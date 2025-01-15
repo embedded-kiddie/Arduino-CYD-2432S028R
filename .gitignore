@@ -6,10 +6,8 @@
 !README.md
 !LICENSE
 
-!LovyanGFX/HowToUse
-!LovyanGFX/MovingIcons
-!LovyanGFX/RotatedZoomSample
-!TFT_eSPI/TFT_Meters
+!LovyanGFX
+!TFT_eSPI
 
 # VSCODE
 */.theia
