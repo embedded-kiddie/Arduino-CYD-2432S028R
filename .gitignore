@@ -8,6 +8,7 @@
 
 !LovyanGFX
 !TFT_eSPI
+!TFT_graphicstest_PDQ
 
 # VSCODE
 */.theia
