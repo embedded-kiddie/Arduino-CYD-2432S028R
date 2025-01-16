@@ -37,6 +37,9 @@
 
 Unit: milliseconds
 
+![TFT_eSPI](result-TFT_eSPI.png "Test result of TFT_eSPI")
+![LovyanGFX](result-LovyanGFX.png "Test result of LovyanGFX")
+
 [1]: https://github.com/espressif/arduino-esp32/releases/tag/3.1.1 "Release Arduino Release v3.1.1 based on ESP-IDF v5.3.2 · espressif/arduino-esp32"
 [2]: https://github.com/espressif/arduino-esp32/tree/master/variants/jczn_2432s028r "arduino-esp32/variants/jczn_2432s028r at master · espressif/arduino-esp32"
 [3]: https://github.com/Bodmer/TFT_eSPI/releases/tag/V2.5.43 "Release Bug fixes · Bodmer/TFT_eSPI"
