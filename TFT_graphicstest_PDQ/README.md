@@ -11,10 +11,10 @@
 
 - Arduino IDE: Version 2.3.4
 - ESP32 board package: [v3.1.1][1]
-    - Board type: ESP32-2432S028R CYD
-    - Pin assign: [pins_arduino.h][2]
-- Bodmer/TFT_eSPI: [V2.5.43][3]
-- lovyan03/LovyanGFX: [1.2.0][4]
+    - Board type: [jczn_2432s028r (name: ESP32-2432S028R CYD)][2]
+    - Pin assign: [pins_arduino.h][3]
+- Bodmer/TFT_eSPI: [V2.5.43][4]
+- lovyan03/LovyanGFX: [1.2.0][5]
 
 ## Results
 
@@ -41,6 +41,7 @@
 Unit: milliseconds
 
 [1]: https://github.com/espressif/arduino-esp32/releases/tag/3.1.1 "Release Arduino Release v3.1.1 based on ESP-IDF v5.3.2 · espressif/arduino-esp32"
-[2]: https://github.com/espressif/arduino-esp32/tree/master/variants/jczn_2432s028r "arduino-esp32/variants/jczn_2432s028r at master · espressif/arduino-esp32"
-[3]: https://github.com/Bodmer/TFT_eSPI/releases/tag/V2.5.43 "Release Bug fixes · Bodmer/TFT_eSPI"
-[4]: https://github.com/lovyan03/LovyanGFX/releases/tag/1.2.0 "Release 1.2.0 · lovyan03/LovyanGFX"
+[2]: https://github.com/espressif/arduino-esp32/blob/master/boards.txt "arduino-esp32/boards.txt at master · espressif/arduino-esp32"
+[3]: https://github.com/espressif/arduino-esp32/tree/master/variants/jczn_2432s028r "arduino-esp32/variants/jczn_2432s028r at master · espressif/arduino-esp32"
+[4]: https://github.com/Bodmer/TFT_eSPI/releases/tag/V2.5.43 "Release Bug fixes · Bodmer/TFT_eSPI"
+[5]: https://github.com/lovyan03/LovyanGFX/releases/tag/1.2.0 "Release 1.2.0 · lovyan03/LovyanGFX"
