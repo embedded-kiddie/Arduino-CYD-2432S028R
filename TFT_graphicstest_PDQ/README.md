@@ -12,7 +12,7 @@
 - Arduino IDE: Version 2.3.4
 - ESP32 board package: [v3.1.1][1]
     - Board type: ESP32-2432S028R CYD
-    - [pins_arduino.h][2]
+    - Pin assign: [pins_arduino.h][2]
 - Bodmer/TFT_eSPI: [V2.5.43][3]
 - lovyan03/LovyanGFX: [1.2.0][4]
 
@@ -35,10 +35,10 @@
 | Rounded rects (outline) |    11384   |   **8204** |
 | Rounded rects (filled)  |   167494   | **162837** |
 
-Unit: milliseconds
-
 ![TFT_eSPI](result-TFT_eSPI.png "Test result of TFT_eSPI")
 ![LovyanGFX](result-LovyanGFX.png "Test result of LovyanGFX")
+
+Unit: milliseconds
 
 [1]: https://github.com/espressif/arduino-esp32/releases/tag/3.1.1 "Release Arduino Release v3.1.1 based on ESP-IDF v5.3.2 · espressif/arduino-esp32"
 [2]: https://github.com/espressif/arduino-esp32/tree/master/variants/jczn_2432s028r "arduino-esp32/variants/jczn_2432s028r at master · espressif/arduino-esp32"
