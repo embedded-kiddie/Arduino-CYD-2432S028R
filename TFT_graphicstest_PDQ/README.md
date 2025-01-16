@@ -20,20 +20,20 @@
 
 | Benchmark               |   TFT_eSPI |  LovyanGFX |
 | ----------------------- | ----------:| ----------:|
-| HaD pushColor           |   265251   | **258483** |
-| Screen fill             |    15805   |  **15505** |
-| Text                    |  **11764** |    18605   |
-| Pixels                  | **177756** |   180681   |
-| Lines                   |   196744   | **186382** |
-| Horiz/Vert Lines        |     8059   |   **7645** |
-| Rectangles (outline)    |     4954   |   **4682** |
-| Rectangles (filled)     |   164526   | **161637** |
-| Circles (filled)        |  **29643** |    37775   |
-| Circles (outline)       |    19708   |  **19009** |
-| Triangles (outline)     |    12291   |  **11030** |
-| Triangles (filled)      |    61018   |  **57283** |
-| Rounded rects (outline) |    11387   |   **8205** |
-| Rounded rects (filled)  |   167503   | **164477** |
+| HaD pushColor           |   265298   | **258479** |
+| Screen fill             |    15806   |  **15495** |
+| Text                    |    11811   |   **7815** |
+| Pixels                  | **177755** |   180683   |
+| Lines                   |   196736   | **186349** |
+| Horiz/Vert Lines        |     8058   |   **7633** |
+| Rectangles (outline)    |     4950   |   **4673** |
+| Rectangles (filled)     |   164422   | **161359** |
+| Circles (outline)       |    19705   |  **18997** |
+| Circles (filled)        |    29640   |  **25644** |
+| Triangles (outline)     |    12290   |  **11018** |
+| Triangles (filled)      |    60899   |  **57143** |
+| Rounded rects (outline) |    11384   |   **8204** |
+| Rounded rects (filled)  |   167494   | **162837** |
 
 Unit: milliseconds
 

@@ -15,7 +15,7 @@
 
 #include "SPI.h"
 
-#if   1
+#if   0
 #include "TFT_eSPI.h"
 TFT_eSPI tft = TFT_eSPI();
 #else
@@ -25,24 +25,30 @@ TFT_eSPI tft = TFT_eSPI();
 LGFX tft;
 #endif
 
+#include "sdcard.hpp"
+
 unsigned long total = 0;
 unsigned long tn = 0;
 void setup() {
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial || millis() < 1000);
   Serial.println(""); Serial.println("");
+
 #if defined (_TFT_eSPIH_)
   Serial.println("Bodmer's TFT_eSPI library Test!"); 
 #else
   Serial.println("Lovyan's LovyanGFX library Test!"); 
 #endif
- 
+
   tft.init();
+	tft.fillScreen(TFT_BLACK);
+
+  sdcard_setup();
+//sdcard_test();
 }
 
 void loop(void)
 {
-
 	Serial.println(F("Benchmark                Time (microseconds)"));
 
 	uint32_t usecHaD = testHaD();
@@ -227,7 +233,20 @@ void loop(void)
 	tft.setTextColor(TFT_GREEN); tft.setTextSize(2);
 	tft.print(F("Benchmark Complete!"));
 
-	delay(60 * 1000L);
+  /*----------------------------------------
+   * Save bitmap image to SD card
+   *----------------------------------------*/
+  uint32_t start = millis();
+  while (millis() - start < 60 * 1000L) {
+    if (Serial.available()) {
+      Serial.readStringUntil('\n');
+#if defined (_TFT_eSPIH_)
+      SaveBMP24(SD, "/img1.bmp");
+#else
+      SaveBMP24(SD, "/img2.bmp");
+#endif
+    }
+  }
 }
 
 void printnice(int32_t v)
@@ -346,7 +365,7 @@ uint32_t testHaD()
 		0x13, 0x44, 0x12, 0x80, 0x89, 0x12, 0x42, 0x11, 0x80, 0x8d, 0x11, 0x40, 0x0f, 0x80, 0x93, 0x0f, 
 		0x45, 0x04, 0x80, 0x9d, 0x04, 0xb9, 0x56, 
 	};
-	
+
 	tft.fillScreen(TFT_BLACK);
 
 	uint32_t start = micros_start();
