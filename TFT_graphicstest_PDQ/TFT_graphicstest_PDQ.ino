@@ -27,8 +27,6 @@ LGFX tft;
 
 #include "sdcard.hpp"
 
-unsigned long total = 0;
-unsigned long tn = 0;
 void setup() {
   Serial.begin(115200);
   while (!Serial || millis() < 1000);
