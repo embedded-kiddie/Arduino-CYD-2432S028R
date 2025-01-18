@@ -13,18 +13,25 @@
 // Graphics library
 #if   defined (_TFT_eSPIH_)
 #define GFX_TYPE  TFT_eSPI
+
 #elif defined (_ADAFRUIT_GFX_H)
 #define GFX_TYPE  Adafruit_GFX
+
 #elif defined (_ARDUINO_TFT_H_)
 #define GFX_TYPE  Arduino_TFT
+
+#else
 #error use TFT_eSPI, Adafruit_GFX or GFX_Library_for_Arduino
 #endif
 
+// Library-independent color definitions
 #define _BLACK  0x0000
 #define _WHITE  0xFFFF
 #define _RED    0xF800
 
-// Defining the class that inherits from XPT2046_Touchscreen class
+/*----------------------------------------------------------------------
+ * Defining the class that inherits from XPT2046_Touchscreen class
+ *----------------------------------------------------------------------*/
 class XPT2046_ScreenPoint : public XPT2046_Touchscreen {
   // Inheriting constructor from the parent class
   using XPT2046_Touchscreen::XPT2046_Touchscreen;
@@ -42,9 +49,7 @@ public:
   }
 
   void calibrateTouch(GFX_TYPE *tft) {
-    if (width == 0 || height == 0) {
-      init(tft->width(), tft->height());
-    }
+    init(tft->width(), tft->height());
 
     TS_Point p;
     int16_t x1, y1, x2, y2;
@@ -85,6 +90,7 @@ public:
     // translate in form pos = m x val + c
     xCalM = (float)xDist / (float)(x2 - x1);
     xCalC = 20.0 - ((float)x1 * xCalM);
+
     yCalM = (float)yDist / (float)(y2 - y1);
     yCalC = 20.0 - ((float)y1 * yCalM);
 

@@ -10,15 +10,15 @@
 TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
 
 // https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h
-#define XPT2046_IRQ   CYD_TP_IRQ
 #define XPT2046_MOSI  CYD_TP_MOSI
 #define XPT2046_MISO  CYD_TP_MISO
 #define XPT2046_CLK   CYD_TP_CLK
 #define XPT2046_CS    CYD_TP_CS
+#define XPT2046_IRQ   CYD_TP_IRQ
 
 #include "XPT2046_ScreenPoint.h"
 
-SPIClass vspi = SPIClass(VSPI);
+SPIClass ts_spi = SPIClass(CYD_TP_SPI_BUS);
 XPT2046_ScreenPoint ts(XPT2046_CS, XPT2046_IRQ);
 
 #define ROTATION  1 // landscape
@@ -34,21 +34,24 @@ void setup() {
   tft.setRotation(ROTATION);
 
   // Initialise the touch screen
-  vspi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
-  ts.begin(vspi);
+  ts_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
+  ts.begin(ts_spi);
+
+  ts.init(tft.width(), tft.height());
   ts.setRotation(ROTATION);
 
 #if   0
   // Run with default parameters without calibration
-  ts.init(tft.width(), tft.height());
+  ;
+
 #elif 0
   // Calibrate the touch screen and retrieve the scaling factors
   ts.calibrateTouch(&tft);
+
 #else
   // Set up calibrated data and run
   float calData[4] = {0.0879, 0.0665, -14.3844, -18.8833};
   ts.setTouch(calData);
-  ts.init(tft.width(), tft.height());
 #endif
 
   // Clear the screen
