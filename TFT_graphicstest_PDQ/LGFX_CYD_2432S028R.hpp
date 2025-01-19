@@ -15,8 +15,8 @@ but please note that in this case it may be deleted when the library is updated.
 To operate safely, make a backup or place it in the user project folder.
 //*/
 
-// false: (micro-USB x 1 type)
-// true : (micro-USB x 1 + USB-C x 1 type)
+// false: Panel driver: ILI9341 (micro-USB x 1 type)
+// true : Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
 #ifndef DISPLAY_CYD_2USB
 #error DISPLAY_CYD_2USB should be defined.
 #endif
@@ -99,7 +99,11 @@ public:
       cfg.spi_host = HSPI_HOST;     // Select the SPI (ESP32-S2,C3: SPI2_HOST or SPI3_HOST / ESP32: VSPI_HOST or HSPI_HOST)
       // Due to the ESP-IDF version upgrade, the VSPI_HOST and HSPI_HOST are deprecated, so if an error occurs, use SPI2_HOST and SPI3_HOST instead.
       cfg.spi_mode = 0;             // SPI communication mode (0 to 3)
+#if DISPLAY_CYD_2USB
       cfg.freq_write = 80000000;    // SPI clock for transmit (Maximum 80MHz, rounded to an integer value of 80MHz)
+#else
+      cfg.freq_write = 40000000;    // SPI clock for transmit (Maximum 80MHz, rounded to an integer value of 80MHz)
+#endif
       cfg.freq_read  = 16000000;    // SPI clock for receive
       cfg.spi_3wire  = false;       // Set to true if receive on the MOSI pin
       cfg.use_lock   = true;        // Set to true if transaction lock is used
@@ -168,8 +172,8 @@ public:
       cfg.bus_shared       = false;  // Set to true if the bus is shared with the SD card (The bus is controlled for drawJpg etc.)
 
 // Set the following only if your display is misaligned, such as ST7735 or ILI9163, which have variable pixel counts.
-//    cfg.memory_width     =   240;  // Maximum width  supported by driver IC
-//    cfg.memory_height    =   320;  // Maximum height supported by driver IC
+      cfg.memory_width     =   240;  // Maximum width  supported by driver IC
+      cfg.memory_height    =   320;  // Maximum height supported by driver IC
 
       _panel_instance.config(cfg);
     }

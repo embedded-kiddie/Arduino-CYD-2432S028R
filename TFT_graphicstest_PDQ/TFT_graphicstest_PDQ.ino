@@ -15,12 +15,12 @@
 
 #include "SPI.h"
 
-#if   1
+#if   0
 // DON'T FORGET TO UPDATE "DISPLAY_CYD_2USB" in User_Setup.h
 #include "TFT_eSPI.h"
 TFT_eSPI tft = TFT_eSPI();
 
-#elif 0
+#elif 1
 #define LGFX_AUTODETECT
 #include <LovyanGFX.h>
 #define pushColor pushBlock
@@ -31,7 +31,7 @@ LGFX tft;
 #define pushColor pushBlock
 // false: (micro-USB x 1 type)
 // true : (micro-USB x 1 + USB-C x 1 type)
-#define DISPLAY_CYD_2USB  false
+#define DISPLAY_CYD_2USB  true
 #include "LGFX_CYD_2432S028R.hpp"
 LGFX tft;
 #endif

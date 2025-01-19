@@ -1,5 +1,5 @@
 // Verify that auto-detection and manual configuration match
-#define USE_AUTODETECT true
+#define USE_AUTODETECT false
 
 #if USE_AUTODETECT
 // D-duino-32 XS, WT32-SC01, and PyBadge are not supported since the panel ID cannot be read.

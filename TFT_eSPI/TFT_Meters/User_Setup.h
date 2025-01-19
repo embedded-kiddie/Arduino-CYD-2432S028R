@@ -8,6 +8,8 @@
 //   run without the need to make any more changes for a particular hardware setup!
 //   Note that some sketches are designed for a particular TFT pixel width/height
 
+// false: Panel driver: ILI9341 (micro-USB x 1 type)
+// true : Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
 #define DISPLAY_CYD_2USB  true
 
 // User defined information reported by "Read_User_Setup" test & diagnostics example
@@ -378,8 +380,8 @@
 // #define SPI_FREQUENCY  10000000
 // #define SPI_FREQUENCY  20000000
 // #define SPI_FREQUENCY  27000000
-// #define SPI_FREQUENCY  40000000
-#define SPI_FREQUENCY  55000000 // STM32 SPI1 only (SPI2 maximum is 27MHz)
+#define SPI_FREQUENCY  40000000
+// #define SPI_FREQUENCY  55000000 // STM32 SPI1 only (SPI2 maximum is 27MHz)
 // #define SPI_FREQUENCY  80000000
 
 #if DISPLAY_CYD_2USB

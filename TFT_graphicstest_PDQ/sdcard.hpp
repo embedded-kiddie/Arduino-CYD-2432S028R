@@ -307,11 +307,7 @@ static bool SaveBMP24(fs::FS &fs, const char *path) {
 
   uint8_t rgb[w * 3];
 
-#if defined (TFT_RGB_ORDER) && (TFT_RGB_ORDER == TFT_BGR)
 #define SWAP_RGB(type, a, b)  { type tmp = a; a = b; b = tmp; }
-#else
-#define SWAP_RGB(type, a, b)
-#endif
 
 #endif // LovyanGFX or TFT_eSPI
 
@@ -366,7 +362,11 @@ static bool SaveBMP24(fs::FS &fs, const char *path) {
 
     tft.readRectRGB(0, y, w, 1, (uint8_t*)rgb);
     for (int i = 0; i < sizeof(rgb); i += 3) {
+#if defined (TFT_RGB_ORDER) && (TFT_RGB_ORDER == TFT_BGR)
       SWAP_RGB(uint8_t, rgb[i+1], rgb[i+2]);
+#else
+      SWAP_RGB(uint8_t, rgb[i+0], rgb[i+2]);
+#endif
       rgb[i  ] <<= 1;
       rgb[i+1] <<= 1;
       rgb[i+2] <<= 1;
