@@ -60,8 +60,6 @@ both Panel drivers ILI9341/ST7789 run correctly at 80MHz.
 However, the TFT_eSPI example [Rotated_Sprite_1][6] does not work even at 55MHz, 
 and the LovyanGFX example [RotatedZoomSample][7] results in severe image distortion.
 
------
-
 [^1]: Panel driver: ILI9341 (micro-USB x 1 type)
 [^2]: Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
 
