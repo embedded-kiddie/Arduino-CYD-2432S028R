@@ -46,6 +46,20 @@
 ![TFT_eSPI](results/ST7789-TFT_eSPI.png "Test result of TFT_eSPI")
 ![LovyanGFX](results/ST7789-LovyanGFX.png "Test result of LovyanGFX")
 
+## Important note
+
+These tests had been performed with the following SPI bus frequencies:
+
+|                   | Panel driver ILI9341 | Panel driver ST7789 |
+| ----------------- |:--------------------:|:-------------------:|
+| SPI Bus Frequency | 40 MHz               | 80 MHz              |
+
+In particular, since these tests do not handle sprite images, 
+both Panel drivers ILI9341/ST7789 run correctly at 80MHz.
+
+However, the TFT_eSPI example [Rotated_Sprite_1][6] does not work even at 55MHz, 
+and the LovyanGFX example [RotatedZoomSample][7] results in severe image distortion.
+
 -----
 
 [^1]: Panel driver: ILI9341 (micro-USB x 1 type)
@@ -56,3 +70,5 @@
 [3]: https://github.com/espressif/arduino-esp32/tree/master/variants/jczn_2432s028r "arduino-esp32/variants/jczn_2432s028r at master · espressif/arduino-esp32"
 [4]: https://github.com/Bodmer/TFT_eSPI/releases/tag/V2.5.43 "Release Bug fixes · Bodmer/TFT_eSPI"
 [5]: https://github.com/lovyan03/LovyanGFX/releases/tag/1.2.0 "Release 1.2.0 · lovyan03/LovyanGFX"
+[6]: https://github.com/Bodmer/TFT_eSPI/tree/master/examples/Sprite/Rotated_Sprite_1 "TFT_eSPI/examples/Sprite/Rotated_Sprite_1 at master · Bodmer/TFT_eSPI"
+[7]: https://github.com/lovyan03/LovyanGFX/tree/master/examples/Sprite/RotatedZoomSample "LovyanGFX/examples/Sprite/RotatedZoomSample at master · lovyan03/LovyanGFX"
