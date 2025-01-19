@@ -1,3 +1,4 @@
+#include "esp32-hal.h"
 /*
  * pin 1 - not used          |  Micro SD card     |
  * pin 2 - CS (SS)           |                   /
@@ -43,17 +44,18 @@
 #include "SPI.h"
 
 /*
-Uncomment and set up if you want to use custom pins for the SPI communication */
-#define REASSIGN_PINS
+Uncomment and set up if you want to use custom pins for the SPI communication
+#define REASSIGN_PINS */
 
 // Note: The symbol 'CYD_SD_SPI_BUS' is defined as 'VSPI'. So check the assigned SPI bus.
-// https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h#L70C9-L70C28
 // https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
 #ifdef  CONFIG_IDF_TARGET_ESP32
 #define ASSIGNED_SPI_BUS  "VSPI"
 #else
 #define ASSIGNED_SPI_BUS  "FSPI"
 #endif
+
+// https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h#L70C9-L70C28
 int sck   = CYD_SD_SCK;
 int miso  = CYD_SD_MISO;
 int mosi  = CYD_SD_MOSI;
@@ -217,9 +219,9 @@ void testFileIO(fs::FS &fs, const char *path) {
 }
 
 void sdcard_setup() {
-  Serial.printf("The SPI bus is assigned to %s for SD.\n", ASSIGNED_SPI_BUS);
-
+#if   1
 #ifdef REASSIGN_PINS
+  Serial.printf("The SPI bus is assigned to %s for SD.\n", ASSIGNED_SPI_BUS);
   SPI.begin(sck, miso, mosi, cs);
   if (!SD.begin(cs)) {
 #else
@@ -228,6 +230,16 @@ void sdcard_setup() {
     Serial.println("Card Mount Failed");
     return;
   }
+#else
+  // This causes the following error when saveBMP24() is executed.
+  // "Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandled."
+  // https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display/blob/main/Examples/Basics/3-SDCardTest/3-SDCardTest.ino#L199-L204
+  SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
+  if (!SD.begin(CYD_SD_SS, spi, 80000000)) {
+    Serial.println("Card Mount Failed");
+    return;
+  }
+#endif
 
   uint8_t cardType = SD.cardType();
   if (cardType == CARD_NONE) {
@@ -282,6 +294,8 @@ inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) {
  * LCD screen capture to save image to SD card
  *--------------------------------------------------------------------------------*/
 static bool SaveBMP24(fs::FS &fs, const char *path) {
+  uint32_t start = millis();
+
   uint32_t w = tft.width();
   uint32_t h = tft.height();
 
@@ -370,7 +384,8 @@ static bool SaveBMP24(fs::FS &fs, const char *path) {
   }
 
   file.close();
-  Serial.printf("done.\n");
+  start = millis() - start;
+  Serial.printf("done (%d msec).\n", start);
   listDir(SD, "/", 0);
   return true;
 }

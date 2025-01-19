@@ -18,7 +18,7 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
 
 #include "XPT2046_ScreenPoint.h"
 
-SPIClass ts_spi = SPIClass(CYD_TP_SPI_BUS);
+SPIClass ts_spi = SPIClass(CYD_TP_SPI_BUS); // VSPI
 XPT2046_ScreenPoint ts(XPT2046_CS, XPT2046_IRQ);
 
 #define ROTATION  1 // landscape

@@ -7,8 +7,11 @@
 #include <LovyanGFX.h>
 #else
 #include <LovyanGFX.h>
-#include "LGFX_CYD_2432S028R_ST7789.hpp"
-#endif
+// false: (micro-USB x 1 type)
+// true : (micro-USB x 1 + USB-C x 1 type)
+#define DISPLAY_CYD_2USB  false
+#include "LGFX_CYD_2432S028R.hpp"
+#endif // USE_AUTODETECT
 
 extern const uint8_t  rgb888[];
 extern const uint8_t  bgr888[];
@@ -23,6 +26,9 @@ static constexpr int image_height = 31;
 static LGFX lcd;
 
 void setup(void) {
+  Serial.begin(115200);
+  while (!Serial || millis() < 1000);
+
   lcd.init();
   lcd.startWrite();
 

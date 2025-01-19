@@ -7,8 +7,11 @@
 #include <LovyanGFX.h>
 #else
 #include <LovyanGFX.h>
-#include "LGFX_CYD_2432S028R_ST7789.hpp"
-#endif
+// false: (micro-USB x 1 type)
+// true : (micro-USB x 1 + USB-C x 1 type)
+#define DISPLAY_CYD_2USB  false
+#include "LGFX_CYD_2432S028R.hpp"
+#endif // USE_AUTODETECT
 
 static LGFX lcd;
 static LGFX_Sprite sprite(&lcd);
@@ -19,6 +22,9 @@ static LGFX_Sprite sprite(&lcd);
 // static TFT_eSprite sprite(&lcd);   // TFT_eSprite is defined as an alias for LGFX_Sprite.
 
 void setup(void) {
+  Serial.begin(115200);
+  while (!Serial || millis() < 1000);
+
   lcd.init();
   lcd.setRotation(1);
   lcd.setBrightness(128);  // 0 ~ 255

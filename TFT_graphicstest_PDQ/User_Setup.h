@@ -8,7 +8,9 @@
 //   run without the need to make any more changes for a particular hardware setup!
 //   Note that some sketches are designed for a particular TFT pixel width/height
 
-#define DISPLAY_CYD_2USB  true
+// false: (micro-USB x 1 type)
+// true : (micro-USB x 1 + USB-C x 1 type)
+#define DISPLAY_CYD_2USB  false
 
 // User defined information reported by "Read_User_Setup" test & diagnostics example
 #define USER_SETUP_INFO "User_Setup_CYD"
@@ -379,13 +381,8 @@
 // #define SPI_FREQUENCY  20000000
 // #define SPI_FREQUENCY  27000000
 // #define SPI_FREQUENCY  40000000
-#define SPI_FREQUENCY  55000000 // STM32 SPI1 only (SPI2 maximum is 27MHz)
-// #define SPI_FREQUENCY  80000000
-
-#if DISPLAY_CYD_2USB
-#undef  SPI_FREQUENCY
+// #define SPI_FREQUENCY  55000000 // STM32 SPI1 only (SPI2 maximum is 27MHz)
 #define SPI_FREQUENCY  80000000
-#endif
 
 // Optional reduced SPI frequency for reading TFT
 #define SPI_READ_FREQUENCY  20000000

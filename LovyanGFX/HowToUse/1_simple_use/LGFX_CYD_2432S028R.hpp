@@ -15,6 +15,11 @@ but please note that in this case it may be deleted when the library is updated.
 To operate safely, make a backup or place it in the user project folder.
 //*/
 
+// false: (micro-USB x 1 type)
+// true : (micro-USB x 1 + USB-C x 1 type)
+#ifndef DISPLAY_CYD_2USB
+#error DISPLAY_CYD_2USB should be defined.
+#endif
 
 /// Create a class for your own settings by deriving from LGFX_Device.
 class LGFX : public lgfx::LGFX_Device
@@ -52,9 +57,14 @@ to match the file name and class name, which will make it less confusing when us
 //lgfx::Panel_SSD1963     _panel_instance;
 //lgfx::Panel_ST7735      _panel_instance;
 //lgfx::Panel_ST7735S     _panel_instance;
-  lgfx::Panel_ST7789      _panel_instance;
+//lgfx::Panel_ST7789      _panel_instance;
 //lgfx::Panel_ST7796      _panel_instance;
 
+#if DISPLAY_CYD_2USB
+  lgfx::Panel_ST7789      _panel_instance;
+#else
+  lgfx::Panel_ILI9341     _panel_instance;
+#endif
 
 // Select an instance that matches the type of bus for your panel.
   lgfx::Bus_SPI       _bus_instance;   // SPI bus instance
@@ -145,7 +155,11 @@ public:
       cfg.offset_x         =     0;  // Panel offset in X direction
       cfg.offset_y         =     0;  // Panel offset in Y direction
       cfg.offset_rotation  =     0;  // Rotation direction offset 0~7 (4~7 are upside down) (4, 0), (6, 2), (7, 1) --> y -= 80 / (7, 3) --> x += 80
+#if DISPLAY_CYD_2USB
       cfg.dummy_read_pixel =    16;  // Number of dummy read bits before pixel read
+#else
+      cfg.dummy_read_pixel =     8;  // Number of dummy read bits before pixel read
+#endif
       cfg.dummy_read_bits  =     1;  // Number of dummy read bits before reading non-pixel data
       cfg.readable         =  true;  // Set to true if data can be read
       cfg.invert           = false;  // Set to true if the panel is inverted
@@ -179,12 +193,16 @@ public:
       auto cfg = _touch_instance.config();
 
       cfg.x_min =  240;         // minimum X value (raw value) from touchscreen
-      cfg.x_max = 3850;         // maximum X value (raw value) from touchscreen
-      cfg.y_min = 3800;         // minimum Y value (raw value) from touchscreen
-      cfg.y_max =  195;         // maximum Y value (raw value) from touchscreen
+      cfg.x_max = 3800;         // maximum X value (raw value) from touchscreen
+      cfg.y_min = 3700;         // minimum Y value (raw value) from touchscreen
+      cfg.y_max =  200;         // maximum Y value (raw value) from touchscreen
       cfg.pin_int = CYD_TP_IRQ; // INT pin number
       cfg.bus_shared = false;   // Set to true if the bus shared with the screen
+#if DISPLAY_CYD_2USB
       cfg.offset_rotation = 2;  // Adjust when display and touch orientation do not match (0~7)
+#else
+      cfg.offset_rotation = 0;  // Adjust when display and touch orientation do not match (0~7)
+#endif
 
 // For SPI connection
       cfg.spi_host = VSPI_HOST;     // Select the SPI (HSPI_HOST or VSPI_HOST)

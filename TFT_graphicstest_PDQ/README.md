@@ -4,8 +4,9 @@
 
 ### Hardware
 
-- ESP32-2432S028 (ESP-WROOM-32) USB x 2 type
-    - Panel driver: ST7789
+- ESP32-2432S028 (ESP-WROOM-32)
+    - Panel driver: ILI9341 (micro-USB x 1 type)
+    - Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
 
 ### Software
 
