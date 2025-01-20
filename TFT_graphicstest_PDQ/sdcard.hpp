@@ -1,4 +1,3 @@
-#include "esp32-hal.h"
 /*
  * pin 1 - not used          |  Micro SD card     |
  * pin 2 - CS (SS)           |                   /
@@ -43,23 +42,23 @@
 #include "SD.h"
 #include "SPI.h"
 
-/*
-Uncomment and set up if you want to use custom pins for the SPI communication
-#define REASSIGN_PINS */
-
-// Note: The symbol 'CYD_SD_SPI_BUS' is defined as 'VSPI'. So check the assigned SPI bus.
-// https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
-#ifdef  CONFIG_IDF_TARGET_ESP32
-#define ASSIGNED_SPI_BUS  "VSPI"
-#else
-#define ASSIGNED_SPI_BUS  "FSPI"
-#endif
+/* Uncomment and set up if you want to use custom pins for the SPI communication
+#define REASSIGN_PINS
 
 // https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h#L70C9-L70C28
 int sck   = CYD_SD_SCK;
 int miso  = CYD_SD_MISO;
 int mosi  = CYD_SD_MOSI;
 int cs    = CYD_SD_SS;
+
+// Note: The symbol 'CYD_SD_SPI_BUS' is defined as 'VSPI'. So check the assigned SPI bus.
+// https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
+#include "esp32-hal.h"
+#ifdef  CONFIG_IDF_TARGET_ESP32
+#define ASSIGNED_SPI_BUS  "VSPI"
+#else
+#define ASSIGNED_SPI_BUS  "FSPI"
+#endif
 //*/
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
@@ -218,6 +217,9 @@ void testFileIO(fs::FS &fs, const char *path) {
   file.close();
 }
 
+/*--------------------------------------------------------------------------------
+ * Setup SD card (Mounting fails if card is not inserted)
+ *--------------------------------------------------------------------------------*/
 void sdcard_setup() {
 #if   1
 #ifdef REASSIGN_PINS
@@ -231,7 +233,7 @@ void sdcard_setup() {
     return;
   }
 #else
-  // This causes the following error when saveBMP24() is executed.
+  // This causes the following error when sdcard_test() or saveBMP24() is executed.
   // "Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandled."
   // https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display/blob/main/Examples/Basics/3-SDCardTest/3-SDCardTest.ino#L199-L204
   SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
@@ -259,6 +261,9 @@ void sdcard_setup() {
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Test basic functions
+ *--------------------------------------------------------------------------------*/
 void sdcard_test(void) {
   uint64_t cardSize = SD.cardSize() / (1024 * 1024);
   Serial.printf("SD Card Size: %lluMB\n", cardSize);
@@ -306,8 +311,6 @@ static bool SaveBMP24(fs::FS &fs, const char *path) {
 #elif defined (_TFT_eSPIH_)
 
   uint8_t rgb[w * 3];
-
-#define SWAP_RGB(type, a, b)  { type tmp = a; a = b; b = tmp; }
 
 #endif // LovyanGFX or TFT_eSPI
 
@@ -357,6 +360,7 @@ static bool SaveBMP24(fs::FS &fs, const char *path) {
 #if defined (LOVYANGFX_HPP_)
 
     tft.readRect(0, y, w, 1, rgb);
+
     for (int i = 0; i < w; i++) {
       rgb[i].r <<= 1;
       rgb[i].g <<= 1;
@@ -366,7 +370,9 @@ static bool SaveBMP24(fs::FS &fs, const char *path) {
 #else // TFT_eSPI
 
     tft.readRectRGB(0, y, w, 1, (uint8_t*)rgb);
+
     for (int i = 0; i < sizeof(rgb); i += 3) {
+#define SWAP_RGB(type, a, b)  { type tmp = a; a = b; b = tmp; }
 #if defined (TFT_RGB_ORDER) && (TFT_RGB_ORDER == TFT_BGR)
       SWAP_RGB(uint8_t, rgb[i+1], rgb[i+2]);
       rgb[i  ] <<= 2;

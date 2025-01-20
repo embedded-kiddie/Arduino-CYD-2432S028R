@@ -30,10 +30,10 @@ When using with AUTODETECT, "LGFX" is used, so change it to a name other than LG
 Also, if you are using multiple panels at the same time, give each panel a different name.
 If you change the class name, you must also change the constructor name to the same name.
 
-You can name it however you like, but in case the number of settings increases,
+You can name it whatever you like, but in case the number of settings increases,
 for example, if you are setting up an SPI-connected ILI9341 with ESP32 DevKit-C, 
-you can name it like LGFX_DevKitC_SPI_ILI9341
-to match the file name and class name, which will make it less confusing when using it.
+you can name it like LGFX_DevKitC_SPI_ILI9341 to match the file name and class name, 
+which will make it less confusing when using it.
 //*/
 
 // Select an instance that matches the type of panel.
@@ -158,10 +158,11 @@ public:
       cfg.panel_height     =   320;  // Panel height
       cfg.offset_x         =     0;  // Panel offset in X direction
       cfg.offset_y         =     0;  // Panel offset in Y direction
-      cfg.offset_rotation  =     0;  // Rotation direction offset 0~7 (4~7 are upside down) (4, 0), (6, 2), (7, 1) --> y -= 80 / (7, 3) --> x += 80
 #if DISPLAY_CYD_2USB
+      cfg.offset_rotation  =     0;  // Rotation direction offset 0~7 (4~7 are upside down) (4, 0), (6, 2), (7, 1) --> y -= 80 / (7, 3) --> x += 80
       cfg.dummy_read_pixel =    16;  // Number of dummy read bits before pixel read
 #else
+      cfg.offset_rotation  =     2;  // Rotation direction offset 0~7 (4~7 are upside down) (4, 0), (6, 2), (7, 1) --> y -= 80 / (7, 3) --> x += 80
       cfg.dummy_read_pixel =     8;  // Number of dummy read bits before pixel read
 #endif
       cfg.dummy_read_bits  =     1;  // Number of dummy read bits before reading non-pixel data
@@ -184,7 +185,7 @@ public:
 
       cfg.pin_bl = CYD_TFT_BL;      // Backlight pin number
       cfg.invert = false;           // Set to true if the backlight brightness is inverted
-      cfg.freq   = 44100;           // Backlight PWM frequency
+      cfg.freq   = 12000;           // Backlight PWM frequency
       cfg.pwm_channel = 7;          // The PWM channel number
 
       _light_instance.config(cfg);
@@ -209,7 +210,11 @@ public:
 #endif
 
 // For SPI connection
+#if DISPLAY_CYD_2USB
       cfg.spi_host = VSPI_HOST;     // Select the SPI (HSPI_HOST or VSPI_HOST)
+#else
+      cfg.spi_host = -1;            // Select the SPI (HSPI_HOST or VSPI_HOST)
+#endif
       cfg.freq = 1000000;           // Set the SPI clock
       cfg.pin_sclk = CYD_TP_CLK;    // SCLK pin number
       cfg.pin_mosi = CYD_TP_MOSI;   // MOSI pin number
