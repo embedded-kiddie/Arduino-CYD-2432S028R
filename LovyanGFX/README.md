@@ -44,7 +44,7 @@ Below is a list of parameters that are set for the two types of CYD.
 | freq_read        | 16000000              | 16000000                   | SPI clock for receive |
 | spi_3wire        | false                 | false                      | Set to true if receive on the MOSI pin |
 | use_lock         | true                  | true                       | Set to true if transaction lock is used |
-| dma_channel [^3] | 3 (`SPI_DMA_CH_AUTO`) | 3 (`SPI_DMA_CH_AUTO`)      | Set the DMA channel (0:DMA not used, 1:1ch, 2:2ch, `SPI_DMA_CH_AUTO`:auto). Due to the ESP-IDF version upgrade, 1ch or 2ch is no longer recommended. |
+| dma_channel [^3] | 3 (`SPI_DMA_CH_AUTO`) | 3 (`SPI_DMA_CH_AUTO`)      | Set the DMA channel (0:DMA unused, 1:1ch, 2:2ch, `SPI_DMA_CH_AUTO`:auto). Due to the ESP-IDF version upgrade, 1ch or 2ch is no longer recommended. |
 | pin_sclk [^4]    | 14 (`CYD_TFT_SCK`)    | 14 (`CYD_TFT_SCK`)         | Set the SPI SCLK pin |
 | pin_mosi [^4]    | 13 (`CYD_TFT_MOSI`)   | 13 (`CYD_TFT_MOSI`)        | Set the SPI MOSI pin |
 | pin_miso [^4]    | 12 (`CYD_TFT_MISO`)   | 12 (`CYD_TFT_MISO`)        | Set the SPI MISO pin (-1 = disable) |
