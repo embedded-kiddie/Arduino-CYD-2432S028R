@@ -117,4 +117,4 @@ Below is a list of parameters that are set for the two types of CYD.
 [8]: https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/spi_master.html#functions "SPI Master Driver - ESP32 -  &mdash; ESP-IDF Programming Guide v5.4 documentation"
 [9]: https://github.com/espressif/esp-idf/blob/master/components/esp_driver_spi/include/driver/spi_common.h#L69-L79 "esp-idf/components/esp_driver_spi/include/driver/spi_common.h at master · espressif/esp-idf"
 [10]: https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h "arduino-esp32/variants/jczn_2432s028r/pins_arduino.h at master · espressif/arduino-esp32"
-[11]: ../Documents/ESP32-2432S028-LCM.jpg
+[11]: https://github.com/embedded-kiddie/Arduino-CYD-2432S028R/blob/main/Documents/ESP32-2432S028-LCM.jpg
