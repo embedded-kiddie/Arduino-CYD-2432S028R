@@ -1,4 +1,20 @@
+# Board type
+
+In Arduino IDE 2.x, select `ESP32-2432S028R CYD`.
+
+![2432S028R CYD](ESP32-2432S028R-CYD.png "Select ESP32-2432S028R CYD for board type")
+
 # Auto Detection
+
+By defining `LGFX_AUTODETECT` as shown below, the parameters to be set in [`LGFX_ESP32_sample.hpp`][1] can be automatically set.
+
+```c++
+#define LGFX_AUTODETECT
+#include <LovyanGFX.h>
+```
+
+The board type in this case is `board_Sunton_ESP32_2432S028` defined in [`boards.hpp`][2].
+Below is a list of parameters that are set for the two types of CYD.
 
 ## Device Settings
 
@@ -80,3 +96,6 @@
 [^4]: d
 [^5]: e
 [^6]: f
+
+[1]: https://github.com/lovyan03/LovyanGFX/blob/master/src/lgfx_user/LGFX_ESP32_sample.hpp "LovyanGFX/src/lgfx_user/LGFX_ESP32_sample.hpp at master · lovyan03/LovyanGFX"
+[2]: https://github.com/lovyan03/LovyanGFX/blob/master/src/lgfx/boards.hpp#L56C7-L56C34 "LovyanGFX/src/lgfx/boards.hpp at master · lovyan03/LovyanGFX"
