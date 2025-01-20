@@ -48,7 +48,7 @@ Below is a list of parameters that are set for the two types of CYD.
 | pin_sclk [^4]    | 14 (`CYD_TFT_SCK`)    | 14 (`CYD_TFT_SCK`)         | Set the SPI SCLK pin |
 | pin_mosi [^4]    | 13 (`CYD_TFT_MOSI`)   | 13 (`CYD_TFT_MOSI`)        | Set the SPI MOSI pin |
 | pin_miso [^4]    | 12 (`CYD_TFT_MISO`)   | 12 (`CYD_TFT_MISO`)        | Set the SPI MISO pin (-1 = disable) |
-| pin_dc [^4]      | 2 (`CYD_TFT_DC`)      | 2 (`CYD_TFT_DC`)           | Set the SPI D/C  pin (-1 = disable) |
+| pin_dc [^4]      |  2 (`CYD_TFT_DC`)     |  2 (`CYD_TFT_DC`)          | Set the SPI D/C  pin (-1 = disable) |
 
 ## Panel Control Settings
 
@@ -94,10 +94,10 @@ Below is a list of parameters that are set for the two types of CYD.
 | offset_rotation | **0**               | **2**                      | Adjust when display and touch orientation do not match (0~7) |
 | spi_host [^6]   | -1                  | -1                         | Select the SPI (HSPI_HOST or VSPI_HOST) |
 | freq            | 1000000             | 1000000                    | Set the SPI clock |
-| pin_sclk [^4]   | 14 (`CYD_TP_CLK`)   | 14 (`CYD_TP_CLK`)          | SCLK pin number |
-| pin_mosi [^4]   | 13 (`CYD_TP_MOSI`)  | 13 (`CYD_TP_MOSI`)         | MOSI pin number |
-| pin_miso [^4]   | 12 (`CYD_TP_MISO`)  | 12 (`CYD_TP_MISO`)         | MISO pin number |
-| pin_dc [^4]     | 2 (`CYD_TP_CS`)     | 2 (`CYD_TP_CS`)            | CS   pin number |
+| pin_sclk [^4]   | 25 (`CYD_TP_CLK`)   | 25 (`CYD_TP_CLK`)          | SCLK pin number |
+| pin_mosi [^4]   | 32 (`CYD_TP_MOSI`)  | 32 (`CYD_TP_MOSI`)         | MOSI pin number |
+| pin_miso [^4]   | 39 (`CYD_TP_MISO`)  | 39 (`CYD_TP_MISO`)         | MISO pin number |
+| pin_dc [^4]     | 33 (`CYD_TP_CS`)    | 33 (`CYD_TP_CS`)           | CS   pin number |
 
 [^1]: Based on the definition in [esp-idf/components/hal/esp32/include/hal/spi_types.h][5] and 
 [esp-idf/components/hal/include/hal/spi_types.h][6], `HSPI_HOST` is equivalent to `1`.
