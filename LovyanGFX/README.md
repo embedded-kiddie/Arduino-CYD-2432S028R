@@ -38,13 +38,13 @@ Below is a list of parameters that are set for the two types of CYD.
 
 | SPI Bus Settings | ILI9341 (micro-USB)   | ST7789 (micro-USB + USB-C) | Description |
 | ---------------- | --------------------- | -------------------------- | ----------- |
-| spi_host [^1]    | 1 (`HSPI_HOST`)       | 1 (`HSPI_HOST`)            | Select the SPI (Due to the ESP-IDF version upgrade, the VSPI_HOST and HSPI_HOST are deprecated, so if an error occurs, use SPI2_HOST and SPI3_HOST instead) |
+| spi_host [^1]    | 1 (`HSPI_HOST`)       | 1 (`HSPI_HOST`)            | Select the SPI (Due to the ESP-IDF version upgrade, the `VSPI_HOST` and `HSPI_HOST` are deprecated, so if an error occurs, use `SPI2_HOST` and `SPI3_HOST` instead) |
 | spi_mode         | 0                     | 0                          | SPI communication mode (0 to 3) |
 | freq_write [^2]  | **40000000**          | **80000000**               | SPI clock for transmit (Maximum 80MHz, rounded to an integer value of 80MHz) |
 | freq_read        | 16000000              | 16000000                   | SPI clock for receive |
 | spi_3wire        | false                 | false                      | Set to true if receive on the MOSI pin |
 | use_lock         | true                  | true                       | Set to true if transaction lock is used |
-| dma_channel [^3] | 3 (`SPI_DMA_CH_AUTO`) | 3 (`SPI_DMA_CH_AUTO`)      | Set the DMA channel (0=DMA not used / 1=1ch / 2=2ch / SPI_DMA_CH_AUTO=automatic). Due to the ESP-IDF version upgrade, 1ch or 2ch is no longer recommended. |
+| dma_channel [^3] | 3 (`SPI_DMA_CH_AUTO`) | 3 (`SPI_DMA_CH_AUTO`)      | Set the DMA channel (0:DMA not used, 1:1ch, 2:2ch, `SPI_DMA_CH_AUTO`:auto). Due to the ESP-IDF version upgrade, 1ch or 2ch is no longer recommended. |
 | pin_sclk [^4]    | 14 (`CYD_TFT_SCK`)    | 14 (`CYD_TFT_SCK`)         | Set the SPI SCLK pin |
 | pin_mosi [^4]    | 13 (`CYD_TFT_MOSI`)   | 13 (`CYD_TFT_MOSI`)        | Set the SPI MOSI pin |
 | pin_miso [^4]    | 12 (`CYD_TFT_MISO`)   | 12 (`CYD_TFT_MISO`)        | Set the SPI MISO pin (-1 = disable) |
@@ -92,7 +92,7 @@ Below is a list of parameters that are set for the two types of CYD.
 | pin_int [^5]    | -1                  | -1                         | Interrupt pin number |
 | bus_shared      | false               | false                      | Set to true if the bus shared with the screen |
 | offset_rotation | **0**               | **2**                      | Adjust when display and touch orientation do not match (0~7) |
-| spi_host [^6]   | -1                  | -1                         | Select the SPI (HSPI_HOST or VSPI_HOST) |
+| spi_host [^6]   | -1                  | -1                         | Select the SPI (`HSPI_HOST` or `VSPI_HOST`) |
 | freq            | 1000000             | 1000000                    | Set the SPI clock |
 | pin_sclk [^4]   | 25 (`CYD_TP_CLK`)   | 25 (`CYD_TP_CLK`)          | SCLK pin number |
 | pin_mosi [^4]   | 32 (`CYD_TP_MOSI`)  | 32 (`CYD_TP_MOSI`)         | MOSI pin number |
