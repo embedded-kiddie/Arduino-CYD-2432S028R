@@ -210,7 +210,7 @@ public:
 #endif
 
 // For SPI connection
-      cfg.spi_host = -1;            // Select the SPI (HSPI_HOST or VSPI_HOST) or -1 only for XPT2046
+      cfg.spi_host = -1;            // Select the SPI (HSPI_HOST or VSPI_HOST) or only XPT2046 can be set to -1.
       cfg.freq = 1000000;           // Set the SPI clock
       cfg.pin_sclk = CYD_TP_CLK;    // SCLK pin number
       cfg.pin_mosi = CYD_TP_MOSI;   // MOSI pin number

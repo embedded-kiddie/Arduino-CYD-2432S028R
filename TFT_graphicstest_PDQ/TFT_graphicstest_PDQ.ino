@@ -23,16 +23,13 @@ TFT_eSPI tft = TFT_eSPI();
 #elif 1
 #define LGFX_AUTODETECT
 #include <LovyanGFX.h>
-#define pushColor pushBlock
 LGFX tft;
 
 #else
-#include <LovyanGFX.h>
-#define pushColor pushBlock
-
 // false: (micro-USB x 1 type)
 // true : (micro-USB x 1 + USB-C x 1 type)
 #define DISPLAY_CYD_2USB  true
+#include <LovyanGFX.h>
 #include "LGFX_CYD_2432S028R.hpp"
 LGFX tft;
 #endif
@@ -63,7 +60,7 @@ void loop(void)
 	Serial.println(F("Benchmark                Time (microseconds)"));
 
 	uint32_t usecHaD = testHaD();
-	Serial.print(F("HaD pushColor            "));
+	Serial.print(F("HaD pushBlock            "));
 	Serial.println(usecHaD);
 	delay(100);
 
@@ -170,7 +167,7 @@ void loop(void)
 	tft.setTextColor(TFT_YELLOW);
 
 	tft.setTextColor(TFT_CYAN); tft.setTextSize(1);
-	tft.print(F("HaD pushColor      "));
+	tft.print(F("HaD pushBlock      "));
 	tft.setTextColor(TFT_YELLOW); tft.setTextSize(2);
 	printnice(usecHaD);
 
@@ -396,7 +393,7 @@ uint32_t testHaD()
 		{
 			cnt = pgm_read_byte(cmp++);
 			if (cnt & 0x80) cnt = ((cnt & 0x7f) << 8) | pgm_read_byte(cmp++);
-			tft.pushColor(curcolor, cnt);	// PDQ_GFX has count
+			tft.pushBlock(curcolor, cnt);	// PDQ_GFX has count
 			curcolor ^= color;
 		}
 		tft.endWrite();

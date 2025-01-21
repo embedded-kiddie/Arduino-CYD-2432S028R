@@ -21,7 +21,7 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
 SPIClass ts_spi = SPIClass(CYD_TP_SPI_BUS); // VSPI
 XPT2046_ScreenPoint ts(XPT2046_CS, XPT2046_IRQ);
 
-#define ROTATION  1 // landscape
+#define ROTATION  1   // clockwise
 
 //------------------------------------------------------------------------------------------
 void setup() {
@@ -56,7 +56,15 @@ void setup() {
 
   // Clear the screen
   tft.fillScreen(TFT_BLACK);
-  tft.drawCentreString("Touch screen to test!", tft.width() / 2, tft.height() / 2, 2);
+  tft.setTextColor(TFT_WHITE);
+
+#ifdef _TFT_eSPIH_
+  tft.setTextDatum(CC_DATUM);
+  tft.drawString("Touch screen to test!", tft.width() / 2, tft.height() / 2, 2);
+#else
+  tft.setCursor(10, tft.height() / 2);
+  tft.print("Touch screen to test!");
+#endif
 }
 
 //------------------------------------------------------------------------------------------

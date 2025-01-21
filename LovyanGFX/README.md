@@ -101,7 +101,7 @@ Below is a list of parameters that are set for the two types of CYD.
 [^3]: See [ESP-IDF Programming Guide v5.4 documentation][8] and [esp-idf/components/esp_driver_spi/include/driver/spi_common.h][8].
 [^4]: See [arduino-esp32/variants/jczn_2432s028r/pins_arduino.h][10].
 [^5]: In the [schematic][11] it is connected to the pen output interrupt (`/PENIRQ` = `IO36`) pin. If it's set to `-1` then library polls the signal.
-[^6]: TBD.
+[^6]: Only XPT2046 can be set to -1. See [][12].
 
 [1]: https://github.com/lovyan03/LovyanGFX/blob/master/src/lgfx_user/LGFX_ESP32_sample.hpp "LovyanGFX/src/lgfx_user/LGFX_ESP32_sample.hpp at master · lovyan03/LovyanGFX"
 [2]: https://github.com/lovyan03/LovyanGFX/blob/master/src/lgfx/boards.hpp#L56C7-L56C34 "LovyanGFX/src/lgfx/boards.hpp at master · lovyan03/LovyanGFX"
@@ -114,3 +114,4 @@ Below is a list of parameters that are set for the two types of CYD.
 [9]: https://github.com/espressif/esp-idf/blob/master/components/esp_driver_spi/include/driver/spi_common.h#L69-L79 "esp-idf/components/esp_driver_spi/include/driver/spi_common.h at master · espressif/esp-idf"
 [10]: https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h "arduino-esp32/variants/jczn_2432s028r/pins_arduino.h at master · espressif/arduino-esp32"
 [11]: https://github.com/embedded-kiddie/Arduino-CYD-2432S028R/blob/main/Documents/ESP32-2432S028-LCM.jpg
+[12]: https://github.com/lovyan03/LovyanGFX/blob/master/src/lgfx/v1/touch/Touch_XPT2046.cpp "LovyanGFX/src/lgfx/v1/touch/Touch_XPT2046.cpp at master · lovyan03/LovyanGFX"
