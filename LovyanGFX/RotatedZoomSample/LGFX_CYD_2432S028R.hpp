@@ -210,11 +210,7 @@ public:
 #endif
 
 // For SPI connection
-#if DISPLAY_CYD_2USB
-      cfg.spi_host = VSPI_HOST;     // Select the SPI (HSPI_HOST or VSPI_HOST)
-#else
-      cfg.spi_host = -1;            // Select the SPI (HSPI_HOST or VSPI_HOST)
-#endif
+      cfg.spi_host = -1;            // Select the SPI (HSPI_HOST or VSPI_HOST) or -1 only for XPT2046
       cfg.freq = 1000000;           // Set the SPI clock
       cfg.pin_sclk = CYD_TP_CLK;    // SCLK pin number
       cfg.pin_mosi = CYD_TP_MOSI;   // MOSI pin number
