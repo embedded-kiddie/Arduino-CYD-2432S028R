@@ -24,6 +24,7 @@ TFT_eSPI tft = TFT_eSPI();
 #define LGFX_AUTODETECT
 #include <LovyanGFX.h>
 #define pushColor pushBlock
+LGFX tft;
 
 #else
 #include <LovyanGFX.h>
@@ -33,9 +34,8 @@ TFT_eSPI tft = TFT_eSPI();
 // true : (micro-USB x 1 + USB-C x 1 type)
 #define DISPLAY_CYD_2USB  true
 #include "LGFX_CYD_2432S028R.hpp"
-#endif
-
 LGFX tft;
+#endif
 
 #include "sdcard.hpp"
 
@@ -50,8 +50,7 @@ void setup() {
   Serial.println("Lovyan's LovyanGFX library Test!"); 
 #endif
 
-  // When LGFX_AUTODETECT is enabled, the touch screen is assigned to the HSPI of the SPI bus.
-  // If you want to manually assign the touch screen to VSPI, you must initialize the SD card first.
+  // It is safer to initialize the SD card prior to the LCD display.
   sdcard_setup();
 //sdcard_test();
 

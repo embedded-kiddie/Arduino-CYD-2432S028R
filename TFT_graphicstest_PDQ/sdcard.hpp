@@ -221,9 +221,9 @@ void testFileIO(fs::FS &fs, const char *path) {
  * Setup SD card (Mounting fails if card is not inserted)
  *--------------------------------------------------------------------------------*/
 void sdcard_setup() {
-#if   1
+#if   true
 #ifdef REASSIGN_PINS
-  Serial.printf("The SPI bus is assigned to %s for SD.\n", ASSIGNED_SPI_BUS);
+  Serial.printf("The SPI bus is assigned to %s for SD.\n", ASSIGNED_SPI_BUS); // VSPI
   SPI.begin(sck, miso, mosi, cs);
   if (!SD.begin(cs)) {
 #else
@@ -232,8 +232,8 @@ void sdcard_setup() {
     Serial.println("Card Mount Failed");
     return;
   }
-#else
-  // This causes the following error when sdcard_test() or saveBMP24() is executed.
+#else // false
+  // When used with an LCD display, running sdcard_test() or saveBMP24() causes the following error:
   // "Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandled."
   // https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display/blob/main/Examples/Basics/3-SDCardTest/3-SDCardTest.ino#L199-L204
   SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
