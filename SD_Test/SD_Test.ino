@@ -225,7 +225,7 @@ void setup() {
 #ifdef REASSIGN_PINS
   // 1048576 bytes read for 2398 ms
   // 1048576 bytes written for 2715 ms
-  Serial.printf("The SPI bus is assigned to %s for SD.\n", ASSIGNED_SPI_BUS);
+  Serial.printf("The SPI bus is assigned to %s for SD.\n", ASSIGNED_SPI_BUS); // VSPI
   SPI.begin(sck, miso, mosi, cs);
   if (!SD.begin(cs)) {
 #else

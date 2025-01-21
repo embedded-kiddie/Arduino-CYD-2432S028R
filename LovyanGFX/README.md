@@ -1,16 +1,14 @@
 # Board type
 
-In Arduino IDE 2.x, select `ESP32-2432S028R CYD`.
+1. In Arduino IDE 2.x, select `ESP32-2432S028R CYD`.
 
-![2432S028R CYD](ESP32-2432S028R-CYD.png "Select ESP32-2432S028R CYD for board type")
-
-And the ESP32 variant name is `jczn_2432s028r` according to the following definition 
+2. And the ESP32 variant name is `jczn_2432s028r` according to the following definition 
 in [`boards.txt`][3], so variant information about partition table or pin assignments 
-can be found in [arduino-esp32/variants/jczn_2432s028r/][4].
-
-```txt
-jczn_2432s028r.name=ESP32-2432S028R CYD
-```
+can be found in [arduino-esp32/variants/jczn_2432s028r/][4].  
+  
+  ```txt
+  jczn_2432s028r.name=ESP32-2432S028R CYD
+  ```
 
 # Auto Detection
 
