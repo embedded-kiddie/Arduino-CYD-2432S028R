@@ -21,7 +21,7 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
 SPIClass ts_spi = SPIClass(CYD_TP_SPI_BUS); // VSPI
 XPT2046_ScreenPoint ts(XPT2046_CS, XPT2046_IRQ);
 
-#define ROTATION  1   // clockwise
+#define ROTATION  1   // Panel: CW --> Screen: CCW (0,2: portrait / 1,3: landscape)
 
 //------------------------------------------------------------------------------------------
 void setup() {
