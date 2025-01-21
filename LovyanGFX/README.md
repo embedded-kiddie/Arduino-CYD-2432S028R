@@ -6,7 +6,7 @@ in [`boards.txt`][3].
 ```txt
 jczn_2432s028r.name=ESP32-2432S028R CYD
 ```
-3. The partition table or pin assignments can be available in [arduino-esp32/variants/jczn_2432s028r/][4].
+3. The partition table or pin assignments is available in [arduino-esp32/variants/jczn_2432s028r/][4].
 
 # Auto Detection
 
