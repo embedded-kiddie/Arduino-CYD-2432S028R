@@ -159,10 +159,10 @@ public:
       cfg.offset_x         =     0;  // Panel offset in X direction
       cfg.offset_y         =     0;  // Panel offset in Y direction
 #if DISPLAY_CYD_2USB
-      cfg.offset_rotation  =     0;  // Rotation direction offset 0~7 (4~7 are upside down) (4, 0), (6, 2), (7, 1) --> y -= 80 / (7, 3) --> x += 80
+      cfg.offset_rotation  =     0;  // Rotation direction offset 0~7 (4~7 are upside down)
       cfg.dummy_read_pixel =    16;  // Number of dummy read bits before pixel read
 #else
-      cfg.offset_rotation  =     2;  // Rotation direction offset 0~7 (4~7 are upside down) (4, 0), (6, 2), (7, 1) --> y -= 80 / (7, 3) --> x += 80
+      cfg.offset_rotation  =     2;  // Rotation direction offset 0~7 (4~7 are upside down)
       cfg.dummy_read_pixel =     8;  // Number of dummy read bits before pixel read
 #endif
       cfg.dummy_read_bits  =     1;  // Number of dummy read bits before reading non-pixel data
@@ -197,11 +197,11 @@ public:
     { // Configure touch screen control (delete if not needed)
       auto cfg = _touch_instance.config();
 
-      cfg.x_min =  240;         // minimum X value (raw value) from touchscreen
-      cfg.x_max = 3800;         // maximum X value (raw value) from touchscreen
-      cfg.y_min = 3700;         // minimum Y value (raw value) from touchscreen
-      cfg.y_max =  200;         // maximum Y value (raw value) from touchscreen
-      cfg.pin_int = CYD_TP_IRQ; // INT pin number
+      cfg.x_min =  240;         // Minimum X value (raw value) from touch screen
+      cfg.x_max = 3800;         // Maximum X value (raw value) from touch screen
+      cfg.y_min = 3700;         // Minimum Y value (raw value) from touch screen
+      cfg.y_max =  200;         // Maximum Y value (raw value) from touch screen
+      cfg.pin_int = CYD_TP_IRQ; // Interrupt pin number
       cfg.bus_shared = false;   // Set to true if the bus shared with the screen
 #if DISPLAY_CYD_2USB
       cfg.offset_rotation = 2;  // Adjust when display and touch orientation do not match (0~7)
