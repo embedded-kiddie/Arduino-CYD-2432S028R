@@ -38,6 +38,7 @@ class XPT2046_ScreenPoint : public XPT2046_Touchscreen {
 
 private:
   bool calibrated = false;
+  int8_t rotation = 0;
   uint16_t width = 0, height = 0;
   float xCalM = 0.0, yCalM = 0.0;  // gradients
   float xCalC = 0.0, yCalC = 0.0;  // y axis crossing points
@@ -48,6 +49,10 @@ public:
     height = h;
   }
 
+  void setRotation(int8_t r) {
+    XPT2046_Touchscreen::setRotation(rotation = r);
+  }
+  
   void calibrateTouch(GFX_TYPE *tft) {
     init(tft->width(), tft->height());
 
@@ -104,7 +109,7 @@ public:
     calibrated = true;
   }
 
-  void setTouch(float *data) {
+  void setTouch(const float *data) {
     xCalM = data[0];
     yCalM = data[1];
     xCalC = data[2];
@@ -116,7 +121,7 @@ public:
     if (touched()) {
       TS_Point p = getPoint();
 
-      //Serial.println("x: " + String(p.x) + ", y: " + String(p.y) + ", z: " + String(p.z));
+      Serial.println("x: " + String(p.x) + ", y: " + String(p.y) + ", z: " + String(p.z));
 
       if (p.z >= threshold) {
         if (calibrated) {
@@ -132,8 +137,16 @@ public:
           *y = yCoord;
         } else {
           // https://randomnerdtutorials.com/lvgl-cheap-yellow-display-esp32-2432s028r/
-          *x = map(p.x, 200, 3700, 0, width  - 1);
-          *y = map(p.y, 240, 3800, 0, height - 1);
+          static const struct {
+            uint16_t xmin, xmax, ymin, ymax;
+          } cal[4] = {
+            {240, 3800, 200, 3700},
+            {200, 3700, 240, 3800},
+            {260, 3850, 300, 3950},
+            {300, 3950, 260, 3850}
+          };
+          *x = map(p.x, cal[rotation].xmin, cal[rotation].xmax, 0, width  - 1);
+          *y = map(p.y, cal[rotation].ymin, cal[rotation].ymax, 0, height - 1);
         }
         return true;
       }

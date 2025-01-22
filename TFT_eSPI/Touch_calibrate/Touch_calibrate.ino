@@ -21,7 +21,9 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
 SPIClass ts_spi = SPIClass(CYD_TP_SPI_BUS); // VSPI
 XPT2046_ScreenPoint ts(XPT2046_CS, XPT2046_IRQ);
 
-#define ROTATION  1   // Panel: CW --> Screen: CCW (0,2: portrait / 1,3: landscape)
+#define ROTATION  3   // Panel: CW --> Screen: CCW (0,2: portrait / 1,3: landscape)
+
+#define CALIBRATED true // false: Execute calibrateTouch()
 
 //------------------------------------------------------------------------------------------
 void setup() {
@@ -41,17 +43,25 @@ void setup() {
   ts.setRotation(ROTATION);
 
 #if   0
-  // Run with default parameters without calibration
+  // Run with default parameters without calibration.
   ;
 
-#elif 0
-  // Calibrate the touch screen and retrieve the scaling factors
-  ts.calibrateTouch(&tft);
+#elif CALIBRATED
+  // Set up calibrated data and run.
+  // Please note that the calibration settings must be updated 
+  // whenever the orientation is changed from the orientation 
+  // used during calibration.
+  const float calData[][4] = {
+    {0.0657, 0.0880, -16.1129, -13.5261},
+    {0.0883, 0.0660, -13.2114, -15.5541},
+    {0.0662, 0.0882, -13.9073, -28.7110},
+    {0.0894, 0.0674, -32.0140, -18.5705}
+  };
+  ts.setTouch(calData[ROTATION]);
 
 #else
-  // Set up calibrated data and run
-  float calData[4] = {0.0879, 0.0665, -14.3844, -18.8833};
-  ts.setTouch(calData);
+  // Calibrate the touch screen and retrieve the scaling factors.
+  ts.calibrateTouch(&tft);
 #endif
 
   // Clear the screen
