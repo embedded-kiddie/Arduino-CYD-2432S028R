@@ -249,9 +249,9 @@ void loop(void)
     if (Serial.available()) {
       Serial.readStringUntil('\n');
 #if defined (_TFT_eSPIH_)
-      SaveBMP24(SD, "/img1.bmp");
+      SaveBMP24(SD, "/img1.bmp", tft);
 #else
-      SaveBMP24(SD, "/img2.bmp");
+      SaveBMP24(SD, "/img2.bmp", tft);
 #endif
     }
   }

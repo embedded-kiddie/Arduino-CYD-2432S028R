@@ -9,7 +9,7 @@
 #include <LovyanGFX.h>
 // false: (micro-USB x 1 type)
 // true : (micro-USB x 1 + USB-C x 1 type)
-#define DISPLAY_CYD_2USB  false
+#define DISPLAY_CYD_2USB  true
 #include "LGFX_CYD_2432S028R.hpp"
 #endif // USE_AUTODETECT
 
@@ -18,11 +18,14 @@
 // Create instance
 LGFX lcd;
 
+#include "sdcard.hpp"
+
 void setup(void) {
   Serial.begin(115200);
   while (!Serial || millis() < 1000);
 
   // Initializing the SPI bus and the panel
+  sdcard_setup();
   lcd.init();
 
   lcd.setTextSize((std::max(lcd.width(), lcd.height()) + 255) >> 8);
@@ -101,5 +104,14 @@ void loop(void) {
     lcd.getTouchRaw(&tp, 1);
     lcd.fillRect(x - 2, y - 2, 5, 5, count * 7);
     Serial.printf("x: %d (raw: %d), y: %d (raw: %d)\n", x, tp.x, y, tp.y);
+  }
+
+  /*----------------------------------------
+   * Save bitmap image to SD card
+   *----------------------------------------*/
+  uint32_t start = millis();
+  if (Serial.available()) {
+    Serial.readStringUntil('\n');
+    SaveBMP24(SD, "/img2.bmp", lcd);
   }
 }
