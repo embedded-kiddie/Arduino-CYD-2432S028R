@@ -287,6 +287,7 @@ void sdcard_test(void) {
 /*--------------------------------------------------------------------------------
  * Convert between RGB565 and RGB888
  *--------------------------------------------------------------------------------*/
+#define COLOR_CORRECTION 1 // 0: normal, 1: for TFT_graphicstest_PDQ
 #define RGB565(r, g, b) ((((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3))
 inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) __attribute__((always_inline));
 inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) {
@@ -370,11 +371,13 @@ bool SaveBMP24(fs::FS &fs, const char *path, GFX_TYPE &tft) {
 
     tft.readRect(0, y, w, 1, rgb);
 
+  #if COLOR_CORRECTION
     for (int i = 0; i < w; i++) {
-      rgb[i].r <<= 1;
-      rgb[i].g <<= 1;
-      rgb[i].b <<= 1;
+      rgb[i].r <<= COLOR_CORRECTION;
+      rgb[i].g <<= COLOR_CORRECTION;
+      rgb[i].b <<= COLOR_CORRECTION;
     }
+  #endif
 
 #else // TFT_eSPI
 
@@ -384,14 +387,16 @@ bool SaveBMP24(fs::FS &fs, const char *path, GFX_TYPE &tft) {
 #define SWAP_RGB(type, a, b)  { type tmp = a; a = b; b = tmp; }
 #if defined (TFT_RGB_ORDER) && (TFT_RGB_ORDER == TFT_BGR)
       SWAP_RGB(uint8_t, rgb[i+1], rgb[i+2]);
-      rgb[i  ] <<= 2;
-      rgb[i+1] <<= 2;
-      rgb[i+2] <<= 2;
+      rgb[i  ] <<= (COLOR_CORRECTION + 1);
+      rgb[i+1] <<= (COLOR_CORRECTION + 1);
+      rgb[i+2] <<= (COLOR_CORRECTION + 1);
 #else
       SWAP_RGB(uint8_t, rgb[i+0], rgb[i+2]);
-      rgb[i  ] <<= 1;
-      rgb[i+1] <<= 1;
-      rgb[i+2] <<= 1;
+  #if COLOR_CORRECTION
+      rgb[i  ] <<= COLOR_CORRECTION;
+      rgb[i+1] <<= COLOR_CORRECTION;
+      rgb[i+2] <<= COLOR_CORRECTION;
+  #endif
 #endif
     }
 
