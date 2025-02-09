@@ -24,11 +24,6 @@
 #error use TFT_eSPI, Adafruit_GFX or GFX_Library_for_Arduino
 #endif
 
-// Library-independent color definitions
-#define _BLACK  0x0000
-#define _WHITE  0xFFFF
-#define _RED    0xF800
-
 /*----------------------------------------------------------------------
  * Defining the class that inherits from XPT2046_Touchscreen class
  *----------------------------------------------------------------------*/
@@ -38,90 +33,50 @@ class XPT2046_ScreenPoint : public XPT2046_Touchscreen {
 
 private:
   bool calibrated = false;
-  int8_t rotation = 0;
+  uint8_t rotation = 0;
   uint16_t width = 0, height = 0;
   float xCalM = 0.0, yCalM = 0.0;  // gradients
   float xCalC = 0.0, yCalC = 0.0;  // y axis crossing points
 
 public:
-  void init(uint16_t w, uint16_t h) {
+  void setRotation(int8_t r) {
+    XPT2046_Touchscreen::setRotation(rotation = r);
+  }
+
+  void begin(SPIClass &spi, uint16_t w, uint16_t h, uint8_t r = 0) {
+    XPT2046_Touchscreen::begin(spi);
+    setRotation(r);
     width  = w;
     height = h;
   }
 
-  void setRotation(int8_t r) {
-    XPT2046_Touchscreen::setRotation(rotation = r);
-  }
-  
-  void calibrateTouch(GFX_TYPE *tft) {
-    init(tft->width(), tft->height());
+  bool setTouch(const uint16_t *cal) {
+    if (cal[4] == rotation) {
+      int16_t x1, y1, x2, y2;
+      int16_t xDist = width - 40;
+      int16_t yDist = height - 40;
 
-    TS_Point p;
-    int16_t x1, y1, x2, y2;
+      x1 = cal[0];
+      y1 = cal[1];
+      x2 = cal[2];
+      y2 = cal[3];
 
-    tft->fillScreen(_BLACK);  
-    while (touched()); // wait for no touch
+      // translate in form pos = m x val + c
+      xCalM = (float)xDist / (float)(x2 - x1);
+      xCalC = 20.0 - ((float)x1 * xCalM);
 
-    tft->drawFastHLine(10, 20, 20, _RED);
-    tft->drawFastVLine(20, 10, 20, _RED);
+      yCalM = (float)yDist / (float)(y2 - y1);
+      yCalC = 20.0 - ((float)y1 * yCalM);
 
-    while (!touched());
-    delay(50); // wait for touch being stable
+      calibrated = true;
+    }
 
-    p = getPoint();
-    x1 = p.x;
-    y1 = p.y;
-    tft->drawFastHLine(10, 20, 20, _BLACK);
-    tft->drawFastVLine(20, 10, 20, _BLACK);
-
-    delay(500);
-    while (touched()); // wait for no touch
-
-    tft->drawFastHLine(width - 30, height - 20, 20, _RED);
-    tft->drawFastVLine(width - 20, height - 30, 20, _RED);
-
-    while (!touched());
-    delay(50); // wait for touch being stable
-
-    p = getPoint();
-    x2 = p.x;
-    y2 = p.y;
-    tft->drawFastHLine(width - 30, height - 20, 20, _BLACK);
-    tft->drawFastVLine(width - 20, height - 30, 20, _BLACK);
-
-    int16_t xDist = width - 40;
-    int16_t yDist = height - 40;
-
-    // translate in form pos = m x val + c
-    xCalM = (float)xDist / (float)(x2 - x1);
-    xCalC = 20.0 - ((float)x1 * xCalM);
-
-    yCalM = (float)yDist / (float)(y2 - y1);
-    yCalC = 20.0 - ((float)y1 * yCalM);
-
-    Serial.print("\nfloat calData[4] = {");
-    Serial.print(xCalM, 4); Serial.print(", ");
-    Serial.print(yCalM, 4); Serial.print(", ");
-    Serial.print(xCalC, 4); Serial.print(", ");
-    Serial.print(yCalC, 4); Serial.print("};\n");
-    Serial.print("sp.setTouch(calData);\n");
-
-    calibrated = true;
-  }
-
-  void setTouch(const float *data) {
-    xCalM = data[0];
-    yCalM = data[1];
-    xCalC = data[2];
-    yCalC = data[3];
-    calibrated = true;
+    return calibrated;
   }
 
   bool getTouch(uint16_t *x, uint16_t *y, uint16_t threshold = 600) {
     if (touched()) {
       TS_Point p = getPoint();
-
-      Serial.println("x: " + String(p.x) + ", y: " + String(p.y) + ", z: " + String(p.z));
 
       if (p.z >= threshold) {
         if (calibrated) {
@@ -152,6 +107,52 @@ public:
       }
     }
     return false;
+  }
+
+  void calibrateTouch(uint16_t *cal, GFX_TYPE *tft, uint32_t color_fg, uint32_t color_bg) {
+    tft->fillScreen(color_bg);
+    tft->setTextColor(color_fg);
+
+#if defined (_TFT_eSPIH_)
+    tft->setTextDatum(CC_DATUM);
+    tft->drawString("Touch the center of the cross", width / 2, height / 2, 2);
+#else // _ADAFRUIT_GFX_H or _ARDUINO_TFT_H_
+    tft->setTextSize(2);
+    tft->setCursor((width - 30 * 12) / 2, (height - 16) / 2); // font size: 12x16
+    tft->print("Touch the center of the cross");
+#endif
+
+    while (touched()); // wait for no touch
+
+    tft->drawFastHLine(10, 20, 20, color_fg);
+    tft->drawFastVLine(20, 10, 20, color_fg);
+
+    while (!touched());
+    delay(50); // wait for touch being stable
+
+    TS_Point p = getPoint();
+    cal[0] = p.x;
+    cal[1] = p.y;
+    tft->drawFastHLine(10, 20, 20, color_bg);
+    tft->drawFastVLine(20, 10, 20, color_bg);
+
+    delay(500);
+    while (touched()); // wait for no touch
+
+    tft->drawFastHLine(width - 30, height - 20, 20, color_fg);
+    tft->drawFastVLine(width - 20, height - 30, 20, color_fg);
+
+    while (!touched());
+    delay(50); // wait for touch being stable
+
+    p = getPoint();
+    cal[2] = p.x;
+    cal[3] = p.y;
+    tft->drawFastHLine(width - 30, height - 20, 20, color_bg);
+    tft->drawFastVLine(width - 20, height - 30, 20, color_bg);
+
+    cal[4] = rotation;
+    calibrated = true;
   }
 };
 
