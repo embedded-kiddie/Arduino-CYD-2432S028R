@@ -100,8 +100,8 @@ public:
             {260, 3850, 300, 3950},
             {300, 3950, 260, 3850}
           };
-          *x = map(p.x, cal[rotation].xmin, cal[rotation].xmax, 0, width  - 1);
-          *y = map(p.y, cal[rotation].ymin, cal[rotation].ymax, 0, height - 1);
+          *x = map(p.x, cal[rotation].xmin, cal[rotation].xmax, 0, width );
+          *y = map(p.y, cal[rotation].ymin, cal[rotation].ymax, 0, height);
         }
         return true;
       }
@@ -111,7 +111,7 @@ public:
 
   void calibrateTouch(uint16_t *cal, GFX_TYPE *tft, uint32_t color_fg, uint32_t color_bg) {
     tft->fillScreen(color_bg);
-    tft->setTextColor(color_fg);
+    tft->setTextColor(color_fg, color_bg);
 
 #if defined (_TFT_eSPIH_)
     tft->setTextDatum(CC_DATUM);
