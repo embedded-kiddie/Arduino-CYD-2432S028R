@@ -30,9 +30,9 @@ void setup() {
   sp.begin(tft.width(), tft.height(), ROTATION);
 #else
   // Assign the CYD touch panel on a different SPI bus from that of the display.
-  static SPIClass spi = SPIClass(TOUCH_SPI_BUS);
-  spi.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
-  sp.begin(spi, tft.width(), tft.height(), ROTATION);
+  static SPIClass sp_spi = SPIClass(TOUCH_SPI_BUS);
+  sp_spi.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
+  sp.begin(sp_spi, tft.width(), tft.height(), ROTATION);
 #endif
 
 #if   0

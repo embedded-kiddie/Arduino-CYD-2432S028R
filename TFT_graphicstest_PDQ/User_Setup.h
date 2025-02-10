@@ -234,7 +234,7 @@
 //#define TFT_RST   CYD_TFT_RS  // Reset pin (could connect to RST pin)
 #define TFT_RST  -1             // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
 //#define TOUCH_CS CYD_TP_CS    // Chip select pin (T_CS) of touch screen
-#define TOUCH_CS -1             // TFT_eSPI does not support touch screen with a different SPI bus (need XPT2046_Touchscreen)
+#define TOUCH_CS -1             // TFT_eSPI cannot set MISO, MOSI, SCLK separately for touch screen and display (need XPT2046_Touchscreen)
 
 // For ESP32 Dev board (only tested with GC9A01 display)
 // The hardware SPI can be mapped to any pins
@@ -337,7 +337,7 @@
 
 // Comment out the #define below to stop the SPIFFS filing system and smooth font code being loaded
 // this will save ~20kbytes of FLASH
-#define SMOOTH_FONT
+// #define SMOOTH_FONT
 
 
 // ##################################################################################
