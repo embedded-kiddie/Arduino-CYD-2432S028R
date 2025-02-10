@@ -6,25 +6,13 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <XPT2046_Touchscreen.h>
-
-TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
-
-// https://github.com/espressif/arduino-esp32/blob/master/variansp/jczn_2432s028r/pins_arduino.h
-#define XPT2046_MOSI  CYD_TP_MOSI
-#define XPT2046_MISO  CYD_TP_MISO
-#define XPT2046_CLK   CYD_TP_CLK
-#define XPT2046_CS    CYD_TP_CS
-#define XPT2046_IRQ   CYD_TP_IRQ
-#define XPT2046_SPI   CYD_TP_SPI_BUS // VSPI
-
 #include "XPT2046_ScreenPoint.h"
 
-SPIClass sp_spi = SPIClass(XPT2046_SPI); 
-XPT2046_ScreenPoint sp(XPT2046_CS, XPT2046_IRQ);
-
 #define ROTATION  3 // Panel: CW --> Screen: CCW (0,2: portrait / 1,3: landscape)
-
 #define CALIBRATED  false // false: Execute calibrateTouch()
+
+TFT_eSPI tft = TFT_eSPI();
+XPT2046_ScreenPoint sp(TOUCH_CS, TOUCH_IRQ);
 
 //------------------------------------------------------------------------------------------
 void setup() {
@@ -36,9 +24,16 @@ void setup() {
   tft.init();
   tft.setRotation(ROTATION);
 
-  // Initialise the touch screen
-  sp_spi.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
-  sp.begin(sp_spi, tft.width(), tft.height(), ROTATION);
+#if 0
+  // The pinout of the CYD touch panel is different from that of the display.
+  SPI.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
+  sp.begin(tft.width(), tft.height(), ROTATION);
+#else
+  // Assign the CYD touch panel on a different SPI bus from that of the display.
+  static SPIClass spi = SPIClass(TOUCH_SPI_BUS);
+  spi.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
+  sp.begin(spi, tft.width(), tft.height(), ROTATION);
+#endif
 
 #if   0
   // Run with default parameters without calibration.

@@ -8,10 +8,14 @@
 #define _XPT2046_SCREENPOINT_H_
 
 #include <math.h>
-#include <XPT2046_Touchscreen.h>
 
-// Graphics library
-#if   defined (_TFT_eSPIH_)
+/*----------------------------------------------------------------------
+ * Graphics library
+ *----------------------------------------------------------------------*/
+#if     defined (LOVYANGFX_HPP_)
+#define GFX_TYPE  LGFX
+
+#elif   defined (_TFT_eSPIH_)
 #define GFX_TYPE  TFT_eSPI
 
 #elif defined (_ADAFRUIT_GFX_H)
@@ -21,7 +25,7 @@
 #define GFX_TYPE  Arduino_TFT
 
 #else
-#error use TFT_eSPI, Adafruit_GFX or GFX_Library_for_Arduino
+#error use LovyanGFX, TFT_eSPI, Adafruit_GFX or GFX_Library_for_Arduino
 #endif
 
 /*----------------------------------------------------------------------
@@ -39,8 +43,8 @@ private:
   float xCalC = 0.0, yCalC = 0.0;  // y axis crossing points
 
 public:
-  void setRotation(int8_t r) {
-    XPT2046_Touchscreen::setRotation(rotation = r);
+  void setRotation(uint8_t r) {
+    XPT2046_Touchscreen::setRotation(rotation = r % 4);
   }
 
   void begin(SPIClass &spi, uint16_t w, uint16_t h, uint8_t r = 0) {
@@ -48,6 +52,10 @@ public:
     setRotation(r);
     width  = w;
     height = h;
+  }
+
+  void begin(uint16_t w, uint16_t h, uint8_t r = 0) {
+    begin(SPI, w, h, r);
   }
 
   bool setTouch(const uint16_t *cal) {
@@ -113,7 +121,7 @@ public:
     tft->fillScreen(color_bg);
     tft->setTextColor(color_fg, color_bg);
 
-#if defined (_TFT_eSPIH_)
+#if defined (_TFT_eSPIH_) || defined (LOVYANGFX_HPP_)
     tft->setTextDatum(CC_DATUM);
     tft->drawString("Touch the center of the cross", width / 2, height / 2, 2);
 #else // _ADAFRUIT_GFX_H or _ARDUINO_TFT_H_

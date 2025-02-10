@@ -231,10 +231,15 @@
 #define TFT_SCLK CYD_TFT_SCK    // 14
 #define TFT_CS   CYD_TFT_CS     // 15 Chip select control pin
 #define TFT_DC   CYD_TFT_DC     //  2 Data Command control pin
-//#define TFT_RST   CYD_TFT_RS  // Reset pin (could connect to RST pin)
+//#define TFT_RST   CYD_TFT_RS  // Reset pin (CYD connects RST pin to DC pin)
 #define TFT_RST  -1             // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
-//#define TOUCH_CS CYD_TP_CS    // Chip select pin (T_CS) of touch screen
-#define TOUCH_CS -1             // TFT_eSPI does not support touch screen with a different SPI bus (need XPT2046_Touchscreen)
+
+#define TOUCH_IRQ     CYD_TP_IRQ      // 36
+#define TOUCH_MOSI    CYD_TP_MOSI     // 32
+#define TOUCH_MISO    CYD_TP_MISO     // 39
+#define TOUCH_CLK     CYD_TP_CLK      // 25
+#define TOUCH_CS      CYD_TP_CS       // 33
+#define TOUCH_SPI_BUS CYD_TP_SPI_BUS  // VSPI
 
 // For ESP32 Dev board (only tested with GC9A01 display)
 // The hardware SPI can be mapped to any pins
