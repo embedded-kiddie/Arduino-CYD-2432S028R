@@ -38,8 +38,8 @@
 
 ### Panel driver: ILI9341 (micro-USB x 1 type)
 
-![TFT_eSPI](results/ILI9341-TFT_eSPI.png "Test result of TFT_eSPI")
-![LovyanGFX](results/ILI9341-LovyanGFX.png "Test result of LovyanGFX")
+![TFT_eSPI](results/ILI9341-TFT_eSPI-40MHz.png "Test result of TFT_eSPI")
+![LovyanGFX](results/ILI9341-LovyanGFX-40MHz.png "Test result of LovyanGFX")
 
 ### Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
 

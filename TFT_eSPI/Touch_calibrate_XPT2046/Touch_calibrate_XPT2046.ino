@@ -37,13 +37,13 @@ void setup() {
   tft.setRotation(ROTATION);
 
 #if defined (_XPT2046_Touchscreen_h_)
+  // assign the CYD touch panel to VSPI which is different from that of the display (HSPI).
+  // https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
   #if 0
-    // The pinout of the CYD touch panel is different from that of the display.
-    SPI.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
+    SPI.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS); // 'SPI' is assigned to VSPI by default
     sp.begin(tft.width(), tft.height(), ROTATION);
   #else
-    // Assign the CYD touch panel on a different SPI bus from that of the display.
-    static SPIClass sp_spi = SPIClass(HSPI/*TOUCH_SPI_BUS*/);
+    static SPIClass sp_spi = SPIClass(HSPI /*TOUCH_SPI_BUS*/); // both HSPI & VSPI will work
     sp_spi.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
     sp.begin(sp_spi, tft.width(), tft.height(), ROTATION);
   #endif

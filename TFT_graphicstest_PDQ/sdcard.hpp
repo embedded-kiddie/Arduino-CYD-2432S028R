@@ -50,15 +50,6 @@ int sck   = CYD_SD_SCK;
 int miso  = CYD_SD_MISO;
 int mosi  = CYD_SD_MOSI;
 int cs    = CYD_SD_SS;
-
-// Note: The symbol 'CYD_SD_SPI_BUS' is defined as 'VSPI'. So check the assigned SPI bus.
-// https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
-#include "esp32-hal.h"
-#ifdef  CONFIG_IDF_TARGET_ESP32
-#define ASSIGNED_SPI_BUS  "VSPI"
-#else
-#define ASSIGNED_SPI_BUS  "FSPI"
-#endif
 //*/
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
@@ -219,16 +210,19 @@ void testFileIO(fs::FS &fs, const char *path) {
 
 /*--------------------------------------------------------------------------------
  * Setup SD card (Mounting fails if card is not inserted)
+ * Note the global variable 'SPI' is assigned to 'VSPI' same as 'CYD_SD_SPI_BUS'.
+ * https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
  *--------------------------------------------------------------------------------*/
 void sdcard_setup() {
 
 #if   false
 
 #ifdef REASSIGN_PINS
-  Serial.printf("The SPI bus for SD is assigned to %s.\n", ASSIGNED_SPI_BUS); // VSPI
   SPI.begin(sck, miso, mosi, cs);
+
   if (!SD.begin(cs)) {
 #else
+  // this also works since CYD_SD_* are assigned to the default spi pins.
   if (!SD.begin()) {
 #endif
     Serial.println("Card Mount Failed");

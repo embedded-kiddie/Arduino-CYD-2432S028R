@@ -34,8 +34,42 @@ LGFX tft;
 LGFX tft;
 #endif
 
+/*--------------------------------------------------------------------------------
+ * Select one of the following to test XPT2046 Touchscreen library
+ *--------------------------------------------------------------------------------*/
+//#include <XPT2046_Touchscreen.h>
+//#include <XPT2046_Bitbang.h>
+
+#if defined (_XPT2046_Touchscreen_h_)
+#include "XPT2046_ScreenPoint.h"
+static SPIClass sp_spi = SPIClass(HSPI /*CYD_TP_SPI_BUS*/);
+static XPT2046_ScreenPoint sp(CYD_TP_CS, CYD_TP_IRQ);
+#endif
+
+#if defined (XPT2046_Bitbang_h)
+#include "XPT2046_ScreenPoint.h"
+static XPT2046_ScreenPoint sp(CYD_TP_MOSI, CYD_TP_MISO, CYD_TP_CLK, CYD_TP_CS);
+#endif
+
+void touch_setup(void) {
+#if defined (_XPT2046_Touchscreen_h_)
+  sp_spi.begin(CYD_TP_CLK, CYD_TP_MISO, CYD_TP_MOSI, CYD_TP_CS);
+  sp.begin(sp_spi, tft.width(), tft.height(), 0);
+#endif
+
+#if defined (XPT2046_Bitbang_h)
+  sp.begin(tft.width(), tft.height(), 0);
+#endif
+}
+
+/*--------------------------------------------------------------------------------
+ * SD card for screenshot (assigned to VSPI)
+ *--------------------------------------------------------------------------------*/
 #include "sdcard.hpp"
 
+/*--------------------------------------------------------------------------------
+ * execute TFT_graphicstest_PDQ
+ *--------------------------------------------------------------------------------*/
 void setup() {
   Serial.begin(115200);
   while (!Serial || millis() < 1000);
@@ -48,7 +82,9 @@ void setup() {
 #endif
 
   // It is safer to initialize the SD card prior to the LCD display.
+  touch_setup();
   sdcard_setup();
+
 //sdcard_test();
 
   tft.init();
@@ -246,13 +282,20 @@ void loop(void)
    *----------------------------------------*/
   uint32_t start = millis();
   while (millis() - start < 60 * 1000L) {
+#ifdef  _XPT2046_SCREENPOINT_H_
+    if (sp.touched()) {
+      Serial.println("touched."); // always "touched" when XPT2046_Touchscreen is selected.
+#else
     if (Serial.available()) {
       Serial.readStringUntil('\n');
+#endif
+
 #if defined (_TFT_eSPIH_)
       SaveBMP24(SD, "/img1.bmp", tft);
 #else
       SaveBMP24(SD, "/img2.bmp", tft);
 #endif
+      break;
     }
   }
 }
