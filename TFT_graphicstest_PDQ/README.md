@@ -46,7 +46,7 @@
 ![TFT_eSPI](results/ST7789-TFT_eSPI.png "Test result of TFT_eSPI")
 ![LovyanGFX](results/ST7789-LovyanGFX.png "Test result of LovyanGFX")
 
-## Important note
+### Test Conditions
 
 These tests had been performed with the following SPI bus frequencies:
 
@@ -54,8 +54,7 @@ These tests had been performed with the following SPI bus frequencies:
 | ----------------- |:--------------------:|:-------------------:|
 | SPI Bus Frequency | 40 MHz               | 80 MHz              |
 
-In particular, since these tests do not handle sprite images, 
-both Panel drivers ILI9341/ST7789 run correctly at 80MHz.
+In particular, these tests do not include the processing of sprite images, in which case both panel drivers ILI9341/ST7789 can run successfully even at 80 MHz.
 
 However, the TFT_eSPI [examples/Sprite/Rotated_Sprite_1][6] does not work even 
 at 55MHz, and the LovyanGFX [examples/Sprite/RotatedZoomSample][7] results in 
