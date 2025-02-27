@@ -67,9 +67,6 @@ void touch_setup(void) {
  *--------------------------------------------------------------------------------*/
 #include "sdcard.hpp"
 
-/*--------------------------------------------------------------------------------
- * execute TFT_graphicstest_PDQ
- *--------------------------------------------------------------------------------*/
 void setup() {
   Serial.begin(115200);
   while (!Serial || millis() < 1000);
@@ -91,8 +88,38 @@ void setup() {
 	tft.fillScreen(TFT_BLACK);
 }
 
-void loop(void)
-{
+void loop(void) {
+  void exec_test(void);
+  exec_test();
+
+  /*----------------------------------------
+   * Save bitmap image to SD card
+   *----------------------------------------*/
+  uint32_t start = millis();
+  while (millis() - start < 60 * 1000L) {
+
+#if defined (_XPT2046_SCREENPOINT_H_)
+    if (sp.touched()) { // always true when XPT2046_Touchscreen is selected.
+      Serial.println("touched.");
+#else
+    if (Serial.available()) {
+      Serial.readStringUntil('\n');
+#endif
+
+#if defined (_TFT_eSPIH_)
+      SaveBMP24(SD, "/img1.bmp", tft);
+#else
+      SaveBMP24(SD, "/img2.bmp", tft);
+#endif
+      break;
+    }
+  }
+}
+
+/*--------------------------------------------------------------------------------
+ * execute TFT_graphicstest_PDQ
+ *--------------------------------------------------------------------------------*/
+void exec_test(void) {
 	Serial.println(F("Benchmark                Time (microseconds)"));
 
 	uint32_t usecHaD = testHaD();
@@ -276,28 +303,6 @@ void loop(void)
 	tft.println(F(""));
 	tft.setTextColor(TFT_GREEN); tft.setTextSize(2);
 	tft.print(F("Benchmark Complete!"));
-
-  /*----------------------------------------
-   * Save bitmap image to SD card
-   *----------------------------------------*/
-  uint32_t start = millis();
-  while (millis() - start < 60 * 1000L) {
-#ifdef  _XPT2046_SCREENPOINT_H_
-    if (sp.touched()) {
-      Serial.println("touched."); // always "touched" when XPT2046_Touchscreen is selected.
-#else
-    if (Serial.available()) {
-      Serial.readStringUntil('\n');
-#endif
-
-#if defined (_TFT_eSPIH_)
-      SaveBMP24(SD, "/img1.bmp", tft);
-#else
-      SaveBMP24(SD, "/img2.bmp", tft);
-#endif
-      break;
-    }
-  }
 }
 
 void printnice(int32_t v)
