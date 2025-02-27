@@ -15,7 +15,7 @@
 
 #include "SPI.h"
 
-#if   0
+#if   1
 // DON'T FORGET TO UPDATE "DISPLAY_CYD_2USB" IN User_Setup.h
 #include "TFT_eSPI.h"
 TFT_eSPI tft = TFT_eSPI();

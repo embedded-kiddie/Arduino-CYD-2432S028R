@@ -1,20 +1,32 @@
-/*
-  Sketch to generate the setup() calibration values,
-  these are reported to the Serial Monitor.
-*/
-
+/*----------------------------------------------------------------------
+ * Generate the calibration values, reported to the Serial Monitor.
+ *----------------------------------------------------------------------*/
 #include <SPI.h>
 #include <TFT_eSPI.h>
-#include <XPT2046_Touchscreen.h>
-#include "XPT2046_ScreenPoint.h"
-
-#define ROTATION  3 // Panel: CW --> Screen: CCW (0,2: portrait / 1,3: landscape)
-#define CALIBRATED  false // false: Execute calibrateTouch()
 
 TFT_eSPI tft = TFT_eSPI();
-XPT2046_ScreenPoint sp(TOUCH_CS, TOUCH_IRQ);
 
-//------------------------------------------------------------------------------------------
+#if   1
+#include <XPT2046_Bitbang.h>
+#else
+#include <XPT2046_Touchscreen.h>
+#endif
+#include "XPT2046_ScreenPoint.h"
+
+#if defined (_XPT2046_Touchscreen_h_)
+XPT2046_ScreenPoint sp(TOUCH_CS, TOUCH_IRQ);
+#endif
+
+#if defined (XPT2046_Bitbang_h)
+XPT2046_ScreenPoint sp(TOUCH_MOSI, TOUCH_MISO, TOUCH_CLK, TOUCH_CS);
+#endif
+
+#define ROTATION    3 // Panel: CW --> Screen: CCW (0,2: portrait / 1,3: landscape)
+#define CALIBRATED  false // false: Execute calibrateTouch()
+
+/*----------------------------------------------------------------------
+ * Setup LCD and touch panel
+ *----------------------------------------------------------------------*/
 void setup() {
   // Use serial port
   Serial.begin(115200);
@@ -24,15 +36,21 @@ void setup() {
   tft.init();
   tft.setRotation(ROTATION);
 
-#if 0
-  // The pinout of the CYD touch panel is different from that of the display.
-  SPI.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
+#if defined (_XPT2046_Touchscreen_h_)
+  #if 0
+    // The pinout of the CYD touch panel is different from that of the display.
+    SPI.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
+    sp.begin(tft.width(), tft.height(), ROTATION);
+  #else
+    // Assign the CYD touch panel on a different SPI bus from that of the display.
+    static SPIClass sp_spi = SPIClass(HSPI/*TOUCH_SPI_BUS*/);
+    sp_spi.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
+    sp.begin(sp_spi, tft.width(), tft.height(), ROTATION);
+  #endif
+#endif
+
+#if defined (XPT2046_Bitbang_h)
   sp.begin(tft.width(), tft.height(), ROTATION);
-#else
-  // Assign the CYD touch panel on a different SPI bus from that of the display.
-  static SPIClass sp_spi = SPIClass(TOUCH_SPI_BUS);
-  sp_spi.begin(TOUCH_CLK, TOUCH_MISO, TOUCH_MOSI, TOUCH_CS);
-  sp.begin(sp_spi, tft.width(), tft.height(), ROTATION);
 #endif
 
 #if   0
@@ -81,7 +99,9 @@ void setup() {
 #endif
 }
 
-//------------------------------------------------------------------------------------------
+/*----------------------------------------------------------------------
+ * Follow the touched point 
+ *----------------------------------------------------------------------*/
 void loop(void) {
   uint16_t x, y;
   if (sp.getTouch(&x, &y)) {
