@@ -50,15 +50,6 @@ int sck   = CYD_SD_SCK;
 int miso  = CYD_SD_MISO;
 int mosi  = CYD_SD_MOSI;
 int cs    = CYD_SD_SS;
-
-// Note: The symbol 'CYD_SD_SPI_BUS' is defined as 'VSPI'. So check the assigned SPI bus.
-// https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
-#include "esp32-hal.h"
-#ifdef  CONFIG_IDF_TARGET_ESP32
-#define ASSIGNED_SPI_BUS  "VSPI"
-#else
-#define ASSIGNED_SPI_BUS  "FSPI"
-#endif
 //*/
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
@@ -219,28 +210,35 @@ void testFileIO(fs::FS &fs, const char *path) {
 
 /*--------------------------------------------------------------------------------
  * Setup SD card (Mounting fails if card is not inserted)
+ * Note the global variable 'SPI' is assigned to 'VSPI' same as 'CYD_SD_SPI_BUS'.
+ * https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
  *--------------------------------------------------------------------------------*/
 void sdcard_setup() {
-#if   true
+
+#if   false
+
 #ifdef REASSIGN_PINS
-  Serial.printf("The SPI bus is assigned to %s for SD.\n", ASSIGNED_SPI_BUS); // VSPI
   SPI.begin(sck, miso, mosi, cs);
+
   if (!SD.begin(cs)) {
 #else
+  // this also works since CYD_SD_* are assigned to the default spi pins.
   if (!SD.begin()) {
 #endif
     Serial.println("Card Mount Failed");
     return;
   }
-#else // false
-  // When used with an LCD display, running sdcard_test() or saveBMP24() causes the following error:
-  // "Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandled."
-  // https://github.com/witnessmenow/ESP32-Cheap-Yellow-Display/blob/main/Examples/Basics/3-SDCardTest/3-SDCardTest.ino#L199-L204
-  SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
-  if (!SD.begin(CYD_SD_SS, spi, 80000000)) {
+
+#else
+
+  static SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
+  spi.begin(CYD_SD_SCK, CYD_SD_MISO, CYD_SD_MOSI, CYD_SD_SS);
+
+  if (!SD.begin(CYD_SD_SS, spi, 50000000)) {
     Serial.println("Card Mount Failed");
     return;
   }
+
 #endif
 
   uint8_t cardType = SD.cardType();
@@ -287,8 +285,10 @@ void sdcard_test(void) {
 /*--------------------------------------------------------------------------------
  * Convert between RGB565 and RGB888
  *--------------------------------------------------------------------------------*/
-#define COLOR_CORRECTION 1 // 0: normal, 1: for TFT_graphicstest_PDQ
-#define RGB565(r, g, b) ((((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3))
+#define RGB_CORRECTION    (0) // 0: normal, 1: for TFT_graphicstest_PDQ
+#define RGB_SWAP(t, a, b) {t tmp = a; a = b; b = tmp;}
+#define RGB565(r, g, b)   ((((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3))
+
 inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) __attribute__((always_inline));
 inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) {
   r = (color>>8)&0x00F8;
@@ -361,21 +361,21 @@ bool SaveBMP24(fs::FS &fs, const char *path, GFX_TYPE &tft) {
   file.write(bmFlHdr, sizeof(bmFlHdr));
   file.write(bmInHdr, sizeof(bmInHdr));
 
-  for (int y = h - 1; y >= 0; y--) {
+  for (int y = h - 1; y >= 0; --y) {
     if (y % 10 == 0) {
       Serial.printf(".");
-      // yield(); // Prevent the watchdog from firing in core 0
+      yield(); // Prevent the watchdog from firing in core 0
     }
 
 #if defined (LOVYANGFX_HPP_)
 
     tft.readRect(0, y, w, 1, rgb);
 
-  #if COLOR_CORRECTION
-    for (int i = 0; i < w; i++) {
-      rgb[i].r <<= COLOR_CORRECTION;
-      rgb[i].g <<= COLOR_CORRECTION;
-      rgb[i].b <<= COLOR_CORRECTION;
+  #if RGB_CORRECTION
+    for (int i = 0; i < w; ++i) {
+      rgb[i].r <<= RGB_CORRECTION;
+      rgb[i].g <<= RGB_CORRECTION;
+      rgb[i].b <<= RGB_CORRECTION;
     }
   #endif
 
@@ -384,18 +384,17 @@ bool SaveBMP24(fs::FS &fs, const char *path, GFX_TYPE &tft) {
     tft.readRectRGB(0, y, w, 1, (uint8_t*)rgb);
 
     for (int i = 0; i < sizeof(rgb); i += 3) {
-#define SWAP_RGB(type, a, b)  { type tmp = a; a = b; b = tmp; }
 #if defined (TFT_RGB_ORDER) && (TFT_RGB_ORDER == TFT_BGR)
-      SWAP_RGB(uint8_t, rgb[i+1], rgb[i+2]);
-      rgb[i  ] <<= (COLOR_CORRECTION + 1);
-      rgb[i+1] <<= (COLOR_CORRECTION + 1);
-      rgb[i+2] <<= (COLOR_CORRECTION + 1);
+      RGB_SWAP(uint8_t, rgb[i+1], rgb[i+2]);
+      rgb[i  ] <<= (RGB_CORRECTION + 1);
+      rgb[i+1] <<= (RGB_CORRECTION + 1);
+      rgb[i+2] <<= (RGB_CORRECTION + 1);
 #else
-      SWAP_RGB(uint8_t, rgb[i+0], rgb[i+2]);
-  #if COLOR_CORRECTION
-      rgb[i  ] <<= COLOR_CORRECTION;
-      rgb[i+1] <<= COLOR_CORRECTION;
-      rgb[i+2] <<= COLOR_CORRECTION;
+      RGB_SWAP(uint8_t, rgb[i+0], rgb[i+2]);
+  #if RGB_CORRECTION
+      rgb[i  ] <<= RGB_CORRECTION;
+      rgb[i+1] <<= RGB_CORRECTION;
+      rgb[i+2] <<= RGB_CORRECTION;
   #endif
 #endif
     }

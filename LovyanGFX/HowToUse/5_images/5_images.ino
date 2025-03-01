@@ -6,7 +6,6 @@
 #define LGFX_AUTODETECT
 #include <LovyanGFX.h>
 #else
-#include <LovyanGFX.h>
 // false: (micro-USB x 1 type)
 // true : (micro-USB x 1 + USB-C x 1 type)
 #define DISPLAY_CYD_2USB  false

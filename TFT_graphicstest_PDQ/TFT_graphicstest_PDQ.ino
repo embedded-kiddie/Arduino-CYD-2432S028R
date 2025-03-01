@@ -29,7 +29,6 @@ LGFX tft;
 // false: (micro-USB x 1 type)
 // true : (micro-USB x 1 + USB-C x 1 type)
 #define DISPLAY_CYD_2USB  true
-#include <LovyanGFX.h>
 #include "LGFX_CYD_2432S028R.hpp"
 LGFX tft;
 #endif
