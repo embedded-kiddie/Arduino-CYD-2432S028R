@@ -33,6 +33,12 @@ LGFX tft;
 LGFX tft;
 #endif
 
+#if   1
+#define SAVE_BMP(a)
+#else
+#define SAVE_BMP(a) {a;}
+#endif
+
 /*--------------------------------------------------------------------------------
  * Select one of the following to test XPT2046 Touchscreen library
  *--------------------------------------------------------------------------------*/
@@ -124,71 +130,85 @@ void exec_test(void) {
 	uint32_t usecHaD = testHaD();
 	Serial.print(F("HaD pushBlock            "));
 	Serial.println(usecHaD);
+      SAVE_BMP(SaveBMP24(SD, "/01.bmp", tft));
 	delay(100);
 
 	uint32_t usecFillScreen = testFillScreen();
 	Serial.print(F("Screen fill              "));
 	Serial.println(usecFillScreen);
+      SAVE_BMP(SaveBMP24(SD, "/02.bmp", tft));
 	delay(100);
 
 	uint32_t usecText = testText();
 	Serial.print(F("Text                     "));
 	Serial.println(usecText);
+      SAVE_BMP(SaveBMP24(SD, "/03.bmp", tft));
 	delay(100);
 
 	uint32_t usecPixels = testPixels();
 	Serial.print(F("Pixels                   "));
 	Serial.println(usecPixels);
+      SAVE_BMP(SaveBMP24(SD, "/04.bmp", tft));
 	delay(100);
 
 	uint32_t usecLines = testLines(TFT_BLUE);
 	Serial.print(F("Lines                    "));
 	Serial.println(usecLines);
+      SAVE_BMP(SaveBMP24(SD, "/05.bmp", tft));
 	delay(100);
 
 	uint32_t usecFastLines = testFastLines(TFT_RED, TFT_BLUE);
 	Serial.print(F("Horiz/Vert Lines         "));
 	Serial.println(usecFastLines);
+      SAVE_BMP(SaveBMP24(SD, "/06.bmp", tft));
 	delay(100);
 
 	uint32_t usecRects = testRects(TFT_GREEN);
 	Serial.print(F("Rectangles (outline)     "));
 	Serial.println(usecRects);
+      SAVE_BMP(SaveBMP24(SD, "/07.bmp", tft));
 	delay(100);
 
 	uint32_t usecFilledRects = testFilledRects(TFT_YELLOW, TFT_MAGENTA);
 	Serial.print(F("Rectangles (filled)      "));
 	Serial.println(usecFilledRects);
+      SAVE_BMP(SaveBMP24(SD, "/08.bmp", tft));
 	delay(100);
 
 	uint32_t usecFilledCircles = testFilledCircles(10, TFT_MAGENTA);
 	Serial.print(F("Circles (filled)         "));
 	Serial.println(usecFilledCircles);
+      SAVE_BMP(SaveBMP24(SD, "/09.bmp", tft));
 	delay(100);
 
 	uint32_t usecCircles = testCircles(10, TFT_WHITE);
 	Serial.print(F("Circles (outline)        "));
 	Serial.println(usecCircles);
+      SAVE_BMP(SaveBMP24(SD, "/10.bmp", tft));
 	delay(100);
 
 	uint32_t usecTriangles = testTriangles();
 	Serial.print(F("Triangles (outline)      "));
 	Serial.println(usecTriangles);
+      SAVE_BMP(SaveBMP24(SD, "/11.bmp", tft));
 	delay(100);
 
 	uint32_t usecFilledTrangles = testFilledTriangles();
 	Serial.print(F("Triangles (filled)       "));
 	Serial.println(usecFilledTrangles);
+      SAVE_BMP(SaveBMP24(SD, "/12.bmp", tft));
 	delay(100);
 
 	uint32_t usecRoundRects = testRoundRects();
 	Serial.print(F("Rounded rects (outline)  "));
 	Serial.println(usecRoundRects);
+      SAVE_BMP(SaveBMP24(SD, "/13.bmp", tft));
 	delay(100);
 
 	uint32_t usedFilledRoundRects = testFilledRoundRects();
 	Serial.print(F("Rounded rects (filled)   "));
 	Serial.println(usedFilledRoundRects);
+      SAVE_BMP(SaveBMP24(SD, "/14.bmp", tft));
 	delay(100);
 
 	Serial.println(F("Done!"));
@@ -302,6 +322,7 @@ void exec_test(void) {
 	tft.println(F(""));
 	tft.setTextColor(TFT_GREEN); tft.setTextSize(2);
 	tft.print(F("Benchmark Complete!"));
+      SAVE_BMP(SaveBMP24(SD, "/15.bmp", tft));
 }
 
 void printnice(int32_t v)
