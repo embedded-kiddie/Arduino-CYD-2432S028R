@@ -9,7 +9,7 @@
 // false: (micro-USB x 1 type)
 // true : (micro-USB x 1 + USB-C x 1 type)
 #define DISPLAY_CYD_2USB  true
-#include "LGFX_CYD_2432S028R.hpp"
+#include "LGFX_ESP32_2432S028R_CYD.hpp"
 #endif // USE_AUTODETECT
 
 #define CALIBRATED true // false: Execute lcd.calibrateTouch()
