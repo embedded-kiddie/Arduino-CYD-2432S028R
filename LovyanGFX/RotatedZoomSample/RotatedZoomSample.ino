@@ -19,8 +19,17 @@ static LGFX_Sprite* sprites[2] = {&sprite1, &sprite2};
 static int32_t width = 280;
 static size_t count = 0;
 
+/*--------------------------------------------------------------------------------
+ * SD card for screenshot (assigned to VSPI)
+ *--------------------------------------------------------------------------------*/
+#include "sdcard.hpp"
+
 void setup(void)
 {
+  Serial.begin(115200);
+
+  sdcard_setup();
+
   lcd.init();
   lcd.setPivot(lcd.width()>>1, lcd.height()>>1);
   width = std::min(width, (std::max(lcd.width(), lcd.height())+10)) | 1;
@@ -47,4 +56,10 @@ void loop(void)
   sprites[!flip]->setClipRect(3,3,width-6,width-6);
   sprites[!flip]->pushRotateZoom(sprites[flip], width>>1, (width>>1)+10, ((float)count)*.5, 0.9, 0.95);
   sprites[flip]->pushSprite((lcd.width() - width) >> 1, (lcd.height() - width) >> 1);
+
+  if (Serial.available()) {
+    Serial.readStringUntil('\n');
+    delay(1000);
+    SaveBMP24(SD, "/demo.bmp", lcd);
+  }
 }
