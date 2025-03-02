@@ -15,12 +15,12 @@
 
 #include "SPI.h"
 
-#if   1
+#if   0
 // DON'T FORGET TO UPDATE "DISPLAY_CYD_2USB" IN User_Setup.h
 #include "TFT_eSPI.h"
 TFT_eSPI tft = TFT_eSPI();
 
-#elif 1
+#elif 0
 #define LGFX_AUTODETECT
 #include <LovyanGFX.h>
 LGFX tft;
