@@ -79,6 +79,7 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
       Serial.print("  SIZE: ");
       Serial.println(file.size());
     }
+
     file = root.openNextFile();
   }
 }
@@ -285,7 +286,6 @@ void sdcard_test(void) {
 /*--------------------------------------------------------------------------------
  * Convert between RGB565 and RGB888
  *--------------------------------------------------------------------------------*/
-#define RGB_CORRECTION    (0) // 0: normal, 1: for TFT_graphicstest_PDQ
 #define RGB_SWAP(t, a, b) {t tmp = a; a = b; b = tmp;}
 #define RGB565(r, g, b)   ((((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3))
 
@@ -295,6 +295,15 @@ inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) {
   g = (color>>3)&0x00FC;
   b = (color<<3)&0x00F8;
 }
+
+/*--------------------------------------------------------------------------------
+ * Correct color shift issue by TFT_eSPI on ESP32 2432S028R
+ *--------------------------------------------------------------------------------*/
+#if defined (_TFT_eSPIH_) && (DISPLAY_CYD_2USB == true)
+#define RGB_CORRECTION    (1)
+#else
+#define RGB_CORRECTION    (0)
+#endif
 
 /*--------------------------------------------------------------------------------
  * LCD screen capture to save image to SD card
@@ -384,19 +393,17 @@ bool SaveBMP24(fs::FS &fs, const char *path, GFX_TYPE &tft) {
     tft.readRectRGB(0, y, w, 1, (uint8_t*)rgb);
 
     for (int i = 0; i < sizeof(rgb); i += 3) {
-#if defined (TFT_RGB_ORDER) && (TFT_RGB_ORDER == TFT_BGR)
+  #if defined (TFT_RGB_ORDER) && (TFT_RGB_ORDER == TFT_BGR)
       RGB_SWAP(uint8_t, rgb[i+1], rgb[i+2]);
-      rgb[i  ] <<= (RGB_CORRECTION + 1);
-      rgb[i+1] <<= (RGB_CORRECTION + 1);
-      rgb[i+2] <<= (RGB_CORRECTION + 1);
-#else
+  #else
       RGB_SWAP(uint8_t, rgb[i+0], rgb[i+2]);
+  #endif
+
   #if RGB_CORRECTION
       rgb[i  ] <<= RGB_CORRECTION;
       rgb[i+1] <<= RGB_CORRECTION;
       rgb[i+2] <<= RGB_CORRECTION;
   #endif
-#endif
     }
 
 #endif // LovyanGFX or TFT_eSPI
