@@ -33,10 +33,10 @@ LGFX tft;
 LGFX tft;
 #endif
 
-#if   1
-#define SAVE_BMP(a)
-#else
+#if   0
 #define SAVE_BMP(a) {a;}
+#else
+#define SAVE_BMP(a)
 #endif
 
 /*--------------------------------------------------------------------------------
