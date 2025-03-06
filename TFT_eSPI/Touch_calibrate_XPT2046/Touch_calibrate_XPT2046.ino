@@ -103,6 +103,7 @@ void setup() {
  * Follow the touched point 
  *----------------------------------------------------------------------*/
 void loop(void) {
+#if 1
   uint16_t x, y;
   if (sp.getTouch(&x, &y)) {
     Serial.println("x: " + String(x) + ", y: " + String(y));
@@ -110,4 +111,11 @@ void loop(void) {
     // Draw a white spot at the detected coordinates
     tft.fillCircle(x, y, 2, TFT_WHITE);
   }
+#else
+  if (sp.touched()) {
+    uint16_t x, y;
+    bool touched = sp.getTouch(&x, &y);
+    Serial.printf("touched: %d, x: %d, y: %d\n", touched, x, y);
+  }
+#endif
 }
