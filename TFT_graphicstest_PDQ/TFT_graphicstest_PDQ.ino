@@ -33,6 +33,8 @@ LGFX tft;
 LGFX tft;
 #endif
 
+#define TFT_ROTATION  0
+
 // Verifying Consistency
 #if   0
 #define SAVE_BMP(a) {a;}
@@ -47,15 +49,18 @@ LGFX tft;
 #define WAIT(a) (a)
 #endif
 
+#if defined (_TFT_eSPIH_)
 /*--------------------------------------------------------------------------------
  * Select one of the following to test XPT2046 Touchscreen library
  *--------------------------------------------------------------------------------*/
-//#include <XPT2046_Touchscreen.h>
+#include <XPT2046_Touchscreen.h>
 //#include <XPT2046_Bitbang.h>
 
 #if defined (_XPT2046_Touchscreen_h_)
 #include "XPT2046_ScreenPoint.h"
-static SPIClass sp_spi = SPIClass(HSPI /*CYD_TP_SPI_BUS*/);
+// HSPI: sp.touched() works properly, but TFT_eSPI on HSPI cannot read pixels properly.
+// CYD_TP_SPI_BUS (= VSPI): can save bitmap files, but sp.touched() does not work properly.
+static SPIClass sp_spi = SPIClass(HSPI /*CYD_TP_SPI_BUS*/); // tft.getSPIinstance();
 static XPT2046_ScreenPoint sp(CYD_TP_CS, CYD_TP_IRQ);
 #endif
 
@@ -64,14 +69,21 @@ static XPT2046_ScreenPoint sp(CYD_TP_CS, CYD_TP_IRQ);
 static XPT2046_ScreenPoint sp(CYD_TP_MOSI, CYD_TP_MISO, CYD_TP_CLK, CYD_TP_CS);
 #endif
 
+#else
+/*--------------------------------------------------------------------------------
+ * Use lovyanGFX native touch functions
+ *--------------------------------------------------------------------------------*/
+#define sp  tft
+#endif
+
 void touch_setup(void) {
 #if defined (_XPT2046_Touchscreen_h_)
   sp_spi.begin(CYD_TP_CLK, CYD_TP_MISO, CYD_TP_MOSI, CYD_TP_CS);
-  sp.begin(sp_spi, tft.width(), tft.height(), 0);
+  sp.begin(sp_spi, tft.width(), tft.height(), TFT_ROTATION);
 #endif
 
 #if defined (XPT2046_Bitbang_h)
-  sp.begin(tft.width(), tft.height(), 0);
+  sp.begin(tft.width(), tft.height(), TFT_ROTATION);
 #endif
 }
 
@@ -91,14 +103,14 @@ void setup() {
   Serial.println("Lovyan's LovyanGFX library Test!"); 
 #endif
 
-  // It is safer to initialize the SD card prior to the LCD display.
+  // initialize TFT_eSPI on HSPI at first
+  tft.init();
+  tft.setRotation(TFT_ROTATION);
+	tft.fillScreen(TFT_BLACK);
+
+  // then initialize touch panel on HSPI and SD card on VSPI
   touch_setup();
   sdcard_setup();
-
-//sdcard_test();
-
-  tft.init();
-	tft.fillScreen(TFT_BLACK);
 }
 
 void loop(void) {
@@ -111,15 +123,19 @@ void loop(void) {
   uint32_t start = millis();
   while (millis() - start < WAIT(60 * 1000L)) {
 
-#if defined (_XPT2046_SCREENPOINT_H_)
-    if (sp.touched()) { // always true when XPT2046_Touchscreen is selected.
-      Serial.println("touched.");
+#if defined (_XPT2046_SCREENPOINT_H_) || defined (LOVYANGFX_HPP_)
+    uint16_t x, y;
+    bool ret = sp.getTouch(&x, &y); // alternative: sp.touched()
+    if (ret) {
+      Serial.printf("ret: %d, x: %d, y: %d\n", ret, x, y);
 #else
     if (Serial.available()) {
       Serial.readStringUntil('\n');
 #endif
 
-#if defined (_TFT_eSPIH_)
+#if   0
+      sdcard_test();
+#elif defined (_TFT_eSPIH_)
       SaveBMP24(SD, "/img1.bmp", tft);
 #else
       SaveBMP24(SD, "/img2.bmp", tft);
