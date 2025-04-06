@@ -5,7 +5,8 @@
 #define SD_CLOCK  10000000
 #define SD_CS     SS
 
-// Defined in CYD_Audio.h
+// Define in CYD_Audio.h   '#define SDFATFS_USED'
+// Define in SdFatConfig.h '#define USE_UTF8_LONG_NAMES 1'
 #ifdef SDFATFS_USED
 #define SD        SD_SDFAT
 #define SD_CONFIG SD_CS, SD_CLOCK
@@ -111,14 +112,15 @@ void setup() {
 
   files.clear();
   GetFileList(SD, "/MP3Player", 2, files);
-
-  audioConnecttoSD(files[playNo].path.c_str());
 }
 
 void loop() {
-  if (!audioIsPlaying()) {
-    playNo = (playNo + 1) % files.size();
-    audioConnecttoSD(files[playNo].path.c_str());
+  if (!audioIsPlaying() && files.size()) {
+    if (!audioConnecttoSD(files[playNo].path.c_str())) {
+      files.erase(files.begin() + playNo);
+    } else {
+      playNo = (playNo + 1) % files.size();
+    }
   }
 }
 
