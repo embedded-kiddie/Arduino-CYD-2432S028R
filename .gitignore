@@ -11,6 +11,7 @@
 !SD_Test
 !TFT_eSPI
 !TFT_graphicstest_PDQ
+!MP3Player
 
 # VSCODE
 */.theia
