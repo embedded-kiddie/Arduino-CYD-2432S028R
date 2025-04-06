@@ -5,8 +5,9 @@
 #define SD_CLOCK  10000000
 #define SD_CS     SS
 
-// Define in CYD_Audio.h   '#define SDFATFS_USED'
-// Define in SdFatConfig.h '#define USE_UTF8_LONG_NAMES 1'
+// Uncomment the followings to use SdFat 
+// "#define SDFATFS_USED" in CYD_Audio.h
+// "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
 #ifdef SDFATFS_USED
 #define SD        SD_SDFAT
 #define SD_CONFIG SD_CS, SD_CLOCK
@@ -18,6 +19,7 @@
 /*--------------------------------------------------------------------------------
  * File name and size for GetFileList()
  *--------------------------------------------------------------------------------*/
+#include <string.h>
 #include <string>
 #include <vector>
 #include <exception>
@@ -33,7 +35,20 @@ static std::vector<FileInfo_t> files;
 static int playNo = 0;
 
 /*--------------------------------------------------------------------------------
- * A function to get a list of files in a specified directory.
+ * Verify file extension.
+ *--------------------------------------------------------------------------------*/
+bool VerifyExt(const char* file) {
+  const char* ext[] = {".mp3", ".wav", ".ogg"};
+  for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
+    if (strcmp(&file[strlen(file) - strlen(ext[i])], ext[i]) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*--------------------------------------------------------------------------------
+ * Get file list in a specified directory.
  *--------------------------------------------------------------------------------*/
 void GetFileList(fs::FS &fs, const char *dirname, uint8_t levels, std::vector<FileInfo_t> &files) {
   File root = fs.open(dirname);
@@ -75,15 +90,15 @@ void GetFileList(fs::FS &fs, const char *dirname, uint8_t levels, std::vector<Fi
     }
 
     else if (!isDir) {
-      // Add full path to vector
-      // file.path(), file.name(), file.size()
-      // https://cpprefjp.github.io/reference/exception/exception.html
-      // https://stackoverflow.com/questions/27609839/about-c-vectorpush-back-exceptions-ellipsis-catch-useful
       try {
 #ifdef SDFATFS_USED
-        files.push_back({path, (size_t)file.fileSize(), isDir, false});
+        if (VerifyExt(path.c_str())) {
+          files.push_back({path, (size_t)file.fileSize(), isDir, false});
+        }
 #else
-        files.push_back({file.path(), file.size(), isDir, false});
+        if (VerifyExt(file.path())) {
+          files.push_back({file.path(), file.size(), isDir, false});
+        }
 #endif
       } catch (const std::exception &e) {
         Serial.printf("Exception: %s\n", e.what());
