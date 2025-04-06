@@ -1,22 +1,23 @@
-#include <Arduino.h>
-#include <SPI.h>
-#include <SD.h>
-#include <FS.h>
+// All necessary files are included
 #include "CYD28_audio.h"
 
-// Digital I/O used
-#define SD_CS     SS    //  5
-#define SPI_MOSI  MOSI  // 23
-#define SPI_MISO  MISO  // 19
-#define SPI_SCK   SCK   // 18
+// 1MHz --> 10MHz or more?
+#define SD_CLOCK  10000000
+#define SD_CS     SS
+
+// Defined in CYD_Audio.h
+#ifdef SDFATFS_USED
+#define SD        SD_SDFAT
+#define SD_CONFIG SD_CS, SD_CLOCK
+#else
+#define SD_CONFIG SD_CS, SPI, SD_CLOCK
+#endif
 
 void setup() {
   Serial.begin(115200);
   while (millis() < 1000);
 
-  SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
-  SPI.setFrequency(10000000); // 1MHz --> 10MHz or more?
-  if (!SD.begin(SD_CS)) {
+  if (!SD.begin(SD_CONFIG)) {
     Serial.println("Cannot begin SD.");
     while (1);
   }
@@ -27,6 +28,9 @@ void setup() {
 }
 
 void loop() {
+  if (!audioIsPlaying()) {
+    audioConnecttoSD("/test.mp3");
+  }
 }
 
 // optional
