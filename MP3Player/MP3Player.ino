@@ -17,11 +17,12 @@
 #endif
 
 /*--------------------------------------------------------------------------------
- * File name and size for GetFileList()
+ * File name and size for ScanFileList()
  *--------------------------------------------------------------------------------*/
 #include <string.h>
 #include <string>
 #include <vector>
+#include <random>
 #include <exception>
 
 typedef struct {
@@ -31,11 +32,11 @@ typedef struct {
   bool        isSelected;
 } FileInfo_t;
 
-static std::vector<FileInfo_t> files;
+static std::vector<FileInfo_t> files = {};
 static int playNo = 0;
 
 /*--------------------------------------------------------------------------------
- * Verify file extension.
+ * Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
  *--------------------------------------------------------------------------------*/
 bool VerifyExt(const char* file) {
   const char* ext[] = {".mp3", ".wav", ".ogg"};
@@ -48,9 +49,9 @@ bool VerifyExt(const char* file) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get file list in a specified directory.
+ * Scan and create a list of audio files in a specified directory.
  *--------------------------------------------------------------------------------*/
-void GetFileList(fs::FS &fs, const char *dirname, uint8_t levels, std::vector<FileInfo_t> &files) {
+void ScanFileList(fs::FS &fs, const char *dirname, uint8_t levels, std::vector<FileInfo_t> &files) {
   File root = fs.open(dirname);
   if (!root) {
     Serial.printf("Failed to open %s.\n", dirname);
@@ -83,9 +84,9 @@ void GetFileList(fs::FS &fs, const char *dirname, uint8_t levels, std::vector<Fi
 
     else if (isDir && levels) {
 #ifdef SDFATFS_USED
-      GetFileList(fs, path.c_str(), levels - 1, files);
+      ScanFileList(fs, path.c_str(), levels - 1, files);
 #else
-      GetFileList(fs, file.path(), levels - 1, files);
+      ScanFileList(fs, file.path(), levels - 1, files);
 #endif
     }
 
@@ -108,12 +109,30 @@ void GetFileList(fs::FS &fs, const char *dirname, uint8_t levels, std::vector<Fi
 
     file = root.openNextFile();
   }
-
-  std::sort(files.begin(), files.end(), [](FileInfo_t &a, FileInfo_t &b) {
-    return a.path.compare(b.path) > 0 ? true : false;
-  });
 }
 
+/*--------------------------------------------------------------------------------
+ * Sort file list
+ *--------------------------------------------------------------------------------*/
+void SortFileList(std::vector<FileInfo_t> &files, bool shuffle = false) {
+  if (shuffle) {
+    std::random_device seed_gen;
+    std::mt19937 engine(seed_gen());
+    std::shuffle(files.begin(), files.end(), engine);
+  } else {
+    std::sort(files.begin(), files.end(), [](FileInfo_t &a, FileInfo_t &b) {
+      return a.path.compare(b.path) > 0 ? true : false;
+    });
+  }
+
+  for (auto& file : files) {
+    Serial.println(file.path.c_str());
+  }
+}
+
+/*--------------------------------------------------------------------------------
+ * Setup and Loop
+ *--------------------------------------------------------------------------------*/
 void setup() {
   Serial.begin(115200);
   while (millis() < 1000);
@@ -125,8 +144,8 @@ void setup() {
     while (1);
   }
 
-  files.clear();
-  GetFileList(SD, "/MP3Player", 2, files);
+  ScanFileList(SD, "/", 3, files);
+  SortFileList(files, true);
 }
 
 void loop() {
@@ -139,7 +158,9 @@ void loop() {
   }
 }
 
-// optional
+/*--------------------------------------------------------------------------------
+ * Optional
+ *--------------------------------------------------------------------------------*/
 void audio_info(const char *info) {
   Serial.print("info        ");
   Serial.println(info);
