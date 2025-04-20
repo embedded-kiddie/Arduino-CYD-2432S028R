@@ -2,7 +2,7 @@
 /*
 
 # allow list
-!.gitignore
+!*/.gitignore
 !README.md
 !LICENSE
 
@@ -12,6 +12,8 @@
 !TFT_eSPI
 !TFT_graphicstest_PDQ
 !MP3Player
+!LVGL
+
 
 # VSCODE
 */.theia
