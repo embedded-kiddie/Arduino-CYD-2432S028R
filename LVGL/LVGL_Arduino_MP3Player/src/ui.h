@@ -65,16 +65,18 @@ extern lv_obj_t *ui_ScreenOption;
 void ui_event_MenuBackRight( lv_event_t * e);
 extern lv_obj_t *ui_MenuBackRight;
 extern lv_obj_t *ui_LabelFavorite;
+void ui_event_DropdownList( lv_event_t * e);
+extern lv_obj_t *ui_DropdownList;
+extern lv_obj_t *ui_ButtonNewList;
+extern lv_obj_t *ui_LabelNewList;
+extern lv_obj_t *ui_ButtonClearList;
+extern lv_obj_t *ui_LabelClearList;
 extern lv_obj_t *ui_LabelBacklight;
 extern lv_obj_t *ui_LabelSleepTimer;
-void ui_event_SwitchFavorite( lv_event_t * e);
-extern lv_obj_t *ui_SwitchFavorite;
 void ui_event_SwitchBacklight( lv_event_t * e);
 extern lv_obj_t *ui_SwitchBacklight;
 void ui_event_SwitchSleepTimer( lv_event_t * e);
 extern lv_obj_t *ui_SwitchSleepTimer;
-extern lv_obj_t *ui_ButtonFavorite;
-extern lv_obj_t *ui_LabelClearList;
 extern lv_obj_t *ui_RollerBacklight;
 extern lv_obj_t *ui_RollerSleepTimer;
 // CUSTOM VARIABLES
@@ -115,6 +117,9 @@ LV_IMG_DECLARE( ui_img_1837194583);   // assets/bluetooth-off.png
 
 // UI INIT
 void ui_init(void);
+
+// UI LOOP
+void ui_loop(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/

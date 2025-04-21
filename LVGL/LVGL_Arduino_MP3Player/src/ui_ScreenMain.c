@@ -317,6 +317,7 @@ lv_obj_set_style_pad_top(ui_VolumeMin, 24, LV_PART_INDICATOR| LV_STATE_PRESSED);
 lv_obj_set_style_pad_bottom(ui_VolumeMin, 0, LV_PART_INDICATOR| LV_STATE_PRESSED);
 
 ui_Volume = lv_slider_create(ui_ScreenMain);
+lv_slider_set_range(ui_Volume, 0,21);
 lv_slider_set_value( ui_Volume, 0, LV_ANIM_OFF);
 if (lv_slider_get_mode(ui_Volume)==LV_SLIDER_MODE_RANGE ) lv_slider_set_left_value( ui_Volume, 0, LV_ANIM_OFF);
 lv_obj_set_height( ui_Volume, 8);

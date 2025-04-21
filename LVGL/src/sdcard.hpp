@@ -42,6 +42,14 @@
 #include "SD.h"
 #include "SPI.h"
 
+#ifndef CYD_SD_SPI_BUS
+#define CYD_SD_SS      5
+#define CYD_SD_MOSI    23
+#define CYD_SD_MISO    19
+#define CYD_SD_SCK     18
+#define CYD_SD_SPI_BUS VSPI
+#endif
+
 /* Uncomment and set up if you want to use custom pins for the SPI communication
 #define REASSIGN_PINS
 

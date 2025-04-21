@@ -26,12 +26,6 @@
 static LGFX tft;
 
 //----------------------------------------------------------------------
-// CYD MP3 Player
-//----------------------------------------------------------------------
-#include "CYD_MP3Player.h"
-CYD_MP3Player player;
-
-//----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
 #define SCREENSHORT false
@@ -47,6 +41,7 @@ CYD_MP3Player player;
 //#include <examples/lv_examples.h>
 //#include <demos/lv_demos.h>
 #include "src/ui.h"
+#include "CYD28_audio.h"
 
 /*Set to your screen resolution and rotation*/
 #define TFT_HOR_RES   240 // Portrait orientation default width
@@ -216,7 +211,7 @@ void setup() {
 #if USE_HEAP_MALLOC
   for (int i = 0; i < DRAW_BUF_N_BUFS; i++) {
     draw_buf[i] = (uint8_t*)heap_caps_malloc(DRAW_BUF_SIZE, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
-    Serial.printf("buf[%d]: 0x%x%s", i, draw_buf[i], (DRAW_BUF_N_BUFS == 1 || i == 1 ? "\n" : ", "));
+//  Serial.printf("buf[%d]: 0x%x%s", i, draw_buf[i], (DRAW_BUF_N_BUFS == 1 || i == 1 ? "\n" : ", "));
   }
 #endif
 
@@ -247,27 +242,16 @@ void setup() {
 
 #if ! SCREENSHORT
   audioInit();
-  player.begin();
-  player.ScanFileList("/MP3Player", 2);
-  player.SortFileList(true);
-  player.SetVolume(8);
-#endif // ! SCREENSHORT
-
 #endif
 
-  Serial.println("Setup done");
+#endif
 }
 
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
 
 #if ! SCREENSHORT
-  player.AutoPlay();
-
-  if (Serial.available() > 0) {
-    int v = Serial.readStringUntil('\n').toInt();
-    player.SetVolume((uint8_t)constrain(v, 0, 21));
-  }
+  ui_loop();
 #else
   if (Serial.available()) {
     Serial.readStringUntil('\n');

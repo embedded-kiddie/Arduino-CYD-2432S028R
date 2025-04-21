@@ -12,9 +12,9 @@ void setup() {
   audioInit();
 
   player.begin();
-  player.ScanFileList("/MP3Player", 2);
+  player.ScanFileList("/", 3);
   player.SortFileList(true);
-  player.SetVolume(8);
+  player.SetVolume(10);
 }
 
 void loop() {

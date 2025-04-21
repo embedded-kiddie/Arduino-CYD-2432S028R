@@ -11,7 +11,7 @@
 !SD_Test
 !TFT_eSPI
 !TFT_graphicstest_PDQ
-!MP3Player
+!CYD_MP3Player
 !LVGL
 
 

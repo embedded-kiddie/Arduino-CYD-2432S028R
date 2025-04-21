@@ -71,11 +71,11 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
       try {
 #ifdef SDFATFS_USED
         if (VerifyExt(path.c_str())) {
-          m_files.push_back({path, (size_t)file.fileSize(), isDir, false});
+          m_files.push_back({path});
         }
 #else
         if (VerifyExt(file.path())) {
-          m_files.push_back({file.path(), file.size(), isDir, false});
+          m_files.push_back({file.path()});
         }
 #endif
       } catch (const std::exception &e) {
@@ -93,18 +93,16 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
 *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::SortFileList(bool shuffle) {
   if (shuffle) {
-    std::random_device seed_gen;
-    std::mt19937 engine(seed_gen());
+    std::mt19937 engine(esp_random());
     std::shuffle(m_files.begin(), m_files.end(), engine);
   } else {
     std::sort(m_files.begin(), m_files.end(), [](FileInfo_t &a, FileInfo_t &b) {
       return a.path.compare(b.path) > 0 ? true : false;
     });
   }
-
-  for (auto& file : m_files) {
+/*for (auto& file : m_files) {
     Serial.println(file.path.c_str());
-  }
+  }*/
 }
 
 /*--------------------------------------------------------------------------------
@@ -112,6 +110,10 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
 *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::SetVolume(uint8_t vol) {
   audioSetVolume(vol);
+}
+
+uint8_t CYD_MP3Player::GetVolumePerCent(void) {
+  return audioGetVolumePerCent();
 }
 
 bool CYD_MP3Player::IsPlaying(void) {
@@ -148,6 +150,7 @@ void CYD_MP3Player::AutoPlay(void) {
 /*--------------------------------------------------------------------------------
  * Optional functions for audio-I2S
  *--------------------------------------------------------------------------------*/
+#if   false
 void audio_info(const char *info) {
   Serial.print("info        ");
   Serial.println(info);
@@ -184,3 +187,4 @@ void audio_lasthost(const char *info) {  //stream URL played
   Serial.print("lasthost    ");
   Serial.println(info);
 }
+#endif

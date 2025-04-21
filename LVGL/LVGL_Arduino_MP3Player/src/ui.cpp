@@ -6,74 +6,110 @@
 #include "ui.h"
 #include "ui_helpers.h"
 
-#include "CYD_MP3Player.h"
-extern CYD_MP3Player player;
+///////////////////// UI LOOP ////////////////////
+#include <math.h>   // for roundf()
+#include <stdio.h>  // for printf()
+#include "../CYD_MP3Player.h"
+
+CYD_MP3Player player;
+
+#define MP3_VOLUME_INI 8
+#define MP3_ROOT_PATH "/MP3Player"
+#define MP3_ROOT_CONFIG MP3_ROOT_PATH, 2
+
+typedef enum {
+  UI_STAT_INIT,
+  UI_STAT_STOP,
+  UI_STAT_PLAYING,
+} UI_Stat_t;
+
+UI_Stat_t ui_stat = UI_STAT_INIT;
+
+void ui_loop(void) {
+  switch (ui_stat) {
+    case UI_STAT_INIT:
+      player.begin();
+      player.ScanFileList(MP3_ROOT_CONFIG);
+      player.SortFileList(true);
+      player.SetVolume(MP3_VOLUME_INI);
+      lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
+      ui_stat = UI_STAT_PLAYING;
+      break;
+    case UI_STAT_STOP:
+      break;
+    case UI_STAT_PLAYING:
+      player.AutoPlay();
+      break;
+  }
+}
 
 ///////////////////// VARIABLES ////////////////////
 
 // SCREEN: ui_ScreenMain
 void ui_ScreenMain_screen_init(void);
-void ui_event_ScreenMain( lv_event_t * e);
+void ui_event_ScreenMain(lv_event_t *e);
 lv_obj_t *ui_ScreenMain;
 lv_obj_t *ui_ImageAlbum;
 lv_obj_t *ui_ImageWave;
 lv_obj_t *ui_MusicTitle;
 lv_obj_t *ui_ElapsedStart;
 lv_obj_t *ui_ElapsedEnd;
-void ui_event_MenuDotMain( lv_event_t * e);
+void ui_event_MenuDotMain(lv_event_t *e);
 lv_obj_t *ui_MenuDotMain;
-void ui_event_Favourite( lv_event_t * e);
+void ui_event_Favourite(lv_event_t *e);
 lv_obj_t *ui_Favourite;
-void ui_event_Repeat( lv_event_t * e);
+void ui_event_Repeat(lv_event_t *e);
 lv_obj_t *ui_Repeat;
-void ui_event_Shuffle( lv_event_t * e);
+void ui_event_Shuffle(lv_event_t *e);
 lv_obj_t *ui_Shuffle;
-void ui_event_ButtonPlay( lv_event_t * e);
+void ui_event_ButtonPlay(lv_event_t *e);
 lv_obj_t *ui_ButtonPlay;
-void ui_event_ButtonNext( lv_event_t * e);
+void ui_event_ButtonNext(lv_event_t *e);
 lv_obj_t *ui_ButtonNext;
-void ui_event_ButtonPrev( lv_event_t * e);
+void ui_event_ButtonPrev(lv_event_t *e);
 lv_obj_t *ui_ButtonPrev;
-void ui_event_VolumeMax( lv_event_t * e);
+void ui_event_VolumeMax(lv_event_t *e);
 lv_obj_t *ui_VolumeMax;
-void ui_event_VolumeMin( lv_event_t * e);
+void ui_event_VolumeMin(lv_event_t *e);
 lv_obj_t *ui_VolumeMin;
-void ui_event_Volume( lv_event_t * e);
+void ui_event_Volume(lv_event_t *e);
 lv_obj_t *ui_Volume;
-void ui_event_ElapsedBar( lv_event_t * e);
+void ui_event_ElapsedBar(lv_event_t *e);
 lv_obj_t *ui_ElapsedBar;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenOption
 void ui_ScreenOption_screen_init(void);
-void ui_event_ScreenOption( lv_event_t * e);
+void ui_event_ScreenOption(lv_event_t *e);
 lv_obj_t *ui_ScreenOption;
-void ui_event_MenuBackRight( lv_event_t * e);
+void ui_event_MenuBackRight(lv_event_t *e);
 lv_obj_t *ui_MenuBackRight;
 lv_obj_t *ui_LabelFavorite;
+void ui_event_DropdownList(lv_event_t *e);
+lv_obj_t *ui_DropdownList;
+lv_obj_t *ui_ButtonNewList;
+lv_obj_t *ui_LabelNewList;
+lv_obj_t *ui_ButtonClearList;
+lv_obj_t *ui_LabelClearList;
 lv_obj_t *ui_LabelBacklight;
 lv_obj_t *ui_LabelSleepTimer;
-void ui_event_SwitchFavorite( lv_event_t * e);
-lv_obj_t *ui_SwitchFavorite;
-void ui_event_SwitchBacklight( lv_event_t * e);
+void ui_event_SwitchBacklight(lv_event_t *e);
 lv_obj_t *ui_SwitchBacklight;
-void ui_event_SwitchSleepTimer( lv_event_t * e);
+void ui_event_SwitchSleepTimer(lv_event_t *e);
 lv_obj_t *ui_SwitchSleepTimer;
-lv_obj_t *ui_ButtonFavorite;
-lv_obj_t *ui_LabelClearList;
 lv_obj_t *ui_RollerBacklight;
 lv_obj_t *ui_RollerSleepTimer;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
 void ui_ScreenPlayList_screen_init(void);
-void ui_event_ScreenPlayList( lv_event_t * e);
+void ui_event_ScreenPlayList(lv_event_t *e);
 lv_obj_t *ui_ScreenPlayList;
-void ui_event_MenuBackLeft( lv_event_t * e);
+void ui_event_MenuBackLeft(lv_event_t *e);
 lv_obj_t *ui_MenuBackLeft;
-void ui_event_MenuBluetoothOn( lv_event_t * e);
+void ui_event_MenuBluetoothOn(lv_event_t *e);
 lv_obj_t *ui_MenuBluetoothOn;
-void ui_event_MenuBluetoothOff( lv_event_t * e);
+void ui_event_MenuBluetoothOff(lv_event_t *e);
 lv_obj_t *ui_MenuBluetoothOff;
 // CUSTOM VARIABLES
 
@@ -84,219 +120,224 @@ lv_obj_t *ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
-    #error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
+#error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
 #endif
 
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
-void ui_event_ScreenMain( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_ScreenMain(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_RIGHT  ) {
-lv_indev_wait_release(lv_indev_active());
-      _ui_screen_change( &ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
-}
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP  ) {
-lv_indev_wait_release(lv_indev_active());
-      _ui_screen_change( &ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
-      _ui_screen_change( &ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
-}
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM  ) {
-lv_indev_wait_release(lv_indev_active());
-      _ui_screen_change( &ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenPlayList_screen_init);
-}
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT  ) {
-lv_indev_wait_release(lv_indev_active());
-      _ui_screen_change( &ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
-}
-}
-
-void ui_event_MenuDotMain( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
-}
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_RIGHT) {
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
+  }
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
+    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
+  }
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM) {
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenPlayList_screen_init);
+  }
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
+  }
 }
 
-void ui_event_Favourite( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_MenuDotMain(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      ( e );
-}
-}
-
-void ui_event_Repeat( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      ( e );
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
+  }
 }
 
-void ui_event_Shuffle( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_Favourite(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      ( e );
-}
-}
-
-void ui_event_ButtonPlay( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      ( e );
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+  }
 }
 
-void ui_event_ButtonNext( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_Repeat(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      ( e );
-}
-}
-
-void ui_event_ButtonPrev( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      ( e );
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+  }
 }
 
-void ui_event_VolumeMax( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_Shuffle(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      ( e );
-}
-}
-
-void ui_event_VolumeMin( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      ( e );
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+  }
 }
 
-void ui_event_Volume( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_ButtonPlay(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_VALUE_CHANGED) {
-      ( e );
-}
-if ( event_code == LV_EVENT_PRESSED) {
-      ( e );
-}
-if ( event_code == LV_EVENT_RELEASED) {
-      ( e );
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+  }
 }
 
-void ui_event_ElapsedBar( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_ButtonNext(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_VALUE_CHANGED) {
-      ( e );
-}
-}
-
-void ui_event_ScreenOption( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT  ) {
-lv_indev_wait_release(lv_indev_active());
-      _ui_screen_change( &ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+  }
 }
 
-void ui_event_MenuBackRight( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_ButtonPrev(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
-}
-}
-
-void ui_event_SwitchFavorite( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_state_modify( ui_ButtonFavorite, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-      ( e );
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+  }
 }
 
-void ui_event_SwitchBacklight( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_VolumeMax(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_state_modify( ui_RollerBacklight, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-      ( e );
-}
-}
-
-void ui_event_SwitchSleepTimer( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_state_modify( ui_RollerSleepTimer, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-      ( e );
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    int vol = lv_slider_get_value(ui_Volume) + 1;
+    vol = constrain(vol, MP3_VOLUME_MIN, MP3_VOLUME_MAX);
+    lv_slider_set_value(ui_Volume, vol, LV_ANIM_OFF);
+    player.SetVolume(vol);
+  }
 }
 
-void ui_event_ScreenPlayList( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_VolumeMin(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP  ) {
-lv_indev_wait_release(lv_indev_active());
-      _ui_screen_change( &ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
-}
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM  ) {
-lv_indev_wait_release(lv_indev_active());
-      _ui_screen_change( &ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
-}
+  if (event_code == LV_EVENT_CLICKED) {
+    int vol = lv_slider_get_value(ui_Volume) - 1;
+    vol = constrain(vol, MP3_VOLUME_MIN, MP3_VOLUME_MAX);
+    lv_slider_set_value(ui_Volume, vol, LV_ANIM_OFF);
+    player.SetVolume(vol);
+  }
 }
 
-void ui_event_MenuBackLeft( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_Volume(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenMain_screen_init);
-}
+  if (event_code == LV_EVENT_VALUE_CHANGED) {
+    int vol = lv_slider_get_value(ui_Volume);
+    player.SetVolume(vol);
+  }
+  if (event_code == LV_EVENT_PRESSED) {
+    (e);
+  }
+  if (event_code == LV_EVENT_RELEASED) {
+    (e);
+  }
 }
 
-void ui_event_MenuBluetoothOn( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_ElapsedBar(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
-}
+  if (event_code == LV_EVENT_VALUE_CHANGED) {
+    (e);
+  }
 }
 
-void ui_event_MenuBluetoothOff( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
+void ui_event_ScreenOption(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
 
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
+  }
 }
+
+void ui_event_MenuBackRight(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
+  }
+}
+
+void ui_event_DropdownList(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_VALUE_CHANGED) {
+    _ui_state_modify(ui_ButtonClearList, LV_STATE_DISABLED, _UI_MODIFY_STATE_REMOVE);
+  }
+}
+
+void ui_event_SwitchBacklight(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    _ui_state_modify(ui_RollerBacklight, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+    (e);
+  }
+}
+
+void ui_event_SwitchSleepTimer(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    _ui_state_modify(ui_RollerSleepTimer, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+    (e);
+  }
+}
+
+void ui_event_ScreenPlayList(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
+  }
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM) {
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
+  }
+}
+
+void ui_event_MenuBackLeft(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenMain_screen_init);
+  }
+}
+
+void ui_event_MenuBluetoothOn(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
+  }
+}
+
+void ui_event_MenuBluetoothOff(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
+  }
 }
 
 ///////////////////// SCREENS ////////////////////
 
-void ui_init( void )
-{
-lv_disp_t *dispp = lv_display_get_default();
-lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), false, LV_FONT_DEFAULT);
-lv_disp_set_theme(dispp, theme);
-ui_ScreenMain_screen_init();
-ui_ScreenOption_screen_init();
-ui_ScreenPlayList_screen_init();
-ui____initial_actions0 = lv_obj_create(NULL);
-lv_disp_load_scr( ui_ScreenMain);
+void ui_init(void) {
+  lv_disp_t *dispp = lv_display_get_default();
+  lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), false, LV_FONT_DEFAULT);
+  lv_disp_set_theme(dispp, theme);
+  ui_ScreenMain_screen_init();
+  ui_ScreenOption_screen_init();
+  ui_ScreenPlayList_screen_init();
+  ui____initial_actions0 = lv_obj_create(NULL);
+  lv_disp_load_scr(ui_ScreenMain);
 }
