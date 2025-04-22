@@ -7,6 +7,12 @@
 #include "CYD28_audio.h"
 
 /*--------------------------------------------------------------------------------
+ * Possible values ​​for `SetVolume()`
+ *--------------------------------------------------------------------------------*/
+#define MP3_VOLUME_MIN  0
+#define MP3_VOLUME_MAX  21
+
+/*--------------------------------------------------------------------------------
  * File name and size for ScanFileList()
  *--------------------------------------------------------------------------------*/
 #include <string.h>
@@ -17,9 +23,10 @@
 
 typedef struct {
   std::string path;
-  size_t      size;
-  bool        isDirectory;
-  bool        isSelected;
+  std::string title;
+  std::string album;
+  std::string artist;
+  uint32_t    duration;
 } FileInfo_t;
 
 /*--------------------------------------------------------------------------------
@@ -28,7 +35,7 @@ typedef struct {
  *  "#define SDFATFS_USED" in CYD_Audio.h
  *  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
  *--------------------------------------------------------------------------------*/
-#define SD_CLOCK  10000000  // 1MHz --> 10MHz or more?
+#define SD_CLOCK  20000000  // 1MHz --> 20MHz and up
 #define SD_CS     SS
 
 #if   defined (SDFATFS_USED)
@@ -49,14 +56,15 @@ private:
   bool VerifyExt(const char* file);
 
 public:
-  bool begin(void);
-  void ScanFileList(const char *dirname, uint8_t levels);
-  void SortFileList(bool shuffle = false);
-  void SetVolume(uint8_t vol);
-  bool IsPlaying(void);
-  void StopPlay(void);
-  bool FilePlay(const char* path);
-  void AutoPlay(void);
+  bool    begin(void);
+  void    ScanFileList(const char *dirname, uint8_t levels);
+  void    SortFileList(bool shuffle = false);
+  void    SetVolume(uint8_t vol);
+  uint8_t GetVolumePerCent(void);
+  bool    IsPlaying(void);
+  void    StopPlay(void);
+  bool    FilePlay(const char* path);
+  void    AutoPlay(void);
 };
 
 void audio_info(const char *info);

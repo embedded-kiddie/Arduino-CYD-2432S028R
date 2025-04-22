@@ -47,7 +47,10 @@ static uint32_t color_index = 0;
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
+#define SCREENSHORT false
+#if SCREENSHORT
 #include "../src/sdcard.hpp"
+#endif
 
 /*To use the built-in examples and demos of LVGL uncomment the includes below respectively.
  *You also need to copy `lvgl/examples` to `lvgl/src/examples`. Similarly for the demos `lvgl/demos` to `lvgl/src/demos`.
@@ -340,12 +343,13 @@ void setup() {
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
 
-  // Save bitmap image to SD card
+#if SCREENSHORT
   if (Serial.available()) {
     Serial.readStringUntil('\n');
     sdcard_setup();
     SaveBMP24(SD, "/demo.bmp", tft);
   }
+#endif
 
 #if DRAW_RENDERING_RECT
   color = colors[color_index++ % 3];

@@ -142,10 +142,12 @@ void ui_event_ScreenMain(lv_event_t *e) {
     lv_indev_wait_release(lv_indev_active());
     _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenPlayList_screen_init);
   }
+#if   false
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
     lv_indev_wait_release(lv_indev_active());
     _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
   }
+#endif
 }
 
 void ui_event_MenuDotMain(lv_event_t *e) {

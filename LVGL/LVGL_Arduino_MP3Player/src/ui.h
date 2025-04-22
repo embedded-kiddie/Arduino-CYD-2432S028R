@@ -85,12 +85,14 @@ extern lv_obj_t *ui_RollerSleepTimer;
 void ui_ScreenPlayList_screen_init(void);
 void ui_event_ScreenPlayList( lv_event_t * e);
 extern lv_obj_t *ui_ScreenPlayList;
+#if   false
 void ui_event_MenuBackLeft( lv_event_t * e);
 extern lv_obj_t *ui_MenuBackLeft;
 void ui_event_MenuBluetoothOn( lv_event_t * e);
 extern lv_obj_t *ui_MenuBluetoothOn;
 void ui_event_MenuBluetoothOff( lv_event_t * e);
 extern lv_obj_t *ui_MenuBluetoothOff;
+#endif
 // CUSTOM VARIABLES
 
 // EVENTS
