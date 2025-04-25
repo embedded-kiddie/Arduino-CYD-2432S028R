@@ -3,5 +3,6 @@
 
 # target list
 !src
+!assets
 !.gitignore
 .DS_Store
