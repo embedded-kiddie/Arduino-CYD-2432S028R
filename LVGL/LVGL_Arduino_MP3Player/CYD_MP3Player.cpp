@@ -100,9 +100,12 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
       return a.path.compare(b.path) > 0 ? true : false;
     });
   }
-/*for (auto& file : m_files) {
+
+#if   false
+  for (auto& file : m_files) {
     Serial.println(file.path.c_str());
-  }*/
+  }
+#endif
 }
 
 /*--------------------------------------------------------------------------------

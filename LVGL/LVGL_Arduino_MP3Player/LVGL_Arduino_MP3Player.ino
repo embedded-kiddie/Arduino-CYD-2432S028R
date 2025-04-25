@@ -41,7 +41,9 @@ static LGFX tft;
 //#include <examples/lv_examples.h>
 //#include <demos/lv_demos.h>
 #include "src/ui.h"
-#include "CYD28_audio.h" // audioInit()
+#include "CYD_MP3Player.h"
+
+CYD_MP3Player player;
 
 /*Set to your screen resolution and rotation*/
 #define TFT_HOR_RES   240 // Portrait orientation default width

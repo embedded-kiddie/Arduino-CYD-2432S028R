@@ -11,7 +11,7 @@
 #include <stdio.h>  // for printf()
 #include "../CYD_MP3Player.h"
 
-CYD_MP3Player player;
+extern CYD_MP3Player player;
 
 #define MP3_VOLUME_INI 8
 #define MP3_ROOT_PATH "/MP3Player"
@@ -105,12 +105,21 @@ lv_obj_t *ui_RollerSleepTimer;
 void ui_ScreenPlayList_screen_init(void);
 void ui_event_ScreenPlayList(lv_event_t *e);
 lv_obj_t *ui_ScreenPlayList;
+lv_obj_t *ui_ContainerPlayList;
 void ui_event_MenuBackLeft(lv_event_t *e);
 lv_obj_t *ui_MenuBackLeft;
-void ui_event_MenuBluetoothOn(lv_event_t *e);
+void ui_event_CheckFavorite(lv_event_t *e);
+lv_obj_t *ui_CheckFavorite;
+void ui_event_MenuBackUp(lv_event_t *e);
+lv_obj_t *ui_MenuBackUp;
+void ui_event_MenuBackDown(lv_event_t *e);
+lv_obj_t *ui_MenuBackDown;
+#if false
+void ui_event_MenuBluetoothOn( lv_event_t * e);
 lv_obj_t *ui_MenuBluetoothOn;
-void ui_event_MenuBluetoothOff(lv_event_t *e);
+void ui_event_MenuBluetoothOff( lv_event_t * e);
 lv_obj_t *ui_MenuBluetoothOff;
+#endif
 // CUSTOM VARIABLES
 
 // EVENTS
@@ -142,7 +151,7 @@ void ui_event_ScreenMain(lv_event_t *e) {
     lv_indev_wait_release(lv_indev_active());
     _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenPlayList_screen_init);
   }
-#if   false
+#if false
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
     lv_indev_wait_release(lv_indev_active());
     _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
@@ -314,7 +323,7 @@ void ui_event_MenuBackLeft(lv_event_t *e) {
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
-
+#if false
 void ui_event_MenuBluetoothOn(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -328,6 +337,32 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
+  }
+}
+#endif
+void ui_event_CheckFavorite(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+  }
+}
+
+void ui_event_MenuBackUp(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
+  }
+}
+
+void ui_event_MenuBackDown(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
 

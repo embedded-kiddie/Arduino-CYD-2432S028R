@@ -85,9 +85,16 @@ extern lv_obj_t *ui_RollerSleepTimer;
 void ui_ScreenPlayList_screen_init(void);
 void ui_event_ScreenPlayList( lv_event_t * e);
 extern lv_obj_t *ui_ScreenPlayList;
-#if   false
+extern lv_obj_t *ui_ContainerPlayList;
 void ui_event_MenuBackLeft( lv_event_t * e);
 extern lv_obj_t *ui_MenuBackLeft;
+void ui_event_CheckFavorite( lv_event_t * e);
+extern lv_obj_t *ui_CheckFavorite;
+void ui_event_MenuBackUp( lv_event_t * e);
+extern lv_obj_t *ui_MenuBackUp;
+void ui_event_MenuBackDown( lv_event_t * e);
+extern lv_obj_t *ui_MenuBackDown;
+#if   false
 void ui_event_MenuBluetoothOn( lv_event_t * e);
 extern lv_obj_t *ui_MenuBluetoothOn;
 void ui_event_MenuBluetoothOff( lv_event_t * e);
@@ -116,6 +123,10 @@ LV_IMG_DECLARE( ui_img_1710110385);   // assets/back-right.png
 LV_IMG_DECLARE( ui_img_713466046);   // assets/back-left.png
 LV_IMG_DECLARE( ui_img_1753861343);   // assets/bluetooth-on.png
 LV_IMG_DECLARE( ui_img_1837194583);   // assets/bluetooth-off.png
+LV_IMG_DECLARE( ui_img_1157704237);   // assets/heart-off-small.png
+LV_IMG_DECLARE( ui_img_628457255);   // assets/heart-on-small.png
+LV_IMG_DECLARE( ui_img_1668913270);   // assets/back-up.png
+LV_IMG_DECLARE( ui_img_365069097);   // assets/back-down.png
 
 // UI INIT
 void ui_init(void);
