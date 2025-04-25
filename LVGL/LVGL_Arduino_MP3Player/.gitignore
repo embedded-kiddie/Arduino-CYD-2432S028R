@@ -1,0 +1,7 @@
+# ignore all files
+*
+
+# target list
+!src
+!.gitignore
+.DS_Store
