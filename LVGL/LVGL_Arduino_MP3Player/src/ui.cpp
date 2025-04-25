@@ -47,79 +47,55 @@ void ui_loop(void) {
 
 // SCREEN: ui_ScreenMain
 void ui_ScreenMain_screen_init(void);
-void ui_event_ScreenMain(lv_event_t *e);
-lv_obj_t *ui_ScreenMain;
+void ui_event_ScreenMain  (lv_event_t *e); lv_obj_t *ui_ScreenMain;
+void ui_event_MenuDotMain (lv_event_t *e); lv_obj_t *ui_MenuDotMain;
+void ui_event_Favourite   (lv_event_t *e); lv_obj_t *ui_Favourite;
+void ui_event_Repeat      (lv_event_t *e); lv_obj_t *ui_Repeat;
+void ui_event_Shuffle     (lv_event_t *e); lv_obj_t *ui_Shuffle;
+void ui_event_ButtonPlay  (lv_event_t *e); lv_obj_t *ui_ButtonPlay;
+void ui_event_ButtonNext  (lv_event_t *e); lv_obj_t *ui_ButtonNext;
+void ui_event_ButtonPrev  (lv_event_t *e); lv_obj_t *ui_ButtonPrev;
+void ui_event_VolumeMax   (lv_event_t *e); lv_obj_t *ui_VolumeMax;
+void ui_event_VolumeMin   (lv_event_t *e); lv_obj_t *ui_VolumeMin;
+void ui_event_Volume      (lv_event_t *e); lv_obj_t *ui_Volume;
+void ui_event_ElapsedBar  (lv_event_t *e); lv_obj_t *ui_ElapsedBar;
 lv_obj_t *ui_ImageAlbum;
 lv_obj_t *ui_ImageWave;
 lv_obj_t *ui_MusicTitle;
 lv_obj_t *ui_ElapsedStart;
 lv_obj_t *ui_ElapsedEnd;
-void ui_event_MenuDotMain(lv_event_t *e);
-lv_obj_t *ui_MenuDotMain;
-void ui_event_Favourite(lv_event_t *e);
-lv_obj_t *ui_Favourite;
-void ui_event_Repeat(lv_event_t *e);
-lv_obj_t *ui_Repeat;
-void ui_event_Shuffle(lv_event_t *e);
-lv_obj_t *ui_Shuffle;
-void ui_event_ButtonPlay(lv_event_t *e);
-lv_obj_t *ui_ButtonPlay;
-void ui_event_ButtonNext(lv_event_t *e);
-lv_obj_t *ui_ButtonNext;
-void ui_event_ButtonPrev(lv_event_t *e);
-lv_obj_t *ui_ButtonPrev;
-void ui_event_VolumeMax(lv_event_t *e);
-lv_obj_t *ui_VolumeMax;
-void ui_event_VolumeMin(lv_event_t *e);
-lv_obj_t *ui_VolumeMin;
-void ui_event_Volume(lv_event_t *e);
-lv_obj_t *ui_Volume;
-void ui_event_ElapsedBar(lv_event_t *e);
-lv_obj_t *ui_ElapsedBar;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenOption
 void ui_ScreenOption_screen_init(void);
-void ui_event_ScreenOption(lv_event_t *e);
-lv_obj_t *ui_ScreenOption;
-void ui_event_MenuBackRight(lv_event_t *e);
-lv_obj_t *ui_MenuBackRight;
+void ui_event_ScreenOption    (lv_event_t *e); lv_obj_t *ui_ScreenOption;
+void ui_event_MenuBackRight   (lv_event_t *e); lv_obj_t *ui_MenuBackRight;
+void ui_event_DropdownList    (lv_event_t *e); lv_obj_t *ui_DropdownList;
+void ui_event_SwitchBacklight (lv_event_t *e); lv_obj_t *ui_SwitchBacklight;
+void ui_event_SwitchSleepTimer(lv_event_t *e); lv_obj_t *ui_SwitchSleepTimer;
 lv_obj_t *ui_LabelFavorite;
-void ui_event_DropdownList(lv_event_t *e);
-lv_obj_t *ui_DropdownList;
-lv_obj_t *ui_ButtonNewList;
 lv_obj_t *ui_LabelNewList;
-lv_obj_t *ui_ButtonClearList;
 lv_obj_t *ui_LabelClearList;
 lv_obj_t *ui_LabelBacklight;
 lv_obj_t *ui_LabelSleepTimer;
-void ui_event_SwitchBacklight(lv_event_t *e);
-lv_obj_t *ui_SwitchBacklight;
-void ui_event_SwitchSleepTimer(lv_event_t *e);
-lv_obj_t *ui_SwitchSleepTimer;
+lv_obj_t *ui_ButtonNewList;
+lv_obj_t *ui_ButtonClearList;
 lv_obj_t *ui_RollerBacklight;
 lv_obj_t *ui_RollerSleepTimer;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
 void ui_ScreenPlayList_screen_init(void);
-void ui_event_ScreenPlayList(lv_event_t *e);
-lv_obj_t *ui_ScreenPlayList;
-lv_obj_t *ui_ContainerPlayList;
-void ui_event_MenuBackLeft(lv_event_t *e);
-lv_obj_t *ui_MenuBackLeft;
-void ui_event_CheckFavorite(lv_event_t *e);
-lv_obj_t *ui_CheckFavorite;
-void ui_event_MenuBackUp(lv_event_t *e);
-lv_obj_t *ui_MenuBackUp;
-void ui_event_MenuBackDown(lv_event_t *e);
-lv_obj_t *ui_MenuBackDown;
+void ui_event_ScreenPlayList  (lv_event_t *e); lv_obj_t *ui_ScreenPlayList;
+void ui_event_MenuBackLeft    (lv_event_t *e); lv_obj_t *ui_MenuBackLeft;
+void ui_event_CheckFavorite   (lv_event_t *e); lv_obj_t *ui_CheckFavorite;
+void ui_event_MenuBackUp      (lv_event_t *e); lv_obj_t *ui_MenuBackUp;
+void ui_event_MenuBackDown    (lv_event_t *e); lv_obj_t *ui_MenuBackDown;
 #if false
-void ui_event_MenuBluetoothOn( lv_event_t * e);
-lv_obj_t *ui_MenuBluetoothOn;
-void ui_event_MenuBluetoothOff( lv_event_t * e);
-lv_obj_t *ui_MenuBluetoothOff;
+void ui_event_MenuBluetoothOn (lv_event_t *e); lv_obj_t *ui_MenuBluetoothOn;
+void ui_event_MenuBluetoothOff(lv_event_t *e); lv_obj_t *ui_MenuBluetoothOff;
 #endif
+lv_obj_t *ui_ContainerPlayList;
 // CUSTOM VARIABLES
 
 // EVENTS
