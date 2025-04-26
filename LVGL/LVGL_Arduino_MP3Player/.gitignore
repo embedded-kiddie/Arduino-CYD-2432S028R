@@ -2,7 +2,7 @@
 *
 
 # target list
-!src
-!assets
+!src/*
+!assets/*
 !.gitignore
 .DS_Store

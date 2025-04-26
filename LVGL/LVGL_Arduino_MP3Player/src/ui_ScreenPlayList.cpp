@@ -4,6 +4,7 @@
 // Project name: SquareLine_Project
 
 #include "ui.h"
+#include <stdio.h>  // for printf()
 
 /**********************
  *      MACROS
@@ -27,6 +28,7 @@ static lv_style_t style_button_dis;
 static lv_style_t style_title;
 static lv_style_t style_artist;
 static lv_style_t style_time;
+static lv_style_t style_heart;
 LV_IMAGE_DECLARE(img_lv_demo_music_btn_list_play);
 LV_IMAGE_DECLARE(img_lv_demo_music_btn_list_pause);
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
@@ -55,6 +57,7 @@ static void btn_click_event_cb(lv_event_t* e) {
 
   uint32_t idx = lv_obj_get_index(btn);
 
+  printf("btn_click_event_cb(%d)\n", idx);
   //lv_demo_music_play(idx);
 }
 
@@ -70,6 +73,17 @@ static void list_delete_event_cb(lv_event_t* e) {
     lv_style_reset(&style_title);
     lv_style_reset(&style_artist);
     lv_style_reset(&style_time);
+    lv_style_reset(&style_heart);
+  }
+}
+
+static void heart_click_event_cb(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+    uint32_t idx = (uint32_t)lv_event_get_user_data(e);
+    printf("heart_click_event_cb(%d)\n", idx);
   }
 }
 
@@ -111,7 +125,32 @@ static lv_obj_t* add_list_button(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_t* time_label = lv_label_create(btn);
   lv_label_set_text   (time_label, time);
   lv_obj_add_style    (time_label, &style_time, 0);
-  lv_obj_set_grid_cell(time_label, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_CENTER, 0, 2);
+  lv_obj_set_grid_cell(time_label, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_END, 0, 2);
+
+  lv_obj_t* heart = lv_checkbox_create(btn);
+  lv_checkbox_set_text(heart, " ");
+  lv_obj_add_flag     (heart, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
+
+  lv_obj_set_style_bg_image_src (heart, &ui_img_1157704237,      LV_STATE_DEFAULT | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_color     (heart, lv_color_hex(0xFFFFFF),  LV_STATE_DEFAULT | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_opa       (heart,   0,                     LV_STATE_DEFAULT | LV_PART_INDICATOR);
+  lv_obj_set_style_radius       (heart, 100, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+  lv_obj_set_style_border_width (heart,   0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+  lv_obj_set_style_bg_image_src (heart, &ui_img_628457255,       LV_STATE_CHECKED | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_color     (heart, lv_color_hex(0xFFFFFF),  LV_STATE_CHECKED | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_opa       (heart,   0,                     LV_STATE_CHECKED | LV_PART_INDICATOR);
+  lv_obj_set_style_radius       (heart, 100, LV_PART_INDICATOR | LV_STATE_CHECKED);
+  lv_obj_set_style_border_width (heart,   0, LV_PART_INDICATOR | LV_STATE_CHECKED);
+
+  lv_obj_set_style_bg_image_src (heart, &ui_img_1157704237,      LV_STATE_PRESSED | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_color     (heart, lv_color_hex(0xFFFFFF),  LV_STATE_PRESSED | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_opa       (heart,   0,                     LV_STATE_PRESSED | LV_PART_INDICATOR);
+  lv_obj_set_style_radius       (heart, 100, LV_PART_INDICATOR | LV_STATE_PRESSED);
+  lv_obj_set_style_border_width (heart,   0, LV_PART_INDICATOR | LV_STATE_PRESSED);
+
+  lv_obj_add_event_cb (heart, heart_click_event_cb, LV_EVENT_ALL, (void*)track_id);
+  lv_obj_set_grid_cell(heart, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
 
   lv_obj_t* border = lv_image_create(btn);
   lv_image_set_src        (border, &img_lv_demo_music_list_border);
@@ -198,6 +237,10 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_init           (&style_time);
   lv_style_set_text_font  (&style_time, font_small);
   lv_style_set_text_color (&style_time, lv_color_hex(0xffffff));
+
+  lv_style_init         (&style_heart);
+  lv_style_set_bg_opa   (&style_heart, LV_OPA_COVER);
+  lv_style_set_bg_color (&style_heart, PLAYLIST_COLOR_DEFAULT);
 
   /*Create an empty transparent container*/
   list = lv_obj_create(parent);
@@ -333,7 +376,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_event_cb(ui_MenuBluetoothOn, ui_event_MenuBluetoothOn, LV_EVENT_ALL, NULL);
   lv_obj_add_event_cb(ui_MenuBluetoothOff, ui_event_MenuBluetoothOff, LV_EVENT_ALL, NULL);
 #endif
-
+#if   false
   ui_CheckFavorite = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text(ui_CheckFavorite, " ");
   lv_obj_set_width    (ui_CheckFavorite, 15);
@@ -342,9 +385,9 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_flag     (ui_CheckFavorite, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src (ui_CheckFavorite, &ui_img_1157704237,      LV_STATE_DEFAULT | LV_PART_INDICATOR);
-  lv_obj_set_style_bg_color     (ui_CheckFavorite, PLAYLIST_COLOR_DEFAULT,  LV_STATE_DEFAULT | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_color     (ui_CheckFavorite, lv_color_hex(0xFFFFFF),  LV_STATE_DEFAULT | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_opa       (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_radius       (ui_CheckFavorite, 100, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa       (ui_CheckFavorite, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_border_width (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_pad_left     (ui_CheckFavorite,  -4, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_pad_right    (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
@@ -352,22 +395,25 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
   lv_obj_set_style_bg_image_src (ui_CheckFavorite, &ui_img_628457255,       LV_STATE_CHECKED | LV_PART_INDICATOR);
-  lv_obj_set_style_bg_color     (ui_CheckFavorite, PLAYLIST_COLOR_DEFAULT,  LV_STATE_CHECKED | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_color     (ui_CheckFavorite, lv_color_hex(0xFFFFFF),  LV_STATE_CHECKED | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_opa       (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_CHECKED);
   lv_obj_set_style_radius       (ui_CheckFavorite, 100, LV_PART_INDICATOR | LV_STATE_CHECKED);
-  lv_obj_set_style_bg_opa       (ui_CheckFavorite, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
   lv_obj_set_style_pad_left     (ui_CheckFavorite,  -4, LV_PART_INDICATOR | LV_STATE_CHECKED);
   lv_obj_set_style_pad_right    (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_CHECKED);
   lv_obj_set_style_pad_top      (ui_CheckFavorite,  -4, LV_PART_INDICATOR | LV_STATE_CHECKED);
   lv_obj_set_style_pad_bottom   (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_CHECKED);
 
   lv_obj_set_style_bg_image_src (ui_CheckFavorite, &ui_img_1157704237,      LV_STATE_PRESSED | LV_PART_INDICATOR);
-  lv_obj_set_style_bg_color     (ui_CheckFavorite, PLAYLIST_COLOR_DEFAULT,  LV_STATE_PRESSED | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_color     (ui_CheckFavorite, lv_color_hex(0xFFFFFF),  LV_STATE_PRESSED | LV_PART_INDICATOR);
+  lv_obj_set_style_bg_opa       (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_PRESSED);
   lv_obj_set_style_radius       (ui_CheckFavorite, 100, LV_PART_INDICATOR | LV_STATE_PRESSED);
-  lv_obj_set_style_bg_opa       (ui_CheckFavorite, 255, LV_PART_INDICATOR | LV_STATE_PRESSED);
   lv_obj_set_style_pad_left     (ui_CheckFavorite,  -2, LV_PART_INDICATOR | LV_STATE_PRESSED);
   lv_obj_set_style_pad_right    (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_PRESSED);
   lv_obj_set_style_pad_top      (ui_CheckFavorite,  -2, LV_PART_INDICATOR | LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom   (ui_CheckFavorite,   0, LV_PART_INDICATOR | LV_STATE_PRESSED);
+
+  lv_obj_add_event_cb           (ui_CheckFavorite, ui_event_CheckFavorite, LV_EVENT_ALL, NULL);
+#endif
 
   ui_MenuBackUp = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text(ui_MenuBackUp, " ");
@@ -479,7 +525,6 @@ void ui_ScreenPlayList_screen_init(void) {
 
   lv_obj_add_event_cb(ui_MenuBackUp, ui_event_MenuBackUp, LV_EVENT_ALL, NULL);
   lv_obj_add_event_cb(ui_MenuBackDown, ui_event_MenuBackDown, LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_CheckFavorite, ui_event_CheckFavorite, LV_EVENT_ALL, NULL);
   lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_ALL, NULL);
   list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
 }
