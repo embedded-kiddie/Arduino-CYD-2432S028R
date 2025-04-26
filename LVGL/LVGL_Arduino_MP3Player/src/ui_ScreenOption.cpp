@@ -20,19 +20,19 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_align    (ui_MenuBackRight, LV_ALIGN_CENTER);
   lv_obj_add_flag     (ui_MenuBackRight, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
+  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,     LV_PART_INDICATOR | LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,     LV_PART_INDICATOR | LV_STATE_PRESSED);
+  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,     LV_PART_INDICATOR | LV_STATE_CHECKED);
+  lv_obj_set_style_bg_color     (ui_MenuBackRight, lv_color_hex(0xFFFFFF), LV_PART_INDICATOR | LV_STATE_CHECKED);
   lv_obj_set_style_radius       (ui_MenuBackRight, 100, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_border_width (ui_MenuBackRight,   0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_pad_left     (ui_MenuBackRight,   8, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_pad_right    (ui_MenuBackRight,   0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_pad_top      (ui_MenuBackRight,   8, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_pad_bottom   (ui_MenuBackRight,   0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
   lv_obj_set_style_radius       (ui_MenuBackRight, 100, LV_PART_INDICATOR | LV_STATE_CHECKED);
-  lv_obj_set_style_bg_color     (ui_MenuBackRight, lv_color_hex(0xFFFFFF), LV_PART_INDICATOR | LV_STATE_CHECKED);
   lv_obj_set_style_bg_opa       (ui_MenuBackRight, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
-  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385, LV_PART_INDICATOR | LV_STATE_CHECKED);
   lv_obj_set_style_radius       (ui_MenuBackRight, 100, LV_PART_INDICATOR | LV_STATE_PRESSED);
-  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385, LV_PART_INDICATOR | LV_STATE_PRESSED);
   lv_obj_set_style_border_width (ui_MenuBackRight,   0, LV_PART_INDICATOR | LV_STATE_PRESSED);
   lv_obj_set_style_pad_left     (ui_MenuBackRight,  10, LV_PART_INDICATOR | LV_STATE_PRESSED);
   lv_obj_set_style_pad_right    (ui_MenuBackRight,   0, LV_PART_INDICATOR | LV_STATE_PRESSED);

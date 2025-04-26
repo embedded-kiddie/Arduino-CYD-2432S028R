@@ -36,19 +36,19 @@ LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 /**********************
  *   STATIC FUNCTIONS
  **********************/
-static const char* lv_demo_music_get_title(uint32_t track_id) {
+static const char* music_get_title(uint32_t track_id) {
   return "Title";
 }
 
-static const char* lv_demo_music_get_artist(uint32_t track_id) {
+static const char* music_get_artist(uint32_t track_id) {
   return "artist";
 }
 
-static const char* lv_demo_music_get_genre(uint32_t track_id) {
+static const char* music_get_genre(uint32_t track_id) {
   return "genre";
 }
 
-static uint32_t lv_demo_music_get_track_length(uint32_t track_id) {
+static uint32_t music_get_track_length(uint32_t track_id) {
   return 180;
 }
 
@@ -88,11 +88,11 @@ static void heart_click_event_cb(lv_event_t *e) {
 }
 
 static lv_obj_t* add_list_button(lv_obj_t* parent, uint32_t track_id) {
-  uint32_t t = lv_demo_music_get_track_length(track_id);
+  uint32_t t = music_get_track_length(track_id);
   char time[32];
   lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, t / 60, t % 60);
-  const char* title = lv_demo_music_get_title(track_id);
-  const char* artist = lv_demo_music_get_artist(track_id);
+  const char* title = music_get_title(track_id);
+  const char* artist = music_get_artist(track_id);
 
   lv_obj_t* btn = lv_obj_create(parent);
   lv_obj_remove_style_all(btn);
