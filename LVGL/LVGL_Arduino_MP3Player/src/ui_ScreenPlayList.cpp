@@ -523,8 +523,8 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_top        (ui_MenuBackDown,   8, LV_PART_INDICATOR| LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom     (ui_MenuBackDown,   0, LV_PART_INDICATOR| LV_STATE_PRESSED);
 
-  lv_obj_add_event_cb(ui_MenuBackUp, ui_event_MenuBackUp, LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_MenuBackDown, ui_event_MenuBackDown, LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb(ui_MenuBackUp,      ui_event_MenuBackUp,      LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb(ui_MenuBackDown,    ui_event_MenuBackDown,    LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb(ui_ScreenPlayList,  ui_event_ScreenPlayList,  LV_EVENT_ALL, NULL);
   list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
 }

@@ -70,19 +70,19 @@ lv_obj_t *ui_ElapsedEnd;
 void ui_ScreenOption_screen_init(void);
 lv_obj_t *ui_ScreenOption;      void ui_event_ScreenOption    (lv_event_t *e);
 lv_obj_t *ui_MenuBackRight;     void ui_event_MenuBackRight   (lv_event_t *e);
-lv_obj_t *ui_DropdownList;      void ui_event_DropdownList    (lv_event_t *e);
-lv_obj_t *ui_SwitchBacklight;   void ui_event_SwitchBacklight (lv_event_t *e);
-lv_obj_t *ui_SwitchSleepTimer;  void ui_event_SwitchSleepTimer(lv_event_t *e);
-lv_obj_t *ui_SwitchFavorite;    void ui_event_SwitchFavorite  (lv_event_t *e);
-lv_obj_t *ui_LabelFavorite;
-lv_obj_t *ui_LabelNewList;
-lv_obj_t *ui_LabelClearList;
-lv_obj_t *ui_LabelBacklight;
-lv_obj_t *ui_LabelSleepTimer;
-lv_obj_t *ui_ButtonNewList;
-lv_obj_t *ui_ButtonClearList;
-lv_obj_t *ui_RollerBacklight;
-lv_obj_t *ui_RollerSleepTimer;
+lv_obj_t *ui_FavoriteDropdown;  void ui_event_FavoriteDropdown(lv_event_t *e);
+lv_obj_t *ui_BacklightSwitch;   void ui_event_BacklightSwitch (lv_event_t *e);
+lv_obj_t *ui_SleepTimerSwitch;  void ui_event_SleepTimerSwitch(lv_event_t *e);
+lv_obj_t *ui_FavoriteSwitch;    void ui_event_FavoriteSwitch  (lv_event_t *e);
+lv_obj_t *ui_FavoriteLabel;
+lv_obj_t *ui_FavoriteNewLabel;
+lv_obj_t *ui_FavoriteClearLabel;
+lv_obj_t *ui_FavoriteNewButton;
+lv_obj_t *ui_FavoriteClearButton;
+lv_obj_t *ui_BacklightLabel;
+lv_obj_t *ui_BacklightRoller;
+lv_obj_t *ui_SleepTimerLabel;
+lv_obj_t *ui_SleepTimerRoller;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
@@ -254,16 +254,16 @@ void ui_event_MenuBackRight(lv_event_t *e) {
   }
 }
 
-void ui_event_SwitchFavorite( lv_event_t * e) {
+void ui_event_FavoriteSwitch( lv_event_t * e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if ( event_code == LV_EVENT_VALUE_CHANGED) {
     (e);
-    _ui_state_modify(ui_ButtonClearList, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+    _ui_state_modify(ui_FavoriteClearButton, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
   }
 }
 
-void ui_event_DropdownList(lv_event_t *e) {
+void ui_event_FavoriteDropdown(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_VALUE_CHANGED) {
@@ -271,20 +271,20 @@ void ui_event_DropdownList(lv_event_t *e) {
   }
 }
 
-void ui_event_SwitchBacklight(lv_event_t *e) {
+void ui_event_BacklightSwitch(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    _ui_state_modify(ui_RollerBacklight, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+    _ui_state_modify(ui_BacklightRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
     (e);
   }
 }
 
-void ui_event_SwitchSleepTimer(lv_event_t *e) {
+void ui_event_SleepTimerSwitch(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    _ui_state_modify(ui_RollerSleepTimer, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+    _ui_state_modify(ui_SleepTimerRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
     (e);
   }
 }

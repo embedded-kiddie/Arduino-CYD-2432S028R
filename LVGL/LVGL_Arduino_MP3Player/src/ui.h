@@ -51,19 +51,22 @@ extern lv_obj_t *ui_ElapsedBar;   void ui_event_ElapsedBar  (lv_event_t *e);
 void ui_ScreenOption_screen_init(void);
 extern lv_obj_t *ui_ScreenOption;     void ui_event_ScreenOption    (lv_event_t *e);
 extern lv_obj_t *ui_MenuBackRight;    void ui_event_MenuBackRight   (lv_event_t *e);
-extern lv_obj_t *ui_LabelFavorite;
-extern lv_obj_t *ui_SwitchFavorite;   void ui_event_SwitchFavorite  (lv_event_t *e);
-extern lv_obj_t *ui_DropdownList;     void ui_event_DropdownList    (lv_event_t *e);
-extern lv_obj_t *ui_ButtonClearList;
-extern lv_obj_t *ui_LabelClearList;
-extern lv_obj_t *ui_ButtonNewList;
-extern lv_obj_t *ui_LabelNewList;
-extern lv_obj_t *ui_LabelBacklight;
-extern lv_obj_t *ui_LabelSleepTimer;
-extern lv_obj_t *ui_SwitchBacklight;  void ui_event_SwitchBacklight (lv_event_t *e);
-extern lv_obj_t *ui_SwitchSleepTimer; void ui_event_SwitchSleepTimer(lv_event_t *e);
-extern lv_obj_t *ui_RollerBacklight;
-extern lv_obj_t *ui_RollerSleepTimer;
+
+extern lv_obj_t *ui_FavoriteLabel;
+extern lv_obj_t *ui_FavoriteClearLabel;
+extern lv_obj_t *ui_FavoriteClearButton;
+extern lv_obj_t *ui_FavoriteNewLabel;
+extern lv_obj_t *ui_FavoriteNewButton;
+extern lv_obj_t *ui_FavoriteSwitch;   void ui_event_FavoriteSwitch  (lv_event_t *e);
+extern lv_obj_t *ui_FavoriteDropdown; void ui_event_FavoriteDropdown(lv_event_t *e);
+
+extern lv_obj_t *ui_BacklightLabel;
+extern lv_obj_t *ui_BacklightRoller;
+extern lv_obj_t *ui_BacklightSwitch;  void ui_event_BacklightSwitch (lv_event_t *e);
+
+extern lv_obj_t *ui_SleepTimerLabel;
+extern lv_obj_t *ui_SleepTimerRoller;
+extern lv_obj_t *ui_SleepTimerSwitch; void ui_event_SleepTimerSwitch(lv_event_t *e);
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
