@@ -37,10 +37,7 @@
  * For more info see file README.md in this library or on URL:
  * https://github.com/espressif/arduino-esp32/tree/master/libraries/SD
  */
-
-#include "FS.h"
-#include "SD.h"
-#include "SPI.h"
+// #define  USE_SDFAT
 
 #ifndef CYD_SD_SPI_BUS
 #define CYD_SD_SS      5
@@ -48,6 +45,18 @@
 #define CYD_SD_MISO    19
 #define CYD_SD_SCK     18
 #define CYD_SD_SPI_BUS VSPI
+#endif
+
+#define SPI_CLOCK 50 // MHz
+
+#ifdef  USE_SDFAT
+#include "SdFat.h"
+#define SD_CONFIG SdSpiConfig(CYD_SD_SS, SHARED_SPI, SPI_CLOCK)
+#else
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
+#define SD_CONFIG CYD_SD_SS, SPI, SPI_CLOCK
 #endif
 
 /* Uncomment and set up if you want to use custom pins for the SPI communication
@@ -58,6 +67,7 @@ int sck   = CYD_SD_SCK;   // 18
 int miso  = CYD_SD_MISO;  // 19
 int mosi  = CYD_SD_MOSI;  // 23
 int cs    = CYD_SD_SS;    //  5
+#define SD_CONFIG cs
 //*/
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
@@ -228,12 +238,9 @@ void sdcard_setup() {
 
 #ifdef REASSIGN_PINS
   SPI.begin(sck, miso, mosi, cs);
-
-  if (!SD.begin(cs)) {
-#else
-  // this also works since CYD_SD_* are assigned to the default spi pins.
-  if (!SD.begin()) {
 #endif
+
+  if (!SD.begin(SD_CONFIG)) {
     Serial.println("Card Mount Failed");
     return;
   }

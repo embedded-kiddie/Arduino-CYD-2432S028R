@@ -13,12 +13,12 @@ bool CYD_MP3Player::begin() {
 }
 
 /*--------------------------------------------------------------------------------
-* Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
-*--------------------------------------------------------------------------------*/
-bool CYD_MP3Player::VerifyExt(const char* file) {
+ * Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
+ *--------------------------------------------------------------------------------*/
+bool CYD_MP3Player::CheckExtension(const char* path) {
   const char* ext[] = {".mp3", ".m4a", ".wav"};
   for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
-    if (strcmp(&file[strlen(file) - strlen(ext[i])], ext[i]) == 0) {
+    if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
       return true;
     }
   }
@@ -26,8 +26,41 @@ bool CYD_MP3Player::VerifyExt(const char* file) {
 }
 
 /*--------------------------------------------------------------------------------
-* Scan and create a list of audio m_files in a specified directory.
-*--------------------------------------------------------------------------------*/
+ * Get ID3 tags (title, album, artist)
+ *--------------------------------------------------------------------------------*/
+FileInfo_t CYD_MP3Player::GetFileInfo(std::string path) {
+  int n = 0;
+  char *ptr, *token, *str[8], copy[256];
+  FileInfo_t info = {path, "", "", "", 0, false};
+
+  if (path.size() < sizeof(copy)) {
+    strcpy(copy, path.c_str());
+  } else {
+    strcpy(copy, path.c_str() + path.size() + 1 - sizeof(copy));
+  }
+
+  token = strtok_r(copy, "/", &ptr);
+  while (token != NULL && n < 8) {
+    str[n++] = token;
+    token = strtok_r(NULL, "/", &ptr);
+  }
+
+  if (--n >= 0) {
+    info.title = std::string(str[n]);
+    if (--n >= 0) {
+      info.album = std::string(str[n]);
+      if (--n >= 0) {
+        info.artist = std::string(str[n]);
+      }
+    }
+  }
+
+  return info;
+}
+
+/*--------------------------------------------------------------------------------
+ * Scan and create a list of audio m_files in a specified directory.
+ *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
   File root = m_fs.open(dirname);
   if (!root) {
@@ -48,7 +81,8 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
 #ifdef SDFATFS_USED
     char name[BUF_SIZE];
     file.getName(name, sizeof(name));
-    std::string path = std::string(dirname) + "/" + std::string(name);
+    std::string path = std::string(dirname);
+    path += (path.at(path.size() - 1) == '/' ? "" : "/") + std::string(name);
     if (file.isHidden()) {
       // Serial.printf("%s is skipped.\n", name);
     }
@@ -63,19 +97,19 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
 #ifdef SDFATFS_USED
       ScanFileList(path.c_str(), levels - 1);
 #else
-      ScanFileList(file.path(), levels - 1);
+    ScanFileList(file.path(), levels - 1);
 #endif
     }
 
     else if (!isDir) {
       try {
 #ifdef SDFATFS_USED
-        if (VerifyExt(path.c_str())) {
-          m_files.push_back({path});
+        if (CheckExtension(path.c_str())) {
+          m_files.push_back(GetFileInfo(path));
         }
 #else
-        if (VerifyExt(file.path())) {
-          m_files.push_back({file.path()});
+        if (CheckExtension(file.path())) {
+          m_files.push_back(GetFileInfo(file.path()));
         }
 #endif
       } catch (const std::exception &e) {
@@ -89,8 +123,8 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
 }
 
 /*--------------------------------------------------------------------------------
-* Sort file list
-*--------------------------------------------------------------------------------*/
+ * Sort file list
+ *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::SortFileList(bool shuffle) {
   if (shuffle) {
     std::mt19937 engine(esp_random());
@@ -103,14 +137,14 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
 
 #if   false
   for (auto& file : m_files) {
-    Serial.println(file.path.c_str());
+    Serial.printf("title: %s, album: %s, artist: %s\n", file.title.c_str(), file.album.c_str(), file.artist.c_str());
   }
 #endif
 }
 
 /*--------------------------------------------------------------------------------
-* Operation
-*--------------------------------------------------------------------------------*/
+ * Operation
+ *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::SetVolume(uint8_t vol) {
   audioSetVolume(vol);
 }

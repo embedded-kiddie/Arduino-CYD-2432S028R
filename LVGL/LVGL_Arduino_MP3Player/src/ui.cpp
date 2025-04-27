@@ -14,8 +14,23 @@
 extern CYD_MP3Player player;
 
 #define MP3_VOLUME_INI 8
-#define MP3_ROOT_PATH "/MP3Player"
-#define MP3_ROOT_CONFIG MP3_ROOT_PATH, 2
+#define MP3_PATH_ROOT "/MP3Player/"
+#define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
+
+typedef struct {
+  bool      enableFavarite;
+  bool      enableBacklight;
+  bool      enableSleepTimer;
+  uint8_t   selectFavarite;
+  uint8_t   selectBacklight;
+  uint8_t   selectSleepTimer;
+} UI_Option_t;
+
+typedef struct {
+  uint32_t  playNo;
+  uint32_t  startSleepTimer;
+  uint32_t  remainSleepTimer;
+} UI_Control_t;
 
 typedef enum {
   UI_STAT_INIT,
@@ -23,13 +38,18 @@ typedef enum {
   UI_STAT_PLAYING,
 } UI_Stat_t;
 
+/*
+ * Audio-Length:
+ * BitsPerSample:
+ * BitRate:
+ */
 UI_Stat_t ui_stat = UI_STAT_INIT;
 
 void ui_loop(void) {
   switch (ui_stat) {
     case UI_STAT_INIT:
       player.begin();
-      player.ScanFileList(MP3_ROOT_CONFIG);
+      player.ScanFileList(MP3_PATH_CONFIG);
       player.SortFileList(true);
       player.SetVolume(MP3_VOLUME_INI);
       lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);

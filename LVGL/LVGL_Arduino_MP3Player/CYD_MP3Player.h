@@ -27,6 +27,7 @@ typedef struct {
   std::string album;
   std::string artist;
   uint32_t    duration;
+  uint32_t    selected;
 } FileInfo_t;
 
 /*--------------------------------------------------------------------------------
@@ -53,7 +54,8 @@ private:
   fs::FS & m_fs = FS_DEV;
   std::vector<FileInfo_t> m_files = {};
 
-  bool VerifyExt(const char* file);
+  bool CheckExtension(const char* path);
+  FileInfo_t GetFileInfo(std::string path);
 
 public:
   bool    begin(void);
