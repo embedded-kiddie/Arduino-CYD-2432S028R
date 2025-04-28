@@ -7,19 +7,17 @@
 #include "ui_helpers.h"
 
 ///////////////////// UI LOOP ////////////////////
-#include <math.h>   // for roundf()
-#include <stdio.h>  // for printf()
-#include "../CYD_MP3Player.h"
-
-extern void DisplaySleep(void);
-extern void DisplayWakeup(void);
-extern bool IsDisplaySleep(void);
 
 CYD_MP3Player player;
 
 #define MP3_VOLUME_INI 8
 #define MP3_PATH_ROOT "/MP3Player/"
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
+
+// defined in LVGL_Arduino_MP3Player.ino
+extern void DisplaySleep(void);
+extern void DisplayWakeup(void);
+extern bool IsDisplayAwake(void);
 
 typedef enum {
   UI_STATE_INIT,
@@ -39,16 +37,12 @@ typedef enum {
  * BitsPerSample:
  * BitRate:
  */
+UI_State_t ui_state;
 UI_Option_t ui_option;
 UI_Control_t ui_control;
-static UI_State_t ui_state = UI_STATE_INIT;
-
-static uint32_t GetSleepTimer(void) {
-  return 15 * 1000;
-}
 
 void ui_loop(void) {
-  if (!IsDisplaySleep() && ui_control.sleepTimer <= lv_disp_get_inactive_time(NULL)) {
+  if (IsDisplayAwake() && ui_control.sleepTimer <= lv_disp_get_inactive_time(NULL)) {
     DisplaySleep();
   }
 
@@ -407,7 +401,8 @@ void ui_init(void) {
   ui____initial_actions0 = lv_obj_create(NULL);
   lv_disp_load_scr(ui_ScreenMain);
 
+  ui_state = UI_STATE_INIT;
+  ui_control.sleepTimer = 15 * 1000;
+
   audioInit();
- 
-  ui_control.sleepTimer = GetSleepTimer();
 }

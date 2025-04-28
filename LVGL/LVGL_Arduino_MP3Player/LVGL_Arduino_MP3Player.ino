@@ -61,24 +61,24 @@ static uint8_t draw_buf[2][DRAW_BUF_SIZE];
 //----------------------------------------------------------------------
 // Display sleep/wakeup
 //----------------------------------------------------------------------
-static bool displaySleep = false;
+static bool is_awake = true;
 
 void DisplaySleep(void) {
   tft.sleep();
-  displaySleep = true;
+  is_awake = false;
 }
 
 void DisplayWakeup(void) {
   tft.wakeup();
-  displaySleep = false;
+  is_awake = true;
 }
 
-bool IsDisplaySleep(void) {
-  return displaySleep;
+bool IsDisplayAwake(void) {
+  return is_awake;
 }
 
 //----------------------------------------------------------------------
-// LVGL functions
+// LVGL required functions
 //----------------------------------------------------------------------
 #if LV_USE_LOG != 0
 static void my_print(lv_log_level_t level, const char *buf) {
@@ -109,7 +109,7 @@ static void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
     data->state = LV_INDEV_STATE_RELEASED;
   }
 
-  else if (displaySleep) {
+  else if (!is_awake) {
     DisplayWakeup();
     lv_disp_trig_activity(NULL);
     lv_disp_load_scr(lv_scr_act());

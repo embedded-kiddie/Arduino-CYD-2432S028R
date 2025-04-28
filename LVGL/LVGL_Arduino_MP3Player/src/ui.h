@@ -113,6 +113,13 @@ LV_IMG_DECLARE(ui_img_365069097);    // assets/back-down.png
 void ui_init(void);
 
 // UI LOOP
+void ui_loop(void);
+
+#include <stdio.h>  // for printf()
+#include "../CYD_MP3Player.h"
+
+extern CYD_MP3Player player;
+
 typedef struct {
   bool      enableFavarite;
   bool      enableBacklight;
@@ -127,10 +134,8 @@ typedef struct {
   uint32_t  sleepTimer;
 } UI_Control_t;
 
-extern UI_Option_t ui_option;
+extern UI_Option_t  ui_option;
 extern UI_Control_t ui_control;
-
-void ui_loop(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/
