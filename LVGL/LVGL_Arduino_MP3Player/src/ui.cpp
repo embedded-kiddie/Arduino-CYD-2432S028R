@@ -17,21 +17,6 @@ extern CYD_MP3Player player;
 #define MP3_PATH_ROOT "/MP3Player/"
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
 
-typedef struct {
-  bool      enableFavarite;
-  bool      enableBacklight;
-  bool      enableSleepTimer;
-  uint8_t   selectFavarite;
-  uint8_t   selectBacklight;
-  uint8_t   selectSleepTimer;
-} UI_Option_t;
-
-typedef struct {
-  uint32_t  playNo;
-  uint32_t  startSleepTimer;
-  uint32_t  remainSleepTimer;
-} UI_Control_t;
-
 typedef enum {
   UI_STAT_INIT,
   UI_STAT_STOP,
@@ -43,7 +28,10 @@ typedef enum {
  * BitsPerSample:
  * BitRate:
  */
-UI_Stat_t ui_stat = UI_STAT_INIT;
+UI_Option_t ui_option;
+UI_Control_t ui_control;
+
+static UI_Stat_t ui_stat = UI_STAT_INIT;
 
 void ui_loop(void) {
   switch (ui_stat) {
@@ -141,7 +129,6 @@ void ui_event_ScreenMain(lv_event_t *e) {
   }
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
     lv_indev_wait_release(lv_indev_active());
-    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
     _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
   }
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM) {
@@ -375,12 +362,7 @@ void ui_event_MenuBackDown(lv_event_t *e) {
 ///////////////////// SCREENS ////////////////////
 
 void ui_init(void) {
-  lv_disp_t *dispp = lv_display_get_default();
-  lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), false, LV_FONT_DEFAULT);
-  lv_disp_set_theme(dispp, theme);
   ui_ScreenMain_screen_init();
-  ui_ScreenOption_screen_init();
-  ui_ScreenPlayList_screen_init();
   ui____initial_actions0 = lv_obj_create(NULL);
   lv_disp_load_scr(ui_ScreenMain);
 }

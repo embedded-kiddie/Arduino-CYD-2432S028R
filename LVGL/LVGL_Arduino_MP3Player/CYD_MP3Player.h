@@ -23,6 +23,7 @@
 
 typedef struct {
   std::string path;
+  bool selected;
 } PlayList_t;
 
 typedef struct {
@@ -30,7 +31,6 @@ typedef struct {
   std::string album;
   std::string artist;
   uint32_t    duration;
-  uint32_t    selected;
 } ID3Tags_t;
 
 /*--------------------------------------------------------------------------------

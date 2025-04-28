@@ -17,7 +17,7 @@
 /**********************
  *  STATIC VARIABLES
  **********************/
-static lv_obj_t* list;
+static lv_obj_t *play_list;
 static const lv_font_t* font_small;
 static const lv_font_t* font_medium;
 static lv_style_t style_scrollbar;
@@ -52,13 +52,32 @@ static uint32_t music_get_track_length(uint32_t track_id) {
   return 180;
 }
 
-static void btn_click_event_cb(lv_event_t* e) {
+static void list_state_update(uint32_t track_id, bool state) {
+  lv_obj_t* btn = lv_obj_get_child(play_list, track_id);
+  if (btn) {
+    lv_obj_t* icon = lv_obj_get_child(btn, 0);
+
+    if (state) {
+      lv_obj_add_state(btn, LV_STATE_CHECKED);
+      lv_image_set_src(icon, &img_lv_demo_music_btn_list_pause);
+      //    lv_obj_scroll_to_view(btn, LV_ANIM_ON);
+    } else {
+      lv_obj_remove_state(btn, LV_STATE_CHECKED);
+      lv_image_set_src(icon, &img_lv_demo_music_btn_list_play);
+    }
+  }
+}
+
+static void list_click_event_cb(lv_event_t* e) {
   lv_obj_t* btn = (lv_obj_t*)lv_event_get_target(e);
 
   uint32_t idx = lv_obj_get_index(btn);
 
-  printf("btn_click_event_cb(%d)\n", idx);
-  //lv_demo_music_play(idx);
+  printf("list_click_event_cb(%d)\n", idx);
+
+  list_state_update(ui_control.playNo, false);
+  ui_control.playNo = idx;
+  list_state_update(ui_control.playNo, true);
 }
 
 static void list_delete_event_cb(lv_event_t* e) {
@@ -87,7 +106,7 @@ static void heart_click_event_cb(lv_event_t *e) {
   }
 }
 
-static lv_obj_t* add_list_button(lv_obj_t* parent, uint32_t track_id) {
+static void add_list_button(lv_obj_t* parent, uint32_t track_id) {
   uint32_t t = music_get_track_length(track_id);
   char time[32];
   lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, t / 60, t % 60);
@@ -102,12 +121,8 @@ static lv_obj_t* add_list_button(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_add_style(btn, &style_button_pr, LV_STATE_PRESSED);
   lv_obj_add_style(btn, &style_button_chk, LV_STATE_CHECKED);
   lv_obj_add_style(btn, &style_button_dis, LV_STATE_DISABLED);
-  lv_obj_add_event_cb(btn, btn_click_event_cb, LV_EVENT_CLICKED, NULL);
-  /*
-  if (track_id >= 3) {
-    lv_obj_add_state(btn, LV_STATE_DISABLED);
-  }
-*/
+  lv_obj_add_event_cb(btn, list_click_event_cb, LV_EVENT_CLICKED, NULL);
+
   lv_obj_t* icon = lv_image_create(btn);
   lv_image_set_src    (icon, &img_lv_demo_music_btn_list_play);
   lv_obj_set_grid_cell(icon, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 2);
@@ -158,29 +173,11 @@ static lv_obj_t* add_list_button(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_set_width        (border, lv_pct(120));
   lv_obj_align            (border, LV_ALIGN_BOTTOM_MID, 0, 0);
   lv_obj_add_flag         (border, LV_OBJ_FLAG_IGNORE_LAYOUT);
-
-  return btn;
 }
 
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
-void ui_ScreenPlayList_list_button_check(uint32_t track_id, bool state) {
-  lv_obj_t* btn = lv_obj_get_child(list, track_id);
-  if (btn) {
-    lv_obj_t* icon = lv_obj_get_child(btn, 0);
-
-    if (state) {
-      lv_obj_add_state(btn, LV_STATE_CHECKED);
-      lv_image_set_src(icon, &img_lv_demo_music_btn_list_pause);
-      //    lv_obj_scroll_to_view(btn, LV_ANIM_ON);
-    } else {
-      lv_obj_remove_state(btn, LV_STATE_CHECKED);
-      lv_image_set_src(icon, &img_lv_demo_music_btn_list_play);
-    }
-  }
-}
-
 lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   font_small = LV_FONT_DEFAULT;
   font_medium = LV_FONT_DEFAULT;
@@ -243,7 +240,7 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_bg_color (&style_heart, PLAYLIST_COLOR_DEFAULT);
 
   /*Create an empty transparent container*/
-  list = lv_obj_create(parent);
+  lv_obj_t* list = lv_obj_create(parent);
   lv_obj_add_event_cb     (list, list_delete_event_cb, LV_EVENT_DELETE, NULL);
   lv_obj_remove_style_all (list);
   lv_obj_set_size         (list, LV_HOR_RES, LV_VER_RES - LV_DEMO_MUSIC_HANDLE_SIZE);
@@ -251,13 +248,6 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
 //lv_obj_set_y            (list, 0);
   lv_obj_add_style        (list, &style_scrollbar, LV_PART_SCROLLBAR);
   lv_obj_set_flex_flow    (list, LV_FLEX_FLOW_COLUMN);
-
-#define N_ITEMS 2
-  for (uint32_t track_id = 0; track_id < N_ITEMS; track_id++) {
-    add_list_button(list, track_id);
-  }
-
-  ui_ScreenPlayList_list_button_check(1, true);
 
   return list;
 }
@@ -526,5 +516,14 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_event_cb(ui_MenuBackUp,      ui_event_MenuBackUp,      LV_EVENT_ALL, NULL);
   lv_obj_add_event_cb(ui_MenuBackDown,    ui_event_MenuBackDown,    LV_EVENT_ALL, NULL);
   lv_obj_add_event_cb(ui_ScreenPlayList,  ui_event_ScreenPlayList,  LV_EVENT_ALL, NULL);
-  list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
+
+  // Initialize play list container
+  play_list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
+
+#define N_ITEMS 2
+  for (uint32_t track_id = 0; track_id < N_ITEMS; track_id++) {
+    add_list_button(play_list, track_id);
+  }
+
+  list_state_update(ui_control.playNo, true);
 }

@@ -31,7 +31,7 @@ bool CYD_MP3Player::CheckExtension(const char* path) {
 ID3Tags_t CYD_MP3Player::GetID3Tags(std::string path) {
   int n = 0;
   char *ptr, *token, *str[8], copy[256];
-  ID3Tags_t tags = {"", "", "", 0, false};
+  ID3Tags_t tags = {"", "", "", 0};
 
   if (path.size() < sizeof(copy)) {
     strcpy(copy, path.c_str());

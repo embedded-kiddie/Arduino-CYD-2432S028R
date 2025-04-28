@@ -113,6 +113,24 @@ LV_IMG_DECLARE(ui_img_365069097);    // assets/back-down.png
 void ui_init(void);
 
 // UI LOOP
+typedef struct {
+  bool      enableFavarite;
+  bool      enableBacklight;
+  bool      enableSleepTimer;
+  uint8_t   selectFavarite;
+  uint8_t   selectBacklight;
+  uint8_t   selectSleepTimer;
+} UI_Option_t;
+
+typedef struct {
+  uint32_t  playNo;
+  uint32_t  startSleepTimer;
+  uint32_t  remainSleepTimer;
+} UI_Control_t;
+
+extern UI_Option_t ui_option;
+extern UI_Control_t ui_control;
+
 void ui_loop(void);
 
 #ifdef __cplusplus
