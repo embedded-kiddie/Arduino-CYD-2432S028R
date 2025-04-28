@@ -23,12 +23,15 @@
 
 typedef struct {
   std::string path;
+} PlayList_t;
+
+typedef struct {
   std::string title;
   std::string album;
   std::string artist;
   uint32_t    duration;
   uint32_t    selected;
-} FileInfo_t;
+} ID3Tags_t;
 
 /*--------------------------------------------------------------------------------
  * Definition of SPI file system for audio files
@@ -52,21 +55,21 @@ class CYD_MP3Player {
 private:
   int m_playNo = 0;
   fs::FS & m_fs = FS_DEV;
-  std::vector<FileInfo_t> m_files = {};
+  std::vector<PlayList_t> m_files = {};
 
   bool CheckExtension(const char* path);
-  FileInfo_t GetFileInfo(std::string path);
 
 public:
-  bool    begin(void);
-  void    ScanFileList(const char *dirname, uint8_t levels);
-  void    SortFileList(bool shuffle = false);
-  void    SetVolume(uint8_t vol);
-  uint8_t GetVolumePerCent(void);
-  bool    IsPlaying(void);
-  void    StopPlay(void);
-  bool    FilePlay(const char* path);
-  void    AutoPlay(void);
+  bool      begin(void);
+  void      ScanFileList(const char *dirname, uint8_t levels);
+  void      SortFileList(bool shuffle = false);
+  ID3Tags_t GetID3Tags(std::string path);
+  void      SetVolume(uint8_t vol);
+  uint8_t   GetVolumePerCent(void);
+  bool      IsPlaying(void);
+  void      StopPlay(void);
+  bool      FilePlay(const char* path);
+  void      AutoPlay(void);
 };
 
 void audio_info(const char *info);

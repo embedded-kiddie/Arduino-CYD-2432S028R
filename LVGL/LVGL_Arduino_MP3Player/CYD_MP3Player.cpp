@@ -26,12 +26,12 @@ bool CYD_MP3Player::CheckExtension(const char* path) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get ID3 tags (title, album, artist)
+ * Get file information with ID3 tags (title, album, artist)
  *--------------------------------------------------------------------------------*/
-FileInfo_t CYD_MP3Player::GetFileInfo(std::string path) {
+ID3Tags_t CYD_MP3Player::GetID3Tags(std::string path) {
   int n = 0;
   char *ptr, *token, *str[8], copy[256];
-  FileInfo_t info = {path, "", "", "", 0, false};
+  ID3Tags_t tags = {"", "", "", 0, false};
 
   if (path.size() < sizeof(copy)) {
     strcpy(copy, path.c_str());
@@ -46,16 +46,16 @@ FileInfo_t CYD_MP3Player::GetFileInfo(std::string path) {
   }
 
   if (--n >= 0) {
-    info.title = std::string(str[n]);
+    tags.title = std::string(str[n]);
     if (--n >= 0) {
-      info.album = std::string(str[n]);
+      tags.album = std::string(str[n]);
       if (--n >= 0) {
-        info.artist = std::string(str[n]);
+        tags.artist = std::string(str[n]);
       }
     }
   }
 
-  return info;
+  return tags;
 }
 
 /*--------------------------------------------------------------------------------
@@ -105,11 +105,11 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
       try {
 #ifdef SDFATFS_USED
         if (CheckExtension(path.c_str())) {
-          m_files.push_back(GetFileInfo(path));
+          m_files.push_back({path});
         }
 #else
         if (CheckExtension(file.path())) {
-          m_files.push_back(GetFileInfo(file.path()));
+          m_files.push_back({file.path()});
         }
 #endif
       } catch (const std::exception &e) {
@@ -130,14 +130,16 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
     std::mt19937 engine(esp_random());
     std::shuffle(m_files.begin(), m_files.end(), engine);
   } else {
-    std::sort(m_files.begin(), m_files.end(), [](FileInfo_t &a, FileInfo_t &b) {
+    std::sort(m_files.begin(), m_files.end(), [](PlayList_t &a, PlayList_t &b) {
       return a.path.compare(b.path) > 0 ? true : false;
     });
   }
 
-#if   false
+#if   true
+  ID3Tags_t tags;
   for (auto& file : m_files) {
-    Serial.printf("title: %s, album: %s, artist: %s\n", file.title.c_str(), file.album.c_str(), file.artist.c_str());
+    tags = GetID3Tags(file.path);
+    Serial.printf("title: %s, album: %s, artist: %s\n", tags.title.c_str(), tags.album.c_str(), tags.artist.c_str());
   }
 #endif
 }
