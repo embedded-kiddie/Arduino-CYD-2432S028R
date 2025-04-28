@@ -61,17 +61,18 @@ private:
 
 public:
   bool      begin(void);
+  ID3Tags_t GetID3Tags(std::string path);
   void      ScanFileList(const char *dirname, uint8_t levels);
   void      SortFileList(bool shuffle = false);
-  ID3Tags_t GetID3Tags(std::string path);
-  void      SetPlayNo(int playNo);
-  void      SetVolume(uint8_t vol);
+
   uint8_t   GetVolumePerCent(void);
-  bool      IsPlaying(void);
-  void      StopPlay(void);
+  void      SetVolume(uint8_t vol);
   void      PauseResume(void);
+  void      StopPlay(void);
+  void      SetPlayNo(int playNo);
   bool      FilePlay(const char* path);
-  void      AutoPlay(void);
+  bool      IsPlaying(void);
+  bool      AutoPlay(void);
 };
 
 void audio_info(const char *info);

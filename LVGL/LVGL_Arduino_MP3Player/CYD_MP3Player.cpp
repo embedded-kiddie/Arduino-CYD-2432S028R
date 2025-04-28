@@ -147,29 +147,25 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
 /*--------------------------------------------------------------------------------
  * Operation
  *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::SetPlayNo(int playNo) {
-  StopPlay();
-  m_playNo = playNo;
+uint8_t CYD_MP3Player::GetVolumePerCent(void) {
+  return audioGetVolumePerCent();
 }
 
 void CYD_MP3Player::SetVolume(uint8_t vol) {
   audioSetVolume(vol);
 }
 
-uint8_t CYD_MP3Player::GetVolumePerCent(void) {
-  return audioGetVolumePerCent();
-}
-
-bool CYD_MP3Player::IsPlaying(void) {
-  return audioIsPlaying();
+void CYD_MP3Player::PauseResume(void) {
+  audioPauseResume();
 }
 
 void CYD_MP3Player::StopPlay(void) {
   audioStopSong();
 }
 
-void CYD_MP3Player::PauseResume(void) {
-  audioPauseResume();
+void CYD_MP3Player::SetPlayNo(int playNo) {
+  StopPlay();
+  m_playNo = playNo;
 }
 
 bool CYD_MP3Player::FilePlay(const char* path) {
@@ -184,7 +180,11 @@ bool CYD_MP3Player::FilePlay(const char* path) {
   }
 }
 
-void CYD_MP3Player::AutoPlay(void) {
+bool CYD_MP3Player::IsPlaying(void) {
+  return audioIsPlaying();
+}
+
+bool CYD_MP3Player::AutoPlay(void) {
   if (!audioIsPlaying() && m_files.size()) {
     if (!audioConnecttoSD(m_files[m_playNo].path.c_str())) {
       // Something is wrong, so skip it
@@ -194,11 +194,14 @@ void CYD_MP3Player::AutoPlay(void) {
       // Update the play number
       int n = m_files.size() - 1;
       m_playNo = constrain(m_playNo, 0, n);
+      return false;
     } else {
       // Update for the next play
       m_playNo = (m_playNo + 1) % m_files.size();
     }
   }
+
+  return true;
 }
 
 /*--------------------------------------------------------------------------------

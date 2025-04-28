@@ -124,8 +124,7 @@ typedef struct {
 
 typedef struct {
   uint32_t  playNo;
-  uint32_t  startSleepTimer;
-  uint32_t  remainSleepTimer;
+  uint32_t  sleepTimer;
 } UI_Control_t;
 
 extern UI_Option_t ui_option;

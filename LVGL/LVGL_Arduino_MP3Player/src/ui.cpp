@@ -11,7 +11,11 @@
 #include <stdio.h>  // for printf()
 #include "../CYD_MP3Player.h"
 
-extern CYD_MP3Player player;
+extern void DisplaySleep(void);
+extern void DisplayWakeup(void);
+extern bool IsDisplaySleep(void);
+
+CYD_MP3Player player;
 
 #define MP3_VOLUME_INI 8
 #define MP3_PATH_ROOT "/MP3Player/"
@@ -19,13 +23,15 @@ extern CYD_MP3Player player;
 
 typedef enum {
   UI_STATE_INIT,
+  UI_STATE_IDLE,
   UI_STATE_PAUSE,
   UI_STATE_RESUME,
   UI_STATE_NEXT,
   UI_STATE_PREV,
   UI_STATE_PLAY,
   UI_STATE_STOP,
-  UI_STATE_IDLE,
+  UI_STATE_SLEEP,
+  UI_STATE_WAKEUP,
 } UI_State_t;
 
 /*
@@ -35,11 +41,37 @@ typedef enum {
  */
 UI_Option_t ui_option;
 UI_Control_t ui_control;
-
 static UI_State_t ui_state = UI_STATE_INIT;
 
+static uint32_t GetSleepTimer(void) {
+  return 15 * 1000;
+}
+
 void ui_loop(void) {
+  if (!IsDisplaySleep() && ui_control.sleepTimer <= lv_disp_get_inactive_time(NULL)) {
+    DisplaySleep();
+  }
+
   switch (ui_state) {
+    case UI_STATE_PLAY:
+      player.AutoPlay();
+      break;
+    case UI_STATE_RESUME:
+      player.PauseResume();
+      ui_state = UI_STATE_PLAY;
+      break;
+    case UI_STATE_PAUSE:
+      player.PauseResume();
+      ui_state = UI_STATE_IDLE;
+      break;
+    case UI_STATE_NEXT:
+      break;
+    case UI_STATE_PREV:
+      break;
+    case UI_STATE_STOP:
+      player.StopPlay();
+      ui_state = UI_STATE_IDLE;
+      break;
     case UI_STATE_INIT:
       player.begin();
       player.ScanFileList(MP3_PATH_CONFIG);
@@ -47,21 +79,6 @@ void ui_loop(void) {
       player.SetVolume(MP3_VOLUME_INI);
       player.SetPlayNo(ui_control.playNo);
       lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
-      ui_state = UI_STATE_IDLE;
-      break;
-    case UI_STATE_PAUSE:
-      player.PauseResume();
-      ui_state = UI_STATE_IDLE;
-      break;
-    case UI_STATE_RESUME:
-      player.PauseResume();
-      ui_state = UI_STATE_PLAY;
-      break;
-    case UI_STATE_PLAY:
-      player.AutoPlay();
-      break;
-    case UI_STATE_STOP:
-      player.StopPlay();
       ui_state = UI_STATE_IDLE;
       break;
     case UI_STATE_IDLE:
@@ -211,7 +228,7 @@ void ui_event_ButtonNext(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    (e);
+    ui_state = UI_STATE_NEXT;
   }
 }
 
@@ -219,7 +236,7 @@ void ui_event_ButtonPrev(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    (e);
+    ui_state = UI_STATE_PREV;
   }
 }
 
@@ -389,4 +406,8 @@ void ui_init(void) {
   ui_ScreenMain_screen_init();
   ui____initial_actions0 = lv_obj_create(NULL);
   lv_disp_load_scr(ui_ScreenMain);
+
+  audioInit();
+ 
+  ui_control.sleepTimer = GetSleepTimer();
 }

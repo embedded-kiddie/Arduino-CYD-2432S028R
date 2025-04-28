@@ -41,9 +41,6 @@ static LGFX tft;
 //#include <examples/lv_examples.h>
 //#include <demos/lv_demos.h>
 #include "src/ui.h"
-#include "CYD_MP3Player.h"
-
-CYD_MP3Player player;
 
 /*Set to your screen resolution and rotation*/
 #define TFT_HOR_RES   240 // Portrait orientation default width
@@ -61,6 +58,28 @@ static uint8_t* draw_buf[2] = { NULL, };
 static uint8_t draw_buf[2][DRAW_BUF_SIZE];
 #endif
 
+//----------------------------------------------------------------------
+// Display sleep/wakeup
+//----------------------------------------------------------------------
+static bool displaySleep = false;
+
+void DisplaySleep(void) {
+  tft.sleep();
+  displaySleep = true;
+}
+
+void DisplayWakeup(void) {
+  tft.wakeup();
+  displaySleep = false;
+}
+
+bool IsDisplaySleep(void) {
+  return displaySleep;
+}
+
+//----------------------------------------------------------------------
+// LVGL functions
+//----------------------------------------------------------------------
 #if LV_USE_LOG != 0
 static void my_print(lv_log_level_t level, const char *buf) {
   LV_UNUSED(level);
@@ -85,9 +104,20 @@ static void my_disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px
 static void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
   uint16_t x, y;
   bool touched = tft.getTouch(&x, &y);
+
   if (!touched) {
     data->state = LV_INDEV_STATE_RELEASED;
-  } else {
+  }
+
+  else if (displaySleep) {
+    DisplayWakeup();
+    lv_disp_trig_activity(NULL);
+    lv_disp_load_scr(lv_scr_act());
+    delay(100); // Prevent immediate input
+    data->state = LV_INDEV_STATE_RELEASED;
+  }
+
+  else {
     data->state = LV_INDEV_STATE_PRESSED;
 
     switch (tft.getRotation()) {
@@ -241,10 +271,6 @@ void setup() {
 #else
 
   ui_init();
-
-#if ! SCREENSHORT
-  audioInit();
-#endif
 
 #endif
 }
