@@ -18,10 +18,15 @@ extern CYD_MP3Player player;
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
 
 typedef enum {
-  UI_STAT_INIT,
-  UI_STAT_STOP,
-  UI_STAT_PLAYING,
-} UI_Stat_t;
+  UI_STATE_INIT,
+  UI_STATE_PAUSE,
+  UI_STATE_RESUME,
+  UI_STATE_NEXT,
+  UI_STATE_PREV,
+  UI_STATE_PLAY,
+  UI_STATE_STOP,
+  UI_STATE_IDLE,
+} UI_State_t;
 
 /*
  * Audio-Length:
@@ -31,22 +36,36 @@ typedef enum {
 UI_Option_t ui_option;
 UI_Control_t ui_control;
 
-static UI_Stat_t ui_stat = UI_STAT_INIT;
+static UI_State_t ui_state = UI_STATE_INIT;
 
 void ui_loop(void) {
-  switch (ui_stat) {
-    case UI_STAT_INIT:
+  switch (ui_state) {
+    case UI_STATE_INIT:
       player.begin();
       player.ScanFileList(MP3_PATH_CONFIG);
       player.SortFileList(true);
       player.SetVolume(MP3_VOLUME_INI);
+      player.SetPlayNo(ui_control.playNo);
       lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
-      ui_stat = UI_STAT_PLAYING;
+      ui_state = UI_STATE_IDLE;
       break;
-    case UI_STAT_STOP:
+    case UI_STATE_PAUSE:
+      player.PauseResume();
+      ui_state = UI_STATE_IDLE;
       break;
-    case UI_STAT_PLAYING:
+    case UI_STATE_RESUME:
+      player.PauseResume();
+      ui_state = UI_STATE_PLAY;
+      break;
+    case UI_STATE_PLAY:
       player.AutoPlay();
+      break;
+    case UI_STATE_STOP:
+      player.StopPlay();
+      ui_state = UI_STATE_IDLE;
+      break;
+    case UI_STATE_IDLE:
+    default:
       break;
   }
 }
@@ -179,7 +198,12 @@ void ui_event_ButtonPlay(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    (e);
+    lv_state_t state = lv_obj_get_state(ui_ButtonPlay);
+    if (state & LV_STATE_CHECKED) {
+      ui_state = UI_STATE_RESUME;
+    } else { // LV_STATE_DEFAULT
+      ui_state = UI_STATE_PAUSE;
+    }
   }
 }
 

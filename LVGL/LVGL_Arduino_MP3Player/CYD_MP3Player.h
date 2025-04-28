@@ -64,10 +64,12 @@ public:
   void      ScanFileList(const char *dirname, uint8_t levels);
   void      SortFileList(bool shuffle = false);
   ID3Tags_t GetID3Tags(std::string path);
+  void      SetPlayNo(int playNo);
   void      SetVolume(uint8_t vol);
   uint8_t   GetVolumePerCent(void);
   bool      IsPlaying(void);
   void      StopPlay(void);
+  void      PauseResume(void);
   bool      FilePlay(const char* path);
   void      AutoPlay(void);
 };
