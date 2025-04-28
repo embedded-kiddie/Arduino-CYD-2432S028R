@@ -115,11 +115,6 @@ void ui_init(void);
 // UI LOOP
 void ui_loop(void);
 
-#include <stdio.h>  // for printf()
-#include "../CYD_MP3Player.h"
-
-extern CYD_MP3Player player;
-
 typedef struct {
   bool      enableFavarite;
   bool      enableBacklight;

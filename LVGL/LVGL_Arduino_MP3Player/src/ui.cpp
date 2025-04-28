@@ -8,6 +8,9 @@
 
 ///////////////////// UI LOOP ////////////////////
 
+#include <stdio.h>  // for printf()
+#include "../CYD_MP3Player.h"
+
 CYD_MP3Player player;
 
 #define MP3_VOLUME_INI 8

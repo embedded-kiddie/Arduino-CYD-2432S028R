@@ -5,6 +5,11 @@
 
 #include "ui.h"
 
+#include <stdio.h>  // for printf()
+#include "../CYD_MP3Player.h"
+
+extern CYD_MP3Player player;
+
 /**********************
  *      MACROS
  **********************/
