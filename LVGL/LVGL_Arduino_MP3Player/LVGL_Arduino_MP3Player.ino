@@ -63,18 +63,14 @@ static uint8_t draw_buf[2][DRAW_BUF_SIZE];
 //----------------------------------------------------------------------
 static bool is_awake = true;
 
-void DisplaySleep(void) {
+static void DisplaySleep(void) {
   tft.sleep();
   is_awake = false;
 }
 
-void DisplayWakeup(void) {
+static void DisplayWakeup(void) {
   tft.wakeup();
   is_awake = true;
-}
-
-bool IsDisplayAwake(void) {
-  return is_awake;
 }
 
 //----------------------------------------------------------------------
@@ -279,7 +275,10 @@ void loop() {
   lv_timer_handler(); /* let the GUI do its work */
 
 #if ! SCREENSHORT
-  ui_loop();
+  bool state = ui_loop();
+  if (!state && is_awake) {
+    DisplaySleep();
+  }
 #else
   if (Serial.available()) {
     Serial.readStringUntil('\n');

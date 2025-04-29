@@ -17,11 +17,6 @@ CYD_MP3Player player;
 #define MP3_PATH_ROOT "/MP3Player/"
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
 
-// defined in LVGL_Arduino_MP3Player.ino
-extern void DisplaySleep(void);
-extern void DisplayWakeup(void);
-extern bool IsDisplayAwake(void);
-
 typedef enum {
   UI_STATE_INIT,
   UI_STATE_IDLE,
@@ -44,9 +39,13 @@ UI_State_t ui_state;
 UI_Option_t ui_option;
 UI_Control_t ui_control;
 
-void ui_loop(void) {
-  if (IsDisplayAwake() && ui_control.sleepTimer <= lv_disp_get_inactive_time(NULL)) {
-    DisplaySleep();
+bool ui_loop(void) {
+  static uint32_t time;
+  uint32_t now = millis();
+  if (now - time >= 100) {
+    time = now;
+    Serial.printf("%d, %d\n", audioGetDuration(), audioGetElapsedTime());
+    Serial.printf("%d\n", audioGetRMS() & 0xffff);
   }
 
   switch (ui_state) {
@@ -91,6 +90,13 @@ void ui_loop(void) {
     case UI_STATE_IDLE:
     default:
       break;
+  }
+
+  // backlight controll
+  if (ui_control.sleepTimer > lv_disp_get_inactive_time(NULL)) {
+    return true;
+  } else {
+    return false; // backlight off
   }
 }
 

@@ -82,6 +82,26 @@ void audioTask(void *parameter)
 					audioTxTaskMessage.ret = audio.getRMS();
 					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
 					break;
+				case GET_VU:
+					audioTxTaskMessage.cmd = GET_VU;
+					audioTxTaskMessage.ret = audio.getVUlevel();
+					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
+					break;
+				case GET_DURATION:
+					audioTxTaskMessage.cmd = GET_DURATION;
+					audioTxTaskMessage.ret = audio.getAudioFileDuration();
+					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
+					break;
+				case GET_ELAPSED:
+					audioTxTaskMessage.cmd = GET_ELAPSED;
+					audioTxTaskMessage.ret = audio.getAudioCurrentTime();
+					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
+					break;
+				case SET_ELAPSED:
+					audioTxTaskMessage.cmd = SET_ELAPSED;
+					audioTxTaskMessage.ret = audio.setAudioPlayPosition(audioRxTaskMessage.value);
+					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
+					break;
 				case CONNECTTOHOST:
 					audioTxTaskMessage.cmd = CONNECTTOHOST;
 					audioTxTaskMessage.ret = audio.connecttohost(audioRxTaskMessage.txt1);
@@ -172,9 +192,37 @@ uint8_t audioGetVolumePerCent()
 	return ((vol * 100) / steps );
 }
 // ---------------------------------------------------------------
+uint16_t audioGetVU()
+{
+	audioTxMessage.cmd = GET_VU;
+	audioMessage_t RX = transmitReceive(audioTxMessage);
+	return RX.ret;
+}
+// ---------------------------------------------------------------
 uint32_t audioGetRMS()
 {
 	audioTxMessage.cmd = GET_RMS;
+	audioMessage_t RX = transmitReceive(audioTxMessage);
+	return RX.ret;
+}
+// ---------------------------------------------------------------
+uint32_t audioGetDuration()
+{
+	audioTxMessage.cmd = GET_DURATION;
+	audioMessage_t RX = transmitReceive(audioTxMessage);
+	return RX.ret;
+}
+// ---------------------------------------------------------------
+uint32_t audioGetElapsedTime()
+{
+	audioTxMessage.cmd = GET_ELAPSED;
+	audioMessage_t RX = transmitReceive(audioTxMessage);
+	return RX.ret;
+}
+// ---------------------------------------------------------------
+bool audioSetElapsedTime()
+{
+	audioTxMessage.cmd = SET_ELAPSED;
 	audioMessage_t RX = transmitReceive(audioTxMessage);
 	return RX.ret;
 }

@@ -12,6 +12,10 @@ typedef enum : uint8_t
 	SET_VOLUME,
 	GET_VOLUME,
 	GET_RMS,
+  GET_VU,
+  GET_DURATION,
+  GET_ELAPSED,
+  SET_ELAPSED,
 	CONNECTTOHOST,
 	CONNECTTOSPEECH,
 	CONNECTTOSD,
@@ -38,8 +42,12 @@ audioMessage_t transmitReceive(audioMessage_t msg);
 
 bool audioIsPlaying(void);
 void audioSetVolume(uint8_t vol);
-uint32_t audioGetRMS();
 uint8_t audioGetVolumePerCent();
+uint16_t audioGetVU();  // for USE_I2S_DAC
+uint32_t audioGetRMS(); // for internal DAC
+uint32_t audioGetDuration();
+uint32_t audioGetElapsedTime();
+bool audioSetElapsedTime();
 bool audioConnecttohost(const char *host);
 bool audioConnecttoSD(const char *filename);
 bool audioConnecttoSpeech(const char *host, const char *lang);

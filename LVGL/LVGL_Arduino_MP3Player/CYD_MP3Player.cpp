@@ -141,6 +141,7 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
     tags = GetID3Tags(file.path);
     Serial.printf("title: %s, album: %s, artist: %s\n", tags.title.c_str(), tags.album.c_str(), tags.artist.c_str());
   }
+  Serial.printf("total: %d\n", m_files.size());
 #endif
 }
 
@@ -192,20 +193,20 @@ bool CYD_MP3Player::IsPlaying(void) {
 
 bool CYD_MP3Player::AutoPlay(bool selected) {
   if (!audioIsPlaying() && m_files.size()) {
+    // Play all or only selected
     bool play = !selected || m_files[m_playNo].selected;
+
     if (play && !audioConnecttoSD(m_files[m_playNo].path.c_str())) {
       // Something is wrong, so skip it
       Serial.printf("skip %s\n", m_files[m_playNo].path.c_str());
-      m_files.erase(m_files.begin() + m_playNo);
-
-      // Update the play number
-      int n = m_files.size() - 1;
-      m_playNo = constrain(m_playNo, 0, n);
-      return false;
+      play = false;
     } else {
-      // Update for the next play
-      m_playNo = (m_playNo + 1) % m_files.size();
+      play = true;
     }
+
+    // Update for the next play
+    m_playNo = (m_playNo + 1) % m_files.size();
+    return play;
   }
 
   return true;
@@ -214,13 +215,13 @@ bool CYD_MP3Player::AutoPlay(bool selected) {
 /*--------------------------------------------------------------------------------
  * Optional functions for audio-I2S
  *--------------------------------------------------------------------------------*/
+void audio_id3data(const char *info) {  //id3 metadata
+  Serial.print("id3data     ");
+  Serial.println(info);
+}
 #if   false
 void audio_info(const char *info) {
   Serial.print("info        ");
-  Serial.println(info);
-}
-void audio_id3data(const char *info) {  //id3 metadata
-  Serial.print("id3data     ");
   Serial.println(info);
 }
 void audio_eof_mp3(const char *info) {  //end of file
