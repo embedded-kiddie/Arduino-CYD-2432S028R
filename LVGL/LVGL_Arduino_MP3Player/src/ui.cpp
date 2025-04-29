@@ -62,8 +62,14 @@ void ui_loop(void) {
       ui_state = UI_STATE_IDLE;
       break;
     case UI_STATE_NEXT:
+      player.PlayNext();
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+      ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_PREV:
+      player.PlayPrev();
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+      ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_STOP:
       player.StopPlay();
@@ -77,6 +83,10 @@ void ui_loop(void) {
       player.SetPlayNo(ui_control.playNo);
       lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
       ui_state = UI_STATE_IDLE;
+
+      // start playing: it makes ui_state to UI_STATE_RESUME
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+      lv_obj_send_event(ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
       break;
     case UI_STATE_IDLE:
     default:
@@ -213,6 +223,7 @@ void ui_event_ButtonPlay(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     lv_state_t state = lv_obj_get_state(ui_ButtonPlay);
+
     if (state & LV_STATE_CHECKED) {
       ui_state = UI_STATE_RESUME;
     } else { // LV_STATE_DEFAULT

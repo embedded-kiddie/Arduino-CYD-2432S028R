@@ -164,14 +164,20 @@ void CYD_MP3Player::StopPlay(void) {
 }
 
 void CYD_MP3Player::SetPlayNo(int playNo) {
-  StopPlay();
+  audioStopSong();
   m_playNo = playNo;
 }
 
+void CYD_MP3Player::PlayNext(void) {
+  audioStopSong();
+}
+
+void CYD_MP3Player::PlayPrev(void) {
+  SetPlayNo((m_playNo - 2 + m_files.size()) % m_files.size());
+}
+
 bool CYD_MP3Player::FilePlay(const char* path) {
-  if (audioIsPlaying()) {
-    audioStopSong();
-  }
+  audioStopSong();
   if (audioConnecttoSD(path)) {
     return true;
   } else {
@@ -184,9 +190,10 @@ bool CYD_MP3Player::IsPlaying(void) {
   return audioIsPlaying();
 }
 
-bool CYD_MP3Player::AutoPlay(void) {
+bool CYD_MP3Player::AutoPlay(bool selected) {
   if (!audioIsPlaying() && m_files.size()) {
-    if (!audioConnecttoSD(m_files[m_playNo].path.c_str())) {
+    bool play = !selected || m_files[m_playNo].selected;
+    if (play && !audioConnecttoSD(m_files[m_playNo].path.c_str())) {
       // Something is wrong, so skip it
       Serial.printf("skip %s\n", m_files[m_playNo].path.c_str());
       m_files.erase(m_files.begin() + m_playNo);

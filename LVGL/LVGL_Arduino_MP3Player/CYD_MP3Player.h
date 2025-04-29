@@ -54,6 +54,7 @@ typedef struct {
 class CYD_MP3Player {
 private:
   int m_playNo = 0;
+  bool m_selected = false;
   fs::FS & m_fs = FS_DEV;
   std::vector<PlayList_t> m_files = {};
 
@@ -70,9 +71,11 @@ public:
   void      PauseResume(void);
   void      StopPlay(void);
   void      SetPlayNo(int playNo);
+  void      PlayNext(void);
+  void      PlayPrev(void);
   bool      FilePlay(const char* path);
   bool      IsPlaying(void);
-  bool      AutoPlay(void);
+  bool      AutoPlay(bool selected = false);
 };
 
 void audio_info(const char *info);
