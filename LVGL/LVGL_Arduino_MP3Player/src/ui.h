@@ -112,9 +112,11 @@ LV_IMG_DECLARE(ui_img_365069097);    // assets/back-down.png
 // UI INIT
 void ui_init(void);
 
-// UI LOOP
+// Custom Functions
 bool ui_loop(void);
+void ui_redisplay(void);
 
+// Variables
 typedef struct {
   bool      enableFavarite;
   bool      enableBacklight;

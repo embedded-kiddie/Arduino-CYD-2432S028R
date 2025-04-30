@@ -220,9 +220,10 @@ uint32_t audioGetElapsedTime()
 	return RX.ret;
 }
 // ---------------------------------------------------------------
-bool audioSetElapsedTime()
+bool audioSetElapsedTime(uint32_t time)
 {
 	audioTxMessage.cmd = SET_ELAPSED;
+	audioTxMessage.value = time;
 	audioMessage_t RX = transmitReceive(audioTxMessage);
 	return RX.ret;
 }

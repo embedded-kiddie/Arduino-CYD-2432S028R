@@ -47,7 +47,7 @@ uint16_t audioGetVU();  // for USE_I2S_DAC
 uint32_t audioGetRMS(); // for internal DAC
 uint32_t audioGetDuration();
 uint32_t audioGetElapsedTime();
-bool audioSetElapsedTime();
+bool audioSetElapsedTime(uint32_t time);
 bool audioConnecttohost(const char *host);
 bool audioConnecttoSD(const char *filename);
 bool audioConnecttoSpeech(const char *host, const char *lang);

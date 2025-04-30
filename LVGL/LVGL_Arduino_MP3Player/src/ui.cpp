@@ -7,8 +7,7 @@
 #include "ui_helpers.h"
 
 ///////////////////// UI LOOP ////////////////////
-
-#include <stdio.h>  // for printf()
+#include <stdio.h>  // for sprintf(), printf()
 #include "../CYD_MP3Player.h"
 
 CYD_MP3Player player;
@@ -16,6 +15,12 @@ CYD_MP3Player player;
 #define MP3_VOLUME_INI 8
 #define MP3_PATH_ROOT "/MP3Player/"
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
+#define PERIOD_TAKS1 1000
+#define PERIOD_TAKS2 100
+
+// https://embedded-kiddie.github.io/2024/07/22/
+#define DO_EVERY(period, prev) \
+static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; prev = now)
 
 typedef enum {
   UI_STATE_INIT,
@@ -30,24 +35,32 @@ typedef enum {
   UI_STATE_WAKEUP,
 } UI_State_t;
 
-/*
- * Audio-Length:
- * BitsPerSample:
- * BitRate:
- */
 UI_State_t ui_state;
 UI_Option_t ui_option;
 UI_Control_t ui_control;
 
-bool ui_loop(void) {
-  static uint32_t time;
-  uint32_t now = millis();
-  if (now - time >= 100) {
-    time = now;
-    Serial.printf("%d, %d\n", audioGetDuration(), audioGetElapsedTime());
-    Serial.printf("%d\n", audioGetRMS() & 0xffff);
+/////////////////// LOCAL FUNCTIONS //////////////////
+static const char* SecToStr(uint32_t sec) {
+  if (sec < 3600) {
+    static char str[8];
+    sprintf(str, "%2d:%02d", sec / 60, sec - 60 * (uint32_t)(sec / 60));
+    return (const char*)str;
+  } else {
+    return "0.00";
   }
+}
 
+static void UpdateElapsedTime(void) {
+  uint32_t duration = audioGetDuration();
+  uint32_t elapsed  = audioGetElapsedTime();
+  lv_slider_set_range(ui_ElapsedBar, 0, duration);
+  lv_slider_set_value(ui_ElapsedBar, elapsed, LV_ANIM_OFF);
+  lv_label_set_text  (ui_ElapsedStart, SecToStr(elapsed));
+  lv_label_set_text  (ui_ElapsedEnd,   SecToStr(duration));
+}
+
+////////////////// GLOBAL FUNCTIONS /////////////////
+bool ui_loop(void) {
   switch (ui_state) {
     case UI_STATE_PLAY:
       player.AutoPlay();
@@ -92,12 +105,31 @@ bool ui_loop(void) {
       break;
   }
 
-  // backlight controll
-  if (ui_control.sleepTimer > lv_disp_get_inactive_time(NULL)) {
-    return true;
-  } else {
-    return false; // backlight off
+  // Periodical task
+  DO_EVERY(PERIOD_TAKS1, task1Time) {
+    // Update elapsed bar
+    if (player.IsPlaying()) {
+      UpdateElapsedTime();
+    }
   }
+
+  DO_EVERY(PERIOD_TAKS2, task2Time) {
+    if (player.IsPlaying()) {
+      // Serial.printf("%d\n", audioGetRMS() & 0xffff);
+    }
+  }
+
+  // Backlight control according to the duration of non-operation
+  if (ui_control.sleepTimer > lv_disp_get_inactive_time(NULL)) {
+    return true;  // keep backlight on
+  } else {
+    return false; // turn backlight off
+  }
+}
+
+void ui_redisplay(void) {
+  lv_disp_trig_activity(NULL);
+  lv_disp_load_scr(lv_scr_act());
 }
 
 ///////////////////// VARIABLES ////////////////////
@@ -283,19 +315,16 @@ void ui_event_Volume(lv_event_t *e) {
     int vol = lv_slider_get_value(ui_Volume);
     player.SetVolume(vol);
   }
-  if (event_code == LV_EVENT_PRESSED) {
-    (e);
-  }
-  if (event_code == LV_EVENT_RELEASED) {
-    (e);
-  }
 }
 
 void ui_event_ElapsedBar(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_VALUE_CHANGED) {
-    (e);
+    if (player.IsPlaying()) {
+      uint32_t elapsed = lv_slider_get_value(ui_ElapsedBar);
+      audioSetElapsedTime(elapsed);
+    }
   }
 }
 

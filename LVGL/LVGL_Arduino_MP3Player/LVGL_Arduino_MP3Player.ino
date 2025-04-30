@@ -63,14 +63,14 @@ static uint8_t draw_buf[2][DRAW_BUF_SIZE];
 //----------------------------------------------------------------------
 static bool is_awake = true;
 
-static void DisplaySleep(void) {
-  tft.sleep();
-  is_awake = false;
-}
-
-static void DisplayWakeup(void) {
-  tft.wakeup();
-  is_awake = true;
+static void enable_display(bool on_off) {
+  if (on_off == true) {
+    tft.wakeup();
+    is_awake = true;
+  } else {
+    tft.sleep();
+    is_awake = false;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -106,10 +106,9 @@ static void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
   }
 
   else if (!is_awake) {
-    DisplayWakeup();
-    lv_disp_trig_activity(NULL);
-    lv_disp_load_scr(lv_scr_act());
-    delay(100); // Prevent immediate input
+    enable_display(true);
+    ui_redisplay();
+    delay(200); // Prevent unintended events from firing
     data->state = LV_INDEV_STATE_RELEASED;
   }
 
@@ -277,7 +276,7 @@ void loop() {
 #if ! SCREENSHORT
   bool state = ui_loop();
   if (!state && is_awake) {
-    DisplaySleep();
+    enable_display(false);
   }
 #else
   if (Serial.available()) {
