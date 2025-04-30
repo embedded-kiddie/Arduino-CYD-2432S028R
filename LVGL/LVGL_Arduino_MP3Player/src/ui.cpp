@@ -53,6 +53,9 @@ static const char* SecToStr(uint32_t sec) {
 static void UpdateElapsedTime(void) {
   uint32_t duration = audioGetDuration();
   uint32_t elapsed  = audioGetElapsedTime();
+  if (duration < elapsed) {
+    duration = elapsed;
+  }
   lv_slider_set_range(ui_ElapsedBar, 0, duration);
   lv_slider_set_value(ui_ElapsedBar, elapsed, LV_ANIM_OFF);
   lv_label_set_text  (ui_ElapsedStart, SecToStr(elapsed));
