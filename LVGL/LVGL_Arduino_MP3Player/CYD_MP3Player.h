@@ -27,10 +27,10 @@ typedef struct {
 } PlayList_t;
 
 typedef struct {
+  uint32_t    playNo;
   std::string title;
-  std::string album;
   std::string artist;
-  uint32_t    duration;
+  std::string album;
 } ID3Tags_t;
 
 /*--------------------------------------------------------------------------------
@@ -42,8 +42,8 @@ typedef struct {
 #define SD_CLOCK  20000000  // 1MHz --> 20MHz and up
 #define SD_CS     SS
 
-#if   defined (SDFATFS_USED)
-#define FS_DEV    SD_SDFAT
+#if defined (SDFATFS_USED)  // defined in CYD_Audio.h
+#define FS_DEV    SD_SDFAT  // defined in CYD_Audio.cpp
 #define FS_CONFIG SD_CS, SD_CLOCK
 #define BUF_SIZE  64
 #elif defined (_SD_H_)
@@ -76,6 +76,7 @@ public:
   bool      FilePlay(const char* path);
   bool      IsPlaying(void);
   bool      AutoPlay(bool selected = false);
+  void      SetIDd3TagsCallback(void (*callback)(ID3Tags_t*), ID3Tags_t*);
 };
 
 void audio_info(const char *info);

@@ -3,6 +3,12 @@
  *--------------------------------------------------------------------------------*/
 #include "CYD_MP3Player.h"
 
+static ID3Tags_t* id3data_ptr = NULL;
+static void (*id3data_callback)(ID3Tags_t*) = NULL;
+
+/*--------------------------------------------------------------------------------
+ * Begin with SD or SdFat
+ *--------------------------------------------------------------------------------*/
 bool CYD_MP3Player::begin() {
   if (FS_DEV.begin(FS_CONFIG)) {
     return true;
@@ -31,7 +37,7 @@ bool CYD_MP3Player::CheckExtension(const char* path) {
 ID3Tags_t CYD_MP3Player::GetID3Tags(std::string path) {
   int n = 0;
   char *ptr, *token, *str[8], copy[256];
-  ID3Tags_t tags = {"", "", "", 0};
+  ID3Tags_t tags = {0, "", "", ""};
 
   if (path.size() < sizeof(copy)) {
     strcpy(copy, path.c_str());
@@ -191,6 +197,11 @@ bool CYD_MP3Player::IsPlaying(void) {
   return audioIsPlaying();
 }
 
+void CYD_MP3Player::SetIDd3TagsCallback(void (*callback)(ID3Tags_t*), ID3Tags_t* ptr) {
+  id3data_callback = callback;
+  id3data_ptr = ptr;
+}
+
 bool CYD_MP3Player::AutoPlay(bool selected) {
   if (!audioIsPlaying() && m_files.size()) {
     // Play all or only selected
@@ -202,6 +213,10 @@ bool CYD_MP3Player::AutoPlay(bool selected) {
       play = false;
     } else {
       play = true;
+
+      if (id3data_ptr) {
+        id3data_ptr->playNo = m_playNo;
+      }
     }
 
     // Update for the next play
@@ -216,8 +231,21 @@ bool CYD_MP3Player::AutoPlay(bool selected) {
  * Optional functions for audio-I2S
  *--------------------------------------------------------------------------------*/
 void audio_id3data(const char *info) {  //id3 metadata
-  Serial.print("id3data     ");
-  Serial.println(info);
+  if (id3data_callback && id3data_ptr) {
+    char *p;
+    if (p = strstr(info, "Title: ")) {
+      id3data_ptr->title = p + 7;
+    } else
+    if (p = strstr(info, "Artist: ")) {
+      id3data_ptr->artist = p + 8;
+    } else
+    if (p = strstr(info, "Album: ")) {
+      id3data_ptr->album = p + 7;
+      id3data_callback(id3data_ptr);
+    }
+  }
+//Serial.print("id3data     ");
+//Serial.println(info);
 }
 #if   false
 void audio_info(const char *info) {

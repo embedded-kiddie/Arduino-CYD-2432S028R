@@ -62,6 +62,11 @@ static void UpdateElapsedTime(void) {
   lv_label_set_text  (ui_ElapsedEnd,   SecToStr(duration));
 }
 
+static ID3Tags_t id3tags;
+static void get_id3tags(ID3Tags_t* tags [[gnu::unused]]) {
+  printf("No.%d, %s / %s / %s\n", id3tags.playNo, id3tags.title.c_str(), id3tags.artist.c_str(), id3tags.album.c_str());
+}
+
 ////////////////// GLOBAL FUNCTIONS /////////////////
 bool ui_loop(void) {
   switch (ui_state) {
@@ -96,12 +101,13 @@ bool ui_loop(void) {
       player.SortFileList(true);
       player.SetVolume(MP3_VOLUME_INI);
       player.SetPlayNo(ui_control.playNo);
-      lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
+      player.SetIDd3TagsCallback(get_id3tags, &id3tags);
       ui_state = UI_STATE_IDLE;
 
       // start playing: it makes ui_state to UI_STATE_RESUME
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
-      lv_obj_send_event(ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
+      lv_obj_set_state    (ui_ButtonPlay, LV_STATE_CHECKED, true);
+      lv_obj_send_event   (ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
+      lv_slider_set_value (ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
       break;
     case UI_STATE_IDLE:
     default:
