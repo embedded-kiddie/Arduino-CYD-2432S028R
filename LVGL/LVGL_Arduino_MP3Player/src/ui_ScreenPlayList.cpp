@@ -37,19 +37,29 @@ LV_IMAGE_DECLARE(img_lv_demo_music_btn_list_play);
 LV_IMAGE_DECLARE(img_lv_demo_music_btn_list_pause);
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 
+// noto_sans_jp_12, noto_sans_jp_14
+// noto_sans_jp_2bits_12, noto_sans_jp_2bits_14
+// noto_sans_jp_nofallback_12, noto_sans_jp_nofallback_14
+// lv_font_montserrat_12, lv_font_montserrat_12
+#define CUSTOM_FONT_SMALL   noto_sans_jp_2bits_12
+#define CUSTOM_FONT_MEDIUM  noto_sans_jp_2bits_12
+
+#if CUSTOM_FONT_SMALL == CUSTOM_FONT_SMALL
+LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
+#else
+LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
+LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
+#endif
+
 /**********************
  *   STATIC FUNCTIONS
  **********************/
 static const char* music_get_title(uint32_t track_id) {
-  return "Title";
+  return "Title 未完成交響曲";
 }
 
 static const char* music_get_artist(uint32_t track_id) {
-  return "artist";
-}
-
-static const char* music_get_genre(uint32_t track_id) {
-  return "genre";
+  return "artist Nicheシンドローム";
 }
 
 static uint32_t music_get_track_length(uint32_t track_id) {
@@ -187,12 +197,12 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   font_medium = LV_FONT_DEFAULT;
 
 #if LV_FONT_MONTSERRAT_12
-  font_small = &lv_font_montserrat_12;
+  font_small = &CUSTOM_FONT_SMALL;
 #else
   LV_LOG_WARN("LV_FONT_MONTSERRAT_12 is not enabled for the music demo. Using LV_FONT_DEFAULT instead.");
 #endif
 #if LV_FONT_MONTSERRAT_14
-  font_medium = &lv_font_montserrat_14;
+  font_medium = &CUSTOM_FONT_MEDIUM;
 #else
   LV_LOG_WARN("LV_FONT_MONTSERRAT_14 is not enabled for the music demo. Using LV_FONT_DEFAULT instead.");
 #endif
