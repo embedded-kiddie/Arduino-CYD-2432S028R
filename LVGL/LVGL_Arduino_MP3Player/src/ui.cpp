@@ -64,7 +64,12 @@ static void UpdateElapsedTime(void) {
 
 static ID3Tags_t id3tags;
 static void get_id3tags(ID3Tags_t* tags [[gnu::unused]]) {
-  printf("No.%d, %s / %s / %s\n", id3tags.playNo, id3tags.title.c_str(), id3tags.artist.c_str(), id3tags.album.c_str());
+  lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
+    LV_SYMBOL_AUDIO,
+    id3tags.title.c_str(),
+    id3tags.artist.c_str(),
+    id3tags.album.c_str()
+  );
 }
 
 ////////////////// GLOBAL FUNCTIONS /////////////////
@@ -139,6 +144,18 @@ bool ui_loop(void) {
 void ui_redisplay(void) {
   lv_disp_trig_activity(NULL);
   lv_disp_load_scr(lv_scr_act());
+}
+
+const char* ui_get_title(uint32_t track_id) {
+  return "Title";
+}
+
+const char* ui_get_artist(uint32_t track_id) {
+  return "artist";
+}
+
+uint32_t ui_get_track_length(uint32_t track_id) {
+  return 180;
 }
 
 ///////////////////// VARIABLES ////////////////////

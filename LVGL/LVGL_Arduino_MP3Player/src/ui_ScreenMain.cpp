@@ -45,9 +45,10 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_x                (ui_MusicTitle, 0);
   lv_obj_set_y                (ui_MusicTitle, lv_pct(4));
   lv_obj_set_align            (ui_MusicTitle, LV_ALIGN_CENTER);
-  lv_label_set_long_mode      (ui_MusicTitle, LV_LABEL_LONG_SCROLL_CIRCULAR);
-  lv_label_set_text           (ui_MusicTitle, "Music Title One OK Rock");
+  lv_obj_set_style_text_font  (ui_MusicTitle, &CUSTOM_FONT_MEDIUM, 0);
   lv_obj_set_style_text_align (ui_MusicTitle, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_label_set_long_mode      (ui_MusicTitle, LV_LABEL_LONG_SCROLL_CIRCULAR);
+  lv_label_set_text           (ui_MusicTitle, "Music Title / Artist / Album Title");
 
   ui_ElapsedStart = lv_label_create(ui_ScreenMain);
   lv_obj_set_width            (ui_ElapsedStart, LV_SIZE_CONTENT);   /// 1
