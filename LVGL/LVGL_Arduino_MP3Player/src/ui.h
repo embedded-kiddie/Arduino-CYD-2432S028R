@@ -120,11 +120,11 @@ const char* ui_get_artist(uint32_t);
 uint32_t ui_get_track_length(uint32_t);
 
 // Custom font
-LV_FONT_DECLARE(noto_sans_jp_4bit_jis12_12);
-LV_FONT_DECLARE(noto_sans_jp_4bit_jis12_14);
+LV_FONT_DECLARE(noto_sans_jp_4bit_jis1_12);
+LV_FONT_DECLARE(noto_sans_jp_4bit_jis1_14);
 
-#define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis12_12
-#define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis12_14
+#define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
+#define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
 
 // Variables
 typedef struct {

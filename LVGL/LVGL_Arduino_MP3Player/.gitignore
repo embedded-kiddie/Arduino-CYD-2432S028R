@@ -2,8 +2,8 @@
 *
 
 # target list
-!src/*
-!font/*
-!assets/*
+!src
+!font
+!assets
 !.gitignore
 .DS_Store
