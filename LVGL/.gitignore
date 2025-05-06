@@ -6,4 +6,5 @@
 !LVGL_Arduino_TFT_eSPI
 !LVGL_Arduino_MultiCore
 !LVGL_Arduino_MP3Player
+!LVGL_Arduino_FontManager
 

@@ -47,17 +47,46 @@
 #define CYD_SD_SPI_BUS VSPI
 #endif
 
-#define SPI_CLOCK 50 // MHz
+#define SPI_CLOCK 50000000 // 50 MHz
 
-#ifdef  USE_SDFAT
+/*--------------------------------------------------------------------------------
+ * SD library
+ *--------------------------------------------------------------------------------*/
+#ifdef USE_SDFAT
+
+#define DISABLE_FS_H_WARNING
 #include "SdFat.h"
-#define SD_CONFIG SdSpiConfig(CYD_SD_SS, SHARED_SPI, SPI_CLOCK)
+
+#undef  FILE_APPEND
+#define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
+#undef  FILE_WRITE
+#define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
+
+// SHARED_SPI makes SD very slow, while DEDICATED_SPI causes GFX libraries to stop working.
+#define SD_CONFIG SdSpiConfig(CYD_SD_SS, SHARED_SPI /* DEDICATED_SPI */, SPI_CLOCK)
+
+#if   0
+#define FS_TYPE SdFs
+SdFs SD;
 #else
+#define FS_TYPE SdFat
+SdFat SD;
+#endif
+
+#else // ! USE_SDFAT
+
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
+
+#define FS_TYPE  fs::SDFS
+#ifdef _TFT_eSPIH_
+#define SD_CONFIG CYD_SD_SS, GFX_EXEC(getSPIinstance()), SPI_CLOCK
+#else
 #define SD_CONFIG CYD_SD_SS, SPI, SPI_CLOCK
 #endif
+
+#endif // USE_SDFAT
 
 /* Uncomment and set up if you want to use custom pins for the SPI communication
 #define REASSIGN_PINS
@@ -69,8 +98,12 @@ int mosi  = CYD_SD_MOSI;  // 23
 int cs    = CYD_SD_SS;    //  5
 #define SD_CONFIG cs
 //*/
-
-void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
+/*--------------------------------------------------------------------------------
+ * Basic file I/O and directory related functions
+ * ex)  listDir(SD, "/", 0);
+ *      createDir(SD, "/mydir");
+ *--------------------------------------------------------------------------------*/
+void listDir(FS_TYPE &fs, const char *dirname, uint8_t levels) {
   Serial.printf("Listing directory: %s\n", dirname);
 
   File root = fs.open(dirname);
@@ -83,27 +116,40 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
     return;
   }
 
+  char buf[16];
   File file = root.openNextFile();
   while (file) {
     if (file.isDirectory()) {
       Serial.print("  DIR : ");
+#ifdef USE_SDFAT
+      file.getName(buf, sizeof(buf));
+      Serial.println(buf);
+#else
       Serial.println(file.name());
+#endif
       if (levels) {
+#ifdef USE_SDFAT
+        listDir(fs, buf, levels - 1);
+#else
         listDir(fs, file.path(), levels - 1);
+#endif
       }
     } else {
       Serial.print("  FILE: ");
+#ifdef USE_SDFAT
+      file.getName(buf, sizeof(buf));
+      Serial.print(buf);
+#else
       Serial.print(file.name());
+#endif
       Serial.print("  SIZE: ");
       Serial.println(file.size());
     }
-
     file = root.openNextFile();
   }
 }
-
-void createDir(fs::FS &fs, const char *path) {
-  Serial.printf("Creating Dir: %s\n", path);
+void createDir(FS_TYPE &fs, const char *path) {
+  Serial.printf("Creating dir: %s\n", path);
   if (fs.mkdir(path)) {
     Serial.println("Dir created");
   } else {
@@ -111,8 +157,8 @@ void createDir(fs::FS &fs, const char *path) {
   }
 }
 
-void removeDir(fs::FS &fs, const char *path) {
-  Serial.printf("Removing Dir: %s\n", path);
+void removeDir(FS_TYPE &fs, const char *path) {
+  Serial.printf("Removing dir: %s\n", path);
   if (fs.rmdir(path)) {
     Serial.println("Dir removed");
   } else {
@@ -120,7 +166,7 @@ void removeDir(fs::FS &fs, const char *path) {
   }
 }
 
-void readFile(fs::FS &fs, const char *path) {
+void readFile(FS_TYPE &fs, const char *path) {
   Serial.printf("Reading file: %s\n", path);
 
   File file = fs.open(path);
@@ -136,7 +182,7 @@ void readFile(fs::FS &fs, const char *path) {
   file.close();
 }
 
-void writeFile(fs::FS &fs, const char *path, const char *message) {
+void writeFile(FS_TYPE &fs, const char *path, const char *message) {
   Serial.printf("Writing file: %s\n", path);
 
   File file = fs.open(path, FILE_WRITE);
@@ -152,7 +198,7 @@ void writeFile(fs::FS &fs, const char *path, const char *message) {
   file.close();
 }
 
-void appendFile(fs::FS &fs, const char *path, const char *message) {
+void appendFile(FS_TYPE &fs, const char *path, const char *message) {
   Serial.printf("Appending to file: %s\n", path);
 
   File file = fs.open(path, FILE_APPEND);
@@ -168,7 +214,7 @@ void appendFile(fs::FS &fs, const char *path, const char *message) {
   file.close();
 }
 
-void renameFile(fs::FS &fs, const char *path1, const char *path2) {
+void renameFile(FS_TYPE &fs, const char *path1, const char *path2) {
   Serial.printf("Renaming file %s to %s\n", path1, path2);
   if (fs.rename(path1, path2)) {
     Serial.println("File renamed");
@@ -177,7 +223,7 @@ void renameFile(fs::FS &fs, const char *path1, const char *path2) {
   }
 }
 
-void deleteFile(fs::FS &fs, const char *path) {
+void deleteFile(FS_TYPE &fs, const char *path) {
   Serial.printf("Deleting file: %s\n", path);
   if (fs.remove(path)) {
     Serial.println("File deleted");
@@ -185,8 +231,7 @@ void deleteFile(fs::FS &fs, const char *path) {
     Serial.println("Delete failed");
   }
 }
-
-void testFileIO(fs::FS &fs, const char *path) {
+void testFileIO(FS_TYPE &fs, const char *path) {
   File file = fs.open(path);
   static uint8_t buf[512];
   size_t len = 0;
@@ -228,43 +273,31 @@ void testFileIO(fs::FS &fs, const char *path) {
 }
 
 /*--------------------------------------------------------------------------------
- * Setup SD card (Mounting fails if card is not inserted)
- * Note the global variable 'SPI' is assigned to 'VSPI' same as 'CYD_SD_SPI_BUS'.
- * https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
+ * Test basic functions
  *--------------------------------------------------------------------------------*/
-void sdcard_setup() {
+void sdcard_test(void) {
+#ifdef  USE_SDFAT
 
-#if   false
-
-#ifdef REASSIGN_PINS
-  SPI.begin(sck, miso, mosi, cs);
-#endif
-
-  if (!SD.begin(SD_CONFIG)) {
-    Serial.println("Card Mount Failed");
-    return;
+  Serial.print("SD card type: ");
+  switch (SD.card()->type()) {
+    case SD_CARD_TYPE_SD1:  Serial.println("SD1");       break;
+    case SD_CARD_TYPE_SD2:  Serial.println("SD2");       break;
+    case SD_CARD_TYPE_SDHC: Serial.println("SDHC/SDXC"); break;
+    default:                Serial.println("unknown");   break;
   }
 
-#elif 0
-
-  // this also works since the SD card is connected to the default SPI bus, VSPI
-  // and when display and touch panel are connected to HSPI
-  if (!SD.begin()) {
-    Serial.println("Card Mount Failed");
-    return;
+  Serial.print("FS type: ");
+  switch (SD.vol()->fatType()) {
+    case FAT_TYPE_EXFAT: Serial.println("exFat"); break;
+    case FAT_TYPE_FAT32: Serial.println("FAT32"); break;
+    case FAT_TYPE_FAT16: Serial.println("FAT16"); break;
+    case FAT_TYPE_FAT12: Serial.println("FAT12"); break;
   }
+
+  uint32_t cardSize = SD.card()->sectorCount() * 0.000512 + 0.5;
+  Serial.printf("SD card Size: %dMB\n", cardSize);
 
 #else
-
-  static SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
-  spi.begin(CYD_SD_SCK, CYD_SD_MISO, CYD_SD_MOSI, CYD_SD_SS);
-
-  if (!SD.begin(CYD_SD_SS, spi, 50000000)) {
-    Serial.println("Card Mount Failed");
-    return;
-  }
-
-#endif
 
   uint8_t cardType = SD.cardType();
   if (cardType == CARD_NONE) {
@@ -272,7 +305,6 @@ void sdcard_setup() {
     return;
   }
 
-#if   false
   Serial.print("SD Card Type: ");
   if (cardType == CARD_MMC) {
     Serial.println("MMC");
@@ -283,15 +315,11 @@ void sdcard_setup() {
   } else {
     Serial.println("UNKNOWN");
   }
-#endif
-}
 
-/*--------------------------------------------------------------------------------
- * Test basic functions
- *--------------------------------------------------------------------------------*/
-void sdcard_test(void) {
   uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  Serial.printf("SD Card Size: %lluMB\n", cardSize);
+  Serial.printf("SD card size: %lluMB\n", cardSize);
+
+#endif // USE_SDFAT
 
   listDir(SD, "/", 0);
   createDir(SD, "/mydir");
@@ -305,8 +333,20 @@ void sdcard_test(void) {
   renameFile(SD, "/hello.txt", "/foo.txt");
   readFile(SD, "/foo.txt");
   testFileIO(SD, "/test.txt");
+
+#ifdef  USE_SDFAT
+
+  Serial.printf("Free space: %dMB\n", (SD.vol()->bytesPerCluster() * SD.vol()->freeClusterCount()) / (1024 * 1024));
+  SD.ls(LS_R | LS_DATE | LS_SIZE);
+
+#else
+
+  Serial.printf("Number of sectors: %d\n", SD.numSectors());
+  Serial.printf("Size of sector: %d\n", SD.sectorSize());
   Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+
+#endif // USE_SDFAT
 }
 
 /*--------------------------------------------------------------------------------
@@ -343,7 +383,7 @@ inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) {
 #error Support only for TFT_eSPI and LovyanGFX
 #endif
 
-bool SaveBMP24(fs::FS &fs, const char *path, GFX_TYPE &tft) {
+bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
   uint32_t start = millis();
 
   uint32_t w = tft.width();
@@ -362,7 +402,11 @@ bool SaveBMP24(fs::FS &fs, const char *path, GFX_TYPE &tft) {
   File file = fs.open(path, FILE_WRITE);
 
   if (!file) {
+#ifdef  USE_SDFAT
+    Serial.printf("SdFat: open %s failed.\n", path);
+#else
     Serial.printf("SD: open %s failed.\n", path);
+#endif
     return false;
   } else {
     Serial.printf("saving %s\n", path);
@@ -448,4 +492,49 @@ bool SaveBMP24(fs::FS &fs, const char *path, GFX_TYPE &tft) {
   Serial.printf("done (%d msec).\n", start);
 //listDir(SD, "/", 0);
   return true;
+}
+
+/*--------------------------------------------------------------------------------
+ * Setup SD card (Mounting fails if card is not inserted)
+ * Note the global variable 'SPI' is assigned to 'VSPI' same as 'CYD_SD_SPI_BUS'.
+ * https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
+ *--------------------------------------------------------------------------------*/
+void sdcard_setup() {
+
+#ifdef  USE_SDFAT
+
+#if 1
+  if (!SD.cardBegin(SD_CONFIG))
+#else
+  if (!SD.begin(CYD_SD_SS))
+#endif
+  {
+    Serial.println("SdFat: Card Mount Failed");
+    return;
+  }
+
+#elif 0
+
+#ifdef REASSIGN_PINS
+  SPI.begin(sck, miso, mosi, cs);
+#endif
+
+  // this also works since the SD card is connected to the default SPI bus, VSPI
+  // and when display and touch panel are connected to HSPI
+  if (!SD.begin()) {
+    Serial.println("SD: Card Mount Failed");
+    return;
+  }
+
+#else
+
+  static SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
+  spi.begin(CYD_SD_SCK, CYD_SD_MISO, CYD_SD_MOSI, CYD_SD_SS);
+
+  if (!SD.begin(CYD_SD_SS, spi, SPI_CLOCK)) {
+    Serial.println("SD: Card Mount Failed");
+    return;
+  }
+
+#endif // USE_SDFAT
 }

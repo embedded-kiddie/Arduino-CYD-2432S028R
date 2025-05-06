@@ -123,13 +123,13 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_MenuDotMain,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_Favourite = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text        (ui_Favourite, " ");
-  lv_obj_set_width            (ui_Favourite, 25);
-  lv_obj_set_height           (ui_Favourite, 25);
-  lv_obj_set_x                (ui_Favourite, lv_pct(40));
-  lv_obj_set_y                (ui_Favourite, lv_pct(-44));
-  lv_obj_set_align            (ui_Favourite, LV_ALIGN_CENTER);
-  lv_obj_add_flag             (ui_Favourite, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
+  lv_checkbox_set_text          (ui_Favourite, " ");
+  lv_obj_set_width              (ui_Favourite, 25);
+  lv_obj_set_height             (ui_Favourite, 25);
+  lv_obj_set_x                  (ui_Favourite, lv_pct(40));
+  lv_obj_set_y                  (ui_Favourite, lv_pct(-44));
+  lv_obj_set_align              (ui_Favourite, LV_ALIGN_CENTER);
+  lv_obj_add_flag               (ui_Favourite, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src (ui_Favourite, &ui_img_511832737,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_radius       (ui_Favourite, 100,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
@@ -149,13 +149,13 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_Favourite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   ui_Repeat = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text        (ui_Repeat, " ");
-  lv_obj_set_width            (ui_Repeat, 25);
-  lv_obj_set_height           (ui_Repeat, 25);
-  lv_obj_set_x                (ui_Repeat, lv_pct(40));
-  lv_obj_set_y                (ui_Repeat, lv_pct(-15));
-  lv_obj_set_align            (ui_Repeat, LV_ALIGN_CENTER);
-  lv_obj_add_flag             (ui_Repeat, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
+  lv_checkbox_set_text          (ui_Repeat, " ");
+  lv_obj_set_width              (ui_Repeat, 25);
+  lv_obj_set_height             (ui_Repeat, 25);
+  lv_obj_set_x                  (ui_Repeat, lv_pct(40));
+  lv_obj_set_y                  (ui_Repeat, lv_pct(-15));
+  lv_obj_set_align              (ui_Repeat, LV_ALIGN_CENTER);
+  lv_obj_add_flag               (ui_Repeat, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src         (ui_Repeat, &ui_img_repeat_png,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_image_recolor     (ui_Repeat, lv_color_hex(0x4040FF), (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
@@ -174,13 +174,13 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_bg_image_recolor_opa (ui_Repeat, 255,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   ui_Shuffle = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text        (ui_Shuffle, " ");
-  lv_obj_set_width            (ui_Shuffle, 25);
-  lv_obj_set_height           (ui_Shuffle, 25);
-  lv_obj_set_x                (ui_Shuffle, lv_pct(-40));
-  lv_obj_set_y                (ui_Shuffle, lv_pct(-15));
-  lv_obj_set_align            (ui_Shuffle, LV_ALIGN_CENTER);
-  lv_obj_add_flag             (ui_Shuffle, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
+  lv_checkbox_set_text          (ui_Shuffle, " ");
+  lv_obj_set_width              (ui_Shuffle, 25);
+  lv_obj_set_height             (ui_Shuffle, 25);
+  lv_obj_set_x                  (ui_Shuffle, lv_pct(-40));
+  lv_obj_set_y                  (ui_Shuffle, lv_pct(-15));
+  lv_obj_set_align              (ui_Shuffle, LV_ALIGN_CENTER);
+  lv_obj_add_flag               (ui_Shuffle, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src         (ui_Shuffle, &ui_img_shuffle_png,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_image_recolor     (ui_Shuffle, lv_color_hex(0x4040FF),  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
@@ -199,13 +199,13 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_bg_image_recolor_opa (ui_Shuffle, 255,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   ui_ButtonPlay = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text        (ui_ButtonPlay, " ");
-  lv_obj_set_width            (ui_ButtonPlay, 50);
-  lv_obj_set_height           (ui_ButtonPlay, 50);
-  lv_obj_set_x                (ui_ButtonPlay, lv_pct(2));
-  lv_obj_set_y                (ui_ButtonPlay, lv_pct(27));
-  lv_obj_set_align            (ui_ButtonPlay, LV_ALIGN_CENTER);
-  lv_obj_add_flag             (ui_ButtonPlay, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
+  lv_checkbox_set_text          (ui_ButtonPlay, " ");
+  lv_obj_set_width              (ui_ButtonPlay, 50);
+  lv_obj_set_height             (ui_ButtonPlay, 50);
+  lv_obj_set_x                  (ui_ButtonPlay, lv_pct(2));
+  lv_obj_set_y                  (ui_ButtonPlay, lv_pct(27));
+  lv_obj_set_align              (ui_ButtonPlay, LV_ALIGN_CENTER);
+  lv_obj_add_flag               (ui_ButtonPlay, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src (ui_ButtonPlay, &ui_img_play_png,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_radius       (ui_ButtonPlay, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
