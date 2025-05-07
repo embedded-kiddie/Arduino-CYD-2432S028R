@@ -94,7 +94,7 @@ static void apply_font_style(int n) {
 
     // 新たにフォントデータを作成し、ラベルに反映
     if (font[i] = create_font(n, i)) {
-      lv_obj_set_style_text_font(label[i], font[i], 0);
+      lv_obj_set_style_text_font(label[i], font[i], (int32_t)LV_PART_MAIN /* 0 */ | (int32_t)LV_STATE_DEFAULT /* 0 */);
     }
   }
 
@@ -103,7 +103,7 @@ static void apply_font_style(int n) {
   const lv_font_t *font = fonts[n].font;
 
   for (int i = 0; i < N_BPP; i++) {
-    lv_obj_set_style_text_font(label[i], &font[i], 0);
+    lv_obj_set_style_text_font(label[i], &font[i], (int32_t)LV_PART_MAIN /* 0 */ | (int32_t)LV_STATE_DEFAULT /* 0 */);
   }
 
 #endif // USE_LITTLEFS
@@ -142,7 +142,7 @@ int ui_init(void) {
   for (int i = 0; i < N_BPP; i++) {
     label[i] = lv_label_create(lv_screen_active());
     lv_obj_align(label[i], LV_ALIGN_CENTER, 0, ypos[i]);
-    lv_obj_set_style_text_align(label[i], LV_TEXT_ALIGN_CENTER, (int32_t)LV_PART_MAIN | (int32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(label[i], LV_TEXT_ALIGN_CENTER, (int32_t)LV_PART_MAIN /* 0 */ | (int32_t)LV_STATE_DEFAULT /* 0 */);
     lv_label_set_text(label[i], sample);
   }
 

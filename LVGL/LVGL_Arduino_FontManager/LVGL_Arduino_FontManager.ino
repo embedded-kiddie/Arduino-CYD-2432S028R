@@ -44,8 +44,11 @@ static LGFX tft;
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
+#define ENABLE_SCREENSHOT 0
+#if ENABLE_SCREENSHOT
 // #define USE_SDFAT
 #include "../src/sdcard.hpp"
+#endif
 
 //----------------------------------------------------------------------
 // LVGL required functions
@@ -219,7 +222,8 @@ void loop() {
   // 現在表示中のフォントファミリーの名称
   const char* name = ui_loop();
 
-  // スクリーンダンプ
+#if ENABLE_SCREENSHOT
+  // スクリーンショット
   if (Serial.available()) {
     Serial.readStringUntil('\n');
     sdcard_setup();
@@ -227,4 +231,5 @@ void loop() {
     sprintf(buf, "/%s.bmp", &name[strlen(name) - 8]); // ファイル名8文字規制のため
     SaveBMP24(SD, buf, tft);
   }
+#endif
 }
