@@ -10,7 +10,7 @@
 #define FORMAT_LITTLEFS_IF_FAILED true
 
 // https://github.com/espressif/arduino-esp32/tree/master/libraries/LittleFS/examples/LITTLEFS_test
-void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
+static void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
   Serial.printf("Listing directory: %s\r\n", dirname);
 
   File root = fs.open(dirname);
