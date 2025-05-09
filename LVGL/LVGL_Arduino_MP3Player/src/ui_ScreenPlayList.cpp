@@ -95,11 +95,12 @@ static void heart_click_event_cb(lv_event_t *e) {
 }
 
 static void add_list_button(lv_obj_t* parent, uint32_t track_id) {
-  uint32_t t = ui_get_track_length(track_id);
-  char time[32];
-  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, t / 60, t % 60);
-  const char* title = ui_get_title(track_id);
+  const char* title  = ui_get_title(track_id);
   const char* artist = ui_get_artist(track_id);
+  uint32_t duration  = ui_get_duration(track_id);
+
+  char time[32];
+  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
 
   lv_obj_t* btn = lv_obj_create(parent);
   lv_obj_remove_style_all(btn);
@@ -229,8 +230,8 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
 
   /*Create an empty transparent container*/
   lv_obj_t* list = lv_obj_create(parent);
-  lv_obj_add_event_cb     (list, list_delete_event_cb, LV_EVENT_DELETE, NULL);
   lv_obj_remove_style_all (list);
+  lv_obj_add_event_cb     (list, list_delete_event_cb, LV_EVENT_DELETE, NULL);
   lv_obj_set_size         (list, LV_HOR_RES, LV_VER_RES - LV_DEMO_MUSIC_HANDLE_SIZE);
   lv_obj_set_y            (list, LV_DEMO_MUSIC_HANDLE_SIZE);
 //lv_obj_set_y            (list, 0);

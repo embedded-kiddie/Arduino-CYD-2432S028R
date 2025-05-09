@@ -154,7 +154,7 @@ const char* ui_get_artist(uint32_t track_id) {
   return "artist";
 }
 
-uint32_t ui_get_track_length(uint32_t track_id) {
+uint32_t ui_get_duration(uint32_t track_id) {
   return 180;
 }
 

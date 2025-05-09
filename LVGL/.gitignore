@@ -2,6 +2,7 @@
 *
 
 # target list
+!LVGL_Arduino_Base
 !LVGL_Arduino_LovyanGFX
 !LVGL_Arduino_TFT_eSPI
 !LVGL_Arduino_MultiCore

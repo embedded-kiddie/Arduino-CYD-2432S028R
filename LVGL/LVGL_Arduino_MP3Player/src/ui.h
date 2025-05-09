@@ -115,16 +115,17 @@ void ui_init(void);
 // Custom Functions
 bool ui_loop(void);
 void ui_redisplay(void);
+
 const char* ui_get_title(uint32_t);
 const char* ui_get_artist(uint32_t);
-uint32_t ui_get_track_length(uint32_t);
-
-// Custom font
-LV_FONT_DECLARE(noto_sans_jp_4bit_jis1_12);
-LV_FONT_DECLARE(noto_sans_jp_4bit_jis1_14);
+uint32_t ui_get_duration(uint32_t);
 
 #define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
 #define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
+
+// Custom font
+LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
+LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 
 // Variables
 typedef struct {
