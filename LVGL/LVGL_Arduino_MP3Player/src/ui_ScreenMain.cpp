@@ -41,7 +41,7 @@ void ui_ScreenMain_screen_init(void) {
 
   ui_MusicTitle = lv_label_create(ui_ScreenMain);
   lv_obj_set_width            (ui_MusicTitle, lv_pct(90));
-  lv_obj_set_height           (ui_MusicTitle, 16); // for 14pt font
+  lv_obj_set_height           (ui_MusicTitle, LV_SIZE_CONTENT); // for 14pt bpp=4
   lv_obj_set_x                (ui_MusicTitle, 0);
   lv_obj_set_y                (ui_MusicTitle, lv_pct(4));
   lv_obj_set_align            (ui_MusicTitle, LV_ALIGN_CENTER);
@@ -51,7 +51,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_label_set_text           (ui_MusicTitle, "Music Title / Artist / Album Title");
 
   ui_ElapsedStart = lv_label_create(ui_ScreenMain);
-  lv_obj_set_width            (ui_ElapsedStart, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_width            (ui_ElapsedStart, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_height           (ui_ElapsedStart, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_x                (ui_ElapsedStart, lv_pct(-40));
   lv_obj_set_y                (ui_ElapsedStart, lv_pct(13));
@@ -59,7 +59,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_label_set_text           (ui_ElapsedStart, "0:00");
 
   ui_ElapsedEnd = lv_label_create(ui_ScreenMain);
-  lv_obj_set_width            (ui_ElapsedEnd, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_width            (ui_ElapsedEnd, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_height           (ui_ElapsedEnd, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_x                (ui_ElapsedEnd, lv_pct(40));
   lv_obj_set_y                (ui_ElapsedEnd, lv_pct(13));
@@ -69,25 +69,16 @@ void ui_ScreenMain_screen_init(void) {
   ui_ElapsedBar = lv_slider_create(ui_ScreenMain);
   lv_slider_set_value         (ui_ElapsedBar, 0, LV_ANIM_OFF);
   if (lv_slider_get_mode      (ui_ElapsedBar) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_ElapsedBar, 0, LV_ANIM_OFF);
-  lv_obj_set_height           (ui_ElapsedBar, 3);
+  lv_obj_set_height           (ui_ElapsedBar, 5);
   lv_obj_set_width            (ui_ElapsedBar, lv_pct(60));
   lv_obj_set_x                (ui_ElapsedBar, 0);
   lv_obj_set_y                (ui_ElapsedBar, lv_pct(13));
   lv_obj_set_align            (ui_ElapsedBar, LV_ALIGN_CENTER);
   lv_obj_remove_flag          (ui_ElapsedBar, LV_OBJ_FLAG_GESTURE_BUBBLE);  /// Flags
-  lv_obj_set_style_radius     (ui_ElapsedBar, 10, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-
+  lv_obj_set_style_radius     (ui_ElapsedBar, 100,                    (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_color   (ui_ElapsedBar, lv_color_hex(0x000000), (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius     (ui_ElapsedBar,  10,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_opa     (ui_ElapsedBar, 255,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-
-  lv_obj_set_style_bg_color   (ui_ElapsedBar, lv_color_hex(0x000000), (uint32_t)LV_PART_KNOB | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius     (ui_ElapsedBar, 100,                    (uint32_t)LV_PART_KNOB | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa     (ui_ElapsedBar, 255,                    (uint32_t)LV_PART_KNOB | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left   (ui_ElapsedBar,   0,                    (uint32_t)LV_PART_KNOB | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right  (ui_ElapsedBar,   0,                    (uint32_t)LV_PART_KNOB | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_top    (ui_ElapsedBar,   0,                    (uint32_t)LV_PART_KNOB | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_bottom (ui_ElapsedBar,   0,                    (uint32_t)LV_PART_KNOB | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_opa     (ui_ElapsedBar,   0,                    (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
 
   //Compensating for LVGL9.1 draw crash with bar/slider max value when top-padding is nonzero and right-padding is 0
   if (lv_obj_get_style_pad_top(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_ElapsedBar, lv_obj_get_style_pad_right(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) + 1, (uint32_t)LV_PART_MAIN);
