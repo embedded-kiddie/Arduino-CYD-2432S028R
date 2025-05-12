@@ -84,7 +84,7 @@ void ui_ScreenMain_screen_init(void) {
   if (lv_obj_get_style_pad_top(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_ElapsedBar, lv_obj_get_style_pad_right(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) + 1, (uint32_t)LV_PART_MAIN);
 
   ui_MenuDotMain = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text        (ui_MenuDotMain, " ");
+  lv_checkbox_set_text        (ui_MenuDotMain, "");
   lv_obj_set_width            (ui_MenuDotMain, 27);
   lv_obj_set_height           (ui_MenuDotMain, 27);
   lv_obj_set_x                (ui_MenuDotMain, lv_pct(-40));
@@ -114,7 +114,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_MenuDotMain,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_Favourite = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text          (ui_Favourite, " ");
+  lv_checkbox_set_text          (ui_Favourite, "");
   lv_obj_set_width              (ui_Favourite, 25);
   lv_obj_set_height             (ui_Favourite, 25);
   lv_obj_set_x                  (ui_Favourite, lv_pct(40));
@@ -140,7 +140,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_Favourite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   ui_Repeat = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text          (ui_Repeat, " ");
+  lv_checkbox_set_text          (ui_Repeat, "");
   lv_obj_set_width              (ui_Repeat, 25);
   lv_obj_set_height             (ui_Repeat, 25);
   lv_obj_set_x                  (ui_Repeat, lv_pct(40));
@@ -165,7 +165,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_bg_image_recolor_opa (ui_Repeat, 255,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   ui_Shuffle = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text          (ui_Shuffle, " ");
+  lv_checkbox_set_text          (ui_Shuffle, "");
   lv_obj_set_width              (ui_Shuffle, 25);
   lv_obj_set_height             (ui_Shuffle, 25);
   lv_obj_set_x                  (ui_Shuffle, lv_pct(-40));
@@ -190,7 +190,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_bg_image_recolor_opa (ui_Shuffle, 255,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   ui_ButtonPlay = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text          (ui_ButtonPlay, " ");
+  lv_checkbox_set_text          (ui_ButtonPlay, "");
   lv_obj_set_width              (ui_ButtonPlay, 50);
   lv_obj_set_height             (ui_ButtonPlay, 50);
   lv_obj_set_x                  (ui_ButtonPlay, lv_pct(2));
@@ -217,7 +217,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_ButtonPlay,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   ui_ButtonNext = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text          (ui_ButtonNext, " ");
+  lv_checkbox_set_text          (ui_ButtonNext, "");
   lv_obj_set_width              (ui_ButtonNext, 45);
   lv_obj_set_height             (ui_ButtonNext, 45);
   lv_obj_set_x                  (ui_ButtonNext, lv_pct(27));
@@ -251,7 +251,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_ButtonNext,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_ButtonPrev = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text          (ui_ButtonPrev, " ");
+  lv_checkbox_set_text          (ui_ButtonPrev, "");
   lv_obj_set_width              (ui_ButtonPrev, 45);
   lv_obj_set_height             (ui_ButtonPrev, 45);
   lv_obj_set_x                  (ui_ButtonPrev, lv_pct(-22));
@@ -285,7 +285,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_ButtonPrev,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_VolumeMax = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text          (ui_VolumeMax, " ");
+  lv_checkbox_set_text          (ui_VolumeMax, "");
   lv_obj_set_width              (ui_VolumeMax, 40);
   lv_obj_set_height             (ui_VolumeMax, 40);
   lv_obj_set_x                  (ui_VolumeMax, lv_pct(40));
@@ -317,7 +317,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_VolumeMax,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_VolumeMin = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text          (ui_VolumeMin, " ");
+  lv_checkbox_set_text          (ui_VolumeMin, "");
   lv_obj_set_width              (ui_VolumeMin, 40);
   lv_obj_set_height             (ui_VolumeMin, 40);
   lv_obj_set_x                  (ui_VolumeMin, lv_pct(-40));

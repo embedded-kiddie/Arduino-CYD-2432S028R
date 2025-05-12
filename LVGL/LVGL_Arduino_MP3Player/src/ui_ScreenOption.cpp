@@ -12,7 +12,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_style_bg_opa   (ui_ScreenOption, 255,                    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
 
   ui_MenuBackRight = lv_checkbox_create(ui_ScreenOption);
-  lv_checkbox_set_text(ui_MenuBackRight, " ");
+  lv_checkbox_set_text(ui_MenuBackRight, "");
   lv_obj_set_width    (ui_MenuBackRight, 27);
   lv_obj_set_height   (ui_MenuBackRight, 27);
   lv_obj_set_x        (ui_MenuBackRight, lv_pct(42));

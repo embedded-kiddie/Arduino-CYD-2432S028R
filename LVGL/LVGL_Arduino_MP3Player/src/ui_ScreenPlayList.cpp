@@ -132,7 +132,7 @@ static void add_list_button(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_set_grid_cell(time_label, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_END, 0, 2);
 
   lv_obj_t* heart = lv_checkbox_create(btn);
-  lv_checkbox_set_text(heart, " ");
+  lv_checkbox_set_text(heart, "");
   lv_obj_add_flag     (heart, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src (heart, &ui_img_1157704237,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
@@ -261,7 +261,7 @@ void ui_ScreenPlayList_screen_init(void) {
 
 #if   false
   ui_MenuBackLeft = lv_checkbox_create(ui_ContainerPlayList);
-  lv_checkbox_set_text(ui_MenuBackLeft, " ");
+  lv_checkbox_set_text(ui_MenuBackLeft, "");
   lv_obj_set_width    (ui_MenuBackLeft, 27);
   lv_obj_set_height   (ui_MenuBackLeft, 27);
   lv_obj_set_x        (ui_MenuBackLeft, lv_pct(-40));
@@ -293,7 +293,7 @@ void ui_ScreenPlayList_screen_init(void) {
 #endif
 #if false
   ui_MenuBluetoothOn = lv_checkbox_create(ui_ContainerPlayList);
-  lv_checkbox_set_text(ui_MenuBluetoothOn, " ");
+  lv_checkbox_set_text(ui_MenuBluetoothOn, "");
   lv_obj_set_width    (ui_MenuBluetoothOn, 27);
   lv_obj_set_height   (ui_MenuBluetoothOn, 27);
   lv_obj_set_x        (ui_MenuBluetoothOn, lv_pct(40));
@@ -323,7 +323,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOn,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_MenuBluetoothOff = lv_checkbox_create(ui_ContainerPlayList);
-  lv_checkbox_set_text(ui_MenuBluetoothOff, " ");
+  lv_checkbox_set_text(ui_MenuBluetoothOff, "");
   lv_obj_set_width    (ui_MenuBluetoothOff, 27);
   lv_obj_set_height   (ui_MenuBluetoothOff, 27);
   lv_obj_set_x        (ui_MenuBluetoothOff, lv_pct(20));
@@ -357,7 +357,7 @@ void ui_ScreenPlayList_screen_init(void) {
 #endif
 #if   false
   ui_CheckFavorite = lv_checkbox_create(ui_ScreenPlayList);
-  lv_checkbox_set_text(ui_CheckFavorite, " ");
+  lv_checkbox_set_text(ui_CheckFavorite, "");
   lv_obj_set_width    (ui_CheckFavorite, 15);
   lv_obj_set_height   (ui_CheckFavorite, 15);
   lv_obj_set_align    (ui_CheckFavorite, LV_ALIGN_CENTER);
@@ -395,7 +395,7 @@ void ui_ScreenPlayList_screen_init(void) {
 #endif
 
   ui_MenuBackUp = lv_checkbox_create(ui_ScreenPlayList);
-  lv_checkbox_set_text(ui_MenuBackUp, " ");
+  lv_checkbox_set_text(ui_MenuBackUp, "");
   lv_obj_set_height   (ui_MenuBackUp, 25);
   lv_obj_set_width    (ui_MenuBackUp, lv_pct(110));
   lv_obj_set_x        (ui_MenuBackUp, lv_pct(0));
@@ -449,7 +449,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_bottom     (ui_MenuBackUp,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_MenuBackDown = lv_checkbox_create(ui_ScreenPlayList);
-  lv_checkbox_set_text(ui_MenuBackDown, " ");
+  lv_checkbox_set_text(ui_MenuBackDown, "");
   lv_obj_set_height   (ui_MenuBackDown, 25);
   lv_obj_set_width    (ui_MenuBackDown, lv_pct(110));
   lv_obj_set_x        (ui_MenuBackDown, lv_pct(0));
