@@ -32,6 +32,7 @@ static lv_style_t style_scrollbar;
 static lv_style_t style_button;
 static lv_style_t style_button_pressed;
 static lv_style_t style_button_checked;
+//static lv_style_t style_button_disable;
 static lv_style_t style_title;
 static lv_style_t style_artist;
 static lv_style_t style_time;
@@ -79,6 +80,7 @@ static void list_delete_event_cb(lv_event_t* e) {
     lv_style_reset(&style_button);
     lv_style_reset(&style_button_pressed);
     lv_style_reset(&style_button_checked);
+//  lv_style_reset(&style_button_disable);
     lv_style_reset(&style_title);
     lv_style_reset(&style_artist);
     lv_style_reset(&style_time);
@@ -106,11 +108,12 @@ static void add_list_button(lv_obj_t* parent, uint32_t track_id) {
 
   lv_obj_t* btn = lv_obj_create(parent);
   lv_obj_remove_style_all(btn);
-  lv_obj_set_size(btn, lv_pct(100), 60);
+  lv_obj_set_size(btn, lv_pct(100), LIST_HEIGHT);
 
   lv_obj_add_style(btn, &style_button, 0);
   lv_obj_add_style(btn, &style_button_pressed, LV_STATE_PRESSED);
   lv_obj_add_style(btn, &style_button_checked, LV_STATE_CHECKED);
+//lv_obj_add_style(btn, &style_button_disable, LV_STATE_DISABLED);
   lv_obj_add_event_cb(btn, list_click_event_cb, LV_EVENT_CLICKED, NULL);
 
   lv_obj_t* icon = lv_image_create(btn);
@@ -150,8 +153,6 @@ static void add_list_button(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_set_width        (border, lv_pct(120));
   lv_obj_align            (border, LV_ALIGN_BOTTOM_MID, 0, 0);
   lv_obj_add_flag         (border, LV_OBJ_FLAG_IGNORE_LAYOUT);
-
-//printf("height: %d\n", lv_obj_get_height(btn));
 }
 
 /**********************
@@ -190,7 +191,11 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_init           (&style_button_checked);
   lv_style_set_bg_opa     (&style_button_checked, LV_OPA_COVER);
   lv_style_set_bg_color   (&style_button_checked, PLAYLIST_COLOR_DEFAULT);
-
+/*
+  lv_style_init           (&style_button_disable);
+  lv_style_set_text_opa   (&style_button_disable, LV_OPA_40);
+  lv_style_set_image_opa  (&style_button_disable, LV_OPA_40);
+*/
   lv_style_init           (&style_title);
   lv_style_set_text_font  (&style_title, font_medium);
   lv_style_set_text_color (&style_title, lv_color_hex(0xffffff));
