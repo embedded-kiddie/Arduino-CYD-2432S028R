@@ -18,6 +18,10 @@ extern CYD_MP3Player player;
 #define PLAYLIST_COLOR_DEFAULT lv_color_hex(0x5a5a7f)
 #define PLAYLIST_COLOR_PRESSED lv_color_hex(0x4c4965)
 
+#define LIST_HEIGHT   60
+#define LIST_VIEWS    5   // Height of ui_ContainerPlayList (300) / LIST_HEIGHT (60)
+#define LIST_OVERLAP  1
+
 /**********************
  *  STATIC VARIABLES
  **********************/
@@ -25,10 +29,9 @@ static lv_obj_t *play_list;
 static const lv_font_t* font_small;
 static const lv_font_t* font_medium;
 static lv_style_t style_scrollbar;
-static lv_style_t style_btn;
-static lv_style_t style_button_pr;
-static lv_style_t style_button_chk;
-static lv_style_t style_button_dis;
+static lv_style_t style_button;
+static lv_style_t style_button_pressed;
+static lv_style_t style_button_checked;
 static lv_style_t style_title;
 static lv_style_t style_artist;
 static lv_style_t style_time;
@@ -73,10 +76,9 @@ static void list_delete_event_cb(lv_event_t* e) {
 
   if (code == LV_EVENT_DELETE) {
     lv_style_reset(&style_scrollbar);
-    lv_style_reset(&style_btn);
-    lv_style_reset(&style_button_pr);
-    lv_style_reset(&style_button_chk);
-    lv_style_reset(&style_button_dis);
+    lv_style_reset(&style_button);
+    lv_style_reset(&style_button_pressed);
+    lv_style_reset(&style_button_checked);
     lv_style_reset(&style_title);
     lv_style_reset(&style_artist);
     lv_style_reset(&style_time);
@@ -106,10 +108,9 @@ static void add_list_button(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_remove_style_all(btn);
   lv_obj_set_size(btn, lv_pct(100), 60);
 
-  lv_obj_add_style(btn, &style_btn, 0);
-  lv_obj_add_style(btn, &style_button_pr, LV_STATE_PRESSED);
-  lv_obj_add_style(btn, &style_button_chk, LV_STATE_CHECKED);
-  lv_obj_add_style(btn, &style_button_dis, LV_STATE_DISABLED);
+  lv_obj_add_style(btn, &style_button, 0);
+  lv_obj_add_style(btn, &style_button_pressed, LV_STATE_PRESSED);
+  lv_obj_add_style(btn, &style_button_checked, LV_STATE_CHECKED);
   lv_obj_add_event_cb(btn, list_click_event_cb, LV_EVENT_CLICKED, NULL);
 
   lv_obj_t* icon = lv_image_create(btn);
@@ -133,28 +134,15 @@ static void add_list_button(lv_obj_t* parent, uint32_t track_id) {
 
   lv_obj_t* heart = lv_checkbox_create(btn);
   lv_checkbox_set_text(heart, "");
-  lv_obj_add_flag     (heart, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
-
-  lv_obj_set_style_bg_image_src (heart, &ui_img_1157704237,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_color     (heart, lv_color_hex(0xFFFFFF), (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa       (heart,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius       (heart, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_border_width (heart,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-
-  lv_obj_set_style_bg_image_src (heart, &ui_img_628457255,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_color     (heart, lv_color_hex(0xFFFFFF), (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_opa       (heart,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_radius       (heart, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_border_width (heart,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-
-  lv_obj_set_style_bg_image_src (heart, &ui_img_1157704237,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_bg_color     (heart, lv_color_hex(0xFFFFFF), (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_bg_opa       (heart,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_radius       (heart, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_border_width (heart,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-
-  lv_obj_add_event_cb (heart, heart_click_event_cb, LV_EVENT_ALL, (void*)track_id);
-  lv_obj_set_grid_cell(heart, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
+  lv_obj_add_flag               (heart, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
+  lv_obj_set_grid_cell          (heart, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
+  lv_obj_add_event_cb           (heart, heart_click_event_cb, LV_EVENT_ALL, (void*)track_id);
+  lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_bg_image_src (heart, &ui_img_1157704237, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_image_src (heart, &ui_img_628457255,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_bg_image_src (heart, &ui_img_1157704237, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   lv_obj_t* border = lv_image_create(btn);
   lv_image_set_src        (border, &img_lv_demo_music_list_border);
@@ -162,6 +150,8 @@ static void add_list_button(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_set_width        (border, lv_pct(120));
   lv_obj_align            (border, LV_ALIGN_BOTTOM_MID, 0, 0);
   lv_obj_add_flag         (border, LV_OBJ_FLAG_IGNORE_LAYOUT);
+
+//printf("height: %d\n", lv_obj_get_height(btn));
 }
 
 /**********************
@@ -182,35 +172,24 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   LV_LOG_WARN("LV_FONT_MONTSERRAT_14 is not enabled for the music demo. Using LV_FONT_DEFAULT instead.");
 #endif
 
-  lv_style_init         (&style_scrollbar);
-  lv_style_set_width    (&style_scrollbar, 4);
-  lv_style_set_bg_opa   (&style_scrollbar, LV_OPA_COVER);
-  lv_style_set_bg_color (&style_scrollbar, lv_color_hex3(0xeee));
-  lv_style_set_radius   (&style_scrollbar, LV_RADIUS_CIRCLE);
-  lv_style_set_pad_right(&style_scrollbar, 4);
-
   static const int32_t grid_cols[] = { LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_CONTENT, LV_GRID_TEMPLATE_LAST };
   static const int32_t grid_rows[] = { 22, 17, LV_GRID_TEMPLATE_LAST };
 
-  lv_style_init                     (&style_btn);
-  lv_style_set_bg_opa               (&style_btn, LV_OPA_TRANSP);
-  lv_style_set_grid_column_dsc_array(&style_btn, grid_cols);
-  lv_style_set_grid_row_dsc_array   (&style_btn, grid_rows);
-  lv_style_set_grid_row_align       (&style_btn, LV_GRID_ALIGN_CENTER);
-  lv_style_set_layout               (&style_btn, LV_LAYOUT_GRID);
-  lv_style_set_pad_right            (&style_btn, 20);
+  lv_style_init                     (&style_button);
+  lv_style_set_bg_opa               (&style_button, LV_OPA_TRANSP);
+  lv_style_set_grid_column_dsc_array(&style_button, grid_cols);
+  lv_style_set_grid_row_dsc_array   (&style_button, grid_rows);
+  lv_style_set_grid_row_align       (&style_button, LV_GRID_ALIGN_CENTER);
+  lv_style_set_layout               (&style_button, LV_LAYOUT_GRID);
+  lv_style_set_pad_right            (&style_button, 20);
 
-  lv_style_init         (&style_button_pr);
-  lv_style_set_bg_opa   (&style_button_pr, LV_OPA_COVER);
-  lv_style_set_bg_color (&style_button_pr, PLAYLIST_COLOR_DEFAULT);
+  lv_style_init           (&style_button_pressed);
+  lv_style_set_bg_opa     (&style_button_pressed, LV_OPA_COVER);
+  lv_style_set_bg_color   (&style_button_pressed, PLAYLIST_COLOR_DEFAULT);
 
-  lv_style_init         (&style_button_chk);
-  lv_style_set_bg_opa   (&style_button_chk, LV_OPA_COVER);
-  lv_style_set_bg_color (&style_button_chk, PLAYLIST_COLOR_DEFAULT);
-
-  lv_style_init         (&style_button_dis);
-  lv_style_set_text_opa (&style_button_dis, LV_OPA_40);
-  lv_style_set_image_opa(&style_button_dis, LV_OPA_40);
+  lv_style_init           (&style_button_checked);
+  lv_style_set_bg_opa     (&style_button_checked, LV_OPA_COVER);
+  lv_style_set_bg_color   (&style_button_checked, PLAYLIST_COLOR_DEFAULT);
 
   lv_style_init           (&style_title);
   lv_style_set_text_font  (&style_title, font_medium);
@@ -224,9 +203,18 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_text_font  (&style_time, font_small);
   lv_style_set_text_color (&style_time, lv_color_hex(0xffffff));
 
-  lv_style_init         (&style_heart);
-  lv_style_set_bg_opa   (&style_heart, LV_OPA_COVER);
-  lv_style_set_bg_color (&style_heart, PLAYLIST_COLOR_DEFAULT);
+  lv_style_init             (&style_heart);
+  lv_style_set_bg_color     (&style_heart, lv_color_hex(0xFFFFFF));
+  lv_style_set_bg_opa       (&style_heart, 0);
+  lv_style_set_radius       (&style_heart, 100);
+  lv_style_set_border_width (&style_heart, 0);
+
+  lv_style_init           (&style_scrollbar);
+  lv_style_set_width      (&style_scrollbar, 4);
+  lv_style_set_bg_opa     (&style_scrollbar, LV_OPA_COVER);
+  lv_style_set_bg_color   (&style_scrollbar, lv_color_hex3(0xeee));
+  lv_style_set_radius     (&style_scrollbar, LV_RADIUS_CIRCLE);
+  lv_style_set_pad_right  (&style_scrollbar, 4);
 
   /*Create an empty transparent container*/
   lv_obj_t* list = lv_obj_create(parent);
@@ -509,7 +497,7 @@ void ui_ScreenPlayList_screen_init(void) {
   // Initialize play list container
   play_list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
 
-#define N_ITEMS 2
+#define N_ITEMS 10
   for (uint32_t track_id = 0; track_id < N_ITEMS; track_id++) {
     add_list_button(play_list, track_id);
   }
