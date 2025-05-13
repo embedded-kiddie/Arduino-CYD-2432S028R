@@ -4,6 +4,21 @@
 
 // Example of settings for LovyanGFX on ESP32
 // https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h
+#ifndef CYD_TFT_SPI_BUS
+#define CYD_TFT_DC      2
+#define CYD_TFT_MISO    12
+#define CYD_TFT_MOSI    13
+#define CYD_TFT_SCK     14
+#define CYD_TFT_CS      15
+#define CYD_TFT_BL      21
+#define CYD_TP_IRQ      36
+#define CYD_TP_MOSI     32
+#define CYD_TP_MISO     39
+#define CYD_TP_CLK      25
+#define CYD_TP_CS       33
+#define CYD_TFT_SPI_BUS HSPI
+#define CYD_TP_SPI_BUS  VSPI
+#endif
 
 /*
 Copy this file, give it a new name, and change the settings to suit your environment.
