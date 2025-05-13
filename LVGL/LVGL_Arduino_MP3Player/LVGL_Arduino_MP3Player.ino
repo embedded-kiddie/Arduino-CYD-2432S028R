@@ -53,9 +53,9 @@ static LGFX tft;
 #define DRAW_BUF_N_DIVS 10  // 2 - 10
 
 #if USE_HEAP_MALLOC
-static uint8_t* draw_buf[2] = { NULL, };
+static uint8_t* draw_buf[DRAW_BUF_N_BUFS] = { NULL, };
 #else
-static uint8_t draw_buf[2][DRAW_BUF_SIZE];
+static uint8_t draw_buf[DRAW_BUF_N_BUFS][DRAW_BUF_SIZE];
 #endif
 
 //----------------------------------------------------------------------
