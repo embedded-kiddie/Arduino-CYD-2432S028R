@@ -95,11 +95,11 @@
 //
 // ##################################################################################
 
-#define SPI_FREQUENCY  80000000 // 40MHz --> 80MHz in case of LVGL
+#define SPI_FREQUENCY  40000000 // for ILI9341
 
 #if DISPLAY_CYD_2USB
 #undef  SPI_FREQUENCY
-#define SPI_FREQUENCY  80000000
+#define SPI_FREQUENCY  80000000 // for ST7789
 #endif
 
 // Optional reduced SPI frequency for reading TFT

@@ -5,14 +5,6 @@
 //  DO NOT FORGET TO SET 'LV_USE_TFT_ESPI' TO 0
 //  DO NOT FORGET TO SET 'LV_USE_ILI9341' and/or 'LV_USE_ST7789'
 #include <lvgl.h>
-
-/*To use the built-in examples and demos of LVGL uncomment the includes below respectively.
- *You also need to copy `lvgl/examples` to `lvgl/src/examples`. Similarly for the demos `lvgl/demos` to `lvgl/src/demos`.
- *Note that the `lv_examples` library is for LVGL v7 and you shouldn't install it for this version (since LVGL v8)
- *as the examples and demos are now part of the main LVGL library. */
-
-//#include <examples/lv_examples.h>
-//#include <demos/lv_demos.h>
 #include "src/ui.h"
 
 /*Set to your screen resolution and rotation*/
@@ -20,7 +12,7 @@
 #define TFT_VER_RES   320 // Portrait orientation default height
 #define TFT_ROTATION  LV_DISPLAY_ROTATION_0 // LV_DISPLAY_ROTATION_{0|90|180|270}
 
-/*LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes*/
+/* LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes */
 #define DRAW_BUF_SIZE   (TFT_HOR_RES * TFT_VER_RES / DRAW_BUF_N_DIVS * (LV_COLOR_DEPTH / 8))
 #define DRAW_BUF_N_BUFS 1   // 1 or 2
 #define DRAW_BUF_N_DIVS 10  // 2 - 10
@@ -250,26 +242,12 @@ void setup() {
   lv_display_set_buffers(disp, draw_buf[0], draw_buf[1], DRAW_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
 #endif
 
-  /*Initialize the (dummy) input device driver*/
+  /* Initialize the (dummy) input device driver */
   lv_indev_t *indev = lv_indev_create();
-  lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /*Touchpad should have POINTER type*/
+  lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /* Touchpad should have POINTER type */
   lv_indev_set_read_cb(indev, my_touchpad_read);
 
-#if defined(LV_DEMOS_H)
-
-  //lv_demo_widgets();
-  lv_demo_music();
-
-#elif defined(LV_EXAMPLES_H)
-
-  lv_example_arc_1();
-  //lv_example_checkbox_1();
-
-#else
-
   ui_init();
-
-#endif
 }
 
 void loop() {
