@@ -7,7 +7,7 @@
 #include <lvgl.h>
 #include "src/ui.h"
 
-/*Set to your screen resolution and rotation*/
+/* Set to your screen resolution and rotation */
 #define TFT_HOR_RES   240 // Portrait orientation default width
 #define TFT_VER_RES   320 // Portrait orientation default height
 #define TFT_ROTATION  LV_DISPLAY_ROTATION_0 // LV_DISPLAY_ROTATION_{0|90|180|270}
