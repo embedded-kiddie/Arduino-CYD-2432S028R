@@ -4,25 +4,26 @@
 // IN lv_conf.h
 //  DO NOT FORGET TO SET 'LV_USE_TFT_ESPI' TO 0
 //  DO NOT FORGET TO SET 'LV_USE_ILI9341' and/or 'LV_USE_ST7789'
+//  DO NOT FORGET TO SET 'LV_USE_SYSMON' to 1
+//  DO NOT FORGET TO SET 'LV_USE_DEMO_MUSIC' and 'LV_DEMO_MUSIC_AUTO_PLAY' to 1
 #include <lvgl.h>
 
-//----------------------------------------------------------------------
-// LovyanGFX configuration
-//----------------------------------------------------------------------
-#define USE_LGFX_AUTODETECT true
-#define USE_LGFX_CALIBRATED true
+/*To use the built-in examples and demos of LVGL uncomment the includes below respectively.
+ *You also need to copy `lvgl/examples` to `lvgl/src/examples`. Similarly for the demos `lvgl/demos` to `lvgl/src/demos`.
+ *Note that the `lv_examples` library is for LVGL v7 and you shouldn't install it for this version (since LVGL v8)
+ *as the examples and demos are now part of the main LVGL library. */
 
-#if USE_LGFX_AUTODETECT
-#define LGFX_AUTODETECT
-#include <LovyanGFX.h>
-#else
-// false: Panel driver: ILI9341 (micro-USB x 1 type)
-// true : Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
-#define DISPLAY_CYD_2USB false
-#include "../src/LGFX_ESP32_2432S028R_CYD.hpp"
-#endif  // USE_LGFX_AUTODETECT
+//#include <examples/lv_examples.h>
+#include <demos/lv_demos.h>
 
-static LGFX tft;
+/* Set to your screen resolution and rotation */
+#define TFT_HOR_RES   240 // Portrait orientation default width
+#define TFT_VER_RES   320 // Portrait orientation default height
+#define TFT_ROTATION  LV_DISPLAY_ROTATION_270 // LV_DISPLAY_ROTATION_{0|90|180|270}
+
+/* LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes */
+#define DRAW_BUF_SIZE (TFT_HOR_RES * TFT_VER_RES / DRAW_BUF_N_DIVS * (LV_COLOR_DEPTH / 8))
+static uint8_t* draw_buf[2] = { NULL, };
 
 #define ENABLE_LGFX_DMA     true
 #define DRAW_BUF_N_BUFS     2 // single (1) or double (2)
@@ -53,32 +54,83 @@ static char fname[16];
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
-//#include "../src/sdcard.hpp"
-
-/*To use the built-in examples and demos of LVGL uncomment the includes below respectively.
- *You also need to copy `lvgl/examples` to `lvgl/src/examples`. Similarly for the demos `lvgl/demos` to `lvgl/src/demos`.
- *Note that the `lv_examples` library is for LVGL v7 and you shouldn't install it for this version (since LVGL v8)
- *as the examples and demos are now part of the main LVGL library. */
-
-//#include <examples/lv_examples.h>
-#include <demos/lv_demos.h>
-
-/*Set to your screen resolution and rotation*/
-#define TFT_HOR_RES   240 // Portrait orientation default width
-#define TFT_VER_RES   320 // Portrait orientation default height
-#define TFT_ROTATION  LV_DISPLAY_ROTATION_270 // LV_DISPLAY_ROTATION_{0|90|180|270}
-
-/*LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes*/
-#define DRAW_BUF_SIZE (TFT_HOR_RES * TFT_VER_RES / DRAW_BUF_N_DIVS * (LV_COLOR_DEPTH / 8))
-static uint8_t* draw_buf[2] = { NULL, };
-
-#if LV_USE_LOG != 0
-static void my_print(lv_log_level_t level, const char *buf) {
-  LV_UNUSED(level);
-  Serial.println(buf);
-  Serial.flush();
-}
+#define SCREENSHORT false
+#if SCREENSHORT
+#include "../src/sdcard.hpp"
 #endif
+
+//----------------------------------------------------------------------
+// LovyanGFX configuration
+//----------------------------------------------------------------------
+#define USE_LGFX_AUTODETECT true
+#define USE_LGFX_CALIBRATED true
+
+#if USE_LGFX_AUTODETECT
+#define LGFX_AUTODETECT
+#include <LovyanGFX.h>
+#else
+// false: Panel driver: ILI9341 (micro-USB x 1 type)
+// true : Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
+#define DISPLAY_CYD_2USB false
+#include "../src/LGFX_ESP32_2432S028R_CYD.hpp"
+#endif  // USE_LGFX_AUTODETECT
+
+static LGFX tft;
+
+//----------------------------------------------------------------------
+// Calibrate touch panel for LovyanGFX (optional)
+//----------------------------------------------------------------------
+static void calibrate_touch(uint16_t cal[8]) {
+  // Draw guide text on the screen.
+  tft.setTextDatum(textdatum_t::middle_center);
+  tft.drawString("touch the arrow marker.", tft.width() >> 1, tft.height() >> 1);
+  tft.setTextDatum(textdatum_t::top_left);
+
+  // You will need to calibrate by touching the four corners of the screen.
+  uint16_t fg = TFT_WHITE;
+  uint16_t bg = TFT_BLACK;
+  if (tft.isEPD()) {  // Electronic Paper Display
+    std::swap(fg, bg);
+  }
+
+  tft.calibrateTouch(cal, fg, bg, std::max(tft.width(), tft.height()) >> 3);
+
+  Serial.print("\nconst uint16_t cal[8] = { ");
+  for (int i = 0; i < 8; i++) {
+    Serial.printf("%d%s", cal[i], (i < 7 ? ", " : " };\n"));
+  }
+  Serial.print("tft.setTouchCalibrate(cal);\n");
+}
+
+static void tft_init(void) {
+  tft.init();
+#if ENABLE_LGFX_DMA
+  tft.initDMA();
+#endif
+  tft.setColorDepth(16);  // Set to 16-bit RGB565
+
+  if (tft.touch()) {
+    if (USE_LGFX_CALIBRATED) {
+      const uint16_t cal[8] = {
+        240,   // x_min
+        3700,  // y_min
+        240,   // x_min
+        200,   // y_max
+        3800,  // x_max
+        3700,  // y_min
+        3800,  // x_max
+        200    // y_max
+      };
+      tft.setTouchCalibrate((uint16_t*)cal);
+    } else {
+      uint16_t cal[8];
+      calibrate_touch(cal);
+      tft.setTouchCalibrate(cal);
+    }
+  } else {
+    Serial.println("Touch device not found.");
+  }
+}
 
 //----------------------------------------------------------------------
 // Configuration for flush task
@@ -148,7 +200,7 @@ static void flush_wait(lv_display_t *disp) {
   }
 
 #if DRAW_BUF_N_BUFS == 1
-  /*Call it to tell LVGL you are ready*/
+  /* Call it to tell LVGL you are ready */
   lv_display_flush_ready(disp);
 #endif
 }
@@ -174,7 +226,18 @@ static bool flush_init(void) {
   return (ret == pdPASS);
 }
 
-/* LVGL calls it when a rendered image needs to copied to the display*/
+//----------------------------------------------------------------------
+// Functions required by LVGL
+//----------------------------------------------------------------------
+#if LV_USE_LOG != 0
+static void my_print(lv_log_level_t level, const char *buf) {
+  LV_UNUSED(level);
+  Serial.println(buf);
+  Serial.flush();
+}
+#endif
+
+/* LVGL calls it when a rendered image needs to copied to the display */
 static void my_disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
   MessageQueue_t queue = {
     .x = area->x1,
@@ -280,60 +343,7 @@ static void resolution_changed_event_cb(lv_event_t *e) {
   }
 }
 
-// Calibrate touch when enabled (optional)
-static void calibrate_touch(uint16_t cal[8]) {
-  // Draw guide text on the screen.
-  tft.setTextDatum(textdatum_t::middle_center);
-  tft.drawString("touch the arrow marker.", tft.width() >> 1, tft.height() >> 1);
-  tft.setTextDatum(textdatum_t::top_left);
-
-  // You will need to calibrate by touching the four corners of the screen.
-  uint16_t fg = TFT_WHITE;
-  uint16_t bg = TFT_BLACK;
-  if (tft.isEPD()) {  // Electronic Paper Display
-    std::swap(fg, bg);
-  }
-
-  tft.calibrateTouch(cal, fg, bg, std::max(tft.width(), tft.height()) >> 3);
-
-  Serial.print("\nuint16_t cal[8] = { ");
-  for (int i = 0; i < 8; i++) {
-    Serial.printf("%d%s", cal[i], (i < 7 ? ", " : " };\n"));
-  }
-  Serial.print("tft.setTouchCalibrate(cal);\n");
-}
-
-static void tft_init(void) {
-  tft.init();
-#if ENABLE_LGFX_DMA
-  tft.initDMA();
-#endif
-  tft.setColorDepth(16);  // Set to 16-bit RGB565
-
-  if (tft.touch()) {
-    if (USE_LGFX_CALIBRATED) {
-      const uint16_t cal[8] = {
-        240,   // x_min
-        3700,  // y_min
-        240,   // x_min
-        200,   // y_max
-        3800,  // x_max
-        3700,  // y_min
-        3800,  // x_max
-        200    // y_max
-      };
-      tft.setTouchCalibrate((uint16_t*)cal);
-    } else {
-      uint16_t cal[8];
-      calibrate_touch(cal);
-      tft.setTouchCalibrate(cal);
-    }
-  } else {
-    Serial.println("Touch device not found.");
-  }
-}
-
-/*use Arduinos millis() as tick source*/
+/* use Arduinos millis() as tick source */
 static uint32_t my_tick(void) {
 #if SAVE_SEQUENCIAL_BMP
   return millis() - skip;
@@ -358,7 +368,7 @@ void setup() {
     while (1) delay(1000);
   }
 
-  /*Set a tick source so that LVGL will know how much time elapsed. */
+  /* Set a tick source so that LVGL will know how much time elapsed. */
   lv_tick_set_cb(my_tick);
 
   /* register print function for debugging */
@@ -379,9 +389,9 @@ void setup() {
 
   lv_display_set_buffers(disp, draw_buf[0], draw_buf[1], DRAW_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
 
-  /*Initialize the input device driver*/
+  /* Initialize the input device driver */
   lv_indev_t *indev = lv_indev_create();
-  lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /*Touchpad should have POINTER type*/
+  lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /* Touchpad should have POINTER type */
   lv_indev_set_read_cb(indev, my_touchpad_read);
 
 #if defined(LV_DEMOS_H)
@@ -410,7 +420,7 @@ void setup() {
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
 
-#ifdef _SD_H_
+#if SCREENSHORT
   // Save bitmap image to SD card
   if (Serial.available()) {
     Serial.readStringUntil('\n');
