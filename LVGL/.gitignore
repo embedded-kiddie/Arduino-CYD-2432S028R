@@ -1,6 +1,11 @@
 # ignore all files
 *
 
+# Mac special files
+*/.DS_store
+*/._*
+
+
 # target list
 !LVGL_Arduino_Base
 !LVGL_Arduino_LovyanGFX
