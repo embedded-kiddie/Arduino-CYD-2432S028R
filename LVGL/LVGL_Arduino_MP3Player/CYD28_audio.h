@@ -8,31 +8,31 @@
  */
 typedef enum : uint8_t
 {
-	IS_PLAYING,
-	SET_VOLUME,
-	GET_VOLUME,
-	GET_RMS,
+  IS_PLAYING,
+  SET_VOLUME,
+  GET_VOLUME,
+  GET_RMS,
   GET_VU,
   GET_DURATION,
   GET_ELAPSED,
   SET_ELAPSED,
-	CONNECTTOHOST,
-	CONNECTTOSPEECH,
-	CONNECTTOSD,
-	AUDIO_STOP,
+  CONNECTTOHOST,
+  CONNECTTOSPEECH,
+  CONNECTTOSD,
+  AUDIO_STOP,
   PAUSE_RESUME,
-}audioCmd_t;
+} audioCmd_t;
 
 /**
  * @brief Audio task queue message
  */
 typedef struct 
 {
-	audioCmd_t cmd;
-	const char *txt1;
-	const char *txt2;
-	uint32_t value;
-	uint32_t ret;
+  audioCmd_t cmd;
+  const char *txt1;
+  const char *txt2;
+  uint32_t value;
+  uint32_t ret;
 } audioMessage_t;
 
 extern CYD_Audio audio;
