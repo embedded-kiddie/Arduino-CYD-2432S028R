@@ -42,6 +42,14 @@ static uint8_t draw_buf[DRAW_BUF_SIZE];
 static LGFX tft;
 
 //----------------------------------------------------------------------
+// SD card configuration
+//----------------------------------------------------------------------
+#define SCREENSHORT false
+#if SCREENSHORT
+#include "../src/sdcard.hpp"
+#endif
+
+//----------------------------------------------------------------------
 // Calibrate touch panel for LovyanGFX (optional)
 //----------------------------------------------------------------------
 static void calibrate_touch(uint16_t cal[8]) {
@@ -93,14 +101,6 @@ static void tft_init(void) {
     Serial.println("Touch device not found.");
   }
 }
-
-//----------------------------------------------------------------------
-// SD card configuration
-//----------------------------------------------------------------------
-#define SCREENSHORT false
-#if SCREENSHORT
-#include "../src/sdcard.hpp"
-#endif
 
 //----------------------------------------------------------------------
 // Functions required by LVGL

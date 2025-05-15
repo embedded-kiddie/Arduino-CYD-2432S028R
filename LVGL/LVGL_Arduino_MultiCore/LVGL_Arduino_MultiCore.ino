@@ -52,14 +52,6 @@ static char fname[16];
 #endif
 
 //----------------------------------------------------------------------
-// SD card configuration
-//----------------------------------------------------------------------
-#define SCREENSHORT false
-#if SCREENSHORT
-#include "../src/sdcard.hpp"
-#endif
-
-//----------------------------------------------------------------------
 // LovyanGFX configuration
 //----------------------------------------------------------------------
 #define USE_LGFX_AUTODETECT true
@@ -76,6 +68,14 @@ static char fname[16];
 #endif  // USE_LGFX_AUTODETECT
 
 static LGFX tft;
+
+//----------------------------------------------------------------------
+// SD card configuration
+//----------------------------------------------------------------------
+#define SCREENSHORT false
+#if SCREENSHORT
+#include "../src/sdcard.hpp"
+#endif
 
 //----------------------------------------------------------------------
 // Calibrate touch panel for LovyanGFX (optional)

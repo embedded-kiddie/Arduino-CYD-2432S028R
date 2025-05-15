@@ -47,14 +47,6 @@ static uint8_t draw_buf[2][DRAW_BUF_SIZE];
 #endif
 
 //----------------------------------------------------------------------
-// SD card configuration
-//----------------------------------------------------------------------
-#define SCREENSHORT false
-#if SCREENSHORT
-#include "../src/sdcard.hpp"
-#endif
-
-//----------------------------------------------------------------------
 // LovyanGFX configuration
 //----------------------------------------------------------------------
 #define USE_LGFX_AUTODETECT true
@@ -73,6 +65,14 @@ static uint8_t draw_buf[2][DRAW_BUF_SIZE];
 #endif // USE_LGFX_AUTODETECT
 
 static LGFX tft;
+
+//----------------------------------------------------------------------
+// SD card configuration
+//----------------------------------------------------------------------
+#define SCREENSHORT false
+#if SCREENSHORT
+#include "../src/sdcard.hpp"
+#endif
 
 //----------------------------------------------------------------------
 // Calibrate touch panel for LovyanGFX (optional)

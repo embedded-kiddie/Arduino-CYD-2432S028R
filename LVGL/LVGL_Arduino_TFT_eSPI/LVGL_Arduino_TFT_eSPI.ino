@@ -33,7 +33,10 @@ XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
-//#include "../src/sdcard.hpp"
+#define SCREENSHORT false
+#if SCREENSHORT
+#include "../src/sdcard.hpp"
+#endif
 
 /*To use the built-in examples and demos of LVGL uncomment the includes below respectively.
  *You also need to copy `lvgl/examples` to `lvgl/src/examples`. Similarly for the demos `lvgl/demos` to `lvgl/src/demos`.
@@ -134,8 +137,7 @@ void setup() {
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
 
-#ifdef _SD_H_
-  // Save bitmap image to SD card
+#if SCREENSHORT
   if (Serial.available()) {
     Serial.readStringUntil('\n');
     sdcard_setup();
