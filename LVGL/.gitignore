@@ -7,6 +7,7 @@
 
 
 # target list
+!src
 !LVGL_Arduino_Base
 !LVGL_Arduino_LovyanGFX
 !LVGL_Arduino_TFT_eSPI

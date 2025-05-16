@@ -15,8 +15,8 @@ CYD_MP3Player player;
 #define MP3_VOLUME_INI 8
 #define MP3_PATH_ROOT "/MP3Player/"
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
-#define PERIOD_TAKS1 1000
-#define PERIOD_TAKS2 100
+#define PERIOD_TAKS1 1000 // [msec]
+#define PERIOD_TAKS2 100  // [msec]
 
 // https://embedded-kiddie.github.io/2024/07/22/
 #define DO_EVERY(period, prev) \

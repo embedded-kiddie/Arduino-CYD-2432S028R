@@ -37,7 +37,7 @@
  * For more info see file README.md in this library or on URL:
  * https://github.com/espressif/arduino-esp32/tree/master/libraries/SD
  */
-// #define  USE_SDFAT
+#define  USE_SDFAT
 
 #ifndef CYD_SD_SPI_BUS
 #define CYD_SD_SS      5
@@ -47,8 +47,6 @@
 #define CYD_SD_SPI_BUS VSPI
 #endif
 
-#define SPI_CLOCK 50000000 // 50 MHz
-
 /*--------------------------------------------------------------------------------
  * SD library
  *--------------------------------------------------------------------------------*/
@@ -57,20 +55,40 @@
 #define DISABLE_FS_H_WARNING
 #include "SdFat.h"
 
+#if   1
+#define FS_TYPE SdFat
+SdFat SD;
+#else
+#define FS_TYPE SdFs
+SdFs SD;
+#endif
+
 #undef  FILE_APPEND
 #define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
 #undef  FILE_WRITE
 #define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
 
-// SHARED_SPI makes SD very slow, while DEDICATED_SPI causes GFX libraries to stop working.
-#define SD_CONFIG SdSpiConfig(CYD_SD_SS, SHARED_SPI /* DEDICATED_SPI */, SPI_CLOCK)
+// The maximum SD SPI clock of ESP32-2432S028 might be 24 MHz
+#define SD_SPI_CLOCK 24000000
 
-#if   0
-#define FS_TYPE SdFs
-SdFs SD;
+// SHARED_SPI makes SD very slow, while DEDICATED_SPI causes GFX libraries to stop working.
+#ifdef LOVYANGFX_HPP_
+#define SD_SPI_METHOD DEDICATED_SPI
 #else
-#define FS_TYPE SdFat
-SdFat SD;
+#define SD_SPI_METHOD SHARED_SPI
+#endif
+
+#if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+  #if   1
+    static SPIClass sd_spi = SPIClass(VSPI);
+    #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK, &sd_spi) // OK
+  #elif 0
+    #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK) // OK
+  #elif 0
+    #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_CLOCK) // NG
+  #else
+    #define SD_CONFIG CYD_SD_SS // NG
+  #endif
 #endif
 
 #else // ! USE_SDFAT
@@ -80,10 +98,17 @@ SdFat SD;
 #include "SPI.h"
 
 #define FS_TYPE  fs::SDFS
-#ifdef _TFT_eSPIH_
-#define SD_CONFIG CYD_SD_SS, GFX_EXEC(getSPIinstance()), SPI_CLOCK
+
+// The maximum SD SPI clock of ESP32-2432S028 might be 24 MHz
+#define SD_SPI_CLOCK 50000000
+
+#if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+  static SPIClass sd_spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
+  #define SD_CONFIG CYD_SD_SS, sd_spi, SD_SPI_CLOCK
+#elif defined (ARDUINO_XIAO_ESP32S3) && defined (_TFT_eSPIH_)
+  #define SD_CONFIG CYD_SD_SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
 #else
-#define SD_CONFIG CYD_SD_SS, SPI, SPI_CLOCK
+  #define SD_CONFIG CYD_SD_SS, SPI, SD_SPI_CLOCK
 #endif
 
 #endif // USE_SDFAT
@@ -385,7 +410,6 @@ inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) {
 
 bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
   uint32_t start = millis();
-
   uint32_t w = tft.width();
   uint32_t h = tft.height();
 
@@ -503,12 +527,7 @@ void sdcard_setup() {
 
 #ifdef  USE_SDFAT
 
-#if 1
-  if (!SD.cardBegin(SD_CONFIG))
-#else
-  if (!SD.begin(CYD_SD_SS))
-#endif
-  {
+  if (!SD.begin(SD_CONFIG)) {
     Serial.println("SdFat: Card Mount Failed");
     return;
   }
@@ -528,10 +547,11 @@ void sdcard_setup() {
 
 #else
 
-  static SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
-  spi.begin(CYD_SD_SCK, CYD_SD_MISO, CYD_SD_MOSI, CYD_SD_SS);
+#if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+  sd_spi.begin(CYD_SD_SCK, CYD_SD_MISO, CYD_SD_MOSI, CYD_SD_SS);
+#endif
 
-  if (!SD.begin(CYD_SD_SS, spi, SPI_CLOCK)) {
+  if (!SD.begin(SD_CONFIG)) {
     Serial.println("SD: Card Mount Failed");
     return;
   }

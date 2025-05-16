@@ -26,7 +26,6 @@ static lv_obj_t *play_list;
 static lv_obj_t *slider;
 static const lv_font_t* font_small;
 static const lv_font_t* font_medium;
-//static lv_style_t style_scrollbar;
 static lv_style_t style_button;
 static lv_style_t style_button_pressed;
 static lv_style_t style_button_checked;
@@ -86,7 +85,6 @@ static void list_delete_event_cb(lv_event_t* e) {
   lv_event_code_t code = lv_event_get_code(e);
 
   if (code == LV_EVENT_DELETE) {
-//  lv_style_reset(&style_scrollbar);
     lv_style_reset(&style_button);
     lv_style_reset(&style_button_pressed);
     lv_style_reset(&style_button_checked);
@@ -293,14 +291,7 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_bg_opa       (&style_heart, 0);
   lv_style_set_border_width (&style_heart, 0);
   lv_style_set_radius       (&style_heart, LV_RADIUS_CIRCLE);
-/*
-  lv_style_init           (&style_scrollbar);
-  lv_style_set_width      (&style_scrollbar, 4);
-  lv_style_set_bg_opa     (&style_scrollbar, LV_OPA_COVER);
-  lv_style_set_bg_color   (&style_scrollbar, lv_color_hex3(0xeee));
-  lv_style_set_radius     (&style_scrollbar, LV_RADIUS_CIRCLE);
-  lv_style_set_pad_right  (&style_scrollbar, 4);
-*/
+
   lv_style_init               (&style_menu_back);
   lv_style_set_bg_color       (&style_menu_back, PLAYLIST_COLOR_DEFAULT);
   lv_style_set_shadow_color   (&style_menu_back, lv_color_hex(0x000000));
@@ -315,14 +306,13 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_pad_top        (&style_menu_back,   8);
   lv_style_set_pad_bottom     (&style_menu_back,   0);
 
-  /*Create an empty transparent container*/
+  // Create an empty transparent container
   lv_obj_t* list = lv_obj_create(parent);
   lv_obj_remove_style_all (list);
   lv_obj_add_event_cb     (list, list_delete_event_cb, LV_EVENT_DELETE, NULL);
   lv_obj_set_size         (list, LV_HOR_RES, LV_VER_RES - LV_DEMO_MUSIC_HANDLE_SIZE);
   lv_obj_set_y            (list, LV_DEMO_MUSIC_HANDLE_SIZE);
 //lv_obj_set_y            (list, 0);
-//lv_obj_add_style        (list, &style_scrollbar, (uint32_t)LV_PART_SCROLLBAR);
   lv_obj_set_flex_flow    (list, LV_FLEX_FLOW_COLUMN);
 
   // Creating a slider as an alternative to a scrollbar
@@ -336,12 +326,6 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_obj_set_style_bg_color (slider, PLAYLIST_COLOR_SLIDER, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
   lv_slider_set_range       (slider, (MAX_VALUE + 1) * ITEM_HEIGHT, MIN_VALUE * ITEM_HEIGHT);
-
-//lv_style_set_width      (&style_scrollbar, 4);
-//lv_style_set_bg_opa     (&style_scrollbar, LV_OPA_COVER);
-//lv_style_set_bg_color   (&style_scrollbar, lv_color_hex3(0xeee));
-//lv_style_set_radius     (&style_scrollbar, LV_RADIUS_CIRCLE);
-//lv_style_set_pad_right  (&style_scrollbar, 4);
 
   return list;
 }
@@ -457,8 +441,8 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_top      (ui_MenuBluetoothOff,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOff,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
-  lv_obj_add_event_cb(ui_MenuBluetoothOn, ui_event_MenuBluetoothOn, LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_MenuBluetoothOff, ui_event_MenuBluetoothOff, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb           (ui_MenuBluetoothOn, ui_event_MenuBluetoothOn, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb           (ui_MenuBluetoothOff, ui_event_MenuBluetoothOff, LV_EVENT_ALL, NULL);
 #endif
 #if   false
   ui_CheckFavorite = lv_checkbox_create(ui_ScreenPlayList);
@@ -495,7 +479,6 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_top      (ui_CheckFavorite, -2,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom   (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_radius       (ui_CheckFavorite, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-
   lv_obj_add_event_cb           (ui_CheckFavorite, ui_event_CheckFavorite, LV_EVENT_ALL, NULL);
 #endif
 
