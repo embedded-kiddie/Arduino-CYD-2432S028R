@@ -477,7 +477,7 @@ void ui_init(void) {
   lv_disp_load_scr(ui_ScreenMain);
 
   ui_state = UI_STATE_INIT;
-  ui_control.sleepTimer = 15 * 1000;
+  ui_control.sleepTimer = 30 * 1000;
 
   audioInit();
 }

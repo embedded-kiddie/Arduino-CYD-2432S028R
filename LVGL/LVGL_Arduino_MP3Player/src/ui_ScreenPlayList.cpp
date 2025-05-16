@@ -291,8 +291,8 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_init             (&style_heart);
   lv_style_set_bg_color     (&style_heart, lv_color_hex(0xFFFFFF));
   lv_style_set_bg_opa       (&style_heart, 0);
-  lv_style_set_radius       (&style_heart, 100);
   lv_style_set_border_width (&style_heart, 0);
+  lv_style_set_radius       (&style_heart, LV_RADIUS_CIRCLE);
 /*
   lv_style_init           (&style_scrollbar);
   lv_style_set_width      (&style_scrollbar, 4);
@@ -331,9 +331,9 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_obj_remove_flag        (slider, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_width          (slider, 4);
   lv_obj_set_height         (slider, ITEM_VIEWS * ITEM_HEIGHT /*lv_pct(100)*/);
-  lv_obj_set_style_radius   (slider, 100,                   (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_color (slider, PLAYLIST_COLOR_SLIDER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa   (slider,   0,                   (uint32_t)LV_PART_KNOB | (uint32_t)LV_STATE_DEFAULT); // Set the knob invisible
+  lv_obj_set_style_radius   (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_opa   (slider, 0,                     (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT); // Set the knob invisible
+  lv_obj_set_style_bg_color (slider, PLAYLIST_COLOR_SLIDER, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
   lv_slider_set_range       (slider, (MAX_VALUE + 1) * ITEM_HEIGHT, MIN_VALUE * ITEM_HEIGHT);
 
@@ -375,25 +375,25 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_flag               (ui_MenuBackLeft, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src (ui_MenuBackLeft, &ui_img_713466046,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius       (ui_MenuBackLeft, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_border_width (ui_MenuBackLeft,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left     (ui_MenuBackLeft,   8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right    (ui_MenuBackLeft,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_top      (ui_MenuBackLeft,   8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_bottom   (ui_MenuBackLeft,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_radius       (ui_MenuBackLeft, LV_RADIUS_CIRCLE,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_border_width (ui_MenuBackLeft, 0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_left     (ui_MenuBackLeft, 8,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_right    (ui_MenuBackLeft, 0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_top      (ui_MenuBackLeft, 8,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_bottom   (ui_MenuBackLeft, 0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
 
   lv_obj_set_style_bg_image_src (ui_MenuBackLeft, &ui_img_713466046,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_color     (ui_MenuBackLeft, lv_color_hex(0xFFFFFF), (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_radius       (ui_MenuBackLeft, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_radius       (ui_MenuBackLeft, LV_RADIUS_CIRCLE,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_opa       (ui_MenuBackLeft, 255,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   lv_obj_set_style_bg_image_src (ui_MenuBackLeft, &ui_img_713466046,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_radius       (ui_MenuBackLeft, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_border_width (ui_MenuBackLeft,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_left     (ui_MenuBackLeft,  10,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_right    (ui_MenuBackLeft,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_top      (ui_MenuBackLeft,  10,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_bottom   (ui_MenuBackLeft,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_radius       (ui_MenuBackLeft, LV_RADIUS_CIRCLE,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_border_width (ui_MenuBackLeft,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_left     (ui_MenuBackLeft, 10,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_right    (ui_MenuBackLeft,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_top      (ui_MenuBackLeft, 10,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_bottom   (ui_MenuBackLeft,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_add_event_cb           (ui_MenuBackLeft, ui_event_MenuBackLeft, LV_EVENT_ALL, NULL);
 #endif
 #if false
@@ -407,25 +407,25 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_flag               (ui_MenuBluetoothOn, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src (ui_MenuBluetoothOn, &ui_img_1753861343,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius       (ui_MenuBluetoothOn, 100,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_border_width (ui_MenuBluetoothOn,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left     (ui_MenuBluetoothOn,   8,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right    (ui_MenuBluetoothOn,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_top      (ui_MenuBluetoothOn,   8,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOn,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_radius       (ui_MenuBluetoothOn, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_border_width (ui_MenuBluetoothOn, 0,                       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_left     (ui_MenuBluetoothOn, 8,                       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_right    (ui_MenuBluetoothOn, 0,                       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_top      (ui_MenuBluetoothOn, 8,                       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOn, 0,                       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
 
   lv_obj_set_style_bg_image_src (ui_MenuBluetoothOn, &ui_img_1753861343,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_color     (ui_MenuBluetoothOn, lv_color_hex(0xFFFFFF),  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_radius       (ui_MenuBluetoothOn, 100,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_radius       (ui_MenuBluetoothOn, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_opa       (ui_MenuBluetoothOn, 255,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   lv_obj_set_style_bg_image_src (ui_MenuBluetoothOn, &ui_img_1753861343,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_radius       (ui_MenuBluetoothOn, 100,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_border_width (ui_MenuBluetoothOn,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_left     (ui_MenuBluetoothOn,  10,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_right    (ui_MenuBluetoothOn,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_top      (ui_MenuBluetoothOn,  10,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOn,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_radius       (ui_MenuBluetoothOn, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_border_width (ui_MenuBluetoothOn,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_left     (ui_MenuBluetoothOn, 10,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_right    (ui_MenuBluetoothOn,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_top      (ui_MenuBluetoothOn, 10,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOn,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_MenuBluetoothOff = lv_checkbox_create(ui_ContainerPlayList);
   lv_checkbox_set_text          (ui_MenuBluetoothOff, "");
@@ -437,64 +437,64 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_flag               (ui_MenuBluetoothOff, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src (ui_MenuBluetoothOff, &ui_img_1837194583,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius       (ui_MenuBluetoothOff, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_border_width (ui_MenuBluetoothOff,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left     (ui_MenuBluetoothOff,   8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right    (ui_MenuBluetoothOff,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_top      (ui_MenuBluetoothOff,   8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOff,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_radius       (ui_MenuBluetoothOff, LV_RADIUS_CIRCLE,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_border_width (ui_MenuBluetoothOff, 0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_left     (ui_MenuBluetoothOff, 8,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_right    (ui_MenuBluetoothOff, 0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_top      (ui_MenuBluetoothOff, 8,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOff, 0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
 
   lv_obj_set_style_bg_image_src (ui_MenuBluetoothOff, &ui_img_1837194583,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_color     (ui_MenuBluetoothOff, lv_color_hex(0xFFFFFF), (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_radius       (ui_MenuBluetoothOff, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_radius       (ui_MenuBluetoothOff, LV_RADIUS_CIRCLE,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_opa       (ui_MenuBluetoothOff, 255,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   lv_obj_set_style_bg_image_src (ui_MenuBluetoothOff, &ui_img_1837194583,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_radius       (ui_MenuBluetoothOff, 100,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_border_width (ui_MenuBluetoothOff,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_left     (ui_MenuBluetoothOff,  10,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_right    (ui_MenuBluetoothOff,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_top      (ui_MenuBluetoothOff,  10,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOff,   0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_radius       (ui_MenuBluetoothOff, LV_RADIUS_CIRCLE,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_border_width (ui_MenuBluetoothOff,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_left     (ui_MenuBluetoothOff, 10,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_right    (ui_MenuBluetoothOff,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_top      (ui_MenuBluetoothOff,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_bottom   (ui_MenuBluetoothOff,  0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   lv_obj_add_event_cb(ui_MenuBluetoothOn, ui_event_MenuBluetoothOn, LV_EVENT_ALL, NULL);
   lv_obj_add_event_cb(ui_MenuBluetoothOff, ui_event_MenuBluetoothOff, LV_EVENT_ALL, NULL);
 #endif
 #if   false
   ui_CheckFavorite = lv_checkbox_create(ui_ScreenPlayList);
-  lv_checkbox_set_text(ui_CheckFavorite, "");
-  lv_obj_set_width    (ui_CheckFavorite, 15);
-  lv_obj_set_height   (ui_CheckFavorite, 15);
-  lv_obj_set_align    (ui_CheckFavorite, LV_ALIGN_CENTER);
-  lv_obj_add_flag     (ui_CheckFavorite, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
+  lv_checkbox_set_text          (ui_CheckFavorite, "");
+  lv_obj_set_width              (ui_CheckFavorite, 15);
+  lv_obj_set_height             (ui_CheckFavorite, 15);
+  lv_obj_set_align              (ui_CheckFavorite, LV_ALIGN_CENTER);
+  lv_obj_add_flag               (ui_CheckFavorite, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
   lv_obj_set_style_bg_image_src (ui_CheckFavorite, &ui_img_1157704237,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_color     (ui_CheckFavorite, lv_color_hex(0xFFFFFF),  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa       (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius       (ui_CheckFavorite, 100,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_border_width (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left     (ui_CheckFavorite,  -4,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right    (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_top      (ui_CheckFavorite,  -4,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_bottom   (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_opa       (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_border_width (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_left     (ui_CheckFavorite, -4,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_right    (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_top      (ui_CheckFavorite, -4,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_bottom   (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_radius       (ui_CheckFavorite, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
 
   lv_obj_set_style_bg_image_src (ui_CheckFavorite, &ui_img_628457255,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_color     (ui_CheckFavorite, lv_color_hex(0xFFFFFF),  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_opa       (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_radius       (ui_CheckFavorite, 100,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_pad_left     (ui_CheckFavorite,  -4,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_pad_right    (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_pad_top      (ui_CheckFavorite,  -4,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_pad_bottom   (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_bg_opa       (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_pad_left     (ui_CheckFavorite, -4,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_pad_right    (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_pad_top      (ui_CheckFavorite, -4,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_pad_bottom   (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_radius       (ui_CheckFavorite, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
   lv_obj_set_style_bg_image_src (ui_CheckFavorite, &ui_img_1157704237,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_bg_color     (ui_CheckFavorite, lv_color_hex(0xFFFFFF),  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_bg_opa       (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_radius       (ui_CheckFavorite, 100,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_left     (ui_CheckFavorite,  -2,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_right    (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_top      (ui_CheckFavorite,  -2,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_bottom   (ui_CheckFavorite,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_bg_opa       (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_left     (ui_CheckFavorite, -2,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_right    (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_top      (ui_CheckFavorite, -2,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_bottom   (ui_CheckFavorite,  0,                      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_radius       (ui_CheckFavorite, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   lv_obj_add_event_cb           (ui_CheckFavorite, ui_event_CheckFavorite, LV_EVENT_ALL, NULL);
 #endif

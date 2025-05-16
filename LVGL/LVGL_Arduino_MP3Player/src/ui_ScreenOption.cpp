@@ -20,24 +20,24 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_align    (ui_MenuBackRight, LV_ALIGN_CENTER);
   lv_obj_add_flag     (ui_MenuBackRight, LV_OBJ_FLAG_SCROLL_ON_FOCUS);  /// Flags
 
-  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_color     (ui_MenuBackRight, lv_color_hex(0xFFFFFF), (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_radius       (ui_MenuBackRight, 100, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_border_width (ui_MenuBackRight,   0, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left     (ui_MenuBackRight,   8, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right    (ui_MenuBackRight,   0, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_top      (ui_MenuBackRight,   8, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_bottom   (ui_MenuBackRight,   0, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius       (ui_MenuBackRight, 100, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_opa       (ui_MenuBackRight, 255, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_radius       (ui_MenuBackRight, 100, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_border_width (ui_MenuBackRight,   0, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_left     (ui_MenuBackRight,  10, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_right    (ui_MenuBackRight,   0, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_top      (ui_MenuBackRight,  10, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_bottom   (ui_MenuBackRight,   0, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_bg_image_src (ui_MenuBackRight, &ui_img_1710110385,      (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_bg_color     (ui_MenuBackRight, lv_color_hex(0xFFFFFF),  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_radius       (ui_MenuBackRight, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_radius       (ui_MenuBackRight, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_radius       (ui_MenuBackRight, LV_RADIUS_CIRCLE,        (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_border_width (ui_MenuBackRight,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_left     (ui_MenuBackRight,   8,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_right    (ui_MenuBackRight,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_top      (ui_MenuBackRight,   8,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_bottom   (ui_MenuBackRight,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_opa       (ui_MenuBackRight, 255,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_border_width (ui_MenuBackRight,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_left     (ui_MenuBackRight,  10,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_right    (ui_MenuBackRight,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_top      (ui_MenuBackRight,  10,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_bottom   (ui_MenuBackRight,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_FavoriteLabel = lv_label_create(ui_ScreenOption);
   lv_obj_set_width  (ui_FavoriteLabel, LV_SIZE_CONTENT);   /// 1
@@ -131,7 +131,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_align  (ui_SleepTimerSwitch, LV_ALIGN_CENTER);
 
   ui_BacklightRoller = lv_roller_create(ui_ScreenOption);
-  lv_roller_set_options       (ui_BacklightRoller, "15 sec\n30 sec\n1 min\n2 min\n5 min", LV_ROLLER_MODE_NORMAL);
+  lv_roller_set_options       (ui_BacklightRoller, "30 sec\n1 min\n2 min\n5 min", LV_ROLLER_MODE_NORMAL);
   lv_obj_set_width            (ui_BacklightRoller, 80);
   lv_obj_set_height           (ui_BacklightRoller, 70);
   lv_obj_set_x                (ui_BacklightRoller, lv_pct(-24));
