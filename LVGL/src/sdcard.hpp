@@ -73,7 +73,7 @@ SdFs SD;
 
 // SHARED_SPI makes SD very slow, while DEDICATED_SPI causes GFX libraries to stop working.
 #ifdef LOVYANGFX_HPP_
-#define SD_SPI_METHOD DEDICATED_SPI
+#define SD_SPI_METHOD SHARED_SPI // DEDICATED_SPI
 #else
 #define SD_SPI_METHOD SHARED_SPI
 #endif
