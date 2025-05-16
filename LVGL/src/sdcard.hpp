@@ -37,7 +37,7 @@
  * For more info see file README.md in this library or on URL:
  * https://github.com/espressif/arduino-esp32/tree/master/libraries/SD
  */
-#define  USE_SDFAT
+// #define USE_SDFAT
 
 #ifndef CYD_SD_SPI_BUS
 #define CYD_SD_SS      5
@@ -68,13 +68,11 @@ SdFs SD;
 #undef  FILE_WRITE
 #define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
 
-// The maximum SD SPI clock of ESP32-2432S028 might be 24 MHz
+// The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_SPI_CLOCK 24000000
 
 // SHARED_SPI makes SD very slow, while DEDICATED_SPI causes GFX libraries to stop working.
-#ifdef LOVYANGFX_HPP_
-#define SD_SPI_METHOD SHARED_SPI // DEDICATED_SPI
-#else
+#ifndef SD_SPI_METHOD
 #define SD_SPI_METHOD SHARED_SPI
 #endif
 
@@ -99,7 +97,7 @@ SdFs SD;
 
 #define FS_TYPE  fs::SDFS
 
-// The maximum SD SPI clock of ESP32-2432S028 might be 24 MHz
+// The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_SPI_CLOCK 50000000
 
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)

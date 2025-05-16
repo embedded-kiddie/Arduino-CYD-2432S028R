@@ -47,6 +47,7 @@ static LGFX tft;
 //----------------------------------------------------------------------
 #define SCREENSHORT false
 #if SCREENSHORT
+#define USE_SDFAT
 #include "../src/sdcard.hpp"
 #endif
 

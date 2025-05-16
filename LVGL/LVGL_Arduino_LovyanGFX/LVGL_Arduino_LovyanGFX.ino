@@ -69,8 +69,10 @@ static LGFX tft;
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
-#define SCREENSHORT false
+#define SCREENSHORT true
 #if SCREENSHORT
+#define USE_SDFAT
+#define SD_SPI_METHOD DEDICATED_SPI 
 #include "../src/sdcard.hpp"
 #endif
 
