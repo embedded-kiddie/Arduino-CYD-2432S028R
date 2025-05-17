@@ -108,6 +108,8 @@ LV_IMG_DECLARE(ui_img_1157704237);   // assets/heart-off-small.png
 LV_IMG_DECLARE(ui_img_628457255);    // assets/heart-on-small.png
 LV_IMG_DECLARE(ui_img_1668913270);   // assets/back-up.png
 LV_IMG_DECLARE(ui_img_365069097);    // assets/back-down.png
+LV_IMG_DECLARE(button_list_play);    // assets/list_play.png
+LV_IMG_DECLARE(button_list_pause);   // assets/list_pause.png
 
 // UI INIT
 void ui_init(void);
@@ -118,7 +120,8 @@ void ui_redisplay(void);
 
 const char* ui_get_title(uint32_t);
 const char* ui_get_artist(uint32_t);
-uint32_t ui_get_duration(uint32_t);
+const uint32_t ui_get_duration(uint32_t);
+const uint32_t ui_get_counts(void);
 
 #define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
 #define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14

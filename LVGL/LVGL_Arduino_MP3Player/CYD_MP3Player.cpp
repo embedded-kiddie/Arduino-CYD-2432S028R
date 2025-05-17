@@ -36,27 +36,38 @@ bool CYD_MP3Player::CheckExtension(const char* path) {
  *--------------------------------------------------------------------------------*/
 ID3Tags_t CYD_MP3Player::GetID3Tags(std::string path) {
   int n = 0;
-  char *ptr, *token, *str[8], copy[256];
-  ID3Tags_t tags = {0, "", "", ""};
+  char *ptr, *token, *tmp[8], copy[256];
+  ID3Tags_t tags = m_empty;
 
   if (path.size() < sizeof(copy)) {
     strcpy(copy, path.c_str());
   } else {
+    // Copy a string including the null character from the end
     strcpy(copy, path.c_str() + path.size() + 1 - sizeof(copy));
   }
 
   token = strtok_r(copy, "/", &ptr);
   while (token != NULL && n < 8) {
-    str[n++] = token;
+    tmp[n++] = token;
     token = strtok_r(NULL, "/", &ptr);
   }
 
   if (--n >= 0) {
-    tags.title = std::string(str[n]);
+    ptr = strrchr(tmp[n], '.'); // ".mp3", ".m4a", ".wav"
+    if (ptr) {
+      *ptr = '\0';
+    }
+    if (isdigit(*tmp[n])) { // "1-01 title"
+      ptr = strchr(tmp[n], ' ');
+      ptr = ptr ? ptr + 1 : tmp[n];
+      tags.title = std::string(ptr);
+    } else {
+      tags.title = std::string(tmp[n]);
+    }
     if (--n >= 0) {
-      tags.album = std::string(str[n]);
+      tags.album = std::string(tmp[n]);
       if (--n >= 0) {
-        tags.artist = std::string(str[n]);
+        tags.artist = std::string(tmp[n]);
       }
     }
   }
@@ -213,10 +224,6 @@ bool CYD_MP3Player::AutoPlay(bool selected) {
       play = false;
     } else {
       play = true;
-
-      if (id3data_ptr) {
-        id3data_ptr->playNo = m_playNo;
-      }
     }
 
     // Update for the next play

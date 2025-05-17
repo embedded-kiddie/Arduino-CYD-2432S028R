@@ -40,7 +40,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_style_pad_bottom   (ui_MenuBackRight,   0,                     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   ui_FavoriteLabel = lv_label_create(ui_ScreenOption);
-  lv_obj_set_width  (ui_FavoriteLabel, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_width  (ui_FavoriteLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_height (ui_FavoriteLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_x      (ui_FavoriteLabel, lv_pct(-22));
   lv_obj_set_y      (ui_FavoriteLabel, lv_pct(-40));
@@ -74,7 +74,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_remove_flag(ui_FavoriteClearButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
 
   ui_FavoriteClearLabel = lv_label_create(ui_FavoriteClearButton);
-  lv_obj_set_width            (ui_FavoriteClearLabel, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_width            (ui_FavoriteClearLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_height           (ui_FavoriteClearLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_align            (ui_FavoriteClearLabel, LV_ALIGN_CENTER);
   lv_label_set_text           (ui_FavoriteClearLabel, "Clear List");
@@ -92,7 +92,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_remove_flag(ui_FavoriteNewButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
 
   ui_FavoriteNewLabel = lv_label_create(ui_FavoriteNewButton);
-  lv_obj_set_width            (ui_FavoriteNewLabel, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_width            (ui_FavoriteNewLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_height           (ui_FavoriteNewLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_align            (ui_FavoriteNewLabel, LV_ALIGN_CENTER);
   lv_label_set_text           (ui_FavoriteNewLabel, "New List");
@@ -101,7 +101,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_style_text_font  (ui_FavoriteNewLabel, &lv_font_montserrat_14, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
 
   ui_BacklightLabel = lv_label_create(ui_ScreenOption);
-  lv_obj_set_width  (ui_BacklightLabel, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_width  (ui_BacklightLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_height (ui_BacklightLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_x      (ui_BacklightLabel, lv_pct(-23));
   lv_obj_set_y      (ui_BacklightLabel, lv_pct(0));
@@ -109,7 +109,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_label_set_text (ui_BacklightLabel, "Backlight Off");
 
   ui_SleepTimerLabel = lv_label_create(ui_ScreenOption);
-  lv_obj_set_width  (ui_SleepTimerLabel, LV_SIZE_CONTENT);   /// 1
+  lv_obj_set_width  (ui_SleepTimerLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_height (ui_SleepTimerLabel, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_x      (ui_SleepTimerLabel, lv_pct(26));
   lv_obj_set_y      (ui_SleepTimerLabel, lv_pct(0));

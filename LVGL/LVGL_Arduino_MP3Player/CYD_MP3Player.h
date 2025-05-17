@@ -27,10 +27,11 @@ typedef struct {
 } PlayList_t;
 
 typedef struct {
-  uint32_t    playNo;
   std::string title;
   std::string artist;
   std::string album;
+  uint32_t    duration;
+  bool        selected;
 } ID3Tags_t;
 
 /*--------------------------------------------------------------------------------
@@ -57,12 +58,15 @@ private:
   bool m_selected = false;
   fs::FS & m_fs = FS_DEV;
   std::vector<PlayList_t> m_files = {};
+  const ID3Tags_t m_empty = {};
 
   bool CheckExtension(const char* path);
 
 public:
   bool      begin(void);
+  uint32_t  GetCounts(void) { return m_files.size(); }
   ID3Tags_t GetID3Tags(std::string path);
+  ID3Tags_t GetID3Tags(uint32_t n) { return n < m_files.size() ? GetID3Tags(m_files[n].path) : m_empty; }
   void      ScanFileList(const char *dirname, uint8_t levels);
   void      SortFileList(bool shuffle = false);
 

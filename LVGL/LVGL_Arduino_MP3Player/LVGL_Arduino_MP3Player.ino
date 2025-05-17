@@ -14,8 +14,8 @@
 
 /* LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes */
 #define DRAW_BUF_SIZE   (TFT_HOR_RES * TFT_VER_RES / DRAW_BUF_N_DIVS * (LV_COLOR_DEPTH / 8))
+#define DRAW_BUF_N_DIVS 10  // 2 (75KB) - 10 (15KB)
 #define DRAW_BUF_N_BUFS 1   // 1 or 2
-#define DRAW_BUF_N_DIVS 10  // 2 - 20
 
 #define USE_HEAP_MALLOC true
 #if USE_HEAP_MALLOC
@@ -45,7 +45,7 @@ static LGFX tft;
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
-#define SCREENSHORT true
+#define SCREENSHORT false
 #if SCREENSHORT
 #define USE_SDFAT
 #include "../src/sdcard.hpp"

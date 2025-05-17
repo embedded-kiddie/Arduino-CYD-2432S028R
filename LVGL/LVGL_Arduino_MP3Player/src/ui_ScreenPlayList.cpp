@@ -4,16 +4,15 @@
 // Project name: SquareLine_Project
 
 #include "ui.h"
-
 #include <stdio.h>  // for printf()
-#include "../CYD_MP3Player.h"
-
-extern CYD_MP3Player player;
 
 /**********************
  *      MACROS
  **********************/
 #define LV_DEMO_MUSIC_HANDLE_SIZE 26
+#define LIST_LABEL_WIDTH    150
+#define FONT_SMALL_HEIGHT   17
+#define FONT_MEDIUM_HEIGHT  22
 
 #define PLAYLIST_COLOR_DEFAULT lv_color_hex(0x5a5a7f)
 #define PLAYLIST_COLOR_PRESSED lv_color_hex(0x4c4965)
@@ -35,12 +34,10 @@ static lv_style_t style_artist;
 static lv_style_t style_time;
 static lv_style_t style_heart;
 static lv_style_t style_menu_back;
-LV_IMAGE_DECLARE(img_lv_demo_music_btn_list_play);
-LV_IMAGE_DECLARE(img_lv_demo_music_btn_list_pause);
+//LV_IMAGE_DECLARE(img_lv_demo_music_btn_list_play);
+//LV_IMAGE_DECLARE(img_lv_demo_music_btn_list_pause);
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 
-#define MIN_VALUE     0
-#define MAX_VALUE     10
 #define ITEM_HEIGHT   60
 #define ITEM_VIEWS    5   // Height of ui_ContainerPlayList (300) / LIST_HEIGHT (60)
 #define ITEM_SPARE    2   // 1 <= ITEM_SPARE <= 2
@@ -59,11 +56,11 @@ static void list_state_update(uint32_t track_id, bool state) {
 
     if (state) {
       lv_obj_add_state(btn, LV_STATE_CHECKED);
-      lv_image_set_src(icon, &img_lv_demo_music_btn_list_pause);
+      lv_image_set_src(icon, &button_list_pause);
       lv_obj_scroll_to_view(btn, LV_ANIM_ON);
     } else {
       lv_obj_remove_state(btn, LV_STATE_CHECKED);
-      lv_image_set_src(icon, &img_lv_demo_music_btn_list_play);
+      lv_image_set_src(icon, &button_list_play);
     }
   }
 }
@@ -73,8 +70,12 @@ static void list_click_event_cb(lv_event_t* e) {
 
   uint32_t idx = (uint32_t)lv_obj_get_index(btn);
   uint32_t idy = (uint32_t)lv_event_get_user_data(e);
+//printf("list_click_event_cb(%d, %d)\n", idx, idy); // should be idx == idy
 
-  printf("list_click_event_cb(%d, %d)\n", idx, idy);
+  lv_point_t p;
+  lv_indev_t * indev = lv_indev_get_act();
+  lv_indev_get_point(indev, &p);
+  printf("list_click_event_cb(%d, %d)\n", p.x, p.y);
 
   list_state_update(ui_control.playNo, false);
   ui_control.playNo = idx;
@@ -125,23 +126,25 @@ static lv_obj_t *add_list_button(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_add_event_cb(btn, list_click_event_cb, LV_EVENT_CLICKED, (void*)track_id);
 
   lv_obj_t* icon = lv_image_create(btn);
-  lv_image_set_src    (icon, &img_lv_demo_music_btn_list_play);
+  lv_image_set_src    (icon, &button_list_play);
   lv_obj_set_grid_cell(icon, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 2);
 
   lv_obj_t* title_label = lv_label_create(btn);
-  lv_label_set_text   (title_label, title);
-  lv_obj_set_grid_cell(title_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
-  lv_obj_add_style    (title_label, &style_title, 0);
+  lv_label_set_text     (title_label, title);
+  lv_label_set_long_mode(title_label, LV_LABEL_LONG_DOT);
+  lv_obj_set_grid_cell  (title_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+  lv_obj_add_style      (title_label, &style_title, 0);
 
   lv_obj_t* artist_label = lv_label_create(btn);
-  lv_label_set_text   (artist_label, artist);
-  lv_obj_add_style    (artist_label, &style_artist, 0);
-  lv_obj_set_grid_cell(artist_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+  lv_label_set_text     (artist_label, artist);
+  lv_label_set_long_mode(artist_label, LV_LABEL_LONG_DOT);
+  lv_obj_set_grid_cell  (artist_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+  lv_obj_add_style      (artist_label, &style_artist, 0);
 
   lv_obj_t* time_label = lv_label_create(btn);
-  lv_label_set_text   (time_label, time);
   lv_obj_add_style    (time_label, &style_time, 0);
   lv_obj_set_grid_cell(time_label, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_END, 0, 2);
+  lv_label_set_text   (time_label, time);
 
   lv_obj_t* heart = lv_checkbox_create(btn);
   lv_checkbox_set_text(heart, "");
@@ -176,13 +179,13 @@ static void update_scroll(lv_obj_t *obj) {
   int32_t pos;
 
   /* load items we're getting close to */
-  while (bottom_num < MAX_VALUE && (pos = lv_obj_get_scroll_bottom(obj)) < (ITEM_HEIGHT)) {
+  while (bottom_num < ui_get_counts() - 1 && (pos = lv_obj_get_scroll_bottom(obj)) < (ITEM_HEIGHT)) {
     bottom_num += 1;
     add_list_button(obj, bottom_num);
     lv_obj_update_layout(obj);
     //Serial.printf("added bottom num: %d, pos: %d\n", bottom_num, pos);
   }
-  while (top_num > MIN_VALUE && (pos = lv_obj_get_scroll_top(obj)) < (ITEM_HEIGHT)) {
+  while (top_num > 0 && (pos = lv_obj_get_scroll_top(obj)) < (ITEM_HEIGHT)) {
     top_num -= 1;
     int32_t bottom_before = lv_obj_get_scroll_bottom(obj);
     lv_obj_t *new_item = add_list_button(obj, top_num);
@@ -251,8 +254,8 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   LV_LOG_WARN("LV_FONT_MONTSERRAT_14 is not enabled for the music demo. Using LV_FONT_DEFAULT instead.");
 #endif
 
-  static const int32_t grid_cols[] = { LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_CONTENT, LV_GRID_TEMPLATE_LAST };
-  static const int32_t grid_rows[] = { 22, 17, LV_GRID_TEMPLATE_LAST };
+  static const int32_t grid_cols[] = { LV_GRID_CONTENT, LIST_LABEL_WIDTH, LV_GRID_CONTENT, LV_GRID_TEMPLATE_LAST };
+  static const int32_t grid_rows[] = { FONT_MEDIUM_HEIGHT, FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
 
   lv_style_init                     (&style_button);
   lv_style_set_bg_opa               (&style_button, LV_OPA_TRANSP);
@@ -275,10 +278,14 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_image_opa  (&style_button_disable, LV_OPA_40);
 */
   lv_style_init           (&style_title);
+  lv_style_set_width      (&style_title, LIST_LABEL_WIDTH);
+  lv_style_set_height     (&style_title, FONT_MEDIUM_HEIGHT);
   lv_style_set_text_font  (&style_title, font_medium);
   lv_style_set_text_color (&style_title, lv_color_hex(0xffffff));
 
   lv_style_init           (&style_artist);
+  lv_style_set_width      (&style_artist, LIST_LABEL_WIDTH);
+  lv_style_set_height     (&style_artist, FONT_SMALL_HEIGHT);
   lv_style_set_text_font  (&style_artist, font_small);
   lv_style_set_text_color (&style_artist, lv_color_hex(0xb1b0be));
 
@@ -325,7 +332,7 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_obj_set_style_bg_opa   (slider, 0,                     (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT); // Set the knob invisible
   lv_obj_set_style_bg_color (slider, PLAYLIST_COLOR_SLIDER, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
-  lv_slider_set_range       (slider, (MAX_VALUE + 1) * ITEM_HEIGHT, MIN_VALUE * ITEM_HEIGHT);
+  lv_slider_set_range       (slider, ui_get_counts() * ITEM_HEIGHT, 0);
 
   return list;
 }
@@ -528,8 +535,7 @@ void ui_ScreenPlayList_screen_init(void) {
   play_list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
 
   /* These counters hold the the highest/lowest number currently loaded. */
-  top_num = MIN_VALUE;
-  bottom_num = MIN_VALUE;
+  top_num = bottom_num = 0;
   add_list_button(play_list, top_num);
 
   lv_obj_update_layout(play_list);

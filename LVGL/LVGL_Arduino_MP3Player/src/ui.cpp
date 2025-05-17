@@ -12,7 +12,7 @@
 
 CYD_MP3Player player;
 
-#define MP3_VOLUME_INI 8
+#define MP3_VOLUME_INI 6
 #define MP3_PATH_ROOT "/MP3Player/"
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
 #define PERIOD_TAKS1 1000 // [msec]
@@ -146,16 +146,22 @@ void ui_redisplay(void) {
   lv_disp_load_scr(lv_scr_act());
 }
 
+static ID3Tags_t ui_tags;
 const char* ui_get_title(uint32_t track_id) {
-  return "Title";
+  ui_tags = player.GetID3Tags(track_id);
+  return ui_tags.title.c_str();
 }
 
 const char* ui_get_artist(uint32_t track_id) {
-  return "artist";
+  return ui_tags.artist.c_str();
 }
 
-uint32_t ui_get_duration(uint32_t track_id) {
-  return 180;
+const uint32_t ui_get_duration(uint32_t track_id) {
+  return 650;
+}
+
+const uint32_t ui_get_counts(void) {
+  return (const uint32_t)player.GetCounts();
 }
 
 ///////////////////// VARIABLES ////////////////////
