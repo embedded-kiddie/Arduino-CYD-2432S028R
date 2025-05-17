@@ -15,11 +15,11 @@
 /* LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes */
 #define DRAW_BUF_SIZE   (TFT_HOR_RES * TFT_VER_RES / DRAW_BUF_N_DIVS * (LV_COLOR_DEPTH / 8))
 #define DRAW_BUF_N_BUFS 1   // 1 or 2
-#define DRAW_BUF_N_DIVS 10  // 2 - 10
+#define DRAW_BUF_N_DIVS 10  // 2 - 20
 
 #define USE_HEAP_MALLOC true
 #if USE_HEAP_MALLOC
-static uint8_t* draw_buf[DRAW_BUF_N_BUFS] = { NULL, };
+static uint8_t* draw_buf[DRAW_BUF_N_BUFS] = {};
 #else
 static uint8_t draw_buf[DRAW_BUF_N_BUFS][DRAW_BUF_SIZE];
 #endif
@@ -45,7 +45,7 @@ static LGFX tft;
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
-#define SCREENSHORT false
+#define SCREENSHORT true
 #if SCREENSHORT
 #define USE_SDFAT
 #include "../src/sdcard.hpp"
@@ -254,12 +254,13 @@ void setup() {
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
 
-#if ! SCREENSHORT
   bool state = ui_loop();
   if (!state && is_awake) {
     enable_display(false);
   }
-#else
+
+#if SCREENSHORT
+  // Stop playing before saving screenshot
   if (Serial.available()) {
     Serial.readStringUntil('\n');
     sdcard_setup();
