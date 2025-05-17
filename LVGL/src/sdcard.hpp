@@ -52,16 +52,10 @@
  *--------------------------------------------------------------------------------*/
 #ifdef USE_SDFAT
 
-#define DISABLE_FS_H_WARNING
 #include "SdFat.h"
 
-#if   1
 #define FS_TYPE SdFat
 SdFat SD;
-#else
-#define FS_TYPE SdFs
-SdFs SD;
-#endif
 
 #undef  FILE_APPEND
 #define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
@@ -77,10 +71,10 @@ SdFs SD;
 #endif
 
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-  #if   1
+  #if   0
     static SPIClass sd_spi = SPIClass(VSPI);
     #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK, &sd_spi) // OK
-  #elif 0
+  #elif 1
     #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK) // OK
   #elif 0
     #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_CLOCK) // NG
