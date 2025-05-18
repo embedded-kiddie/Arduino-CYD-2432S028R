@@ -10,7 +10,8 @@
 #include <stdio.h>  // for sprintf(), printf()
 #include "../CYD_MP3Player.h"
 
-CYD_MP3Player player;
+static CYD_MP3Player player;
+static ID3Tags_t id3tags;
 
 #define MP3_VOLUME_INI 6
 #define MP3_PATH_ROOT "/MP3Player/"
@@ -25,12 +26,12 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 typedef enum {
   UI_STATE_INIT,
   UI_STATE_IDLE,
+  UI_STATE_STOP,
   UI_STATE_PAUSE,
   UI_STATE_RESUME,
   UI_STATE_NEXT,
   UI_STATE_PREV,
   UI_STATE_PLAY,
-  UI_STATE_STOP,
   UI_STATE_SLEEP,
   UI_STATE_WAKEUP,
 } UI_State_t;
@@ -41,13 +42,10 @@ UI_Control_t ui_control;
 
 /////////////////// LOCAL FUNCTIONS //////////////////
 static const char* SecToStr(uint32_t sec) {
-  if (sec < 3600) {
-    static char str[8];
-    sprintf(str, "%2d:%02d", sec / 60, sec - 60 * (uint32_t)(sec / 60));
-    return (const char*)str;
-  } else {
-    return "0.00";
-  }
+  static char str[8];
+  snprintf(str, sizeof(str)-1, "%2d:%02d", sec / 60, sec - (sec / 60) * 60);
+  str[sizeof(str)-1] = '\0';
+  return (const char*)str;
 }
 
 static void UpdateElapsedTime(void) {
@@ -62,14 +60,46 @@ static void UpdateElapsedTime(void) {
   lv_label_set_text  (ui_ElapsedEnd,   SecToStr(duration));
 }
 
-static ID3Tags_t id3tags;
-static void get_id3tags(ID3Tags_t* tags [[gnu::unused]]) {
-  lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
-    LV_SYMBOL_AUDIO,
-    id3tags.title.c_str(),
-    id3tags.artist.c_str(),
-    id3tags.album.c_str()
-  );
+/*--------------------------------------------------------------------------------
+ * Get file information with ID3 tags (title, album, artist)
+ *--------------------------------------------------------------------------------*/
+static void GetID3Tags(uint32_t track_id) {
+  int n = 0;
+  char *ptr, *token, *tmp[8], copy[256];
+  const char *path = player.GetPath(track_id);
+
+  if (strlen(path) < sizeof(copy)) {
+    strcpy(copy, path);
+  } else {
+    // Copy a string including the null character from the end
+    strcpy(copy, path + strlen(path) + 1 - sizeof(copy));
+  }
+
+  token = strtok_r(copy, "/", &ptr);
+  while (token != NULL && n < 8) {
+    tmp[n++] = token;
+    token = strtok_r(NULL, "/", &ptr);
+  }
+
+  if (--n >= 0) {
+    ptr = strrchr(tmp[n], '.'); // ".mp3", ".m4a", ".wav"
+    if (ptr) {
+      *ptr = '\0';
+    }
+    if (isdigit(*tmp[n])) { // "1-01 title"
+      ptr = strchr(tmp[n], ' ');
+      ptr = ptr ? ptr + 1 : tmp[n];
+      id3tags.title = std::string(ptr);
+    } else {
+      id3tags.title = std::string(tmp[n]);
+    }
+    if (--n >= 0) {
+      id3tags.album = std::string(tmp[n]);
+      if (--n >= 0) {
+        id3tags.artist = std::string(tmp[n]);
+      }
+    }
+  }
 }
 
 ////////////////// GLOBAL FUNCTIONS /////////////////
@@ -78,13 +108,14 @@ bool ui_loop(void) {
     case UI_STATE_PLAY:
       player.AutoPlay();
       break;
-    case UI_STATE_RESUME:
-      player.PauseResume();
-      ui_state = UI_STATE_PLAY;
-      break;
+    case UI_STATE_STOP:
     case UI_STATE_PAUSE:
       player.PauseResume();
       ui_state = UI_STATE_IDLE;
+      break;
+    case UI_STATE_RESUME:
+      player.PauseResume();
+      ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_NEXT:
       player.PlayNext();
@@ -96,17 +127,12 @@ bool ui_loop(void) {
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
       ui_state = UI_STATE_PLAY;
       break;
-    case UI_STATE_STOP:
-      player.StopPlay();
-      ui_state = UI_STATE_IDLE;
-      break;
     case UI_STATE_INIT:
       player.begin();
       player.ScanFileList(MP3_PATH_CONFIG);
       player.SortFileList(true);
       player.SetVolume(MP3_VOLUME_INI);
       player.SetPlayNo(ui_control.playNo);
-      player.SetIDd3TagsCallback(get_id3tags, &id3tags);
       ui_state = UI_STATE_IDLE;
 
       // start playing: it makes ui_state to UI_STATE_RESUME
@@ -146,18 +172,17 @@ void ui_redisplay(void) {
   lv_disp_load_scr(lv_scr_act());
 }
 
-static ID3Tags_t ui_tags;
 const char* ui_get_title(uint32_t track_id) {
-  ui_tags = player.GetID3Tags(track_id);
-  return ui_tags.title.c_str();
+  GetID3Tags(track_id);
+  return id3tags.title.c_str();
 }
 
 const char* ui_get_artist(uint32_t track_id) {
-  return ui_tags.artist.c_str();
+  return id3tags.artist.c_str();
 }
 
 const uint32_t ui_get_duration(uint32_t track_id) {
-  return 650;
+  return id3tags.duration;
 }
 
 const uint32_t ui_get_counts(void) {
@@ -473,6 +498,32 @@ void ui_event_MenuBackDown(lv_event_t *e) {
     (e);
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
   }
+}
+
+/*--------------------------------------------------------------------------------
+ * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
+ *--------------------------------------------------------------------------------*/
+void audio_id3data(const char *info) {  //id3 metadata
+  char *p;
+  if (p = strstr(info, "Title: ")) {
+    id3tags.title = p + 7;
+  } else
+  if (p = strstr(info, "Artist: ")) {
+    id3tags.artist = p + 8;
+  } else
+  if (p = strstr(info, "Album: ")) {
+    id3tags.album = p + 7;
+    lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
+      LV_SYMBOL_AUDIO,
+      id3tags.title.c_str(),
+      id3tags.artist.c_str(),
+      id3tags.album.c_str()
+    );
+  }
+}
+
+void audio_eof_mp3(const char *info) {  //end of file
+  player.SetPlayNo(player.GetPlayNo() + 1);
 }
 
 ///////////////////// SCREENS ////////////////////

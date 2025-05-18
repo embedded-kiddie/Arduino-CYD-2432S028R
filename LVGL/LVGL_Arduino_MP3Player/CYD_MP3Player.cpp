@@ -3,9 +3,6 @@
  *--------------------------------------------------------------------------------*/
 #include "CYD_MP3Player.h"
 
-static ID3Tags_t* id3data_ptr = NULL;
-static void (*id3data_callback)(ID3Tags_t*) = NULL;
-
 /*--------------------------------------------------------------------------------
  * Begin with SD or SdFat
  *--------------------------------------------------------------------------------*/
@@ -29,50 +26,6 @@ bool CYD_MP3Player::CheckExtension(const char* path) {
     }
   }
   return false;
-}
-
-/*--------------------------------------------------------------------------------
- * Get file information with ID3 tags (title, album, artist)
- *--------------------------------------------------------------------------------*/
-ID3Tags_t CYD_MP3Player::GetID3Tags(std::string path) {
-  int n = 0;
-  char *ptr, *token, *tmp[8], copy[256];
-  ID3Tags_t tags = m_empty;
-
-  if (path.size() < sizeof(copy)) {
-    strcpy(copy, path.c_str());
-  } else {
-    // Copy a string including the null character from the end
-    strcpy(copy, path.c_str() + path.size() + 1 - sizeof(copy));
-  }
-
-  token = strtok_r(copy, "/", &ptr);
-  while (token != NULL && n < 8) {
-    tmp[n++] = token;
-    token = strtok_r(NULL, "/", &ptr);
-  }
-
-  if (--n >= 0) {
-    ptr = strrchr(tmp[n], '.'); // ".mp3", ".m4a", ".wav"
-    if (ptr) {
-      *ptr = '\0';
-    }
-    if (isdigit(*tmp[n])) { // "1-01 title"
-      ptr = strchr(tmp[n], ' ');
-      ptr = ptr ? ptr + 1 : tmp[n];
-      tags.title = std::string(ptr);
-    } else {
-      tags.title = std::string(tmp[n]);
-    }
-    if (--n >= 0) {
-      tags.album = std::string(tmp[n]);
-      if (--n >= 0) {
-        tags.artist = std::string(tmp[n]);
-      }
-    }
-  }
-
-  return tags;
 }
 
 /*--------------------------------------------------------------------------------
@@ -114,7 +67,7 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
 #ifdef SDFATFS_USED
       ScanFileList(path.c_str(), levels - 1);
 #else
-    ScanFileList(file.path(), levels - 1);
+      ScanFileList(file.path(), levels - 1);
 #endif
     }
 
@@ -152,46 +105,24 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
     });
   }
 
-#if   true
-  ID3Tags_t tags;
   for (auto& file : m_files) {
-    tags = GetID3Tags(file.path);
-    Serial.printf("title: %s, album: %s, artist: %s\n", tags.title.c_str(), tags.album.c_str(), tags.artist.c_str());
+    Serial.println(file.path.c_str());
   }
-  Serial.printf("total: %d\n", m_files.size());
-#endif
 }
 
 /*--------------------------------------------------------------------------------
  * Operation
  *--------------------------------------------------------------------------------*/
-uint8_t CYD_MP3Player::GetVolumePerCent(void) {
-  return audioGetVolumePerCent();
-}
-
 void CYD_MP3Player::SetVolume(uint8_t vol) {
   audioSetVolume(vol);
 }
 
-void CYD_MP3Player::PauseResume(void) {
-  audioPauseResume();
+uint8_t CYD_MP3Player::GetVolumePerCent(void) {
+  return audioGetVolumePerCent();
 }
 
-void CYD_MP3Player::StopPlay(void) {
-  audioStopSong();
-}
-
-void CYD_MP3Player::SetPlayNo(int playNo) {
-  audioStopSong();
-  m_playNo = playNo;
-}
-
-void CYD_MP3Player::PlayNext(void) {
-  audioStopSong();
-}
-
-void CYD_MP3Player::PlayPrev(void) {
-  SetPlayNo((m_playNo - 2 + m_files.size()) % m_files.size());
+bool CYD_MP3Player::IsPlaying(void) {
+  return audioIsPlaying();
 }
 
 bool CYD_MP3Player::FilePlay(const char* path) {
@@ -204,13 +135,27 @@ bool CYD_MP3Player::FilePlay(const char* path) {
   }
 }
 
-bool CYD_MP3Player::IsPlaying(void) {
-  return audioIsPlaying();
+void CYD_MP3Player::StopPlay(void) {
+  audioStopSong();
 }
 
-void CYD_MP3Player::SetIDd3TagsCallback(void (*callback)(ID3Tags_t*), ID3Tags_t* ptr) {
-  id3data_callback = callback;
-  id3data_ptr = ptr;
+void CYD_MP3Player::PauseResume(void) {
+  audioPauseResume();
+}
+
+void CYD_MP3Player::SetPlayNo(uint32_t playNo) {
+  uint32_t size = m_files.size();
+  m_playNo = (playNo + size) % m_files.size();
+}
+
+void CYD_MP3Player::PlayNext(void) {
+  audioStopSong();
+  SetPlayNo(m_playNo + 1);
+}
+
+void CYD_MP3Player::PlayPrev(void) {
+  audioStopSong();
+  SetPlayNo(m_playNo - 1);
 }
 
 bool CYD_MP3Player::AutoPlay(bool selected) {
@@ -226,8 +171,6 @@ bool CYD_MP3Player::AutoPlay(bool selected) {
       play = true;
     }
 
-    // Update for the next play
-    m_playNo = (m_playNo + 1) % m_files.size();
     return play;
   }
 
@@ -235,28 +178,15 @@ bool CYD_MP3Player::AutoPlay(bool selected) {
 }
 
 /*--------------------------------------------------------------------------------
- * Optional functions for audio-I2S
+ * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
  *--------------------------------------------------------------------------------*/
-void audio_id3data(const char *info) {  //id3 metadata
-  if (id3data_callback && id3data_ptr) {
-    char *p;
-    if (p = strstr(info, "Title: ")) {
-      id3data_ptr->title = p + 7;
-    } else
-    if (p = strstr(info, "Artist: ")) {
-      id3data_ptr->artist = p + 8;
-    } else
-    if (p = strstr(info, "Album: ")) {
-      id3data_ptr->album = p + 7;
-      id3data_callback(id3data_ptr);
-    }
-  }
-//Serial.print("id3data     ");
-//Serial.println(info);
-}
 #if   false
 void audio_info(const char *info) {
   Serial.print("info        ");
+  Serial.println(info);
+}
+void audio_id3data(const char *info) {  //id3 metadata
+  Serial.print("id3tags     ");
   Serial.println(info);
 }
 void audio_eof_mp3(const char *info) {  //end of file

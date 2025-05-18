@@ -65,19 +65,15 @@ static void list_state_update(uint32_t track_id, bool state) {
 
 static void list_click_event_cb(lv_event_t* e) {
   lv_obj_t* btn = (lv_obj_t*)lv_event_get_target(e);
-
-  uint32_t idx = (uint32_t)lv_obj_get_index(btn);
-  uint32_t idy = (uint32_t)lv_event_get_user_data(e);
-  //printf("list_click_event_cb(%d, %d)\n", idx, idy); // should be idx == idy
+  uint32_t track_id = (uint32_t)lv_event_get_user_data(e);
 
   lv_point_t p;
-  lv_indev_t * indev = lv_indev_get_act();
-  lv_indev_get_point(indev, &p);
-  printf("list_click_event_cb(%d, %d)\n", p.x, p.y);
+  lv_indev_get_point(lv_indev_get_act(), &p);
+//printf("list_click_event_cb(%d, %d): %d --> %d\n", p.x, p.y, ui_control.playNo, track_id);
 
-  list_state_update(ui_control.playNo, false);
-  ui_control.playNo = idx;
-  list_state_update(ui_control.playNo, true);
+  list_state_update(ui_control.playNo - top_num, false);
+  ui_control.playNo = track_id;
+  list_state_update(ui_control.playNo - top_num, true);
 }
 
 static void list_delete_event_cb(lv_event_t* e) {
@@ -100,8 +96,8 @@ static void heart_click_event_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    uint32_t idx = (uint32_t)lv_event_get_user_data(e);
-    printf("heart_click_event_cb(%d)\n", idx);
+    uint32_t track_id = (uint32_t)lv_event_get_user_data(e);
+    printf("heart_click_event_cb(%d)\n", track_id);
   }
 }
 
@@ -334,7 +330,7 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
 }
 
 /*--------------------------------------------------------------------------------
- *
+ * This initialization is executed once
  *--------------------------------------------------------------------------------*/
 void ui_ScreenPlayList_screen_init(void) {
   ui_ScreenPlayList = lv_obj_create(NULL);
