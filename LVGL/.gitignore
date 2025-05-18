@@ -8,11 +8,11 @@
 
 # target list
 !src
-!LVGL_Arduino_Base
-!LVGL_Arduino_LovyanGFX
-!LVGL_Arduino_TFT_eSPI
+!LVGL_Arduino_Base/*
+!LVGL_Arduino_LovyanGFX/*
+!LVGL_Arduino_TFT_eSPI/*
 !LVGL_Arduino_MultiCore
-!LVGL_Arduino_MP3Player
-!LVGL_Arduino_FontManager
-!LVGL_Arduino_EEZ
+!LVGL_Arduino_MP3Player/*
+!LVGL_Arduino_FontManager/*
+!LVGL_Arduino_EEZ/*
 

@@ -11,7 +11,8 @@
  **********************/
 #define LV_DEMO_MUSIC_HANDLE_SIZE 25
 
-#define LIST_LABEL_WIDTH          150
+#define LIST_LABEL_WIDTH          152
+#define LIST_BUTTON_WIDTH         48
 #define LIST_FONT_SMALL_HEIGHT    17
 #define LIST_FONT_MEDIUM_HEIGHT   22
 #define LIST_CELL_HEIGHT          60
@@ -319,7 +320,7 @@ lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
 
   // Creating a slider as an alternative to a scrollbar
   slider = lv_slider_create(parent);
-  lv_obj_align              (slider, LV_ALIGN_TOP_RIGHT, -4, LV_DEMO_MUSIC_HANDLE_SIZE);
+  lv_obj_align              (slider, LV_ALIGN_TOP_RIGHT, -2, LV_DEMO_MUSIC_HANDLE_SIZE);
   lv_obj_remove_flag        (slider, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_set_width          (slider, 4);
   lv_obj_set_height         (slider, LIST_CELL_VIEWS * LIST_CELL_HEIGHT);
