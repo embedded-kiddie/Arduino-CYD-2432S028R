@@ -211,8 +211,8 @@ static uint32_t my_tick(void) {
 }
 
 void setup() {
-  Serial.begin(115200);
   while (millis() < 1000);
+  Serial.begin(115200);
 
   tft_init();
   lv_init();
