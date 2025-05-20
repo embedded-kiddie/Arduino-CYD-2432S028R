@@ -6,12 +6,8 @@
 #include "ui.h"
 #include "ui_helpers.h"
 
-///////////////////// UI LOOP ////////////////////
 #include <stdio.h>  // for sprintf(), printf()
 #include "../CYD_MP3Player.h"
-
-static CYD_MP3Player player;
-static ID3Tags_t id3tags;
 
 #define MP3_VOLUME_INI 6
 #define MP3_PATH_ROOT "/MP3Player/"
@@ -23,6 +19,10 @@ static ID3Tags_t id3tags;
 #define DO_EVERY(period, prev) \
 static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; prev = now)
 
+static CYD_MP3Player player;
+static ID3Tags_t id3tags;
+
+///////////////////// UI LOOP ////////////////////
 typedef enum {
   UI_STATE_INIT,
   UI_STATE_IDLE,
@@ -40,205 +40,7 @@ UI_State_t ui_state;
 UI_Option_t ui_option;
 UI_Control_t ui_control;
 
-/////////////////// LOCAL FUNCTIONS //////////////////
-static const char* SecToStr(uint32_t sec) {
-  static char str[8];
-  snprintf(str, sizeof(str)-1, "%2d:%02d", sec / 60, sec - (sec / 60) * 60);
-  str[sizeof(str)-1] = '\0';
-  return (const char*)str;
-}
-
-static void UpdateElapsedTime(void) {
-  uint32_t duration = audioGetDuration();
-  uint32_t elapsed  = audioGetElapsedTime();
-  if (duration < elapsed) {
-    duration = elapsed;
-  }
-  lv_slider_set_range(ui_ElapsedBar, 0, duration);
-  lv_slider_set_value(ui_ElapsedBar, elapsed, LV_ANIM_OFF);
-  lv_label_set_text  (ui_ElapsedStart, SecToStr(elapsed));
-  lv_label_set_text  (ui_ElapsedEnd,   SecToStr(duration));
-}
-
-/*--------------------------------------------------------------------------------
- * Get file information with ID3 tags (title, album, artist)
- *--------------------------------------------------------------------------------*/
-static void GetID3Tags(uint32_t track_id) {
-  int n = 0;
-  char *ptr, *token, *tmp[8], copy[256];
-  const char *path = player.GetPath(track_id);
-
-  if (strlen(path) < sizeof(copy)) {
-    strcpy(copy, path);
-  } else {
-    // Copy a string including the null character from the end
-    strcpy(copy, path + strlen(path) + 1 - sizeof(copy));
-  }
-
-  token = strtok_r(copy, "/", &ptr);
-  while (token != NULL && n < 8) {
-    tmp[n++] = token;
-    token = strtok_r(NULL, "/", &ptr);
-  }
-
-  if (--n >= 0) {
-    ptr = strrchr(tmp[n], '.'); // ".mp3", ".m4a", ".wav"
-    if (ptr) {
-      *ptr = '\0';
-    }
-    if (isdigit(*tmp[n])) { // "1-01 title"
-      ptr = strchr(tmp[n], ' ');
-      ptr = ptr ? ptr + 1 : tmp[n];
-      id3tags.title = std::string(ptr);
-    } else {
-      id3tags.title = std::string(tmp[n]);
-    }
-    if (--n >= 0) {
-      id3tags.album = std::string(tmp[n]);
-      if (--n >= 0) {
-        id3tags.artist = std::string(tmp[n]);
-      }
-    }
-  }
-}
-
-////////////////// GLOBAL FUNCTIONS /////////////////
-bool ui_loop(void) {
-  switch (ui_state) {
-    case UI_STATE_PLAY:
-      player.AutoPlay();
-      break;
-    case UI_STATE_STOP:
-    case UI_STATE_PAUSE:
-      player.PauseResume();
-      ui_state = UI_STATE_IDLE;
-      break;
-    case UI_STATE_RESUME:
-      player.PauseResume();
-      ui_state = UI_STATE_PLAY;
-      break;
-    case UI_STATE_NEXT:
-      player.PlayNext();
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
-      ui_state = UI_STATE_PLAY;
-      break;
-    case UI_STATE_PREV:
-      player.PlayPrev();
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
-      ui_state = UI_STATE_PLAY;
-      break;
-    case UI_STATE_INIT:
-      player.begin();
-      player.ScanFileList(MP3_PATH_CONFIG);
-      player.SortFileList(true);
-      player.SetVolume(MP3_VOLUME_INI);
-      player.SetPlayNo(ui_control.selectedNo = 0);
-      ui_state = UI_STATE_IDLE;
-
-      // start playing: it makes ui_state to UI_STATE_RESUME
-      lv_obj_set_state    (ui_ButtonPlay, LV_STATE_CHECKED, true);
-      lv_obj_send_event   (ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
-      lv_slider_set_value (ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
-      break;
-    case UI_STATE_IDLE:
-    default:
-      break;
-  }
-
-  // Periodical task
-  DO_EVERY(PERIOD_TAKS1, task1Time) {
-    // Update elapsed bar
-    if (player.IsPlaying()) {
-      UpdateElapsedTime();
-    }
-  }
-
-  DO_EVERY(PERIOD_TAKS2, task2Time) {
-    if (player.IsPlaying()) {
-      // Serial.printf("%d\n", audioGetRMS() & 0xffff);
-    }
-  }
-
-  // Backlight control according to the duration of non-operation
-  if (ui_control.sleepTimer > lv_disp_get_inactive_time(NULL)) {
-    return true;  // keep backlight on
-  } else {
-    return false; // turn backlight off
-  }
-}
-
-void ui_redisplay(void) {
-  lv_disp_trig_activity(NULL);
-  lv_disp_load_scr(lv_scr_act());
-}
-
-const char* ui_get_title(uint32_t track_id) {
-  GetID3Tags(track_id);
-  return id3tags.title.c_str();
-}
-
-const char* ui_get_artist(uint32_t track_id) {
-  return id3tags.artist.c_str();
-}
-
-const char* ui_get_album(uint32_t track_id) {
-  return id3tags.album.c_str();
-}
-
-const uint32_t ui_get_duration(uint32_t track_id) {
-  return id3tags.duration;
-}
-
-const uint32_t ui_get_counts(void) {
-  return (const uint32_t)player.GetCounts();
-}
-
-uint32_t ui_get_playNo(void) {
-  return player.GetPlayNo();
-}
-
-void ui_set_playNo(uint32_t playNo) {
-  player.SetPlayNo(playNo);
-}
-
-/*--------------------------------------------------------------------------------
- * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
- *--------------------------------------------------------------------------------*/
-void audio_id3data(const char *info) {  //id3 metadata
-  char *p;
-  if (p = strstr(info, "Title: ")) {
-    id3tags.title = p + 7;
-  } else
-  if (p = strstr(info, "Artist: ")) {
-    id3tags.artist = p + 8;
-  } else
-  if (p = strstr(info, "Album: ")) {
-    id3tags.album = p + 7;
-    lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
-      LV_SYMBOL_AUDIO,
-      id3tags.title.c_str(),
-      id3tags.artist.c_str(),
-      id3tags.album.c_str()
-    );
-  }
-}
-
-void audio_eof_mp3(const char *info) {  //end of file
-  if (ui_ScreenPlayList) {
-    ui_list_update_cell(ui_control.selectedNo, false);
-    ui_list_update_icon(ui_get_playNo(),       false);
-  }
-
-  player.PlayNext(false); // continuous play
-  ui_control.selectedNo = player.GetPlayNo();
-
-  if (ui_ScreenPlayList) {
-    ui_list_update_play(ui_control.selectedNo, true);
-  }
-}
-
 ///////////////////// VARIABLES ////////////////////
-
 // SCREEN: ui_ScreenMain
 void ui_ScreenMain_screen_init(void);
 lv_obj_t *ui_ScreenMain;  void ui_event_ScreenMain  (lv_event_t *e);
@@ -550,4 +352,201 @@ void ui_init(void) {
   ui_control.sleepTimer = 30 * 1000;
 
   audioInit();
+}
+
+/////////////////// LOCAL FUNCTIONS //////////////////
+static const char* SecToStr(uint32_t sec) {
+  static char str[8];
+  snprintf(str, sizeof(str)-1, "%2d:%02d", sec / 60, sec - (sec / 60) * 60);
+  str[sizeof(str)-1] = '\0';
+  return (const char*)str;
+}
+
+static void UpdateElapsedTime(void) {
+  uint32_t duration = audioGetDuration();
+  uint32_t elapsed  = audioGetElapsedTime();
+  if (duration < elapsed) {
+    duration = elapsed;
+  }
+  lv_slider_set_range(ui_ElapsedBar, 0, duration);
+  lv_slider_set_value(ui_ElapsedBar, elapsed, LV_ANIM_OFF);
+  lv_label_set_text  (ui_ElapsedStart, SecToStr(elapsed));
+  lv_label_set_text  (ui_ElapsedEnd,   SecToStr(duration));
+}
+
+/*--------------------------------------------------------------------------------
+ * Get file information with ID3 tags (title, album, artist)
+ *--------------------------------------------------------------------------------*/
+static void GetID3Tags(uint32_t track_id) {
+  int n = 0;
+  char *ptr, *token, *tmp[8], copy[256];
+  const char *path = player.GetPath(track_id);
+
+  if (strlen(path) < sizeof(copy)) {
+    strcpy(copy, path);
+  } else {
+    // Copy a string including the null character from the end
+    strcpy(copy, path + strlen(path) + 1 - sizeof(copy));
+  }
+
+  token = strtok_r(copy, "/", &ptr);
+  while (token != NULL && n < 8) {
+    tmp[n++] = token;
+    token = strtok_r(NULL, "/", &ptr);
+  }
+
+  if (--n >= 0) {
+    ptr = strrchr(tmp[n], '.'); // ".mp3", ".m4a", ".wav"
+    if (ptr) {
+      *ptr = '\0';
+    }
+    if (isdigit(*tmp[n])) { // "1-01 title"
+      ptr = strchr(tmp[n], ' ');
+      ptr = ptr ? ptr + 1 : tmp[n];
+      id3tags.title = std::string(ptr);
+    } else {
+      id3tags.title = std::string(tmp[n]);
+    }
+    if (--n >= 0) {
+      id3tags.album = std::string(tmp[n]);
+      if (--n >= 0) {
+        id3tags.artist = std::string(tmp[n]);
+      }
+    }
+  }
+}
+
+////////////////// GLOBAL FUNCTIONS /////////////////
+bool ui_loop(void) {
+  switch (ui_state) {
+    case UI_STATE_PLAY:
+      player.AutoPlay();
+      break;
+    case UI_STATE_STOP:
+    case UI_STATE_PAUSE:
+      player.PauseResume();
+      ui_state = UI_STATE_IDLE;
+      break;
+    case UI_STATE_RESUME:
+      player.PauseResume();
+      ui_state = UI_STATE_PLAY;
+      break;
+    case UI_STATE_NEXT:
+      player.PlayNext();
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+      ui_state = UI_STATE_PLAY;
+      break;
+    case UI_STATE_PREV:
+      player.PlayPrev();
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+      ui_state = UI_STATE_PLAY;
+      break;
+    case UI_STATE_INIT:
+      player.begin();
+      player.ScanFileList(MP3_PATH_CONFIG);
+      player.SortFileList(true);
+      player.SetVolume(MP3_VOLUME_INI);
+      player.SetPlayNo(ui_control.selectedNo = 0);
+      ui_state = UI_STATE_IDLE;
+
+      // start playing: it makes ui_state to UI_STATE_RESUME
+      lv_obj_set_state    (ui_ButtonPlay, LV_STATE_CHECKED, true);
+      lv_obj_send_event   (ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
+      lv_slider_set_value (ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
+      break;
+    case UI_STATE_IDLE:
+    default:
+      break;
+  }
+
+  // Periodical task
+  DO_EVERY(PERIOD_TAKS1, task1Time) {
+    // Update elapsed bar
+    if (player.IsPlaying()) {
+      UpdateElapsedTime();
+    }
+  }
+
+  DO_EVERY(PERIOD_TAKS2, task2Time) {
+    if (player.IsPlaying()) {
+      // Serial.printf("%d\n", audioGetRMS() & 0xffff);
+    }
+  }
+
+  // Backlight control according to the duration of non-operation
+  if (ui_control.sleepTimer > lv_disp_get_inactive_time(NULL)) {
+    return true;  // keep backlight on
+  } else {
+    return false; // turn backlight off
+  }
+}
+
+void ui_redisplay(void) {
+  lv_disp_trig_activity(NULL);
+  lv_disp_load_scr(lv_scr_act());
+}
+
+const char* ui_get_title(uint32_t track_id) {
+  GetID3Tags(track_id);
+  return id3tags.title.c_str();
+}
+
+const char* ui_get_artist(uint32_t track_id) {
+  return id3tags.artist.c_str();
+}
+
+const char* ui_get_album(uint32_t track_id) {
+  return id3tags.album.c_str();
+}
+
+const uint32_t ui_get_duration(uint32_t track_id) {
+  return id3tags.duration;
+}
+
+const uint32_t ui_get_counts(void) {
+  return (const uint32_t)player.GetCounts();
+}
+
+uint32_t ui_get_playNo(void) {
+  return player.GetPlayNo();
+}
+
+void ui_set_playNo(uint32_t playNo) {
+  player.SetPlayNo(playNo);
+}
+
+/*--------------------------------------------------------------------------------
+ * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
+ *--------------------------------------------------------------------------------*/
+void audio_id3data(const char *info) {  //id3 metadata
+  char *p;
+  if (p = strstr(info, "Title: ")) {
+    id3tags.title = p + 7;
+  } else
+  if (p = strstr(info, "Artist: ")) {
+    id3tags.artist = p + 8;
+  } else
+  if (p = strstr(info, "Album: ")) {
+    id3tags.album = p + 7;
+    lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
+      LV_SYMBOL_AUDIO,
+      id3tags.title.c_str(),
+      id3tags.artist.c_str(),
+      id3tags.album.c_str()
+    );
+  }
+}
+
+void audio_eof_mp3(const char *info) {  //end of file
+  if (ui_ScreenPlayList) {
+    ui_list_update_cell(ui_control.selectedNo, false);
+    ui_list_update_icon(ui_get_playNo(),       false);
+  }
+
+  player.PlayNext(false); // continuous play
+  ui_control.selectedNo = player.GetPlayNo();
+
+  if (ui_ScreenPlayList) {
+    ui_list_update_play(ui_control.selectedNo, true);
+  }
 }
