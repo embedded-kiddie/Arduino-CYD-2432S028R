@@ -143,29 +143,29 @@ void CYD_MP3Player::PauseResume(void) {
   audioPauseResume();
 }
 
-void CYD_MP3Player::SetPlayNo(uint32_t playNo) {
+void CYD_MP3Player::SetPlayNo(uint32_t playNo, bool stop) {
+  if (stop) {
+    audioStopSong();
+  }
   uint32_t size = m_files.size();
   m_playNo = (playNo + size) % m_files.size();
 }
 
-void CYD_MP3Player::PlayNext(void) {
-  audioStopSong();
-  SetPlayNo(m_playNo + 1);
+void CYD_MP3Player::PlayNext(bool stop) {
+  SetPlayNo(m_playNo + 1, stop);
 }
 
-void CYD_MP3Player::PlayPrev(void) {
-  audioStopSong();
-  SetPlayNo(m_playNo - 1);
+void CYD_MP3Player::PlayPrev(bool stop) {
+  SetPlayNo(m_playNo - 1, stop);
 }
 
-bool CYD_MP3Player::AutoPlay(bool selected) {
+bool CYD_MP3Player::AutoPlay(bool selectedOnly) {
   if (!audioIsPlaying() && m_files.size()) {
-    // Play all or only selected
-    bool play = !selected || m_files[m_playNo].selected;
+    // Play all or selected only
+    bool play = !selectedOnly || m_files[m_playNo].selected;
 
     if (play && !audioConnecttoSD(m_files[m_playNo].path.c_str())) {
-      // Something is wrong, so skip it
-      Serial.printf("skip %s\n", m_files[m_playNo].path.c_str());
+      Serial.printf("skip: %s\n", m_files[m_playNo].path.c_str()); // Something is wrong, so skip it
       play = false;
     } else {
       play = true;

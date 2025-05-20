@@ -132,7 +132,7 @@ bool ui_loop(void) {
       player.ScanFileList(MP3_PATH_CONFIG);
       player.SortFileList(true);
       player.SetVolume(MP3_VOLUME_INI);
-      player.SetPlayNo(ui_control.playNo);
+      player.SetPlayNo(ui_control.selectedNo = 0);
       ui_state = UI_STATE_IDLE;
 
       // start playing: it makes ui_state to UI_STATE_RESUME
@@ -187,6 +187,50 @@ const uint32_t ui_get_duration(uint32_t track_id) {
 
 const uint32_t ui_get_counts(void) {
   return (const uint32_t)player.GetCounts();
+}
+
+uint32_t ui_get_playNo(void) {
+  return player.GetPlayNo();
+}
+
+void ui_set_playNo(uint32_t playNo) {
+  player.SetPlayNo(playNo);
+}
+
+/*--------------------------------------------------------------------------------
+ * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
+ *--------------------------------------------------------------------------------*/
+void audio_id3data(const char *info) {  //id3 metadata
+  char *p;
+  if (p = strstr(info, "Title: ")) {
+    id3tags.title = p + 7;
+  } else
+  if (p = strstr(info, "Artist: ")) {
+    id3tags.artist = p + 8;
+  } else
+  if (p = strstr(info, "Album: ")) {
+    id3tags.album = p + 7;
+    lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
+      LV_SYMBOL_AUDIO,
+      id3tags.title.c_str(),
+      id3tags.artist.c_str(),
+      id3tags.album.c_str()
+    );
+  }
+}
+
+void audio_eof_mp3(const char *info) {  //end of file
+  if (ui_ScreenPlayList) {
+    ui_list_update_cell(ui_control.selectedNo, false);
+    ui_list_update_icon(ui_get_playNo(),       false);
+  }
+
+  player.PlayNext(false); // continuous play
+  ui_control.selectedNo = player.GetPlayNo();
+
+  if (ui_ScreenPlayList) {
+    ui_list_update_play(ui_control.selectedNo, true);
+  }
 }
 
 ///////////////////// VARIABLES ////////////////////
@@ -498,32 +542,6 @@ void ui_event_MenuBackDown(lv_event_t *e) {
     (e);
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
   }
-}
-
-/*--------------------------------------------------------------------------------
- * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
- *--------------------------------------------------------------------------------*/
-void audio_id3data(const char *info) {  //id3 metadata
-  char *p;
-  if (p = strstr(info, "Title: ")) {
-    id3tags.title = p + 7;
-  } else
-  if (p = strstr(info, "Artist: ")) {
-    id3tags.artist = p + 8;
-  } else
-  if (p = strstr(info, "Album: ")) {
-    id3tags.album = p + 7;
-    lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
-      LV_SYMBOL_AUDIO,
-      id3tags.title.c_str(),
-      id3tags.artist.c_str(),
-      id3tags.album.c_str()
-    );
-  }
-}
-
-void audio_eof_mp3(const char *info) {  //end of file
-  player.SetPlayNo(player.GetPlayNo() + 1);
 }
 
 ///////////////////// SCREENS ////////////////////
