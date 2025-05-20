@@ -181,6 +181,10 @@ const char* ui_get_artist(uint32_t track_id) {
   return id3tags.artist.c_str();
 }
 
+const char* ui_get_album(uint32_t track_id) {
+  return id3tags.album.c_str();
+}
+
 const uint32_t ui_get_duration(uint32_t track_id) {
   return id3tags.duration;
 }
@@ -278,11 +282,10 @@ lv_obj_t *ui_SleepTimerRoller;
 // SCREEN: ui_ScreenPlayList
 void ui_ScreenPlayList_screen_init(void);
 lv_obj_t *ui_ScreenPlayList;    void ui_event_ScreenPlayList  (lv_event_t *e);
-lv_obj_t *ui_MenuBackLeft;      void ui_event_MenuBackLeft    (lv_event_t *e);
 lv_obj_t *ui_MenuBackUp;        void ui_event_MenuBackUp      (lv_event_t *e);
 lv_obj_t *ui_MenuBackDown;      void ui_event_MenuBackDown    (lv_event_t *e);
 #if false
-lv_obj_t *ui_CheckFavorite;     void ui_event_CheckFavorite   (lv_event_t *e);
+lv_obj_t *ui_MenuBackLeft;      void ui_event_MenuBackLeft    (lv_event_t *e);
 lv_obj_t *ui_MenuBluetoothOn;   void ui_event_MenuBluetoothOn (lv_event_t *e);
 lv_obj_t *ui_MenuBluetoothOff;  void ui_event_MenuBluetoothOff(lv_event_t *e);
 #endif
@@ -493,7 +496,7 @@ void ui_event_ScreenPlayList(lv_event_t *e) {
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
-
+#if false
 void ui_event_MenuBackLeft(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -501,7 +504,7 @@ void ui_event_MenuBackLeft(lv_event_t *e) {
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
-#if false
+
 void ui_event_MenuBluetoothOn(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -515,14 +518,6 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
-  }
-}
-
-void ui_event_CheckFavorite(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
-
-  if (event_code == LV_EVENT_CLICKED) {
-    (e);
   }
 }
 #endif

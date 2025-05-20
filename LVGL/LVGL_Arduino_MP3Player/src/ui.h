@@ -76,11 +76,10 @@ void ui_list_update_play(uint32_t track_id, bool state);
 void ui_ScreenPlayList_screen_init(void);
 extern lv_obj_t *ui_ContainerPlayList;
 extern lv_obj_t *ui_ScreenPlayList;     void ui_event_ScreenPlayList  (lv_event_t *e);
-extern lv_obj_t *ui_MenuBackLeft;       void ui_event_MenuBackLeft    (lv_event_t *e);
 extern lv_obj_t *ui_MenuBackUp;         void ui_event_MenuBackUp      (lv_event_t *e);
 extern lv_obj_t *ui_MenuBackDown;       void ui_event_MenuBackDown    (lv_event_t *e);
 #if false
-extern lv_obj_t *ui_CheckFavorite;      void ui_event_CheckFavorite   (lv_event_t *e);
+extern lv_obj_t *ui_MenuBackLeft;       void ui_event_MenuBackLeft    (lv_event_t *e);
 extern lv_obj_t *ui_MenuBluetoothOn;    void ui_event_MenuBluetoothOn (lv_event_t *e);
 extern lv_obj_t *ui_MenuBluetoothOff;   void ui_event_MenuBluetoothOff(lv_event_t *e);
 #endif
@@ -121,8 +120,9 @@ void ui_init(void);
 bool ui_loop(void);
 void ui_redisplay(void);
 
-const char*     ui_get_title(uint32_t);
+const char*     ui_get_title (uint32_t);
 const char*     ui_get_artist(uint32_t);
+const char*     ui_get_album (uint32_t);
 const uint32_t  ui_get_duration(uint32_t);
 const uint32_t  ui_get_counts(void);
 uint32_t        ui_get_playNo(void);
