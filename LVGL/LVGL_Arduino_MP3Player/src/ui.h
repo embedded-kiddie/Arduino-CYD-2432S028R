@@ -6,10 +6,6 @@
 #ifndef _SQUARELINE_PROJECT_UI_H
 #define _SQUARELINE_PROJECT_UI_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined __has_include
 #if __has_include("lvgl.h")
 #include "lvgl.h"
@@ -49,31 +45,23 @@ extern lv_obj_t *ui_ElapsedBar;   void ui_event_ElapsedBar  (lv_event_t *e);
 
 // SCREEN: ui_ScreenOption
 void ui_ScreenOption_screen_init(void);
+extern lv_obj_t *ui_FavoriteClearButton;
+extern lv_obj_t *ui_FavoriteNewButton;
+extern lv_obj_t *ui_BacklightRoller;
+extern lv_obj_t *ui_SleepTimerRoller;
 extern lv_obj_t *ui_ScreenOption;       void ui_event_ScreenOption      (lv_event_t *e);
 extern lv_obj_t *ui_OptionToMainRight;  void ui_event_OptionToMainRight (lv_event_t *e);
-
-extern lv_obj_t *ui_FavoriteLabel;
-extern lv_obj_t *ui_FavoriteClearLabel;
-extern lv_obj_t *ui_FavoriteClearButton;
-extern lv_obj_t *ui_FavoriteNewLabel;
-extern lv_obj_t *ui_FavoriteNewButton;
-extern lv_obj_t *ui_FavoriteSwitch;   void ui_event_FavoriteSwitch  (lv_event_t *e);
-extern lv_obj_t *ui_FavoriteDropdown; void ui_event_FavoriteDropdown(lv_event_t *e);
-
-extern lv_obj_t *ui_BacklightLabel;
-extern lv_obj_t *ui_BacklightRoller;
-extern lv_obj_t *ui_BacklightSwitch;  void ui_event_BacklightSwitch (lv_event_t *e);
-
-extern lv_obj_t *ui_SleepTimerLabel;
-extern lv_obj_t *ui_SleepTimerRoller;
-extern lv_obj_t *ui_SleepTimerSwitch; void ui_event_SleepTimerSwitch(lv_event_t *e);
+extern lv_obj_t *ui_FavoriteSwitch;     void ui_event_FavoriteSwitch    (lv_event_t *e);
+extern lv_obj_t *ui_FavoriteDropdown;   void ui_event_FavoriteDropdown  (lv_event_t *e);
+extern lv_obj_t *ui_BacklightSwitch;    void ui_event_BacklightSwitch   (lv_event_t *e);
+extern lv_obj_t *ui_SleepTimerSwitch;   void ui_event_SleepTimerSwitch  (lv_event_t *e);
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
+void ui_ScreenPlayList_screen_init(void);
 void ui_list_update_icon(uint32_t track_id, bool state);
 void ui_list_update_cell(uint32_t track_id, bool state);
 void ui_list_update_play(uint32_t track_id, bool state);
-void ui_ScreenPlayList_screen_init(void);
 extern lv_obj_t *ui_ContainerPlayList;
 extern lv_obj_t *ui_ScreenPlayList;     void ui_event_ScreenPlayList    (lv_event_t *e);
 extern lv_obj_t *ui_PlayListToMainUp;   void ui_event_PlayListToMainUp  (lv_event_t *e);
@@ -159,11 +147,22 @@ typedef struct {
   uint32_t  sleepTimer;
 } UI_Control_t;
 
-extern UI_Option_t  ui_option;
-extern UI_Control_t ui_control;
+typedef enum {
+  UI_STATE_INIT,
+  UI_STATE_IDLE,
+  UI_STATE_PLAY,
+  UI_STATE_STOP,
+  UI_STATE_PAUSE,
+  UI_STATE_RESUME,
+  UI_STATE_NEXT,
+  UI_STATE_PREV,
+  UI_STATE_SLEEP,
+  UI_STATE_WAKEUP,
+  UI_STATE_ID3DATA,
+} UI_State_t;
 
-#ifdef __cplusplus
-} /*extern "C"*/
-#endif
+extern UI_State_t ui_state;
+extern UI_Option_t ui_option;
+extern UI_Control_t ui_control;
 
 #endif

@@ -180,7 +180,7 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_add_style              (time_label, &style_time, 0);
 
   lv_obj_t* heart = lv_checkbox_create(cell);
-  lv_checkbox_set_text(heart, "");
+  lv_checkbox_set_text          (heart, "");
   lv_obj_add_flag               (heart, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
   lv_obj_set_grid_cell          (heart, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
   lv_obj_add_event_cb           (heart, heart_click_event_cb, LV_EVENT_ALL, (void*)track_id);

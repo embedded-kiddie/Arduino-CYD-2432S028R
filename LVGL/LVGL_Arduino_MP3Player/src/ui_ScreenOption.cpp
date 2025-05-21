@@ -39,13 +39,13 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_style_pad_top      (ui_OptionToMainRight,  10,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom   (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
-  ui_FavoriteLabel = lv_label_create(ui_ScreenOption);
+  lv_obj_t *ui_FavoriteLabel = lv_label_create(ui_ScreenOption);
   lv_obj_set_width              (ui_FavoriteLabel, LV_SIZE_CONTENT);
   lv_obj_set_height             (ui_FavoriteLabel, LV_SIZE_CONTENT);
   lv_obj_set_x                  (ui_FavoriteLabel, lv_pct(-22));
   lv_obj_set_y                  (ui_FavoriteLabel, lv_pct(-40));
   lv_obj_set_align              (ui_FavoriteLabel, LV_ALIGN_CENTER);
-  lv_label_set_text             (ui_FavoriteLabel, "Favorite Songs");
+  lv_label_set_text_static      (ui_FavoriteLabel, "Favorite Songs");
 
   ui_FavoriteSwitch = lv_switch_create(ui_ScreenOption);
   lv_obj_set_width              (ui_FavoriteSwitch, 50);
@@ -73,11 +73,11 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_add_flag               (ui_FavoriteClearButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
   lv_obj_remove_flag            (ui_FavoriteClearButton, LV_OBJ_FLAG_SCROLLABLE);
 
-  ui_FavoriteClearLabel = lv_label_create(ui_FavoriteClearButton);
+  lv_obj_t *ui_FavoriteClearLabel = lv_label_create(ui_FavoriteClearButton);
   lv_obj_set_width              (ui_FavoriteClearLabel, LV_SIZE_CONTENT);
   lv_obj_set_height             (ui_FavoriteClearLabel, LV_SIZE_CONTENT);
   lv_obj_set_align              (ui_FavoriteClearLabel, LV_ALIGN_CENTER);
-  lv_label_set_text             (ui_FavoriteClearLabel, "Clear List");
+  lv_label_set_text_static      (ui_FavoriteClearLabel, "Clear List");
   lv_obj_set_style_text_color   (ui_FavoriteClearLabel, UI_COLOR_BACKGROUND,    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_text_opa     (ui_FavoriteClearLabel, 255,                    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_text_font    (ui_FavoriteClearLabel, &lv_font_montserrat_14, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
@@ -91,30 +91,30 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_add_flag               (ui_FavoriteNewButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
   lv_obj_remove_flag            (ui_FavoriteNewButton, LV_OBJ_FLAG_SCROLLABLE);
 
-  ui_FavoriteNewLabel = lv_label_create(ui_FavoriteNewButton);
+  lv_obj_t *ui_FavoriteNewLabel = lv_label_create(ui_FavoriteNewButton);
   lv_obj_set_width              (ui_FavoriteNewLabel, LV_SIZE_CONTENT);
   lv_obj_set_height             (ui_FavoriteNewLabel, LV_SIZE_CONTENT);
   lv_obj_set_align              (ui_FavoriteNewLabel, LV_ALIGN_CENTER);
-  lv_label_set_text             (ui_FavoriteNewLabel, "New List");
+  lv_label_set_text_static      (ui_FavoriteNewLabel, "New List");
   lv_obj_set_style_text_color   (ui_FavoriteNewLabel, UI_COLOR_BACKGROUND,    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_text_opa     (ui_FavoriteNewLabel, 255,                    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_text_font    (ui_FavoriteNewLabel, &lv_font_montserrat_14, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
 
-  ui_BacklightLabel = lv_label_create(ui_ScreenOption);
+  lv_obj_t *ui_BacklightLabel = lv_label_create(ui_ScreenOption);
   lv_obj_set_width              (ui_BacklightLabel, LV_SIZE_CONTENT);
   lv_obj_set_height             (ui_BacklightLabel, LV_SIZE_CONTENT);
   lv_obj_set_x                  (ui_BacklightLabel, lv_pct(-23));
   lv_obj_set_y                  (ui_BacklightLabel, lv_pct(0));
   lv_obj_set_align              (ui_BacklightLabel, LV_ALIGN_CENTER);
-  lv_label_set_text             (ui_BacklightLabel, "Backlight Off");
+  lv_label_set_text_static      (ui_BacklightLabel, "Backlight Off");
 
-  ui_SleepTimerLabel = lv_label_create(ui_ScreenOption);
+  lv_obj_t *ui_SleepTimerLabel = lv_label_create(ui_ScreenOption);
   lv_obj_set_width              (ui_SleepTimerLabel, LV_SIZE_CONTENT);
   lv_obj_set_height             (ui_SleepTimerLabel, LV_SIZE_CONTENT);
   lv_obj_set_x                  (ui_SleepTimerLabel, lv_pct(26));
   lv_obj_set_y                  (ui_SleepTimerLabel, lv_pct(0));
   lv_obj_set_align              (ui_SleepTimerLabel, LV_ALIGN_CENTER);
-  lv_label_set_text             (ui_SleepTimerLabel, "Sleep Timer");
+  lv_label_set_text_static      (ui_SleepTimerLabel, "Sleep Timer");
 
   ui_BacklightSwitch = lv_switch_create(ui_ScreenOption);
   lv_obj_set_width              (ui_BacklightSwitch, 50);

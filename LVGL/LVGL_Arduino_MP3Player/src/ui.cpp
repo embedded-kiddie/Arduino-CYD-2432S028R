@@ -23,20 +23,6 @@ static CYD_MP3Player player;
 static ID3Tags_t id3tags;
 
 ///////////////////// UI LOOP ////////////////////
-typedef enum {
-  UI_STATE_INIT,
-  UI_STATE_IDLE,
-  UI_STATE_PLAY,
-  UI_STATE_STOP,
-  UI_STATE_PAUSE,
-  UI_STATE_RESUME,
-  UI_STATE_NEXT,
-  UI_STATE_PREV,
-  UI_STATE_SLEEP,
-  UI_STATE_WAKEUP,
-  UI_STATE_ID3DATA,
-} UI_State_t;
-
 UI_State_t ui_state;
 UI_Option_t ui_option;
 UI_Control_t ui_control;
@@ -71,14 +57,10 @@ lv_obj_t *ui_FavoriteDropdown;  void ui_event_FavoriteDropdown  (lv_event_t *e);
 lv_obj_t *ui_BacklightSwitch;   void ui_event_BacklightSwitch   (lv_event_t *e);
 lv_obj_t *ui_SleepTimerSwitch;  void ui_event_SleepTimerSwitch  (lv_event_t *e);
 lv_obj_t *ui_FavoriteSwitch;    void ui_event_FavoriteSwitch    (lv_event_t *e);
-lv_obj_t *ui_FavoriteLabel;
-lv_obj_t *ui_FavoriteNewLabel;
-lv_obj_t *ui_FavoriteClearLabel;
 lv_obj_t *ui_FavoriteNewButton;
 lv_obj_t *ui_FavoriteClearButton;
 lv_obj_t *ui_BacklightLabel;
 lv_obj_t *ui_BacklightRoller;
-lv_obj_t *ui_SleepTimerLabel;
 lv_obj_t *ui_SleepTimerRoller;
 // CUSTOM VARIABLES
 
@@ -168,12 +150,7 @@ void ui_event_ButtonPlay(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     lv_state_t state = lv_obj_get_state(ui_ButtonPlay);
-
-    if (state & LV_STATE_CHECKED) {
-      ui_state = UI_STATE_RESUME;
-    } else { // LV_STATE_DEFAULT
-      ui_state = UI_STATE_PAUSE;
-    }
+    ui_state = state & LV_STATE_CHECKED ? UI_STATE_RESUME : UI_STATE_PAUSE;
   }
 }
 
@@ -371,8 +348,8 @@ static void UpdateElapsedTime(void) {
   }
   lv_slider_set_range(ui_ElapsedBar, 0, duration);
   lv_slider_set_value(ui_ElapsedBar, elapsed, LV_ANIM_OFF);
-  lv_label_set_text  (ui_ElapsedStart, SecToStr(elapsed));
-  lv_label_set_text  (ui_ElapsedEnd,   SecToStr(duration));
+  lv_label_set_text(ui_ElapsedStart, SecToStr(elapsed));
+  lv_label_set_text(ui_ElapsedEnd,   SecToStr(duration));
 }
 
 /*--------------------------------------------------------------------------------
@@ -551,20 +528,27 @@ void ui_set_playNo(uint32_t playNo) {
  * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
  *--------------------------------------------------------------------------------*/
 void audio_id3data(const char *info) {  //id3 metadata
-  char *p;
-  if (p = strstr(info, "Title: ")) {
-    id3tags.title = p + 7;
-  } else
-  if (p = strstr(info, "Artist: ")) {
-    id3tags.artist = p + 8;
-  } else
-  if (p = strstr(info, "Album: ")) {
-    id3tags.album = p + 7;
-    ui_state = UI_STATE_ID3DATA;
+  // A race condition occurred with audio_eof_mp3().
+  if (ui_state == UI_STATE_PLAY) {
+    char *p;
+    if (p = strstr(info, "Title: ")) {
+      id3tags.title = p + 7;
+    } else
+    if (p = strstr(info, "Artist: ")) {
+      id3tags.artist = p + 8;
+    } else
+    if (p = strstr(info, "Album: ")) {
+      id3tags.album = p + 7;
+      ui_state = UI_STATE_ID3DATA;
+    }
   }
 }
 
 void audio_eof_mp3(const char *info) {  //end of file
-//ui_state = UI_STATE_NEXT; // A race condition occurred with UI_STATE_ID3DATA.
-  ui_control_play(true, false);
+  if (!player.IsLastSong() || lv_obj_get_state(ui_Repeat) & LV_STATE_CHECKED) {
+    ui_state = UI_STATE_NEXT;
+  } else {
+    ui_state = UI_STATE_PAUSE;
+    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
+  }
 }
