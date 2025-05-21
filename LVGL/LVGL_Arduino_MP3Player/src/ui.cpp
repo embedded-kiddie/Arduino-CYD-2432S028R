@@ -34,6 +34,7 @@ typedef enum {
   UI_STATE_PLAY,
   UI_STATE_SLEEP,
   UI_STATE_WAKEUP,
+  UI_STATE_ID3DATA,
 } UI_State_t;
 
 UI_State_t ui_state;
@@ -476,6 +477,15 @@ bool ui_loop(void) {
       lv_obj_send_event   (ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
       lv_slider_set_value (ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
       break;
+    case UI_STATE_ID3DATA:
+      lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
+        LV_SYMBOL_AUDIO,
+        id3tags.title.c_str(),
+        id3tags.artist.c_str(),
+        id3tags.album.c_str()
+      );
+      ui_state = UI_STATE_PLAY;
+      break;
     case UI_STATE_IDLE:
     default:
       break;
@@ -550,19 +560,10 @@ void audio_id3data(const char *info) {  //id3 metadata
   } else
   if (p = strstr(info, "Album: ")) {
     id3tags.album = p + 7;
-    lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
-      LV_SYMBOL_AUDIO,
-      id3tags.title.c_str(),
-      id3tags.artist.c_str(),
-      id3tags.album.c_str()
-    );
+    ui_state = UI_STATE_ID3DATA;
   }
 }
 
 void audio_eof_mp3(const char *info) {  //end of file
-#if   false
-  ui_control_play(true, false); // continuous play
-#else
   ui_state = UI_STATE_NEXT;
-#endif
 }
