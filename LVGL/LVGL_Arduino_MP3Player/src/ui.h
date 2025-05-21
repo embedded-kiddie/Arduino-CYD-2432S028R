@@ -50,7 +50,7 @@ extern lv_obj_t *ui_ElapsedBar;   void ui_event_ElapsedBar  (lv_event_t *e);
 // SCREEN: ui_ScreenOption
 void ui_ScreenOption_screen_init(void);
 extern lv_obj_t *ui_ScreenOption;     void ui_event_ScreenOption    (lv_event_t *e);
-extern lv_obj_t *ui_MenuBackRight;    void ui_event_MenuBackRight   (lv_event_t *e);
+extern lv_obj_t *ui_MenuBackToRight;  void ui_event_MenuBackToRight (lv_event_t *e);
 
 extern lv_obj_t *ui_FavoriteLabel;
 extern lv_obj_t *ui_FavoriteClearLabel;
@@ -76,10 +76,10 @@ void ui_list_update_play(uint32_t track_id, bool state);
 void ui_ScreenPlayList_screen_init(void);
 extern lv_obj_t *ui_ContainerPlayList;
 extern lv_obj_t *ui_ScreenPlayList;     void ui_event_ScreenPlayList  (lv_event_t *e);
-extern lv_obj_t *ui_MenuBackUp;         void ui_event_MenuBackUp      (lv_event_t *e);
-extern lv_obj_t *ui_MenuBackDown;       void ui_event_MenuBackDown    (lv_event_t *e);
+extern lv_obj_t *ui_MenuBackToUp;       void ui_event_MenuBackToUp    (lv_event_t *e);
+extern lv_obj_t *ui_MenuBackToDown;     void ui_event_MenuBackToDown  (lv_event_t *e);
 #if false
-extern lv_obj_t *ui_MenuBackLeft;       void ui_event_MenuBackLeft    (lv_event_t *e);
+extern lv_obj_t *ui_MenuBackToLeft;     void ui_event_MenuBackToLeft  (lv_event_t *e);
 extern lv_obj_t *ui_MenuBluetoothOn;    void ui_event_MenuBluetoothOn (lv_event_t *e);
 extern lv_obj_t *ui_MenuBluetoothOff;   void ui_event_MenuBluetoothOff(lv_event_t *e);
 #endif
@@ -127,6 +127,15 @@ const uint32_t  ui_get_duration(uint32_t);
 const uint32_t  ui_get_counts(void);
 uint32_t        ui_get_playNo(void);
 void            ui_set_playNo(uint32_t playNo);
+
+#define UI_COLOR_BACKGROUND   lv_color_hex(0xffffff)
+#define UI_COLOR_SLIDER       lv_color_hex(0x000000)
+#define UI_COLOR_CHECKBOX     lv_color_hex(0x4040ff)
+#define UI_COLOR_LIST_DEFAULT lv_color_hex(0x5a5a7f)
+#define UI_COLOR_LIST_PRESSED lv_color_hex(0x4c4965)
+#define UI_COLOR_LIST_SHADOW  lv_color_hex(0x2d2d4b)
+#define UI_COLOR_LIST_ARTIST  lv_color_hex(0xb1b0be)
+#define UI_COLOR_LIST_SLIDER  lv_color_hex(0xeeeeee)
 
 #define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
 #define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14

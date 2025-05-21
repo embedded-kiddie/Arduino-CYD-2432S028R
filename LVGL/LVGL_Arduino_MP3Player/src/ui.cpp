@@ -65,7 +65,7 @@ lv_obj_t *ui_ElapsedEnd;
 // SCREEN: ui_ScreenOption
 void ui_ScreenOption_screen_init(void);
 lv_obj_t *ui_ScreenOption;      void ui_event_ScreenOption    (lv_event_t *e);
-lv_obj_t *ui_MenuBackRight;     void ui_event_MenuBackRight   (lv_event_t *e);
+lv_obj_t *ui_MenuBackToRight;   void ui_event_MenuBackToRight (lv_event_t *e);
 lv_obj_t *ui_FavoriteDropdown;  void ui_event_FavoriteDropdown(lv_event_t *e);
 lv_obj_t *ui_BacklightSwitch;   void ui_event_BacklightSwitch (lv_event_t *e);
 lv_obj_t *ui_SleepTimerSwitch;  void ui_event_SleepTimerSwitch(lv_event_t *e);
@@ -84,10 +84,10 @@ lv_obj_t *ui_SleepTimerRoller;
 // SCREEN: ui_ScreenPlayList
 void ui_ScreenPlayList_screen_init(void);
 lv_obj_t *ui_ScreenPlayList;    void ui_event_ScreenPlayList  (lv_event_t *e);
-lv_obj_t *ui_MenuBackUp;        void ui_event_MenuBackUp      (lv_event_t *e);
-lv_obj_t *ui_MenuBackDown;      void ui_event_MenuBackDown    (lv_event_t *e);
+lv_obj_t *ui_MenuBackToUp;      void ui_event_MenuBackToUp    (lv_event_t *e);
+lv_obj_t *ui_MenuBackToDown;    void ui_event_MenuBackToDown  (lv_event_t *e);
 #if false
-lv_obj_t *ui_MenuBackLeft;      void ui_event_MenuBackLeft    (lv_event_t *e);
+lv_obj_t *ui_MenuBackToLeft;    void ui_event_MenuBackToLeft  (lv_event_t *e);
 lv_obj_t *ui_MenuBluetoothOn;   void ui_event_MenuBluetoothOn (lv_event_t *e);
 lv_obj_t *ui_MenuBluetoothOff;  void ui_event_MenuBluetoothOff(lv_event_t *e);
 #endif
@@ -243,7 +243,7 @@ void ui_event_ScreenOption(lv_event_t *e) {
   }
 }
 
-void ui_event_MenuBackRight(lv_event_t *e) {
+void ui_event_MenuBackToRight(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
@@ -298,8 +298,26 @@ void ui_event_ScreenPlayList(lv_event_t *e) {
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
+
+void ui_event_MenuBackToUp(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
+  }
+}
+
+void ui_event_MenuBackToDown(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    (e);
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
+  }
+}
 #if false
-void ui_event_MenuBackLeft(lv_event_t *e) {
+void ui_event_MenuBackToLeft(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
@@ -323,24 +341,6 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
   }
 }
 #endif
-void ui_event_MenuBackUp(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
-
-  if (event_code == LV_EVENT_CLICKED) {
-    (e);
-    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
-  }
-}
-
-void ui_event_MenuBackDown(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
-
-  if (event_code == LV_EVENT_CLICKED) {
-    (e);
-    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
-  }
-}
-
 ///////////////////// SCREENS ////////////////////
 
 void ui_init(void) {
@@ -416,6 +416,28 @@ static void GetID3Tags(uint32_t track_id) {
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Control next or previous play / stop or continuous play
+ *--------------------------------------------------------------------------------*/
+static void ui_control_play(bool next, bool stop) {
+  if (ui_ScreenPlayList) {
+    ui_list_update_cell(ui_control.selectedNo, false);
+    ui_list_update_icon(ui_get_playNo(),       false);
+  }
+
+  if (next) {
+    player.PlayNext(stop);
+  } else {
+    player.PlayPrev(stop);
+  }
+
+  ui_control.selectedNo = player.GetPlayNo();
+
+  if (ui_ScreenPlayList) {
+    ui_list_update_play(ui_control.selectedNo, true);
+  }
+}
+
 ////////////////// GLOBAL FUNCTIONS /////////////////
 bool ui_loop(void) {
   switch (ui_state) {
@@ -432,12 +454,12 @@ bool ui_loop(void) {
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_NEXT:
-      player.PlayNext();
+      ui_control_play(true, true);
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_PREV:
-      player.PlayPrev();
+      ui_control_play(false, true);
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
       ui_state = UI_STATE_PLAY;
       break;
@@ -538,15 +560,9 @@ void audio_id3data(const char *info) {  //id3 metadata
 }
 
 void audio_eof_mp3(const char *info) {  //end of file
-  if (ui_ScreenPlayList) {
-    ui_list_update_cell(ui_control.selectedNo, false);
-    ui_list_update_icon(ui_get_playNo(),       false);
-  }
-
-  player.PlayNext(false); // continuous play
-  ui_control.selectedNo = player.GetPlayNo();
-
-  if (ui_ScreenPlayList) {
-    ui_list_update_play(ui_control.selectedNo, true);
-  }
+#if   false
+  ui_control_play(true, false); // continuous play
+#else
+  ui_state = UI_STATE_NEXT;
+#endif
 }
