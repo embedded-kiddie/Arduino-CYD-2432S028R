@@ -29,28 +29,28 @@ UI_Control_t ui_control;
 
 ///////////////////// VARIABLES ////////////////////
 // SCREEN: ui_ScreenMain
+lv_obj_t *ui_ScreenMain;
 lv_obj_t *ui_ImageAlbum;
 lv_obj_t *ui_ImageWave;
 lv_obj_t *ui_MusicTitle;
 lv_obj_t *ui_ElapsedStart;
 lv_obj_t *ui_ElapsedEnd;
-lv_obj_t *ui_ScreenMain;
 lv_obj_t *ui_ButtonPlay;
 lv_obj_t *ui_Volume;
 lv_obj_t *ui_ElapsedBar;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenOption
-lv_obj_t *ui_FavoriteNewButton;
-lv_obj_t *ui_FavoriteClearButton;
+lv_obj_t *ui_ScreenOption;
 lv_obj_t *ui_BacklightRoller;
 lv_obj_t *ui_SleepTimerRoller;
-lv_obj_t *ui_ScreenOption;
+lv_obj_t *ui_FavoriteNewButton;
+lv_obj_t *ui_FavoriteClearButton;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
-lv_obj_t *ui_ContainerPlayList;
 lv_obj_t *ui_ScreenPlayList;
+lv_obj_t *ui_ContainerPlayList;
 // CUSTOM VARIABLES
 
 // EVENTS

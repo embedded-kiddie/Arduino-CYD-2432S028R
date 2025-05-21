@@ -47,11 +47,11 @@ void ui_event_VolumeMin   (lv_event_t *e);
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenOption
-extern lv_obj_t *ui_FavoriteClearButton;
-extern lv_obj_t *ui_FavoriteNewButton;
+extern lv_obj_t *ui_ScreenOption;
 extern lv_obj_t *ui_BacklightRoller;
 extern lv_obj_t *ui_SleepTimerRoller;
-extern lv_obj_t *ui_ScreenOption;
+extern lv_obj_t *ui_FavoriteNewButton;
+extern lv_obj_t *ui_FavoriteClearButton;
 void ui_ScreenOption_screen_init(void);
 void ui_event_ScreenOption      (lv_event_t *e);
 void ui_event_OptionToMainRight (lv_event_t *e);
@@ -62,8 +62,8 @@ void ui_event_SleepTimerSwitch  (lv_event_t *e);
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
-extern lv_obj_t *ui_ContainerPlayList;
 extern lv_obj_t *ui_ScreenPlayList;
+extern lv_obj_t *ui_ContainerPlayList;
 void ui_ScreenPlayList_screen_init(void);
 void ui_event_ScreenPlayList    (lv_event_t *e);
 void ui_event_PlayListToMainUp  (lv_event_t *e);
