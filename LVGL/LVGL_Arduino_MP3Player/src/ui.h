@@ -49,8 +49,8 @@ extern lv_obj_t *ui_ElapsedBar;   void ui_event_ElapsedBar  (lv_event_t *e);
 
 // SCREEN: ui_ScreenOption
 void ui_ScreenOption_screen_init(void);
-extern lv_obj_t *ui_ScreenOption;     void ui_event_ScreenOption    (lv_event_t *e);
-extern lv_obj_t *ui_MenuBackToRight;  void ui_event_MenuBackToRight (lv_event_t *e);
+extern lv_obj_t *ui_ScreenOption;       void ui_event_ScreenOption      (lv_event_t *e);
+extern lv_obj_t *ui_OptionToMainRight;  void ui_event_OptionToMainRight (lv_event_t *e);
 
 extern lv_obj_t *ui_FavoriteLabel;
 extern lv_obj_t *ui_FavoriteClearLabel;
@@ -75,13 +75,13 @@ void ui_list_update_cell(uint32_t track_id, bool state);
 void ui_list_update_play(uint32_t track_id, bool state);
 void ui_ScreenPlayList_screen_init(void);
 extern lv_obj_t *ui_ContainerPlayList;
-extern lv_obj_t *ui_ScreenPlayList;     void ui_event_ScreenPlayList  (lv_event_t *e);
-extern lv_obj_t *ui_MenuBackToUp;       void ui_event_MenuBackToUp    (lv_event_t *e);
-extern lv_obj_t *ui_MenuBackToDown;     void ui_event_MenuBackToDown  (lv_event_t *e);
+extern lv_obj_t *ui_ScreenPlayList;     void ui_event_ScreenPlayList    (lv_event_t *e);
+extern lv_obj_t *ui_PlayListToMainUp;   void ui_event_PlayListToMainUp  (lv_event_t *e);
+extern lv_obj_t *ui_PlayListToMainDown; void ui_event_PlayListToMainDown(lv_event_t *e);
 #if false
-extern lv_obj_t *ui_MenuBackToLeft;     void ui_event_MenuBackToLeft  (lv_event_t *e);
-extern lv_obj_t *ui_MenuBluetoothOn;    void ui_event_MenuBluetoothOn (lv_event_t *e);
-extern lv_obj_t *ui_MenuBluetoothOff;   void ui_event_MenuBluetoothOff(lv_event_t *e);
+extern lv_obj_t *ui_MenuBackToLeft;     void ui_event_MenuBackToLeft    (lv_event_t *e);
+extern lv_obj_t *ui_MenuBluetoothOn;    void ui_event_MenuBluetoothOn   (lv_event_t *e);
+extern lv_obj_t *ui_MenuBluetoothOff;   void ui_event_MenuBluetoothOff  (lv_event_t *e);
 #endif
 // CUSTOM VARIABLES
 

@@ -26,12 +26,12 @@ static ID3Tags_t id3tags;
 typedef enum {
   UI_STATE_INIT,
   UI_STATE_IDLE,
+  UI_STATE_PLAY,
   UI_STATE_STOP,
   UI_STATE_PAUSE,
   UI_STATE_RESUME,
   UI_STATE_NEXT,
   UI_STATE_PREV,
-  UI_STATE_PLAY,
   UI_STATE_SLEEP,
   UI_STATE_WAKEUP,
   UI_STATE_ID3DATA,
@@ -65,12 +65,12 @@ lv_obj_t *ui_ElapsedEnd;
 
 // SCREEN: ui_ScreenOption
 void ui_ScreenOption_screen_init(void);
-lv_obj_t *ui_ScreenOption;      void ui_event_ScreenOption    (lv_event_t *e);
-lv_obj_t *ui_MenuBackToRight;   void ui_event_MenuBackToRight (lv_event_t *e);
-lv_obj_t *ui_FavoriteDropdown;  void ui_event_FavoriteDropdown(lv_event_t *e);
-lv_obj_t *ui_BacklightSwitch;   void ui_event_BacklightSwitch (lv_event_t *e);
-lv_obj_t *ui_SleepTimerSwitch;  void ui_event_SleepTimerSwitch(lv_event_t *e);
-lv_obj_t *ui_FavoriteSwitch;    void ui_event_FavoriteSwitch  (lv_event_t *e);
+lv_obj_t *ui_ScreenOption;      void ui_event_ScreenOption      (lv_event_t *e);
+lv_obj_t *ui_OptionToMainRight; void ui_event_OptionToMainRight (lv_event_t *e);
+lv_obj_t *ui_FavoriteDropdown;  void ui_event_FavoriteDropdown  (lv_event_t *e);
+lv_obj_t *ui_BacklightSwitch;   void ui_event_BacklightSwitch   (lv_event_t *e);
+lv_obj_t *ui_SleepTimerSwitch;  void ui_event_SleepTimerSwitch  (lv_event_t *e);
+lv_obj_t *ui_FavoriteSwitch;    void ui_event_FavoriteSwitch    (lv_event_t *e);
 lv_obj_t *ui_FavoriteLabel;
 lv_obj_t *ui_FavoriteNewLabel;
 lv_obj_t *ui_FavoriteClearLabel;
@@ -84,13 +84,13 @@ lv_obj_t *ui_SleepTimerRoller;
 
 // SCREEN: ui_ScreenPlayList
 void ui_ScreenPlayList_screen_init(void);
-lv_obj_t *ui_ScreenPlayList;    void ui_event_ScreenPlayList  (lv_event_t *e);
-lv_obj_t *ui_MenuBackToUp;      void ui_event_MenuBackToUp    (lv_event_t *e);
-lv_obj_t *ui_MenuBackToDown;    void ui_event_MenuBackToDown  (lv_event_t *e);
+lv_obj_t *ui_ScreenPlayList;      void ui_event_ScreenPlayList    (lv_event_t *e);
+lv_obj_t *ui_PlayListToMainUp;    void ui_event_PlayListToMainUp  (lv_event_t *e);
+lv_obj_t *ui_PlayListToMainDown;  void ui_event_PlayListToMainDown(lv_event_t *e);
 #if false
-lv_obj_t *ui_MenuBackToLeft;    void ui_event_MenuBackToLeft  (lv_event_t *e);
-lv_obj_t *ui_MenuBluetoothOn;   void ui_event_MenuBluetoothOn (lv_event_t *e);
-lv_obj_t *ui_MenuBluetoothOff;  void ui_event_MenuBluetoothOff(lv_event_t *e);
+lv_obj_t *ui_MenuBackToLeft;      void ui_event_MenuBackToLeft    (lv_event_t *e);
+lv_obj_t *ui_MenuBluetoothOn;     void ui_event_MenuBluetoothOn   (lv_event_t *e);
+lv_obj_t *ui_MenuBluetoothOff;    void ui_event_MenuBluetoothOff  (lv_event_t *e);
 #endif
 lv_obj_t *ui_ContainerPlayList;
 // CUSTOM VARIABLES
@@ -244,7 +244,7 @@ void ui_event_ScreenOption(lv_event_t *e) {
   }
 }
 
-void ui_event_MenuBackToRight(lv_event_t *e) {
+void ui_event_OptionToMainRight(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
@@ -300,7 +300,7 @@ void ui_event_ScreenPlayList(lv_event_t *e) {
   }
 }
 
-void ui_event_MenuBackToUp(lv_event_t *e) {
+void ui_event_PlayListToMainUp(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
@@ -309,7 +309,7 @@ void ui_event_MenuBackToUp(lv_event_t *e) {
   }
 }
 
-void ui_event_MenuBackToDown(lv_event_t *e) {
+void ui_event_PlayListToMainDown(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
@@ -565,5 +565,6 @@ void audio_id3data(const char *info) {  //id3 metadata
 }
 
 void audio_eof_mp3(const char *info) {  //end of file
-  ui_state = UI_STATE_NEXT;
+//ui_state = UI_STATE_NEXT; // A race condition occurred with UI_STATE_ID3DATA.
+  ui_control_play(true, false);
 }
