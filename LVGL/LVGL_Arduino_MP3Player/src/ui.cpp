@@ -29,55 +29,31 @@ UI_Control_t ui_control;
 
 ///////////////////// VARIABLES ////////////////////
 // SCREEN: ui_ScreenMain
-void ui_ScreenMain_screen_init(void);
 lv_obj_t *ui_ImageAlbum;
 lv_obj_t *ui_ImageWave;
 lv_obj_t *ui_MusicTitle;
 lv_obj_t *ui_ElapsedStart;
 lv_obj_t *ui_ElapsedEnd;
-lv_obj_t *ui_ScreenMain;  void ui_event_ScreenMain  (lv_event_t *e);
-lv_obj_t *ui_MenuDotMain; void ui_event_MenuDotMain (lv_event_t *e);
-lv_obj_t *ui_Favourite;   void ui_event_Favourite   (lv_event_t *e);
-lv_obj_t *ui_Repeat;      void ui_event_Repeat      (lv_event_t *e);
-lv_obj_t *ui_Shuffle;     void ui_event_Shuffle     (lv_event_t *e);
-lv_obj_t *ui_ButtonPlay;  void ui_event_ButtonPlay  (lv_event_t *e);
-lv_obj_t *ui_ButtonNext;  void ui_event_ButtonNext  (lv_event_t *e);
-lv_obj_t *ui_ButtonPrev;  void ui_event_ButtonPrev  (lv_event_t *e);
-lv_obj_t *ui_VolumeMax;   void ui_event_VolumeMax   (lv_event_t *e);
-lv_obj_t *ui_VolumeMin;   void ui_event_VolumeMin   (lv_event_t *e);
-lv_obj_t *ui_Volume;      void ui_event_Volume      (lv_event_t *e);
-lv_obj_t *ui_ElapsedBar;  void ui_event_ElapsedBar  (lv_event_t *e);
+lv_obj_t *ui_ScreenMain;
+lv_obj_t *ui_ButtonPlay;
+lv_obj_t *ui_Volume;
+lv_obj_t *ui_ElapsedBar;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenOption
-void ui_ScreenOption_screen_init(void);
 lv_obj_t *ui_FavoriteNewButton;
 lv_obj_t *ui_FavoriteClearButton;
 lv_obj_t *ui_BacklightRoller;
 lv_obj_t *ui_SleepTimerRoller;
-lv_obj_t *ui_ScreenOption;      void ui_event_ScreenOption      (lv_event_t *e);
-lv_obj_t *ui_OptionToMainRight; void ui_event_OptionToMainRight (lv_event_t *e);
-lv_obj_t *ui_FavoriteDropdown;  void ui_event_FavoriteDropdown  (lv_event_t *e);
-lv_obj_t *ui_BacklightSwitch;   void ui_event_BacklightSwitch   (lv_event_t *e);
-lv_obj_t *ui_SleepTimerSwitch;  void ui_event_SleepTimerSwitch  (lv_event_t *e);
-lv_obj_t *ui_FavoriteSwitch;    void ui_event_FavoriteSwitch    (lv_event_t *e);
+lv_obj_t *ui_ScreenOption;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
-void ui_ScreenPlayList_screen_init(void);
 lv_obj_t *ui_ContainerPlayList;
-lv_obj_t *ui_ScreenPlayList;      void ui_event_ScreenPlayList    (lv_event_t *e);
-lv_obj_t *ui_PlayListToMainUp;    void ui_event_PlayListToMainUp  (lv_event_t *e);
-lv_obj_t *ui_PlayListToMainDown;  void ui_event_PlayListToMainDown(lv_event_t *e);
-#if false
-lv_obj_t *ui_MenuBackToLeft;      void ui_event_MenuBackToLeft    (lv_event_t *e);
-lv_obj_t *ui_MenuBluetoothOn;     void ui_event_MenuBluetoothOn   (lv_event_t *e);
-lv_obj_t *ui_MenuBluetoothOff;    void ui_event_MenuBluetoothOff  (lv_event_t *e);
-#endif
+lv_obj_t *ui_ScreenPlayList;
 // CUSTOM VARIABLES
 
 // EVENTS
-lv_obj_t *ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
 
@@ -89,6 +65,9 @@ lv_obj_t *ui____initial_actions0;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
+/*--------------------------------------------------------------------------------
+ * Event handlers for Screen Main
+ *--------------------------------------------------------------------------------*/
 void ui_event_ScreenMain(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -120,11 +99,13 @@ void ui_event_MenuDotMain(lv_event_t *e) {
   }
 }
 
-void ui_event_Favourite(lv_event_t *e) {
+void ui_event_Favorite(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    (e);
+    lv_obj_t *obj = lv_event_get_target_obj(e);
+    ui_option.favorite = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+    printf("ui_option.favorite: %d\n", ui_option.favorite);
   }
 }
 
@@ -132,7 +113,9 @@ void ui_event_Repeat(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    (e);
+    lv_obj_t *obj = lv_event_get_target_obj(e);
+    ui_option.repeat = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+    printf("ui_option.repeat: %d\n", ui_option.repeat);
   }
 }
 
@@ -140,7 +123,9 @@ void ui_event_Shuffle(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    (e);
+    lv_obj_t *obj = lv_event_get_target_obj(e);
+    ui_option.shuffle = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+    printf("ui_option.shuffle: %d\n", ui_option.shuffle);
   }
 }
 
@@ -211,6 +196,9 @@ void ui_event_ElapsedBar(lv_event_t *e) {
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Event handlers for Screen Option
+ *--------------------------------------------------------------------------------*/
 void ui_event_ScreenOption(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -250,7 +238,9 @@ void ui_event_BacklightSwitch(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     _ui_state_modify(ui_BacklightRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-    (e);
+    lv_obj_t *obj = lv_event_get_target_obj(e);
+    ui_option.backlight = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+    printf("ui_option.backlight: %d\n", ui_option.backlight);
   }
 }
 
@@ -259,10 +249,15 @@ void ui_event_SleepTimerSwitch(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     _ui_state_modify(ui_SleepTimerRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-    (e);
+    lv_obj_t *obj = lv_event_get_target_obj(e);
+    ui_option.sleepTimer = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+    printf("ui_option.sleepTimer: %d\n", ui_option.sleepTimer);
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Event handlers for Screen Playlist
+ *--------------------------------------------------------------------------------*/
 void ui_event_ScreenPlayList(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -280,7 +275,6 @@ void ui_event_PlayListToMainUp(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    (e);
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
@@ -289,7 +283,6 @@ void ui_event_PlayListToMainDown(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_CLICKED) {
-    (e);
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
@@ -322,7 +315,6 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
 
 void ui_init(void) {
   ui_ScreenMain_screen_init();
-  ui____initial_actions0 = lv_obj_create(NULL);
   lv_disp_load_scr(ui_ScreenMain);
 
   ui_state = UI_STATE_INIT;
@@ -422,6 +414,8 @@ bool ui_loop(void) {
       player.AutoPlay();
       break;
     case UI_STATE_STOP:
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
+      // no break
     case UI_STATE_PAUSE:
       player.PauseResume();
       ui_state = UI_STATE_IDLE;
@@ -469,7 +463,6 @@ bool ui_loop(void) {
 
   // Periodical task
   DO_EVERY(PERIOD_TAKS1, task1Time) {
-    // Update elapsed bar
     if (player.IsPlaying()) {
       update_epalsed_time();
     }
@@ -525,6 +518,7 @@ void ui_set_playNo(uint32_t playNo) {
 
 /*--------------------------------------------------------------------------------
  * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
+ * Note: These functions will be executed in the context of CORE 1.
  *--------------------------------------------------------------------------------*/
 void audio_id3data(const char *info) {
   // Avoid a race condition with ui_state set by audio_eof_mp3()
@@ -544,10 +538,9 @@ void audio_id3data(const char *info) {
 }
 
 void audio_eof_mp3(const char *info) {
-  if (!player.IsLastSong() || lv_obj_get_state(ui_Repeat) & LV_STATE_CHECKED) {
+  if (!player.IsLastSong() || ui_option.repeat) {
     ui_state = UI_STATE_NEXT;
   } else {
-    ui_state = UI_STATE_PAUSE;
-    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
+    ui_state = UI_STATE_STOP;
   }
 }

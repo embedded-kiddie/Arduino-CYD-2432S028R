@@ -22,59 +22,63 @@
 #include "ui_events.h"
 
 // SCREEN: ui_ScreenMain
-void ui_ScreenMain_screen_init(void);
-void ui_event_ScreenMain(lv_event_t *e);
 extern lv_obj_t *ui_ScreenMain;
 extern lv_obj_t *ui_ImageAlbum;
 extern lv_obj_t *ui_ImageWave;
 extern lv_obj_t *ui_MusicTitle;
 extern lv_obj_t *ui_ElapsedStart;
 extern lv_obj_t *ui_ElapsedEnd;
-extern lv_obj_t *ui_MenuDotMain;  void ui_event_MenuDotMain (lv_event_t *e);
-extern lv_obj_t *ui_Favourite;    void ui_event_Favourite   (lv_event_t *e);
-extern lv_obj_t *ui_Repeat;       void ui_event_Repeat      (lv_event_t *e);
-extern lv_obj_t *ui_Shuffle;      void ui_event_Shuffle     (lv_event_t *e);
-extern lv_obj_t *ui_ButtonPlay;   void ui_event_ButtonPlay  (lv_event_t *e);
-extern lv_obj_t *ui_ButtonNext;   void ui_event_ButtonNext  (lv_event_t *e);
-extern lv_obj_t *ui_ButtonPrev;   void ui_event_ButtonPrev  (lv_event_t *e);
-extern lv_obj_t *ui_VolumeMax;    void ui_event_VolumeMax   (lv_event_t *e);
-extern lv_obj_t *ui_VolumeMin;    void ui_event_VolumeMin   (lv_event_t *e);
-extern lv_obj_t *ui_Volume;       void ui_event_Volume      (lv_event_t *e);
-extern lv_obj_t *ui_ElapsedBar;   void ui_event_ElapsedBar  (lv_event_t *e);
+extern lv_obj_t *ui_ButtonPlay;
+extern lv_obj_t *ui_Volume;
+extern lv_obj_t *ui_ElapsedBar;
+void ui_ScreenMain_screen_init(void);
+void ui_event_ScreenMain  (lv_event_t *e);
+void ui_event_ButtonPlay  (lv_event_t *e);
+void ui_event_Volume      (lv_event_t *e);
+void ui_event_ElapsedBar  (lv_event_t *e);
+void ui_event_MenuDotMain (lv_event_t *e);
+void ui_event_Favorite    (lv_event_t *e);
+void ui_event_Repeat      (lv_event_t *e);
+void ui_event_Shuffle     (lv_event_t *e);
+void ui_event_ButtonNext  (lv_event_t *e);
+void ui_event_ButtonPrev  (lv_event_t *e);
+void ui_event_VolumeMax   (lv_event_t *e);
+void ui_event_VolumeMin   (lv_event_t *e);
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenOption
-void ui_ScreenOption_screen_init(void);
 extern lv_obj_t *ui_FavoriteClearButton;
 extern lv_obj_t *ui_FavoriteNewButton;
 extern lv_obj_t *ui_BacklightRoller;
 extern lv_obj_t *ui_SleepTimerRoller;
-extern lv_obj_t *ui_ScreenOption;       void ui_event_ScreenOption      (lv_event_t *e);
-extern lv_obj_t *ui_OptionToMainRight;  void ui_event_OptionToMainRight (lv_event_t *e);
-extern lv_obj_t *ui_FavoriteSwitch;     void ui_event_FavoriteSwitch    (lv_event_t *e);
-extern lv_obj_t *ui_FavoriteDropdown;   void ui_event_FavoriteDropdown  (lv_event_t *e);
-extern lv_obj_t *ui_BacklightSwitch;    void ui_event_BacklightSwitch   (lv_event_t *e);
-extern lv_obj_t *ui_SleepTimerSwitch;   void ui_event_SleepTimerSwitch  (lv_event_t *e);
+extern lv_obj_t *ui_ScreenOption;
+void ui_ScreenOption_screen_init(void);
+void ui_event_ScreenOption      (lv_event_t *e);
+void ui_event_OptionToMainRight (lv_event_t *e);
+void ui_event_FavoriteDropdown  (lv_event_t *e);
+void ui_event_FavoriteSwitch    (lv_event_t *e);
+void ui_event_BacklightSwitch   (lv_event_t *e);
+void ui_event_SleepTimerSwitch  (lv_event_t *e);
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
+extern lv_obj_t *ui_ContainerPlayList;
+extern lv_obj_t *ui_ScreenPlayList;
 void ui_ScreenPlayList_screen_init(void);
+void ui_event_ScreenPlayList    (lv_event_t *e);
+void ui_event_PlayListToMainUp  (lv_event_t *e);
+void ui_event_PlayListToMainDown(lv_event_t *e);
 void ui_list_update_icon(uint32_t track_id, bool state);
 void ui_list_update_cell(uint32_t track_id, bool state);
 void ui_list_update_play(uint32_t track_id, bool state);
-extern lv_obj_t *ui_ContainerPlayList;
-extern lv_obj_t *ui_ScreenPlayList;     void ui_event_ScreenPlayList    (lv_event_t *e);
-extern lv_obj_t *ui_PlayListToMainUp;   void ui_event_PlayListToMainUp  (lv_event_t *e);
-extern lv_obj_t *ui_PlayListToMainDown; void ui_event_PlayListToMainDown(lv_event_t *e);
 #if false
-extern lv_obj_t *ui_MenuBackToLeft;     void ui_event_MenuBackToLeft    (lv_event_t *e);
-extern lv_obj_t *ui_MenuBluetoothOn;    void ui_event_MenuBluetoothOn   (lv_event_t *e);
-extern lv_obj_t *ui_MenuBluetoothOff;   void ui_event_MenuBluetoothOff  (lv_event_t *e);
+void ui_event_MenuBackToLeft    (lv_event_t *e);
+void ui_event_MenuBluetoothOn   (lv_event_t *e);
+void ui_event_MenuBluetoothOff  (lv_event_t *e);
 #endif
 // CUSTOM VARIABLES
 
 // EVENTS
-extern lv_obj_t *ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
 LV_IMG_DECLARE(ui_img_album_png);    // assets/album.png
@@ -134,9 +138,11 @@ LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 
 // Variables
 typedef struct {
-  bool      enableFavarite;
-  bool      enableBacklight;
-  bool      enableSleepTimer;
+  bool      shuffle;
+  bool      repeat;
+  bool      favorite;
+  bool      backlight;
+  bool      sleepTimer;
   uint8_t   selectFavarite;
   uint8_t   selectBacklight;
   uint8_t   selectSleepTimer;

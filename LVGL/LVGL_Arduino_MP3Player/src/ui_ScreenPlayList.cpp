@@ -22,8 +22,6 @@
  **********************/
 static lv_obj_t *play_list;
 static lv_obj_t *slider;
-static const lv_font_t* font_small;
-static const lv_font_t* font_medium;
 static lv_style_t style_button;
 static lv_style_t style_button_pressed;
 static lv_style_t style_button_checked;
@@ -271,20 +269,6 @@ static void scroll_cb(lv_event_t *e) {
  * Initialize the style of each cell in the playlist
  *--------------------------------------------------------------------------------*/
 static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
-  font_small = LV_FONT_DEFAULT;
-  font_medium = LV_FONT_DEFAULT;
-
-#if LV_FONT_MONTSERRAT_12
-  font_small = &CUSTOM_FONT_SMALL;
-#else
-  LV_LOG_WARN("LV_FONT_MONTSERRAT_12 is not enabled for the music demo. Using LV_FONT_DEFAULT instead.");
-#endif
-#if LV_FONT_MONTSERRAT_14
-  font_medium = &CUSTOM_FONT_MEDIUM;
-#else
-  LV_LOG_WARN("LV_FONT_MONTSERRAT_14 is not enabled for the music demo. Using LV_FONT_DEFAULT instead.");
-#endif
-
   static const int32_t grid_cols[] = { LV_GRID_CONTENT, LV_GRID_FR(1), (int32_t)ui_img_1157704237.header.w, LV_GRID_TEMPLATE_LAST };
   static const int32_t grid_rows[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
 
@@ -311,18 +295,18 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_init               (&style_title);
   lv_style_set_width          (&style_title, lv_obj_get_width(lv_scr_act()) - 100);
   lv_style_set_height         (&style_title, LIST_FONT_MEDIUM_HEIGHT);
-  lv_style_set_text_font      (&style_title, font_medium);
+  lv_style_set_text_font      (&style_title, &CUSTOM_FONT_MEDIUM);
   lv_style_set_text_color     (&style_title, UI_COLOR_BACKGROUND);
 
   lv_style_init               (&style_artist);
   lv_style_set_width          (&style_artist, lv_obj_get_width(lv_scr_act()) - 100);
   lv_style_set_height         (&style_artist, LIST_FONT_SMALL_HEIGHT);
   lv_style_set_pad_right      (&style_artist, 5); // gap between artist and time
-  lv_style_set_text_font      (&style_artist, font_small);
+  lv_style_set_text_font      (&style_artist, &CUSTOM_FONT_SMALL);
   lv_style_set_text_color     (&style_artist, UI_COLOR_LIST_ARTIST);
 
   lv_style_init               (&style_time);
-  lv_style_set_text_font      (&style_time, font_small);
+  lv_style_set_text_font      (&style_time, &CUSTOM_FONT_SMALL);
   lv_style_set_text_color     (&style_time, UI_COLOR_BACKGROUND);
 
   lv_style_init               (&style_heart);
@@ -388,7 +372,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_align                (ui_ContainerPlayList, LV_ALIGN_CENTER);
   lv_obj_remove_flag              (ui_ContainerPlayList, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
 
-  ui_PlayListToMainUp = lv_checkbox_create(ui_ScreenPlayList);
+  lv_obj_t *ui_PlayListToMainUp = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text            (ui_PlayListToMainUp, "");
   lv_obj_set_height               (ui_PlayListToMainUp, 25);
   lv_obj_set_width                (ui_PlayListToMainUp, lv_pct(110));
@@ -407,7 +391,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
-  ui_PlayListToMainDown = lv_checkbox_create(ui_ScreenPlayList);
+  lv_obj_t *ui_PlayListToMainDown = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text            (ui_PlayListToMainDown, "");
   lv_obj_set_height               (ui_PlayListToMainDown, 25);
   lv_obj_set_width                (ui_PlayListToMainDown, lv_pct(110));
@@ -426,7 +410,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 #if   false
-  ui_MenuBackToLeft = lv_checkbox_create(ui_ContainerPlayList);
+  lv_obj_t *ui_MenuBackToLeft = lv_checkbox_create(ui_ContainerPlayList);
   lv_checkbox_set_text            (ui_MenuBackToLeft, "");
   lv_obj_set_width                (ui_MenuBackToLeft, 27);
   lv_obj_set_height               (ui_MenuBackToLeft, 27);
@@ -457,7 +441,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_bottom     (ui_MenuBackToLeft,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_add_event_cb             (ui_MenuBackToLeft, ui_event_MenuBackToLeft, LV_EVENT_ALL, NULL);
 
-  ui_MenuBluetoothOn = lv_checkbox_create(ui_ContainerPlayList);
+  lv_obj_t *ui_MenuBluetoothOn = lv_checkbox_create(ui_ContainerPlayList);
   lv_checkbox_set_text            (ui_MenuBluetoothOn, "");
   lv_obj_set_width                (ui_MenuBluetoothOn, 27);
   lv_obj_set_height               (ui_MenuBluetoothOn, 27);
@@ -487,7 +471,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_top        (ui_MenuBluetoothOn, 10,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom     (ui_MenuBluetoothOn,  0,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
-  ui_MenuBluetoothOff = lv_checkbox_create(ui_ContainerPlayList);
+  lv_obj_t *ui_MenuBluetoothOff = lv_checkbox_create(ui_ContainerPlayList);
   lv_checkbox_set_text            (ui_MenuBluetoothOff, "");
   lv_obj_set_width                (ui_MenuBluetoothOff, 27);
   lv_obj_set_height               (ui_MenuBluetoothOff, 27);
