@@ -30,6 +30,11 @@ UI_Control_t ui_control;
 ///////////////////// VARIABLES ////////////////////
 // SCREEN: ui_ScreenMain
 void ui_ScreenMain_screen_init(void);
+lv_obj_t *ui_ImageAlbum;
+lv_obj_t *ui_ImageWave;
+lv_obj_t *ui_MusicTitle;
+lv_obj_t *ui_ElapsedStart;
+lv_obj_t *ui_ElapsedEnd;
 lv_obj_t *ui_ScreenMain;  void ui_event_ScreenMain  (lv_event_t *e);
 lv_obj_t *ui_MenuDotMain; void ui_event_MenuDotMain (lv_event_t *e);
 lv_obj_t *ui_Favourite;   void ui_event_Favourite   (lv_event_t *e);
@@ -42,30 +47,25 @@ lv_obj_t *ui_VolumeMax;   void ui_event_VolumeMax   (lv_event_t *e);
 lv_obj_t *ui_VolumeMin;   void ui_event_VolumeMin   (lv_event_t *e);
 lv_obj_t *ui_Volume;      void ui_event_Volume      (lv_event_t *e);
 lv_obj_t *ui_ElapsedBar;  void ui_event_ElapsedBar  (lv_event_t *e);
-lv_obj_t *ui_ImageAlbum;
-lv_obj_t *ui_ImageWave;
-lv_obj_t *ui_MusicTitle;
-lv_obj_t *ui_ElapsedStart;
-lv_obj_t *ui_ElapsedEnd;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenOption
 void ui_ScreenOption_screen_init(void);
+lv_obj_t *ui_FavoriteNewButton;
+lv_obj_t *ui_FavoriteClearButton;
+lv_obj_t *ui_BacklightRoller;
+lv_obj_t *ui_SleepTimerRoller;
 lv_obj_t *ui_ScreenOption;      void ui_event_ScreenOption      (lv_event_t *e);
 lv_obj_t *ui_OptionToMainRight; void ui_event_OptionToMainRight (lv_event_t *e);
 lv_obj_t *ui_FavoriteDropdown;  void ui_event_FavoriteDropdown  (lv_event_t *e);
 lv_obj_t *ui_BacklightSwitch;   void ui_event_BacklightSwitch   (lv_event_t *e);
 lv_obj_t *ui_SleepTimerSwitch;  void ui_event_SleepTimerSwitch  (lv_event_t *e);
 lv_obj_t *ui_FavoriteSwitch;    void ui_event_FavoriteSwitch    (lv_event_t *e);
-lv_obj_t *ui_FavoriteNewButton;
-lv_obj_t *ui_FavoriteClearButton;
-lv_obj_t *ui_BacklightLabel;
-lv_obj_t *ui_BacklightRoller;
-lv_obj_t *ui_SleepTimerRoller;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
 void ui_ScreenPlayList_screen_init(void);
+lv_obj_t *ui_ContainerPlayList;
 lv_obj_t *ui_ScreenPlayList;      void ui_event_ScreenPlayList    (lv_event_t *e);
 lv_obj_t *ui_PlayListToMainUp;    void ui_event_PlayListToMainUp  (lv_event_t *e);
 lv_obj_t *ui_PlayListToMainDown;  void ui_event_PlayListToMainDown(lv_event_t *e);
@@ -74,7 +74,6 @@ lv_obj_t *ui_MenuBackToLeft;      void ui_event_MenuBackToLeft    (lv_event_t *e
 lv_obj_t *ui_MenuBluetoothOn;     void ui_event_MenuBluetoothOn   (lv_event_t *e);
 lv_obj_t *ui_MenuBluetoothOff;    void ui_event_MenuBluetoothOff  (lv_event_t *e);
 #endif
-lv_obj_t *ui_ContainerPlayList;
 // CUSTOM VARIABLES
 
 // EVENTS
@@ -333,14 +332,14 @@ void ui_init(void) {
 }
 
 /////////////////// LOCAL FUNCTIONS //////////////////
-static const char* SecToStr(uint32_t sec) {
+static const char* sec_to_str(uint32_t sec) {
   static char str[8];
   snprintf(str, sizeof(str)-1, "%2d:%02d", sec / 60, sec - (sec / 60) * 60);
   str[sizeof(str)-1] = '\0';
   return (const char*)str;
 }
 
-static void UpdateElapsedTime(void) {
+static void update_epalsed_time(void) {
   uint32_t duration = audioGetDuration();
   uint32_t elapsed  = audioGetElapsedTime();
   if (duration < elapsed) {
@@ -348,14 +347,14 @@ static void UpdateElapsedTime(void) {
   }
   lv_slider_set_range(ui_ElapsedBar, 0, duration);
   lv_slider_set_value(ui_ElapsedBar, elapsed, LV_ANIM_OFF);
-  lv_label_set_text(ui_ElapsedStart, SecToStr(elapsed));
-  lv_label_set_text(ui_ElapsedEnd,   SecToStr(duration));
+  lv_label_set_text(ui_ElapsedStart, sec_to_str(elapsed));
+  lv_label_set_text(ui_ElapsedEnd,   sec_to_str(duration));
 }
 
 /*--------------------------------------------------------------------------------
  * Get file information with ID3 tags (title, album, artist)
  *--------------------------------------------------------------------------------*/
-static void GetID3Tags(uint32_t track_id) {
+static void get_id3_tags(uint32_t track_id) {
   int n = 0;
   char *ptr, *token, *tmp[8], copy[256];
   const char *path = player.GetPath(track_id);
@@ -381,14 +380,14 @@ static void GetID3Tags(uint32_t track_id) {
     if (isdigit(*tmp[n])) { // "1-01 title"
       ptr = strchr(tmp[n], ' ');
       ptr = ptr ? ptr + 1 : tmp[n];
-      id3tags.title = std::string(ptr);
+      id3tags.title = ptr;
     } else {
-      id3tags.title = std::string(tmp[n]);
+      id3tags.title = tmp[n];
     }
     if (--n >= 0) {
-      id3tags.album = std::string(tmp[n]);
+      id3tags.album = tmp[n];
       if (--n >= 0) {
-        id3tags.artist = std::string(tmp[n]);
+        id3tags.artist = tmp[n];
       }
     }
   }
@@ -472,7 +471,7 @@ bool ui_loop(void) {
   DO_EVERY(PERIOD_TAKS1, task1Time) {
     // Update elapsed bar
     if (player.IsPlaying()) {
-      UpdateElapsedTime();
+      update_epalsed_time();
     }
   }
 
@@ -496,7 +495,7 @@ void ui_redisplay(void) {
 }
 
 const char* ui_get_title(uint32_t track_id) {
-  GetID3Tags(track_id);
+  get_id3_tags(track_id);
   return id3tags.title.c_str();
 }
 
@@ -527,8 +526,8 @@ void ui_set_playNo(uint32_t playNo) {
 /*--------------------------------------------------------------------------------
  * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
  *--------------------------------------------------------------------------------*/
-void audio_id3data(const char *info) {  //id3 metadata
-  // A race condition occurred with audio_eof_mp3().
+void audio_id3data(const char *info) {
+  // Avoid a race condition with ui_state set by audio_eof_mp3()
   if (ui_state == UI_STATE_PLAY) {
     char *p;
     if (p = strstr(info, "Title: ")) {
@@ -544,7 +543,7 @@ void audio_id3data(const char *info) {  //id3 metadata
   }
 }
 
-void audio_eof_mp3(const char *info) {  //end of file
+void audio_eof_mp3(const char *info) {
   if (!player.IsLastSong() || lv_obj_get_state(ui_Repeat) & LV_STATE_CHECKED) {
     ui_state = UI_STATE_NEXT;
   } else {
