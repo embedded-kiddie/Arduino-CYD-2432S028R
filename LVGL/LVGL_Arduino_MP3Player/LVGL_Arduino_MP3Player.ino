@@ -49,6 +49,8 @@ static LGFX tft;
 #if SCREENSHORT
 #define USE_SDFAT
 #include "../src/sdcard.hpp"
+#else
+#include "../src/ESP32.hpp"
 #endif
 
 //----------------------------------------------------------------------
@@ -259,12 +261,14 @@ void loop() {
     enable_display(false);
   }
 
-#if SCREENSHORT
-  // Stop playing before saving screenshot
   if (Serial.available()) {
     Serial.readStringUntil('\n');
+#if SCREENSHORT
+    // Stop playing before saving screenshot
     sdcard_setup();
     SaveBMP24(SD, "/demo.bmp", tft);
-  }
+#else
+    PrintESP32Memory();
 #endif
+  }
 }

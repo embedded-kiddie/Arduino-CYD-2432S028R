@@ -36,9 +36,8 @@ lv_obj_t *ui_MusicTitle;
 lv_obj_t *ui_ElapsedStart;
 lv_obj_t *ui_ElapsedEnd;
 lv_obj_t *ui_ButtonPlay;
-lv_obj_t *ui_Volume;
 lv_obj_t *ui_ElapsedBar;
-// CUSTOM VARIABLES
+lv_obj_t *ui_Volume;
 
 // SCREEN: ui_ScreenOption
 lv_obj_t *ui_ScreenOption;
@@ -46,12 +45,10 @@ lv_obj_t *ui_BacklightRoller;
 lv_obj_t *ui_SleepTimerRoller;
 lv_obj_t *ui_FavoriteNewButton;
 lv_obj_t *ui_FavoriteClearButton;
-// CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
 lv_obj_t *ui_ScreenPlayList;
 lv_obj_t *ui_ContainerPlayList;
-// CUSTOM VARIABLES
 
 // EVENTS
 
@@ -312,7 +309,6 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
 }
 #endif
 ///////////////////// SCREENS ////////////////////
-
 void ui_init(void) {
   ui_ScreenMain_screen_init();
   lv_disp_load_scr(ui_ScreenMain);

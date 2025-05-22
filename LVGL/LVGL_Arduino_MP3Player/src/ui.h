@@ -29,8 +29,8 @@ extern lv_obj_t *ui_MusicTitle;
 extern lv_obj_t *ui_ElapsedStart;
 extern lv_obj_t *ui_ElapsedEnd;
 extern lv_obj_t *ui_ButtonPlay;
-extern lv_obj_t *ui_Volume;
 extern lv_obj_t *ui_ElapsedBar;
+extern lv_obj_t *ui_Volume;
 void ui_ScreenMain_screen_init(void);
 void ui_event_ScreenMain  (lv_event_t *e);
 void ui_event_ButtonPlay  (lv_event_t *e);
@@ -136,6 +136,20 @@ void            ui_set_playNo(uint32_t playNo);
 LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
 LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 
+typedef enum {
+  UI_STATE_INIT,
+  UI_STATE_IDLE,
+  UI_STATE_PLAY,
+  UI_STATE_STOP,
+  UI_STATE_PAUSE,
+  UI_STATE_RESUME,
+  UI_STATE_NEXT,
+  UI_STATE_PREV,
+  UI_STATE_SLEEP,
+  UI_STATE_WAKEUP,
+  UI_STATE_ID3DATA,
+} UI_State_t;
+
 // Variables
 typedef struct {
   bool      shuffle;
@@ -152,20 +166,6 @@ typedef struct {
   uint32_t  selectedNo;
   uint32_t  sleepTimer;
 } UI_Control_t;
-
-typedef enum {
-  UI_STATE_INIT,
-  UI_STATE_IDLE,
-  UI_STATE_PLAY,
-  UI_STATE_STOP,
-  UI_STATE_PAUSE,
-  UI_STATE_RESUME,
-  UI_STATE_NEXT,
-  UI_STATE_PREV,
-  UI_STATE_SLEEP,
-  UI_STATE_WAKEUP,
-  UI_STATE_ID3DATA,
-} UI_State_t;
 
 extern UI_State_t ui_state;
 extern UI_Option_t ui_option;
