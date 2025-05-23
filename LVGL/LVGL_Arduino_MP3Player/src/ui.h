@@ -64,8 +64,9 @@ void ui_event_SleepTimerSwitch  (lv_event_t *e);
 // SCREEN: ui_ScreenPlayList
 extern lv_obj_t *ui_ScreenPlayList;
 extern lv_obj_t *ui_ContainerPlayList;
+extern lv_obj_t *ui_PlayListToMainUp;
+extern lv_obj_t *ui_PlayListToMainDown;
 void ui_ScreenPlayList_screen_init(void);
-void ui_event_ScreenPlayList    (lv_event_t *e);
 void ui_event_PlayListToMainUp  (lv_event_t *e);
 void ui_event_PlayListToMainDown(lv_event_t *e);
 void ui_list_update_icon(uint32_t track_id, bool state);
