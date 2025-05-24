@@ -72,6 +72,7 @@ void ui_event_PlayListToMainDown(lv_event_t *e);
 void ui_list_update_icon(uint32_t track_id, bool state);
 void ui_list_update_cell(uint32_t track_id, bool state);
 void ui_list_update_play(uint32_t track_id, bool state);
+void ui_list_focus_playing(uint32_t track_id);
 #if false
 void ui_event_MenuBackToLeft    (lv_event_t *e);
 void ui_event_MenuBluetoothOn   (lv_event_t *e);

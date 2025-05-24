@@ -33,7 +33,7 @@ static lv_style_t style_heart;
 static lv_style_t style_menu_back;
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 
-static int32_t top_num, bottom_num;
+static int32_t top_num, bottom_num; // hold the the highest/lowest number currently loaded in the playlist
 static bool update_scroll_running = false;
 
 /**********************
@@ -234,7 +234,6 @@ static void update_scroll(lv_obj_t *obj) {
   // Update slider
   int32_t tail = lv_obj_get_scroll_top(obj) + top_num * LIST_CELL_HEIGHT;
   int32_t head = tail + LIST_CELL_VIEWS * LIST_CELL_HEIGHT;
-  //printf("top: (%3d, %3d) / bottom: (%3d, %3d)\n", top_num, tail, bottom_num, head);
 
   lv_slider_set_value     (slider, head, LV_ANIM_OFF);
   lv_slider_set_left_value(slider, tail, LV_ANIM_OFF);
@@ -320,6 +319,7 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_obj_set_size             (list, lv_pct(100), lv_pct(100));
   lv_obj_set_align            (list, LV_ALIGN_CENTER);
   lv_obj_set_flex_flow        (list, LV_FLEX_FLOW_COLUMN);
+  lv_obj_add_event_cb         (list, scroll_cb, LV_EVENT_ALL, NULL);
 
   // Creating a slider as an alternative to a scrollbar
   slider = lv_slider_create(parent); // attach to ui_ContainerPlayList
@@ -328,12 +328,30 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_obj_set_width            (slider, 4);
   lv_obj_set_height           (slider, LIST_CELL_VIEWS * LIST_CELL_HEIGHT);
   lv_obj_set_style_radius     (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa     (slider, 0,                     (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT); // Set the knob invisible
+  lv_obj_set_style_bg_opa     (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_color   (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_slider_set_mode          (slider, LV_SLIDER_MODE_RANGE);
   lv_slider_set_range         (slider, ui_get_counts() * LIST_CELL_HEIGHT, 0);
 
   return list;
+}
+
+/*--------------------------------------------------------------------------------
+ * Delete all cells and focus the specified cell when out of range
+ *--------------------------------------------------------------------------------*/
+void ui_list_focus_playing(uint32_t track_id) {
+  if (track_id < top_num || bottom_num < track_id) {
+    // delete all cells in playlist
+    while (lv_obj_get_child_count(play_list)) {
+      lv_obj_clean(play_list);
+    }
+
+    // add new cells according to the specified id
+    ui_control.selectedNo = top_num = bottom_num = track_id;
+    add_list_cell(play_list, top_num);
+    update_scroll(play_list);
+    ui_list_update_play(ui_control.selectedNo, true);
+  }
 }
 
 /*--------------------------------------------------------------------------------
@@ -486,13 +504,9 @@ void ui_ScreenPlayList_screen_init(void) {
   // Initialize play list container
   play_list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
 
-  /* These counters hold the the highest/lowest number currently loaded. */
+  // add new cells according to the specified id
   top_num = bottom_num = 0;
   add_list_cell(play_list, top_num);
-
-  lv_obj_update_layout(play_list);
   update_scroll(play_list);
-  lv_obj_add_event_cb(play_list, scroll_cb, LV_EVENT_ALL, NULL);
-
   ui_list_update_play(ui_control.selectedNo, true);
 }
