@@ -86,6 +86,7 @@ void ui_event_ScreenMain(lv_event_t *e) {
     lv_obj_add_flag   (ui_PlayListToMainUp,   LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
 
+    ui_list_focus_playing(player.GetPlayNo());
     lv_indev_wait_release(lv_indev_active());
     lv_screen_load_anim(ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, false);
   }
@@ -98,6 +99,7 @@ void ui_event_ScreenMain(lv_event_t *e) {
     lv_obj_remove_flag(ui_PlayListToMainUp,   LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag   (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
 
+    ui_list_focus_playing(player.GetPlayNo());
     lv_indev_wait_release(lv_indev_active());
     lv_screen_load_anim(ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, false);
   }

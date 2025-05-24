@@ -319,7 +319,7 @@ void ui_ScreenMain_screen_init(void) {
   lv_checkbox_set_text          (ui_VolumeMin, "");
   lv_obj_set_width              (ui_VolumeMin, 40);
   lv_obj_set_height             (ui_VolumeMin, 40);
-  lv_obj_set_x                  (ui_VolumeMin, lv_pct(-40));
+  lv_obj_set_x                  (ui_VolumeMin, lv_pct(-39));
   lv_obj_set_y                  (ui_VolumeMin, lv_pct(43));
   lv_obj_set_align              (ui_VolumeMin, LV_ALIGN_CENTER);
   lv_obj_add_flag               (ui_VolumeMin, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
