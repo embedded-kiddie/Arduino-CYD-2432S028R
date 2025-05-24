@@ -77,7 +77,7 @@ void ui_event_ScreenMain(lv_event_t *e) {
     lv_indev_wait_release(lv_indev_active());
     lv_screen_load_anim(ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, false);
   }
-  
+
   else if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
     if (!ui_ContainerPlayList) {
       ui_ScreenPlayList_screen_init(); // initialize ui_ScreenPlayList and ui_ContainerPlayList
