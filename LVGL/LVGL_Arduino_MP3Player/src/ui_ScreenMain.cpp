@@ -67,7 +67,6 @@ void ui_ScreenMain_screen_init(void) {
 
   ui_ElapsedBar = lv_slider_create(ui_ScreenMain);
   lv_slider_set_value           (ui_ElapsedBar, 0, LV_ANIM_OFF);
-  if (lv_slider_get_mode        (ui_ElapsedBar) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_ElapsedBar, 0, LV_ANIM_OFF);
   lv_obj_set_height             (ui_ElapsedBar, 6);
   lv_obj_set_width              (ui_ElapsedBar, lv_pct(60));
   lv_obj_set_x                  (ui_ElapsedBar, 0);
@@ -78,9 +77,10 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_bg_color     (ui_ElapsedBar, UI_COLOR_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_opa       (ui_ElapsedBar, 255,              (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_opa       (ui_ElapsedBar,   0,              (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
+  if (lv_slider_get_mode        (ui_ElapsedBar) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_ElapsedBar, 0, LV_ANIM_OFF);
 
   // Compensating for LVGL9.1 draw crash with bar/slider max value when top-padding is nonzero and right-padding is 0
-  if (lv_obj_get_style_pad_top(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_ElapsedBar, lv_obj_get_style_pad_right(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) + 1, (uint32_t)LV_PART_MAIN);
+  if (lv_obj_get_style_pad_top  (ui_ElapsedBar, (uint32_t)LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_ElapsedBar, lv_obj_get_style_pad_right(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) + 1, (uint32_t)LV_PART_MAIN);
 
   lv_obj_t *ui_MenuDotMain = lv_checkbox_create(ui_ScreenMain);
   lv_checkbox_set_text          (ui_MenuDotMain, "");
@@ -350,13 +350,13 @@ void ui_ScreenMain_screen_init(void) {
   ui_Volume = lv_slider_create(ui_ScreenMain);
   lv_slider_set_range           (ui_Volume, 0, 21); // MP3_VOLUME_MAX (21) is defined in CYD_MP3Player.h
   lv_slider_set_value           (ui_Volume, 0, LV_ANIM_OFF);
-  if (lv_slider_get_mode        (ui_Volume) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_Volume, 0, LV_ANIM_OFF);
   lv_obj_set_height             (ui_Volume, 8);
   lv_obj_set_width              (ui_Volume, lv_pct(49));
   lv_obj_set_x                  (ui_Volume, lv_pct(1));
   lv_obj_set_y                  (ui_Volume, lv_pct(43));
   lv_obj_set_align              (ui_Volume, LV_ALIGN_CENTER);
   lv_obj_remove_flag            (ui_Volume, LV_OBJ_FLAG_GESTURE_BUBBLE);
+  if (lv_slider_get_mode        (ui_Volume) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_Volume, 0, LV_ANIM_OFF);
 
   lv_obj_set_style_bg_color     (ui_Volume, UI_COLOR_SLIDER, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_opa       (ui_Volume, 255,             (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);

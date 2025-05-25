@@ -9,11 +9,11 @@
 /**********************
  *      MACROS
  **********************/
-#define LIST_BACK_TO_HANDLE_SIZE  20
-#define LIST_FONT_SMALL_HEIGHT    17
-#define LIST_FONT_MEDIUM_HEIGHT   22
-#define LIST_LABEL_MARGINE        100
-#define LIST_CELL_HEIGHT          60
+#define LIST_BACK_TO_HANDLE_SIZE  25  // back-up.png/back-down.png: 20x20
+#define LIST_FONT_SMALL_HEIGHT    17  // for font size: 12px
+#define LIST_FONT_MEDIUM_HEIGHT   22  // for font size: 14px
+#define LIST_LABEL_MARGINE        100 // left(50) + right(50)
+#define LIST_CELL_HEIGHT          60  // column(3) x rol(2)
 #define LIST_CELL_VIEWS           5   // LIST_CELL_HEIGHT * LIST_CELL_VIEWS + LIST_BACK_TO_HANDLE_SIZE
 #define LIST_CELL_SPARE           2   // 1 <= LIST_CELL_SPARE <= 2
 
@@ -33,14 +33,14 @@ static lv_style_t style_heart;
 static lv_style_t style_menu_back;
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 
-static int32_t top_num, bottom_num; // hold the the highest/lowest number currently loaded in the playlist
+static int32_t top_num, end_num; // hold the the highest/lowest number currently loaded in the playlist
 static bool update_scroll_running = false;
 
 /**********************
  *  GLOBAL FUNCTIONS
  **********************/
 void ui_list_update_icon(uint32_t track_id, bool state) {
-  if (top_num <= track_id && track_id <= bottom_num) {
+  if (top_num <= track_id && track_id <= end_num) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
     lv_obj_t* icon = lv_obj_get_child(cell, 0);
     if (state) {
@@ -52,7 +52,7 @@ void ui_list_update_icon(uint32_t track_id, bool state) {
 }
 
 void ui_list_update_cell(uint32_t track_id, bool state) {
-  if (top_num <= track_id && track_id <= bottom_num) {
+  if (top_num <= track_id && track_id <= end_num) {
     lv_obj_t* cell   = lv_obj_get_child(play_list, track_id - top_num);
     lv_obj_t* title  = lv_obj_get_child(cell, 1);
     lv_obj_t* artist = lv_obj_get_child(cell, 2);
@@ -70,7 +70,7 @@ void ui_list_update_cell(uint32_t track_id, bool state) {
 }
 
 void ui_list_update_play(uint32_t track_id, bool state) {
-  if (top_num <= track_id && track_id <= bottom_num) {
+  if (top_num <= track_id && track_id <= end_num) {
     lv_obj_t* cell   = lv_obj_get_child(play_list, track_id - top_num);
     lv_obj_t* icon   = lv_obj_get_child(cell, 0);
     lv_obj_t* title  = lv_obj_get_child(cell, 1);
@@ -191,11 +191,11 @@ static void update_scroll(lv_obj_t *obj) {
   int32_t pos;
 
   /* load items we're getting close to */
-  while (bottom_num < ui_get_counts() - 1 && (pos = lv_obj_get_scroll_bottom(obj)) < (LIST_CELL_HEIGHT)) {
-    bottom_num += 1;
-    add_list_cell(obj, bottom_num);
+  while (end_num < ui_get_counts() - 1 && (pos = lv_obj_get_scroll_bottom(obj)) < (LIST_CELL_HEIGHT)) {
+    end_num += 1;
+    add_list_cell(obj, end_num);
     lv_obj_update_layout(obj);
-    //printf("added bottom num: %d, pos: %d\n", bottom_num, pos);
+    //printf("added end_num: %d, pos: %d\n", end_num, pos);
   }
   while (top_num > 0 && (pos = lv_obj_get_scroll_top(obj)) < (LIST_CELL_HEIGHT)) {
     top_num -= 1;
@@ -205,18 +205,18 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
     int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
     lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    //printf("added top num: %d, pos: %d\n", top_num, pos);
+    //printf("added top_num: %d, pos: %d\n", top_num, pos);
   }
 
   /* delete far-away items */
-  while ((pos = lv_obj_get_scroll_bottom(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && bottom_num - top_num > (LIST_CELL_VIEWS)) {
-    bottom_num -= 1;
+  while ((pos = lv_obj_get_scroll_bottom(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && end_num - top_num > (LIST_CELL_VIEWS)) {
+    end_num -= 1;
     lv_obj_t *child = lv_obj_get_child(obj, -1);
     lv_obj_delete(child);
     lv_obj_update_layout(obj);
-    //printf("deleted bottom num: %d, pos: %d\n", bottom_num, pos);
+    //printf("deleted end_num: %d, pos: %d\n", end_num, pos);
   }
-  while ((pos = lv_obj_get_scroll_top(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && bottom_num - top_num > (LIST_CELL_VIEWS)) {
+  while ((pos = lv_obj_get_scroll_top(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && end_num - top_num > (LIST_CELL_VIEWS)) {
     top_num += 1;
     int32_t bottom_before = lv_obj_get_scroll_bottom(obj);
     lv_obj_t *child = lv_obj_get_child(obj, 0);
@@ -224,7 +224,7 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
     int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
     lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    //printf("deleted top num: %d, pos: %d\n", top_num, pos);
+    //printf("deleted top_num: %d, pos: %d\n", top_num, pos);
   }
 
   update_scroll_running = false;
@@ -232,11 +232,10 @@ static void update_scroll(lv_obj_t *obj) {
   ui_list_update_icon(ui_get_playNo(),       true);
 
   // Update slider
-  int32_t tail = lv_obj_get_scroll_top(obj) + top_num * LIST_CELL_HEIGHT;
-  int32_t head = tail + LIST_CELL_VIEWS * LIST_CELL_HEIGHT;
-
-  lv_slider_set_value     (slider, head, LV_ANIM_OFF);
-  lv_slider_set_left_value(slider, tail, LV_ANIM_OFF);
+  int32_t top = lv_obj_get_scroll_top(obj) + top_num * LIST_CELL_HEIGHT;
+  int32_t end = top + LIST_CELL_VIEWS * LIST_CELL_HEIGHT;
+  lv_slider_set_value     (slider, end, LV_ANIM_OFF);
+  lv_slider_set_left_value(slider, top, LV_ANIM_OFF);
 }
 
 static void scroll_cb(lv_event_t *e) {
@@ -337,20 +336,25 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
 }
 
 /*--------------------------------------------------------------------------------
- * Delete all cells and focus the specified cell when out of range
+ * Delete all cells and focus the specified cell when it is out of range
  *--------------------------------------------------------------------------------*/
 void ui_list_focus_playing(uint32_t track_id) {
-  if (track_id < top_num || bottom_num < track_id) {
+  if (track_id < top_num || end_num < track_id) {
     // delete all cells in playlist
     while (lv_obj_get_child_count(play_list)) {
       lv_obj_clean(play_list);
     }
 
     // add new cells according to the specified id
-    ui_control.selectedNo = top_num = bottom_num = track_id;
+    ui_control.selectedNo = top_num = end_num = track_id;
     add_list_cell(play_list, top_num);
     update_scroll(play_list);
     ui_list_update_play(ui_control.selectedNo, true);
+
+    // these can not fix the incorrect range
+    // lv_obj_update_layout(slider);
+    // lv_slider_set_range (slider, ui_get_counts() * LIST_CELL_HEIGHT, 0);
+    // lv_obj_send_event   (slider, LV_EVENT_VALUE_CHANGED, NULL);
   }
 }
 
@@ -372,7 +376,7 @@ void ui_ScreenPlayList_screen_init(void) {
 
   ui_PlayListToMainUp = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text            (ui_PlayListToMainUp, "");
-  lv_obj_set_height               (ui_PlayListToMainUp, 25);
+  lv_obj_set_height               (ui_PlayListToMainUp, LIST_BACK_TO_HANDLE_SIZE);
   lv_obj_set_width                (ui_PlayListToMainUp, lv_pct(110));
   lv_obj_set_align                (ui_PlayListToMainUp, LV_ALIGN_BOTTOM_MID);
   lv_obj_add_flag                 (ui_PlayListToMainUp, LV_OBJ_FLAG_HIDDEN);
@@ -389,7 +393,7 @@ void ui_ScreenPlayList_screen_init(void) {
 
   ui_PlayListToMainDown = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text            (ui_PlayListToMainDown, "");
-  lv_obj_set_height               (ui_PlayListToMainDown, 25);
+  lv_obj_set_height               (ui_PlayListToMainDown, LIST_BACK_TO_HANDLE_SIZE);
   lv_obj_set_width                (ui_PlayListToMainDown, lv_pct(110));
   lv_obj_set_align                (ui_PlayListToMainDown, LV_ALIGN_TOP_MID);
   lv_obj_add_flag                 (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
@@ -505,7 +509,7 @@ void ui_ScreenPlayList_screen_init(void) {
   play_list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
 
   // add new cells according to the specified id
-  top_num = bottom_num = 0;
+  ui_control.selectedNo = top_num = end_num = 0;
   add_list_cell(play_list, top_num);
   update_scroll(play_list);
   ui_list_update_play(ui_control.selectedNo, true);
