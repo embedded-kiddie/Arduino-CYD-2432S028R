@@ -46,51 +46,57 @@ static bool update_scroll_running = false;
 void ui_list_update_icon(uint32_t track_id, bool state) {
   if (top_num <= track_id && track_id <= end_num) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
-    lv_obj_t* icon = lv_obj_get_child(cell, 0);
-    if (state) {
-      lv_image_set_src(icon, &ui_img_list_pause);
-    } else {
-      lv_image_set_src(icon, &ui_img_list_play);
+    if (cell) {
+      lv_obj_t* icon = lv_obj_get_child(cell, 0);
+      if (state) {
+        lv_image_set_src(icon, &ui_img_list_pause);
+      } else {
+        lv_image_set_src(icon, &ui_img_list_play);
+      }
     }
   }
 }
 
 void ui_list_update_cell(uint32_t track_id, bool state) {
   if (top_num <= track_id && track_id <= end_num) {
-    lv_obj_t* cell   = lv_obj_get_child(play_list, track_id - top_num);
-    lv_obj_t* title  = lv_obj_get_child(cell, 1);
-    lv_obj_t* artist = lv_obj_get_child(cell, 2);
+    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
+    if (cell) {
+      lv_obj_t* title  = lv_obj_get_child(cell, 1);
+      lv_obj_t* artist = lv_obj_get_child(cell, 2);
 
-    if (state) {
-      lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
-      lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
-      lv_obj_add_state(cell, LV_STATE_CHECKED);
-    } else {
-      lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
-      lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
-      lv_obj_remove_state(cell, LV_STATE_CHECKED);
+      if (state) {
+        lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_obj_add_state(cell, LV_STATE_CHECKED);
+      } else {
+        lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
+        lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
+        lv_obj_remove_state(cell, LV_STATE_CHECKED);
+      }
     }
   }
 }
 
 void ui_list_update_play(uint32_t track_id, bool state) {
   if (top_num <= track_id && track_id <= end_num) {
-    lv_obj_t* cell   = lv_obj_get_child(play_list, track_id - top_num);
-    lv_obj_t* icon   = lv_obj_get_child(cell, 0);
-    lv_obj_t* title  = lv_obj_get_child(cell, 1);
-    lv_obj_t* artist = lv_obj_get_child(cell, 2);
+    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
+    if (cell) {
+      lv_obj_t* icon   = lv_obj_get_child(cell, 0);
+      lv_obj_t* title  = lv_obj_get_child(cell, 1);
+      lv_obj_t* artist = lv_obj_get_child(cell, 2);
 
-    if (state) {
-      lv_image_set_src(icon, &ui_img_list_pause);
-      lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
-      lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
-      lv_obj_add_state(cell, LV_STATE_CHECKED);
-      lv_obj_scroll_to_view(cell, LV_ANIM_ON);
-    } else {
-      lv_image_set_src(icon, &ui_img_list_play);
-      lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
-      lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
-      lv_obj_remove_state(cell, LV_STATE_CHECKED);
+      if (state) {
+        lv_image_set_src(icon, &ui_img_list_pause);
+        lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_obj_add_state(cell, LV_STATE_CHECKED);
+        lv_obj_scroll_to_view(cell, LV_ANIM_ON);
+      } else {
+        lv_image_set_src(icon, &ui_img_list_play);
+        lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
+        lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
+        lv_obj_remove_state(cell, LV_STATE_CHECKED);
+      }
     }
   }
 }
@@ -104,6 +110,7 @@ static void list_click_event_cb(lv_event_t* e) {
   lv_point_t p;
   lv_indev_get_point(lv_indev_get_act(), &p);
 
+  // the clicked coordinates within the icon area?
   if (p.x <= ui_img_list_play.header.w) {
     ui_list_update_play(ui_control.selectedNo, false);
     ui_control.selectedNo = track_id;
