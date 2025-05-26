@@ -347,16 +347,17 @@ void ui_list_focus_playing(uint32_t track_id) {
       lv_obj_clean(play_list);
     }
 
+    // update layout before add new cells
+    lv_slider_set_value     (slider, 0, LV_ANIM_OFF);
+    lv_slider_set_left_value(slider, 0, LV_ANIM_OFF);
+    lv_obj_update_layout    (slider);
+    lv_obj_update_layout    (play_list);
+
     // add new cells according to the specified id
     ui_control.selectedNo = top_num = end_num = track_id;
     add_list_cell(play_list, top_num);
     update_scroll(play_list);
     ui_list_update_play(ui_control.selectedNo, true);
-
-    // these can not fix the incorrect range
-    // lv_obj_update_layout(slider);
-    // lv_slider_set_range (slider, ui_get_counts() * LIST_CELL_HEIGHT, 0);
-    // lv_obj_send_event   (slider, LV_EVENT_VALUE_CHANGED, NULL);
   }
 }
 
