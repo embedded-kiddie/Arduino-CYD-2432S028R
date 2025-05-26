@@ -320,11 +320,12 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
 #endif
 ///////////////////// SCREENS ////////////////////
 void ui_init(void) {
+  ui_control.playNo = ui_control.selectedNo = 0;
+  ui_control.sleepTimer = 30 * 1000;
+  ui_state = UI_STATE_INIT;
+
   ui_ScreenMain_screen_init();
   lv_disp_load_scr(ui_ScreenMain);
-
-  ui_state = UI_STATE_INIT;
-  ui_control.sleepTimer = 30 * 1000;
 
   audioInit();
 }
@@ -350,66 +351,24 @@ static void update_epalsed_time(void) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get file information with ID3 tags (title, album, artist)
- *--------------------------------------------------------------------------------*/
-static void get_id3_tags(uint32_t track_id) {
-  int n = 0;
-  char *ptr, *token, *tmp[8], copy[256];
-  const char *path = player.GetPath(track_id);
-
-  if (strlen(path) < sizeof(copy)) {
-    strcpy(copy, path);
-  } else {
-    // Copy a string including the null character from the end
-    strcpy(copy, path + strlen(path) + 1 - sizeof(copy));
-  }
-
-  token = strtok_r(copy, "/", &ptr);
-  while (token != NULL && n < 8) {
-    tmp[n++] = token;
-    token = strtok_r(NULL, "/", &ptr);
-  }
-
-  if (--n >= 0) {
-    ptr = strrchr(tmp[n], '.'); // ".mp3", ".m4a", ".wav"
-    if (ptr) {
-      *ptr = '\0';
-    }
-    if (isdigit(*tmp[n])) { // "1-01 title"
-      ptr = strchr(tmp[n], ' ');
-      ptr = ptr ? ptr + 1 : tmp[n];
-      id3tags.title = ptr;
-    } else {
-      id3tags.title = tmp[n];
-    }
-    if (--n >= 0) {
-      id3tags.album = tmp[n];
-      if (--n >= 0) {
-        id3tags.artist = tmp[n];
-      }
-    }
-  }
-}
-
-/*--------------------------------------------------------------------------------
  * Control next or previous play / stop or continuous play
  *--------------------------------------------------------------------------------*/
-static void ui_control_play(bool next, bool stop) {
+static void ui_control_play(bool next) {
   if (ui_ScreenPlayList) {
     ui_list_update_cell(ui_control.selectedNo, false);
-    ui_list_update_icon(ui_get_playNo(),       false);
+    ui_list_update_icon(ui_control.playNo,     false);
   }
 
   if (next) {
-    player.PlayNext(stop);
+    player.PlayNext();
   } else {
-    player.PlayPrev(stop);
+    player.PlayPrev();
   }
 
-  ui_control.selectedNo = player.GetPlayNo();
+  ui_control.playNo = ui_control.selectedNo = player.GetPlayNo();
 
   if (ui_ScreenPlayList) {
-    ui_list_update_play(ui_control.selectedNo, true);
+    ui_list_update_play(ui_control.playNo, true);
   }
 }
 
@@ -431,12 +390,12 @@ bool ui_loop(void) {
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_NEXT:
-      ui_control_play(true, true);
+      ui_control_play(true);
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_PREV:
-      ui_control_play(false, true);
+      ui_control_play(false);
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
       ui_state = UI_STATE_PLAY;
       break;
@@ -493,24 +452,7 @@ void ui_redisplay(void) {
   lv_disp_load_scr(lv_scr_act());
 }
 
-const char* ui_get_title(uint32_t track_id) {
-  get_id3_tags(track_id);
-  return id3tags.title.c_str();
-}
-
-const char* ui_get_artist(uint32_t track_id) {
-  return id3tags.artist.c_str();
-}
-
-const char* ui_get_album(uint32_t track_id) {
-  return id3tags.album.c_str();
-}
-
-const uint32_t ui_get_duration(uint32_t track_id) {
-  return id3tags.duration;
-}
-
-const uint32_t ui_get_counts(void) {
+uint32_t ui_get_counts(void) {
   return (const uint32_t)player.GetCounts();
 }
 
@@ -520,6 +462,50 @@ uint32_t ui_get_playNo(void) {
 
 void ui_set_playNo(uint32_t playNo) {
   player.SetPlayNo(playNo);
+}
+
+/*--------------------------------------------------------------------------------
+ * Get ID3 tags (title, album, artist) from the file specified by id
+ *--------------------------------------------------------------------------------*/
+void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags) {
+  int n = 0;
+  char *ptr, *token, *tmp[8], copy[256];
+  const char *path = player.GetPath(track_id);
+
+  tags.duration = 0;
+
+  if (strlen(path) < sizeof(copy)) {
+    strcpy(copy, path);
+  } else {
+    // Copy a string including the null character from the end
+    strcpy(copy, path + strlen(path) + 1 - sizeof(copy));
+  }
+
+  token = strtok_r(copy, "/", &ptr);
+  while (token != NULL && n < 8) {
+    tmp[n++] = token;
+    token = strtok_r(NULL, "/", &ptr);
+  }
+
+  if (--n >= 0) {
+    ptr = strrchr(tmp[n], '.'); // ".mp3", ".m4a", ".wav"
+    if (ptr) {
+      *ptr = '\0';
+    }
+    if (isdigit(*tmp[n])) { // "1-01 title"
+      ptr = strchr(tmp[n], ' ');
+      ptr = ptr ? ptr + 1 : tmp[n];
+      tags.title = ptr;
+    } else {
+      tags.title = tmp[n];
+    }
+    if (--n >= 0) {
+      tags.album = tmp[n];
+      if (--n >= 0) {
+        tags.artist = tmp[n];
+      }
+    }
+  }
 }
 
 /*--------------------------------------------------------------------------------

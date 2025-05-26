@@ -114,13 +114,9 @@ void ui_init(void);
 bool ui_loop(void);
 void ui_redisplay(void);
 
-const char*     ui_get_title (uint32_t);
-const char*     ui_get_artist(uint32_t);
-const char*     ui_get_album (uint32_t);
-const uint32_t  ui_get_duration(uint32_t);
-const uint32_t  ui_get_counts(void);
-uint32_t        ui_get_playNo(void);
-void            ui_set_playNo(uint32_t playNo);
+uint32_t  ui_get_counts(void);
+uint32_t  ui_get_playNo(void);
+void      ui_set_playNo(uint32_t playNo);
 
 #define UI_COLOR_BACKGROUND   lv_color_hex(0xffffff)
 #define UI_COLOR_SLIDER       lv_color_hex(0x000000)
@@ -165,6 +161,7 @@ typedef struct {
 } UI_Option_t;
 
 typedef struct {
+  uint32_t  playNo;
   uint32_t  selectedNo;
   uint32_t  sleepTimer;
 } UI_Control_t;

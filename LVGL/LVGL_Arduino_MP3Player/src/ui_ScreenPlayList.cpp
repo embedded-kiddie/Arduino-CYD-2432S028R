@@ -4,7 +4,11 @@
 // Project name: SquareLine_Project
 
 #include "ui.h"
-#include <stdio.h>  // for printf()
+#include <stdio.h>  // for sprintf(), printf()
+
+// defined in ui.cpp
+#include "../CYD_MP3Player.h"
+extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags);
 
 /**********************
  *      MACROS
@@ -122,13 +126,11 @@ static void heart_click_event_cb(lv_event_t *e) {
 }
 
 static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
-  const char* title  = ui_get_title (track_id);
-  const char* artist = ui_get_artist(track_id);
-  const char* album  = ui_get_album (track_id);
-  uint32_t duration  = ui_get_duration(track_id);
+  ID3Tags_t tags;
+  ui_get_id3tags(track_id, tags);
 
   char time[32];
-  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
+  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, tags.duration / 60, tags.duration % 60);
 
   lv_obj_t* cell = lv_obj_create(parent);
   lv_obj_remove_style_all       (cell);
@@ -145,13 +147,13 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_set_grid_cell          (icon, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 2);
 
   lv_obj_t* title_label = lv_label_create(cell);
-  lv_label_set_text             (title_label, title);
+  lv_label_set_text             (title_label, tags.title.c_str());
   lv_label_set_long_mode        (title_label, LV_LABEL_LONG_DOT);
   lv_obj_set_grid_cell          (title_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
   lv_obj_add_style              (title_label, &style_title, 0);
 
   lv_obj_t* artist_label = lv_label_create(cell);
-  lv_label_set_text_fmt         (artist_label, "%s / %s", artist, album);
+  lv_label_set_text_fmt         (artist_label, "%s / %s", tags.artist.c_str(), tags.album.c_str());
   lv_label_set_long_mode        (artist_label, LV_LABEL_LONG_DOT);
   lv_obj_set_grid_cell          (artist_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
   lv_obj_add_style              (artist_label, &style_artist, 0);
@@ -509,8 +511,8 @@ void ui_ScreenPlayList_screen_init(void) {
   play_list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
 
   // add new cells according to the specified id
-  ui_control.selectedNo = top_num = end_num = 0;
+  top_num = end_num = ui_control.playNo;
   add_list_cell(play_list, top_num);
   update_scroll(play_list);
-  ui_list_update_play(ui_control.selectedNo, true);
+  ui_list_update_play(ui_control.playNo, true);
 }
