@@ -110,16 +110,17 @@ static void list_click_event_cb(lv_event_t* e) {
   lv_point_t p;
   lv_indev_get_point(lv_indev_get_act(), &p);
 
-  // the clicked coordinates within the icon area?
+  // check if the clicked coordinates within the icon area
   if (p.x <= ui_img_list_play.header.w) {
-    ui_list_update_play(ui_control.selectedNo, false);
-    ui_control.selectedNo = track_id;
-    ui_list_update_play(ui_control.selectedNo, true);
-    ui_set_playNo(ui_control.selectedNo);
+    ui_list_update_play(ui_control.playNo,     false);
+    ui_list_update_cell(ui_control.selectedNo, false);
+    ui_control.playNo = ui_control.selectedNo = track_id;
+    ui_list_update_play(track_id, true);
+    ui_set_playNo(track_id);
   } else {
     ui_list_update_cell(ui_control.selectedNo, false);
     ui_control.selectedNo = track_id;
-    ui_list_update_cell(ui_control.selectedNo, true);
+    ui_list_update_cell(track_id, true);
   }
 }
 
