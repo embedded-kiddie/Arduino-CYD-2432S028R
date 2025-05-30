@@ -47,7 +47,7 @@ static LGFX tft;
 //----------------------------------------------------------------------
 #define SCREENSHORT false
 #if SCREENSHORT
-#define USE_SDFAT
+#define USE_SDFAT // "SDFATFS_USED" should be defined in CYD_Audio.h
 #include "../src/sdcard.hpp"
 #else
 #include "../src/ESP32.hpp"
@@ -213,9 +213,6 @@ static uint32_t my_tick(void) {
 }
 
 void setup() {
-  while (millis() < 1000);
-  Serial.begin(115200);
-
   tft_init();
   lv_init();
 
@@ -235,7 +232,6 @@ void setup() {
 #if USE_HEAP_MALLOC
   for (int i = 0; i < DRAW_BUF_N_BUFS; i++) {
     draw_buf[i] = (uint8_t*)heap_caps_malloc(DRAW_BUF_SIZE, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
-//  Serial.printf("buf[%d]: 0x%x%s", i, draw_buf[i], (DRAW_BUF_N_BUFS == 1 || i == 1 ? "\n" : ", "));
   }
 #endif
 
@@ -245,11 +241,12 @@ void setup() {
   lv_display_set_buffers(disp, draw_buf[0], draw_buf[1], DRAW_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
 #endif
 
-  /* Initialize the (dummy) input device driver */
+  /* Initialize the input device driver */
   lv_indev_t *indev = lv_indev_create();
   lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /* Touchpad should have POINTER type */
   lv_indev_set_read_cb(indev, my_touchpad_read);
 
+  Serial.begin(115200);
   ui_init();
 }
 
@@ -265,8 +262,12 @@ void loop() {
     Serial.readStringUntil('\n');
 #if SCREENSHORT
     // Stop playing before saving screenshot
-    sdcard_setup();
-    SaveBMP24(SD, "/demo.bmp", tft);
+    FS_TYPE sd;
+    if (!sd.begin(SD_CONFIG)) {
+      Serial.println("Card Mount Failed");
+      return;
+    }
+    SaveBMP24(sd, "/demo.bmp", tft);
 #else
     PrintESP32Memory();
 #endif

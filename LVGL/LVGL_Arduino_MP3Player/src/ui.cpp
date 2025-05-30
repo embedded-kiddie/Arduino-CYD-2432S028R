@@ -11,7 +11,8 @@
 
 #define MP3_VOLUME_INI 6
 #define MP3_PATH_ROOT "/MP3Player/"
-#define MP3_PATH_CONFIG MP3_PATH_ROOT, 2
+#define MP3_PATH_LEVEL 2
+#define MP3_PATH_CONFIG MP3_PATH_ROOT, MP3_PATH_LEVEL
 #define PERIOD_TAKS1 1000 // [msec]
 #define PERIOD_TAKS2 100  // [msec]
 
@@ -318,18 +319,6 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
   }
 }
 #endif
-///////////////////// SCREENS ////////////////////
-void ui_init(void) {
-  ui_control.playNo = ui_control.selectedNo = 0;
-  ui_control.sleepTimer = 30 * 1000;
-  ui_state = UI_STATE_INIT;
-
-  ui_ScreenMain_screen_init();
-  lv_disp_load_scr(ui_ScreenMain);
-
-  audioInit();
-}
-
 /////////////////// LOCAL FUNCTIONS //////////////////
 static const char* sec_to_str(uint32_t sec) {
   static char str[8];
@@ -355,8 +344,8 @@ static void update_epalsed_time(void) {
  *--------------------------------------------------------------------------------*/
 static void ui_control_play(bool next) {
   if (ui_ScreenPlayList) {
-    ui_list_update_cell(ui_control.selectedNo, false);
-    ui_list_update_icon(ui_control.playNo,     false);
+    ui_list_update_cell(ui_control.focusNo, false);
+    ui_list_update_icon(ui_control.playNo,  false);
   }
 
   if (next) {
@@ -365,16 +354,44 @@ static void ui_control_play(bool next) {
     player.PlayPrev();
   }
 
-  ui_control.playNo = ui_control.selectedNo = player.GetPlayNo();
+  ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
 
   if (ui_ScreenPlayList) {
     ui_list_update_play(ui_control.playNo, true);
   }
 }
 
+///////////////////// SCREENS ////////////////////
+void ui_init(void) {
+  ui_ScreenMain_screen_init();
+  lv_disp_load_scr(ui_ScreenMain);
+
+  ui_control.sleepTimer = 30 * 1000;
+  ui_state = UI_STATE_INIT;
+
+  audioInit();
+}
+
 ////////////////// GLOBAL FUNCTIONS /////////////////
 bool ui_loop(void) {
   switch (ui_state) {
+    case UI_STATE_INIT:
+      player.begin(MP3_PATH_ROOT);
+      player.SetVolume(MP3_VOLUME_INI);
+      lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
+      // no break
+    case UI_STATE_START:
+      player.ScanFileList(MP3_PATH_LEVEL);
+      player.SortFileList(true);
+      if (player.GetCounts()) {
+        player.SetPlayNo(ui_control.playNo = ui_control.focusNo = 0);
+        lv_obj_set_state (ui_ButtonPlay, LV_STATE_CHECKED, true);
+        lv_obj_send_event(ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
+        ui_state = UI_STATE_PLAY;
+      } else {
+        ui_state = UI_STATE_IDLE;
+      }
+      break;
     case UI_STATE_PLAY:
       player.AutoPlay();
       break;
@@ -398,19 +415,6 @@ bool ui_loop(void) {
       ui_control_play(false);
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
       ui_state = UI_STATE_PLAY;
-      break;
-    case UI_STATE_INIT:
-      player.begin();
-      player.ScanFileList(MP3_PATH_CONFIG);
-      player.SortFileList(true);
-      player.SetVolume(MP3_VOLUME_INI);
-      player.SetPlayNo(ui_control.selectedNo = 0);
-      ui_state = UI_STATE_IDLE;
-
-      // start playing: it makes ui_state to UI_STATE_RESUME
-      lv_obj_set_state    (ui_ButtonPlay, LV_STATE_CHECKED, true);
-      lv_obj_send_event   (ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
-      lv_slider_set_value (ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
       break;
     case UI_STATE_ID3DATA:
       lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
@@ -468,44 +472,7 @@ void ui_set_playNo(uint32_t playNo) {
  * Get ID3 tags (title, album, artist) from the file specified by id
  *--------------------------------------------------------------------------------*/
 void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags) {
-  int n = 0;
-  char *ptr, *token, *tmp[8], copy[256];
-  const char *path = player.GetPath(track_id);
-
-  tags.duration = 0;
-
-  if (strlen(path) < sizeof(copy)) {
-    strcpy(copy, path);
-  } else {
-    // Copy a string including the null character from the end
-    strcpy(copy, path + strlen(path) + 1 - sizeof(copy));
-  }
-
-  token = strtok_r(copy, "/", &ptr);
-  while (token != NULL && n < 8) {
-    tmp[n++] = token;
-    token = strtok_r(NULL, "/", &ptr);
-  }
-
-  if (--n >= 0) {
-    ptr = strrchr(tmp[n], '.'); // ".mp3", ".m4a", ".wav"
-    if (ptr) {
-      *ptr = '\0';
-    }
-    if (isdigit(*tmp[n])) { // "1-01 title"
-      ptr = strchr(tmp[n], ' ');
-      ptr = ptr ? ptr + 1 : tmp[n];
-      tags.title = ptr;
-    } else {
-      tags.title = tmp[n];
-    }
-    if (--n >= 0) {
-      tags.album = tmp[n];
-      if (--n >= 0) {
-        tags.artist = tmp[n];
-      }
-    }
-  }
+  player.GetID3Tags(track_id, tags);
 }
 
 /*--------------------------------------------------------------------------------

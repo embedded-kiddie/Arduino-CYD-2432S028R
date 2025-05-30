@@ -112,14 +112,14 @@ static void list_click_event_cb(lv_event_t* e) {
 
   // check if the clicked coordinates within the icon area
   if (p.x <= ui_img_list_play.header.w) {
-    ui_list_update_play(ui_control.playNo,     false);
-    ui_list_update_cell(ui_control.selectedNo, false);
-    ui_control.playNo = ui_control.selectedNo = track_id;
+    ui_list_update_play(ui_control.playNo,  false);
+    ui_list_update_cell(ui_control.focusNo, false);
+    ui_control.playNo = ui_control.focusNo = track_id;
     ui_list_update_play(track_id, true);
     ui_set_playNo(track_id);
   } else {
-    ui_list_update_cell(ui_control.selectedNo, false);
-    ui_control.selectedNo = track_id;
+    ui_list_update_cell(ui_control.focusNo, false);
+    ui_control.focusNo = track_id;
     ui_list_update_cell(track_id, true);
   }
 }
@@ -138,7 +138,8 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   ui_get_id3tags(track_id, tags);
 
   char time[32];
-  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, tags.duration / 60, tags.duration % 60);
+  uint32_t duration = (uint32_t)tags.meta.duration;
+  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
 
   lv_obj_t* cell = lv_obj_create(parent);
   lv_obj_remove_style_all       (cell);
@@ -238,8 +239,8 @@ static void update_scroll(lv_obj_t *obj) {
   }
 
   update_scroll_running = false;
-  ui_list_update_cell(ui_control.selectedNo, true);
-  ui_list_update_icon(ui_get_playNo(),       true);
+  ui_list_update_cell(ui_control.focusNo, true);
+  ui_list_update_icon(ui_get_playNo(),    true);
 
   // Update slider
   int32_t top = lv_obj_get_scroll_top(obj) + top_num * LIST_CELL_HEIGHT;
@@ -362,10 +363,10 @@ void ui_list_focus_playing(uint32_t track_id) {
     lv_obj_update_layout    (play_list);
 
     // add new cells according to the specified id
-    ui_control.selectedNo = top_num = end_num = track_id;
+    ui_control.focusNo = top_num = end_num = track_id;
     add_list_cell(play_list, top_num);
     update_scroll(play_list);
-    ui_list_update_play(ui_control.selectedNo, true);
+    ui_list_update_play(track_id, true);
   }
 }
 

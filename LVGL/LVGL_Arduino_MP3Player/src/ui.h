@@ -98,8 +98,8 @@ LV_IMG_DECLARE(ui_img_1994412056);  // assets/volume-max.png
 LV_IMG_DECLARE(ui_img_2058316518);  // assets/volume-min.png
 LV_IMG_DECLARE(ui_img_1710110385);  // assets/back-right.png
 LV_IMG_DECLARE(ui_img_713466046);   // assets/back-left.png
-LV_IMG_DECLARE(ui_img_1753861343);  // assets/bluetooth-on.png
-LV_IMG_DECLARE(ui_img_1837194583);  // assets/bluetooth-off.png
+//LV_IMG_DECLARE(ui_img_1753861343);  // assets/bluetooth-on.png
+//LV_IMG_DECLARE(ui_img_1837194583);  // assets/bluetooth-off.png
 LV_IMG_DECLARE(ui_img_1157704237);  // assets/heart-off-small.png
 LV_IMG_DECLARE(ui_img_628457255);   // assets/heart-on-small.png
 LV_IMG_DECLARE(ui_img_1668913270);  // assets/back-up.png
@@ -136,6 +136,7 @@ LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 
 typedef enum {
   UI_STATE_INIT,
+  UI_STATE_START,
   UI_STATE_IDLE,
   UI_STATE_PLAY,
   UI_STATE_STOP,
@@ -162,7 +163,7 @@ typedef struct {
 
 typedef struct {
   uint32_t  playNo;
-  uint32_t  selectedNo;
+  uint32_t  focusNo;
   uint32_t  sleepTimer;
 } UI_Control_t;
 

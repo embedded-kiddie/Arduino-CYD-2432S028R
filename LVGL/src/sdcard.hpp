@@ -73,13 +73,13 @@ SdFat SD;
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
   #if   0
     static SPIClass sd_spi = SPIClass(VSPI);
-    #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK, &sd_spi) // OK
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK, &sd_spi) // OK
   #elif 1
-    #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK) // OK
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK) // OK
   #elif 0
-    #define SD_CONFIG SdSpiConfig(CYD_SD_SS, SD_SPI_CLOCK) // NG
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)CYD_SD_SS, SD_SPI_CLOCK) // NG
   #else
-    #define SD_CONFIG CYD_SD_SS // NG
+    #define SD_CONFIG (SdCsPin_t)CYD_SD_SS // NG
   #endif
 #endif
 
@@ -396,10 +396,9 @@ inline void color565toRGB(uint16_t color, uint8_t &r, uint8_t &g, uint8_t &b) {
 #define GFX_TYPE  TFT_eSPI
 #elif defined (LOVYANGFX_HPP_)
 #define GFX_TYPE  LGFX
-#else
-#error Support only for TFT_eSPI and LovyanGFX
 #endif
 
+#if defined (GFX_TYPE)
 bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
   uint32_t start = millis();
   uint32_t w = tft.width();
@@ -509,6 +508,7 @@ bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
 //listDir(SD, "/", 0);
   return true;
 }
+#endif // GFX_TYPE
 
 /*--------------------------------------------------------------------------------
  * Setup SD card (Mounting fails if card is not inserted)
