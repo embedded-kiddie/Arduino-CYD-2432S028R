@@ -113,10 +113,10 @@ void ui_init(void);
 // Custom Functions
 bool ui_loop(void);
 void ui_redisplay(void);
+void ui_set_playNo(uint32_t playNo);
 
-uint32_t  ui_get_counts(void);
-uint32_t  ui_get_playNo(void);
-void      ui_set_playNo(uint32_t playNo);
+uint32_t ui_get_playNo(void);
+uint32_t ui_get_counts(void);
 
 #define UI_COLOR_BACKGROUND   lv_color_hex(0xffffff)
 #define UI_COLOR_SLIDER       lv_color_hex(0x000000)

@@ -359,6 +359,8 @@ static void ui_control_play(bool next) {
   if (ui_ScreenPlayList) {
     ui_list_update_play(ui_control.playNo, true);
   }
+
+  lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
 }
 
 ///////////////////// SCREENS ////////////////////
@@ -384,9 +386,7 @@ bool ui_loop(void) {
       player.ScanFileList(MP3_PATH_LEVEL);
       player.SortFileList(true);
       if (player.GetCounts()) {
-        player.SetPlayNo(ui_control.playNo = ui_control.focusNo = 0);
-        lv_obj_set_state (ui_ButtonPlay, LV_STATE_CHECKED, true);
-        lv_obj_send_event(ui_ButtonPlay, LV_EVENT_CLICKED, NULL);
+        ui_set_playNo(ui_control.playNo = ui_control.focusNo = 0);
         ui_state = UI_STATE_PLAY;
       } else {
         ui_state = UI_STATE_IDLE;
@@ -408,12 +408,10 @@ bool ui_loop(void) {
       break;
     case UI_STATE_NEXT:
       ui_control_play(true);
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_PREV:
       ui_control_play(false);
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_ID3DATA:
@@ -456,16 +454,20 @@ void ui_redisplay(void) {
   lv_disp_load_scr(lv_scr_act());
 }
 
-uint32_t ui_get_counts(void) {
-  return (const uint32_t)player.GetCounts();
+void ui_set_playNo(uint32_t playNo) {
+  player.SetPlayNo(playNo);
+  if (ui_state != UI_STATE_PLAY) {
+    lv_obj_set_state (ui_ButtonPlay, LV_STATE_CHECKED, true);
+    ui_state = UI_STATE_PLAY;
+  }
 }
 
 uint32_t ui_get_playNo(void) {
   return player.GetPlayNo();
 }
 
-void ui_set_playNo(uint32_t playNo) {
-  player.SetPlayNo(playNo);
+uint32_t ui_get_counts(void) {
+  return (const uint32_t)player.GetCounts();
 }
 
 /*--------------------------------------------------------------------------------

@@ -110,14 +110,25 @@ static void list_click_event_cb(lv_event_t* e) {
   lv_point_t p;
   lv_indev_get_point(lv_indev_get_act(), &p);
 
-  // check if the clicked coordinates within the icon area
+  // if the clicked coordinates within the icon area...
   if (p.x <= ui_img_list_play.header.w) {
-    ui_list_update_play(ui_control.playNo,  false);
-    ui_list_update_cell(ui_control.focusNo, false);
-    ui_control.playNo = ui_control.focusNo = track_id;
-    ui_list_update_play(track_id, true);
-    ui_set_playNo(track_id);
-  } else {
+    // if currently playing...
+    if (ui_control.playNo == track_id) {
+      // execute pause/resume
+      ui_state = (ui_state == UI_STATE_PLAY ? UI_STATE_PAUSE : UI_STATE_RESUME);
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, ui_state == UI_STATE_PAUSE ? false : true);
+    }
+    // else select the new track to play
+    else {
+      ui_list_update_play(ui_control.playNo,  false);
+      ui_list_update_cell(ui_control.focusNo, false);
+      ui_control.playNo = ui_control.focusNo = track_id;
+      ui_list_update_play(track_id, true);
+      ui_set_playNo(track_id);
+    }
+  }
+  // else just change the focused cell
+  else {
     ui_list_update_cell(ui_control.focusNo, false);
     ui_control.focusNo = track_id;
     ui_list_update_cell(track_id, true);
