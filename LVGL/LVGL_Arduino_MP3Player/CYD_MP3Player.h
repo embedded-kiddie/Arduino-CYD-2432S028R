@@ -71,14 +71,14 @@ private:
 
   bool        CheckExtension(const char *path);
   const char* MetaDataPath  (const char *path);
-  MetaData_t  LoadMetaData  (const char *path);
+  void        LoadMetaData  (const char *path, MetaData_t *meta);
   bool        SaveMetaData  (const char *path, MetaData_t *meta);
+  PlayList_t* GetPlayList   (uint32_t playNo);
 
 public:
   bool        begin(const char *root);
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_files.size(); }
-  PlayList_t* GetPlayList(uint32_t playNo) { return m_files.size() ? &m_files[playNo] : NULL; }
   void        GetID3Tags(uint32_t playNo, ID3Tags_t &tags);
   void        PutID3Tags(uint32_t playNo, ID3Tags_t &tags);
   void        ScanFileList(const char *dirname, uint8_t levels);

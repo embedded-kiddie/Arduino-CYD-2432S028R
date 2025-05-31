@@ -46,7 +46,7 @@ bool CYD_MP3Player::begin(const char *root) {
 /*--------------------------------------------------------------------------------
  * Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
  *--------------------------------------------------------------------------------*/
-bool CYD_MP3Player::CheckExtension(const char* path) {
+bool CYD_MP3Player::CheckExtension(const char *path) {
   const char* ext[] = {".mp3", ".m4a", ".wav"};
   for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
     if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
@@ -59,7 +59,7 @@ bool CYD_MP3Player::CheckExtension(const char* path) {
 /*--------------------------------------------------------------------------------
  * Generate a path to the metadata file
  *--------------------------------------------------------------------------------*/
-const char* CYD_MP3Player::MetaDataPath(const char* path) {
+const char* CYD_MP3Player::MetaDataPath(const char *path) {
   MD5Hex_t hex;
   MD5::make_hash(path, hex);
   MD5::make_digest(hex, 5); // get 5 x 2 characters of string
@@ -72,24 +72,19 @@ const char* CYD_MP3Player::MetaDataPath(const char* path) {
 /*--------------------------------------------------------------------------------
  * Load/Save meta data (favorite, duration)
  *--------------------------------------------------------------------------------*/
-MetaData_t CYD_MP3Player::LoadMetaData(const char* path) {
+void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
   if (!audioIsPlaying()) {
     const char *file = MetaDataPath(path);
-    if (FS_DEV.exists(file)) {
-      File fd = FS_DEV.open(file, O_READ);
-      if (fd) {
-        MetaData_t meta = {};
-        fd.read((void*)&meta, sizeof(meta)); // == sizeof(meta)
-        fd.close();
-        return meta;
-      }
+    File fd = FS_DEV.open(file, O_READ);
+    if (fd) {
+      fd.read((void*)meta, sizeof(MetaData_t));
+      fd.close();
     }
   }
-
-  return {};
+  *meta = {};
 }
 
-bool CYD_MP3Player::SaveMetaData(const char* path, MetaData_t *meta) {
+bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
   if (!audioIsPlaying()) {
     const char *file = MetaDataPath(path);
     File fd = FS_DEV.open(file, O_RDWR | O_CREAT | O_TRUNC);
@@ -99,8 +94,18 @@ bool CYD_MP3Player::SaveMetaData(const char* path, MetaData_t *meta) {
       return true;
     }
   }
-
   return false;
+}
+
+/*--------------------------------------------------------------------------------
+ * Get the playlist for the specified track
+ *--------------------------------------------------------------------------------*/
+PlayList_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
+  if (m_files.size()) {
+    return &m_files[playNo];
+  } else {
+    return NULL;
+  }
 }
 
 /*--------------------------------------------------------------------------------
@@ -154,12 +159,14 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
       try {
 #ifdef SDFATFS_USED
         if (CheckExtension(path.c_str())) {
-          MetaData_t meta = LoadMetaData(path.c_str());
+          MetaData_t meta;
+          LoadMetaData(path.c_str(), &meta);
           m_files.push_back({meta, path});
         }
 #else
         if (CheckExtension(file.path())) {
-          MetaData_t meta = LoadMetaData(file.path());
+          MetaData_t meta;
+          LoadMetaData(file.path(), &meta);
           m_files.push_back({meta, file.path()});
         }
 #endif
@@ -308,16 +315,13 @@ void CYD_MP3Player::PlayPrev(bool stop) {
 bool CYD_MP3Player::AutoPlay(bool selectedOnly) {
   if (!audioIsPlaying() && m_files.size()) {
     // Play all or selected only
-    bool play = !selectedOnly || m_files[m_playNo].meta.selected;
-
+    bool play = (!selectedOnly || m_files[m_playNo].meta.selected);
     if (play && !audioConnecttoSD(m_files[m_playNo].path.c_str())) {
       Serial.printf("skip: %s\n", m_files[m_playNo].path.c_str()); // Something is wrong, so skip it
-      play = false;
+      return false;
     } else {
-      play = true;
+      return true;
     }
-
-    return play;
   }
 
   return true;
