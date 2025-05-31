@@ -122,7 +122,6 @@ static void list_click_event_cb(lv_event_t* e) {
     else {
       ui_list_update_play(ui_control.playNo,  false);
       ui_list_update_cell(ui_control.focusNo, false);
-      ui_control.playNo = ui_control.focusNo = track_id;
       ui_list_update_play(track_id, true);
       ui_set_playNo(track_id);
     }

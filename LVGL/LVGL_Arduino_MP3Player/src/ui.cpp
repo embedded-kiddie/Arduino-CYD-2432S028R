@@ -354,13 +354,13 @@ static void ui_control_play(bool next) {
     player.PlayPrev();
   }
 
+  // update ui_control and look of the play button
   ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
+  lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
 
   if (ui_ScreenPlayList) {
     ui_list_update_play(ui_control.playNo, true);
   }
-
-  lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
 }
 
 ///////////////////// SCREENS ////////////////////
@@ -386,7 +386,7 @@ bool ui_loop(void) {
       player.ScanFileList(MP3_PATH_LEVEL);
       player.SortFileList(true);
       if (player.GetCounts()) {
-        ui_set_playNo(ui_control.playNo = ui_control.focusNo = 0);
+        ui_set_playNo(0);
         ui_state = UI_STATE_PLAY;
       } else {
         ui_state = UI_STATE_IDLE;
@@ -449,25 +449,40 @@ bool ui_loop(void) {
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Redraw the display panel when waking up from sleep
+ *--------------------------------------------------------------------------------*/
 void ui_redisplay(void) {
   lv_disp_trig_activity(NULL);
   lv_disp_load_scr(lv_scr_act());
 }
 
-void ui_set_playNo(uint32_t playNo) {
-  player.SetPlayNo(playNo);
+/*--------------------------------------------------------------------------------
+ * Start to play with the specified track
+ *--------------------------------------------------------------------------------*/
+void ui_set_playNo(uint32_t track_id) {
+  // start the specified track to play
+  player.SetPlayNo(track_id);
+
+  // update ui_control
+  ui_control.playNo = ui_control.focusNo = track_id;
+
+  // update the look of the play button
   if (ui_state != UI_STATE_PLAY) {
-    lv_obj_set_state (ui_ButtonPlay, LV_STATE_CHECKED, true);
+    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
     ui_state = UI_STATE_PLAY;
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Get the latest information on MP3Player
+ *--------------------------------------------------------------------------------*/
 uint32_t ui_get_playNo(void) {
   return player.GetPlayNo();
 }
 
 uint32_t ui_get_counts(void) {
-  return (const uint32_t)player.GetCounts();
+  return player.GetCounts();
 }
 
 /*--------------------------------------------------------------------------------
