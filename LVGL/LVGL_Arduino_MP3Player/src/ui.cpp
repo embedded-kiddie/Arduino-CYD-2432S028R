@@ -471,7 +471,7 @@ bool ui_loop(void) {
       break;
     case UI_STATE_ERROR:
       lv_label_set_text_fmt(ui_MusicTitle, player.GetError());
-      // no break;
+      ui_state = UI_STATE_IDLE;
     case UI_STATE_IDLE:
     default:
       break;
