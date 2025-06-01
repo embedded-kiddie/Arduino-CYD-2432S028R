@@ -22,6 +22,8 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 
 static CYD_MP3Player player;
 static ID3Tags_t id3tags;
+static bool saveID3tags;
+static UI_State_t saveNext;
 
 ///////////////////// UI LOOP ////////////////////
 UI_State_t ui_state;
@@ -72,17 +74,15 @@ void ui_event_ScreenMain(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_RIGHT) {
-    if (!ui_ScreenOption) {
-      ui_ScreenOption_screen_init();
-    }
     lv_indev_wait_release(lv_indev_active());
-    lv_screen_load_anim(ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, false);
+    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
   }
 
   else if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
     if (!ui_ContainerPlayList) {
       ui_ScreenPlayList_screen_init(); // initialize ui_ScreenPlayList and ui_ContainerPlayList
     }
+
     lv_obj_set_align  (ui_ContainerPlayList,  LV_ALIGN_BOTTOM_MID);
     lv_obj_add_flag   (ui_PlayListToMainUp,   LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
@@ -96,6 +96,7 @@ void ui_event_ScreenMain(lv_event_t *e) {
     if (!ui_ContainerPlayList) {
       ui_ScreenPlayList_screen_init(); // initialize ui_ScreenPlayList and ui_ContainerPlayList
     }
+
     lv_obj_set_align  (ui_ContainerPlayList,  LV_ALIGN_TOP_MID);
     lv_obj_remove_flag(ui_PlayListToMainUp,   LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag   (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
@@ -126,7 +127,6 @@ void ui_event_Favorite(lv_event_t *e) {
   if (event_code == LV_EVENT_CLICKED) {
     lv_obj_t *obj = lv_event_get_target_obj(e);
     ui_option.favorite = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-    printf("ui_option.favorite: %d\n", ui_option.favorite);
   }
 }
 
@@ -135,8 +135,7 @@ void ui_event_Repeat(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     lv_obj_t *obj = lv_event_get_target_obj(e);
-    ui_option.repeat = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-    printf("ui_option.repeat: %d\n", ui_option.repeat);
+    ui_option.repeat = (uint8_t)(lv_obj_get_state(obj) & LV_STATE_CHECKED ? 1 : 0);
   }
 }
 
@@ -146,7 +145,6 @@ void ui_event_Shuffle(lv_event_t *e) {
   if (event_code == LV_EVENT_CLICKED) {
     lv_obj_t *obj = lv_event_get_target_obj(e);
     ui_option.shuffle = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-    printf("ui_option.shuffle: %d\n", ui_option.shuffle);
   }
 }
 
@@ -164,6 +162,7 @@ void ui_event_ButtonNext(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     ui_state = UI_STATE_NEXT;
+    bitSet(ui_option.repeat, 7); // force to set the bit temporarily
   }
 }
 
@@ -172,6 +171,7 @@ void ui_event_ButtonPrev(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     ui_state = UI_STATE_PREV;
+    bitSet(ui_option.repeat, 7); // force to set the bit temporarily
   }
 }
 
@@ -237,7 +237,7 @@ void ui_event_OptionToMainRight(lv_event_t *e) {
   }
 }
 
-void ui_event_FavoriteSwitch( lv_event_t * e) {
+void ui_event_FavoriteSwitch(lv_event_t * e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if ( event_code == LV_EVENT_VALUE_CHANGED) {
@@ -259,9 +259,9 @@ void ui_event_BacklightSwitch(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     _ui_state_modify(ui_BacklightRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+
     lv_obj_t *obj = lv_event_get_target_obj(e);
     ui_option.backlight = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-    printf("ui_option.backlight: %d\n", ui_option.backlight);
   }
 }
 
@@ -270,15 +270,38 @@ void ui_event_SleepTimerSwitch(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     _ui_state_modify(ui_SleepTimerRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+
     lv_obj_t *obj = lv_event_get_target_obj(e);
     ui_option.sleepTimer = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-    printf("ui_option.sleepTimer: %d\n", ui_option.sleepTimer);
   }
 }
 
 /*--------------------------------------------------------------------------------
  * Event handlers for Screen Playlist
  *--------------------------------------------------------------------------------*/
+void ui_event_PlayList_Heart(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    MetaData_t meta;
+    uint32_t track_id = (uint32_t)lv_event_get_user_data(e);
+    player.GetMetaData(track_id, &meta);
+
+    lv_obj_t *obj = (lv_obj_t*)lv_event_get_current_target(e);
+    meta.selected = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+
+    // prevent input while saving metadata to SD card
+    lv_indev_enable(NULL, false);
+    bool saved = player.PutMetaData(track_id, &meta);
+    lv_indev_enable(NULL, true);
+
+    // in case the metadata file cannot be saved, save it separately
+    if (!saved) {
+      saveID3tags = true;
+    }
+  }
+}
+
 void ui_event_PlayListToMainUp(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -342,17 +365,24 @@ static void update_epalsed_time(void) {
 /*--------------------------------------------------------------------------------
  * Control next or previous play / stop or continuous play
  *--------------------------------------------------------------------------------*/
-static void ui_control_play(bool next) {
+static bool play_next(bool next) {
   if (ui_ScreenPlayList) {
     ui_list_update_cell(ui_control.focusNo, false);
     ui_list_update_icon(ui_control.playNo,  false);
   }
 
-  if (next) {
-    player.PlayNext();
+  bool ret = true;
+  if (ui_option.favorite) {
+    ret = player.NextSelected(next, (ui_option.repeat ? true : false));
   } else {
-    player.PlayPrev();
+    if (next) {
+      player.PlayNext();
+    } else {
+      player.PlayPrev();
+    }
   }
+
+  bitClear(ui_option.repeat, 7); // clear the bit that has been forced set
 
   // update ui_control and look of the play button
   ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
@@ -361,6 +391,8 @@ static void ui_control_play(bool next) {
   if (ui_ScreenPlayList) {
     ui_list_update_play(ui_control.playNo, true);
   }
+
+  return ret;
 }
 
 ///////////////////// SCREENS ////////////////////
@@ -393,7 +425,12 @@ bool ui_loop(void) {
       }
       break;
     case UI_STATE_PLAY:
-      player.AutoPlay();
+      if (ui_option.favorite && !player.IsSelected()) {
+        ui_state = UI_STATE_NEXT;
+      }
+      else if (!player.AutoPlay()) {
+        ui_state = UI_STATE_STOP;
+      }
       break;
     case UI_STATE_STOP:
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
@@ -407,14 +444,20 @@ bool ui_loop(void) {
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_NEXT:
-      ui_control_play(true);
-      ui_state = UI_STATE_PLAY;
+      if (play_next(true)) {
+        ui_state = UI_STATE_PLAY;
+      } else {
+        ui_state = UI_STATE_STOP;
+      }
       break;
     case UI_STATE_PREV:
-      ui_control_play(false);
-      ui_state = UI_STATE_PLAY;
+      if (play_next(false)) {
+        ui_state = UI_STATE_PLAY;
+      } else {
+        ui_state = UI_STATE_STOP;
+      }
       break;
-    case UI_STATE_ID3DATA:
+    case UI_STATE_GET_ID3:
       lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
         LV_SYMBOL_AUDIO,
         id3tags.title.c_str(),
@@ -508,7 +551,7 @@ void audio_id3data(const char *info) {
     } else
     if (p = strstr(info, "Album: ")) {
       id3tags.album = p + 7;
-      ui_state = UI_STATE_ID3DATA;
+      ui_state = UI_STATE_GET_ID3;
     }
   }
 }

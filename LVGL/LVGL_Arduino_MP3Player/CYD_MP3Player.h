@@ -22,8 +22,8 @@
 #include <exception>
 
 typedef struct {
+  bool saved;
   bool selected;
-  bool updated;
   uint16_t duration;
 } MetaData_t;
 
@@ -79,8 +79,9 @@ public:
   bool        begin(const char *root);
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_files.size(); }
-  void        GetID3Tags(uint32_t playNo, ID3Tags_t &tags);
-  void        PutID3Tags(uint32_t playNo, ID3Tags_t &tags);
+  void        GetID3Tags  (uint32_t playNo, ID3Tags_t &tags);
+  void        GetMetaData (uint32_t playNo, MetaData_t *meta);
+  bool        PutMetaData (uint32_t playNo, MetaData_t *meta);
   void        ScanFileList(const char *dirname, uint8_t levels);
   void        ScanFileList(uint8_t levels);
   void        SortFileList(bool shuffle = false);
@@ -95,7 +96,9 @@ public:
   void        SetPlayNo(uint32_t playNo, bool stop = true);
   void        PlayNext(bool stop = true);
   void        PlayPrev(bool stop = true);
-  bool        AutoPlay(bool selectedOnly = false);
+  bool        IsSelected(void);
+  bool        NextSelected(bool next, bool loop, bool stop = true);
+  bool        AutoPlay(void);
 };
 /*
 void audio_info(const char *info);

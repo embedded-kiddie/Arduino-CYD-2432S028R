@@ -67,6 +67,7 @@ extern lv_obj_t *ui_ContainerPlayList;
 extern lv_obj_t *ui_PlayListToMainUp;
 extern lv_obj_t *ui_PlayListToMainDown;
 void ui_ScreenPlayList_screen_init(void);
+void ui_event_PlayList_Heart    (lv_event_t *e);
 void ui_event_PlayListToMainUp  (lv_event_t *e);
 void ui_event_PlayListToMainDown(lv_event_t *e);
 void ui_list_update_icon(uint32_t track_id, bool state);
@@ -146,17 +147,18 @@ typedef enum {
   UI_STATE_PREV,
   UI_STATE_SLEEP,
   UI_STATE_WAKEUP,
-  UI_STATE_ID3DATA,
+  UI_STATE_GET_ID3,
+  UI_STATE_PUT_ID3,
 } UI_State_t;
 
 // Variables
 typedef struct {
   bool      shuffle;
-  bool      repeat;
   bool      favorite;
   bool      backlight;
   bool      sleepTimer;
-  uint8_t   selectFavarite;
+  uint8_t   repeat;
+  uint8_t   selectPlaylist;
   uint8_t   selectBacklight;
   uint8_t   selectSleepTimer;
 } UI_Option_t;

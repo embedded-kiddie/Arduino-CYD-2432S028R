@@ -29,7 +29,7 @@ bool CYD_MP3Player::begin(const char *root) {
     }
   }
 
-  constexpr char* dirs[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
+  const char* dirs[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
   for (int i = 0; i < sizeof(dirs) / sizeof(char*); i++) {
     path = m_root + META_DATA_DIR + dirs[i];
     if (!FS_DEV.exists(path.c_str())) {
@@ -62,10 +62,11 @@ bool CYD_MP3Player::CheckExtension(const char *path) {
 const char* CYD_MP3Player::MetaDataPath(const char *path) {
   MD5Hex_t hex;
   MD5::make_hash(path, hex);
-  MD5::make_digest(hex, 5); // get 5 x 2 characters of string
+  MD5::make_digest(hex, 5); // e.g. "0123456789" (get 5 x 2 characters of string)
+  hex.digest[1] = '/';      // e.g. "0/23456789"
 
-  hex.digest[1] = '/';
-  static std::string file = m_root + META_DATA_DIR + hex.digest + META_DATA_EXT;
+  static std::string file;
+  file = m_root + META_DATA_DIR + hex.digest + META_DATA_EXT;
   return file.c_str();
 }
 
@@ -81,7 +82,6 @@ void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
       fd.close();
     }
   }
-  *meta = {};
 }
 
 bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
@@ -89,6 +89,7 @@ bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
     const char *file = MetaDataPath(path);
     File fd = FS_DEV.open(file, O_RDWR | O_CREAT | O_TRUNC);
     if (fd) {
+      meta->saved = meta->selected;
       fd.write((void*)meta, sizeof(MetaData_t));
       fd.close();
       return true;
@@ -128,7 +129,6 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
 
   File file = root.openNextFile();
   while (file) {
-    // Serial.printf("%s\n", file.path());
     bool isDir = file.isDirectory();
 
     // skip dot file
@@ -159,13 +159,13 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
       try {
 #ifdef SDFATFS_USED
         if (CheckExtension(path.c_str())) {
-          MetaData_t meta;
+          MetaData_t meta = {};
           LoadMetaData(path.c_str(), &meta);
           m_files.push_back({meta, path});
         }
 #else
         if (CheckExtension(file.path())) {
-          MetaData_t meta;
+          MetaData_t meta = {};
           LoadMetaData(file.path(), &meta);
           m_files.push_back({meta, file.path()});
         }
@@ -194,7 +194,7 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
   }
 
   for (auto& file : m_files) {
-    Serial.println(file.path.c_str());
+    Serial.printf("%d, %d, %d, %s\n", file.meta.saved, file.meta.selected, file.meta.duration, file.path.c_str());
   }
   Serial.printf("Total: %d\n", m_files.size());
 }
@@ -248,13 +248,22 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
   }
 }
 
-void CYD_MP3Player::PutID3Tags(uint32_t playNo, ID3Tags_t &tags) {
+void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
   PlayList_t *list = GetPlayList(playNo);
   if (list) {
-    const char *path = list->path.c_str();
-    MetaData_t *meta = &tags.meta;
-    SaveMetaData(path, meta);
+    *meta = list->meta;
+  } else {
+    *meta = {};
   }
+}
+
+bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
+  PlayList_t *list = GetPlayList(playNo);
+  if (list) {
+    list->meta.selected = meta->selected;
+    return SaveMetaData(list->path.c_str(), meta);
+  }
+  return true;
 }
 
 /*--------------------------------------------------------------------------------
@@ -312,18 +321,37 @@ void CYD_MP3Player::PlayPrev(bool stop) {
   SetPlayNo(m_playNo - 1, stop);
 }
 
-bool CYD_MP3Player::AutoPlay(bool selectedOnly) {
-  if (!audioIsPlaying() && m_files.size()) {
-    // Play all or selected only
-    bool play = (!selectedOnly || m_files[m_playNo].meta.selected);
-    if (play && !audioConnecttoSD(m_files[m_playNo].path.c_str())) {
-      Serial.printf("skip: %s\n", m_files[m_playNo].path.c_str()); // Something is wrong, so skip it
-      return false;
-    } else {
+bool CYD_MP3Player::IsSelected(void) {
+  if (m_files.size()) {
+    return m_files[m_playNo].meta.selected;
+  } else {
+    return false;
+  }
+}
+
+bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
+  const int N = m_files.size();
+  const int m = (m_playNo + (next ? 1 : -1) + N) % N;
+  const int n = N - (loop ? 0 : m);
+
+  for (int i = 0; i < n; i++) {
+    int j = (m + (next ? i : -i) + N) % N;
+    if (m_files[j].meta.selected) {
+      SetPlayNo(j, stop);
       return true;
     }
   }
 
+  return false;
+}
+
+bool CYD_MP3Player::AutoPlay(void) {
+  if (!audioIsPlaying() && m_files.size()) {
+    if (!audioConnecttoSD(m_files[m_playNo].path.c_str())) {
+      Serial.printf("fail to play: %s\n", m_files[m_playNo].path.c_str());
+      return false;
+    }
+  }
   return true;
 }
 

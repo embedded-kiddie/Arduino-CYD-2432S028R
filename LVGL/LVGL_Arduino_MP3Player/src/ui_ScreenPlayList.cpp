@@ -134,15 +134,6 @@ static void list_click_event_cb(lv_event_t* e) {
   }
 }
 
-static void heart_click_event_cb(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
-
-  if (event_code == LV_EVENT_CLICKED) {
-    uint32_t track_id = (uint32_t)lv_event_get_user_data(e);
-    printf("heart_click_event_cb(%d)\n", track_id);
-  }
-}
-
 static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   ID3Tags_t tags;
   ui_get_id3tags(track_id, tags);
@@ -184,9 +175,9 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
 
   lv_obj_t* heart = lv_checkbox_create(cell);
   lv_checkbox_set_text          (heart, "");
-  lv_obj_add_flag               (heart, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+  lv_obj_set_state              (heart, LV_STATE_CHECKED, tags.meta.selected);
   lv_obj_set_grid_cell          (heart, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
-  lv_obj_add_event_cb           (heart, heart_click_event_cb, LV_EVENT_ALL, (void*)track_id);
+  lv_obj_add_event_cb           (heart, ui_event_PlayList_Heart, LV_EVENT_ALL, (void*)track_id);
   lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
