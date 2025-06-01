@@ -10,6 +10,7 @@
  * Possible values for `SetVolume()`
  *--------------------------------------------------------------------------------*/
 #define MP3_VOLUME_MIN  0
+#define MP3_VOLUME_INI  6
 #define MP3_VOLUME_MAX  21
 
 /*--------------------------------------------------------------------------------
@@ -66,6 +67,7 @@ class CYD_MP3Player {
 private:
   uint32_t m_playNo = 0;
   fs::FS & m_fs = FS_DEV;
+  std::string m_error = "";
   std::string m_root = "/";
   std::vector<PlayList_t> m_files = {};
 
@@ -76,15 +78,16 @@ private:
   PlayList_t* GetPlayList   (uint32_t playNo);
 
 public:
-  bool        begin(const char *root);
+  bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_files.size(); }
   void        GetID3Tags  (uint32_t playNo, ID3Tags_t &tags);
   void        GetMetaData (uint32_t playNo, MetaData_t *meta);
   bool        PutMetaData (uint32_t playNo, MetaData_t *meta);
-  void        ScanFileList(const char *dirname, uint8_t levels);
-  void        ScanFileList(uint8_t levels);
-  void        SortFileList(bool shuffle = false);
+  bool        ScanFileList(const char *dirname, uint8_t levels);
+  uint32_t    ScanFileList(uint8_t levels, bool shuffle = true);
+  uint32_t    SortFileList(bool shuffle = true);
+  const char* GetError(void);
 
   void        SetVolume(uint8_t vol);
   uint8_t     GetVolumePerCent(void);

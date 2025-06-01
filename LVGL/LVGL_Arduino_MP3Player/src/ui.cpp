@@ -9,7 +9,6 @@
 #include <stdio.h>  // for sprintf(), printf()
 #include "../CYD_MP3Player.h"
 
-#define MP3_VOLUME_INI 6
 #define MP3_PATH_ROOT "/MP3Player/"
 #define MP3_PATH_LEVEL 2
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, MP3_PATH_LEVEL
@@ -144,7 +143,7 @@ void ui_event_Shuffle(lv_event_t *e) {
 
   if (event_code == LV_EVENT_CLICKED) {
     lv_obj_t *obj = lv_event_get_target_obj(e);
-    ui_option.shuffle = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+    ui_option.shuffle = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
   }
 }
 
@@ -417,18 +416,15 @@ void ui_init(void) {
 bool ui_loop(void) {
   switch (ui_state) {
     case UI_STATE_INIT:
-      player.begin(MP3_PATH_ROOT);
-      player.SetVolume(MP3_VOLUME_INI);
+      player.begin(MP3_PATH_ROOT, MP3_VOLUME_INI);
       lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
       // no break
     case UI_STATE_START:
-      player.ScanFileList(MP3_PATH_LEVEL);
-      player.SortFileList(true);
-      if (player.GetCounts()) {
+      if (player.ScanFileList(MP3_PATH_LEVEL /* , ui_option.shuffle */)) {
         ui_set_playNo(0);
         ui_state = UI_STATE_PLAY;
       } else {
-        ui_state = UI_STATE_IDLE;
+        ui_state = UI_STATE_ERROR;
       }
       break;
     case UI_STATE_PLAY:
@@ -436,7 +432,7 @@ bool ui_loop(void) {
         ui_state = UI_STATE_NEXT;
       }
       else if (!player.AutoPlay()) {
-        ui_state = UI_STATE_STOP;
+        ui_state = UI_STATE_ERROR;
       }
       break;
     case UI_STATE_STOP:
@@ -472,6 +468,9 @@ bool ui_loop(void) {
         id3tags.album.c_str()
       );
       ui_state = UI_STATE_PLAY;
+      break;
+    case UI_STATE_ERROR:
+      lv_label_set_text_fmt(ui_MusicTitle, player.GetError());
       break;
     case UI_STATE_IDLE:
     default:

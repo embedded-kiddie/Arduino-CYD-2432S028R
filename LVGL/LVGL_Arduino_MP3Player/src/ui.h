@@ -149,6 +149,7 @@ typedef enum {
   UI_STATE_WAKEUP,
   UI_STATE_GET_ID3,
   UI_STATE_PUT_ID3,
+  UI_STATE_ERROR,
 } UI_State_t;
 
 // Variables

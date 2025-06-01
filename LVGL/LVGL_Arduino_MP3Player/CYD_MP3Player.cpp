@@ -7,16 +7,15 @@
 /*--------------------------------------------------------------------------------
  * Begin with SD or SdFat
  *--------------------------------------------------------------------------------*/
-bool CYD_MP3Player::begin(const char *root) {
+bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   // set root path
   m_root = root;
   if (m_root.back() != '/') {
     m_root += "/";
   }
-
   // initialize SD card
   if (!FS_DEV.begin(FS_CONFIG)) {
-    Serial.println("Failed to mount the file system.");
+    m_error = "Failed to mount the file system.";
     return false;
   }
 
@@ -24,7 +23,7 @@ bool CYD_MP3Player::begin(const char *root) {
   std::string path = m_root + META_DATA_DIR;
   if (!FS_DEV.exists(path.c_str())) {
     if (!FS_DEV.mkdir(path.c_str())) {
-      Serial.printf("mkdir %s failes\n", path.c_str());
+      m_error = "mkdir " + path + "failed.";
       return false;
     }
   }
@@ -34,12 +33,13 @@ bool CYD_MP3Player::begin(const char *root) {
     path = m_root + META_DATA_DIR + dirs[i];
     if (!FS_DEV.exists(path.c_str())) {
       if (!FS_DEV.mkdir(path.c_str())) {
-        Serial.printf("mkdir %s failes\n", path.c_str());
+        m_error = "mkdir " + path + "failed";
         return false;
       }
     }
   }
 
+  SetVolume(volume);
   return true;
 }
 
@@ -112,19 +112,16 @@ PlayList_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
 /*--------------------------------------------------------------------------------
  * Scan and create a list of audio m_files in a specified directory.
  *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::ScanFileList(uint8_t levels) {
-  ScanFileList(m_root.c_str(), levels);
-}
-
-void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
+bool CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
   File root = m_fs.open(dirname);
   if (!root) {
-    Serial.printf("Failed to open %s.\n", dirname);
-    return;
+    m_error = std::string("Failed to open ") + dirname;
+    return false;
   }
+
   if (!root.isDirectory()) {
-    Serial.printf("Not a directory.\n");
-    return;
+    m_error = dirname + std::string("is not a directory.");
+    return false;
   }
 
   File file = root.openNextFile();
@@ -171,25 +168,35 @@ void CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
         }
 #endif
       } catch (const std::exception &e) {
-        Serial.printf("Exception: %s\n", e.what());
-        return;
+        m_error = std::string("Exception: ") + e.what();
+        return false;
       }
     }
 
     file = root.openNextFile();
+  }
+
+  return (m_error == "");
+}
+
+uint32_t CYD_MP3Player::ScanFileList(uint8_t levels, bool shuffle) {
+  if (ScanFileList(m_root.c_str(), levels)) {
+    return SortFileList(shuffle);
+  } else {
+    return false;
   }
 }
 
 /*--------------------------------------------------------------------------------
  * Sort file list
  *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::SortFileList(bool shuffle) {
+uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
   if (shuffle) {
     std::mt19937 engine(esp_random());
     std::shuffle(m_files.begin(), m_files.end(), engine);
   } else {
     std::sort(m_files.begin(), m_files.end(), [](PlayList_t &a, PlayList_t &b) {
-      return a.path.compare(b.path) > 0 ? true : false;
+      return a.path.compare(b.path) < 0 ? true : false; // ascending order
     });
   }
 
@@ -197,6 +204,14 @@ void CYD_MP3Player::SortFileList(bool shuffle) {
     Serial.printf("%d, %d, %d, %s\n", file.meta.saved, file.meta.selected, file.meta.duration, file.path.c_str());
   }
   Serial.printf("Total: %d\n", m_files.size());
+  return m_files.size();
+}
+
+/*--------------------------------------------------------------------------------
+ * Get error message
+ *--------------------------------------------------------------------------------*/
+const char* CYD_MP3Player::GetError(void) {
+  return m_error.c_str();
 }
 
 /*--------------------------------------------------------------------------------
