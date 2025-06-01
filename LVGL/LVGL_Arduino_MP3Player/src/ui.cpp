@@ -395,6 +395,13 @@ static bool play_next(bool next) {
   return ret;
 }
 
+/*--------------------------------------------------------------------------------
+ * Check out the favorite playlists
+ *--------------------------------------------------------------------------------*/
+static bool check_favorite(void) {
+  return !ui_option.favorite || player.IsPlaying() || player.IsSelected();
+}
+
 ///////////////////// SCREENS ////////////////////
 void ui_init(void) {
   ui_ScreenMain_screen_init();
@@ -425,7 +432,7 @@ bool ui_loop(void) {
       }
       break;
     case UI_STATE_PLAY:
-      if (ui_option.favorite && !player.IsSelected()) {
+      if (!check_favorite()) {
         ui_state = UI_STATE_NEXT;
       }
       else if (!player.AutoPlay()) {
