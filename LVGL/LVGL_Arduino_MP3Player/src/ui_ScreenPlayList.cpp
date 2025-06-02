@@ -138,7 +138,7 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   ID3Tags_t tags;
   ui_get_id3tags(track_id, tags);
 
-  char time[32];
+  char time[8];
   uint32_t duration = (uint32_t)tags.meta.duration;
   lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
 
@@ -368,6 +368,21 @@ void ui_list_focus_playing(uint32_t track_id) {
     add_list_cell(play_list, top_num);
     update_scroll(play_list);
     ui_list_update_play(track_id, true);
+  }
+}
+
+/*--------------------------------------------------------------------------------
+ * Updates the duration to the specified cell
+ *--------------------------------------------------------------------------------*/
+void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
+  if (top_num <= track_id && track_id <= end_num) {
+    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
+    if (cell) {
+      lv_obj_t* time_label = lv_obj_get_child(cell, 3);
+      char time[8];
+      lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
+      lv_label_set_text(time_label, time);
+    }
   }
 }
 

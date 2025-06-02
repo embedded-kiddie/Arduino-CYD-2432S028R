@@ -22,7 +22,7 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 static CYD_MP3Player player;
 static ID3Tags_t id3tags;
 static bool saveID3tags;
-static UI_State_t saveNext;
+static UI_State_t nextState;
 
 ///////////////////// UI LOOP ////////////////////
 UI_State_t ui_state;
@@ -342,23 +342,27 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
 }
 #endif
 /////////////////// LOCAL FUNCTIONS //////////////////
-static const char* sec_to_str(uint32_t sec) {
-  static char str[8];
-  snprintf(str, sizeof(str)-1, "%2d:%02d", sec / 60, sec - (sec / 60) * 60);
-  str[sizeof(str)-1] = '\0';
-  return (const char*)str;
-}
-
 static void update_epalsed_time(void) {
   uint32_t duration = audioGetDuration();
   uint32_t elapsed  = audioGetElapsedTime();
+
   if (duration < elapsed) {
     duration = elapsed;
   }
+
+  if (duration) {
+    id3tags.meta.duration = duration;
+  }
+
   lv_slider_set_range(ui_ElapsedBar, 0, duration);
   lv_slider_set_value(ui_ElapsedBar, elapsed, LV_ANIM_OFF);
-  lv_label_set_text(ui_ElapsedStart, sec_to_str(elapsed));
-  lv_label_set_text(ui_ElapsedEnd,   sec_to_str(duration));
+
+  char time[8];
+  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, elapsed  / 60, elapsed  % 60);
+  lv_label_set_text(ui_ElapsedStart, time);
+
+  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
+  lv_label_set_text(ui_ElapsedEnd,   time);
 }
 
 /*--------------------------------------------------------------------------------
@@ -399,6 +403,30 @@ static bool play_next(bool next) {
  *--------------------------------------------------------------------------------*/
 static bool check_favorite(void) {
   return !ui_option.favorite || player.IsPlaying() || player.IsSelected();
+}
+
+/*--------------------------------------------------------------------------------
+ * Check and update the duration
+ *--------------------------------------------------------------------------------*/
+static void update_metadata(void) {
+  MetaData_t meta;
+  uint32_t playNo = player.GetPlayNo();
+
+  player.GetMetaData(playNo, &meta);
+  if (meta.duration < id3tags.meta.duration) {
+    meta.duration = id3tags.meta.duration;
+
+    if (player.IsPlaying()) {
+      audioPauseResume();
+    }
+
+    player.PutMetaData(playNo, &meta);
+    ui_list_update_duration(playNo, meta.duration);
+
+    if (!player.IsPlaying()) {
+      audioPauseResume();
+    }
+  }
 }
 
 ///////////////////// SCREENS ////////////////////
@@ -468,6 +496,10 @@ bool ui_loop(void) {
         id3tags.album.c_str()
       );
       ui_state = UI_STATE_PLAY;
+      break;
+    case UI_STATE_PUT_ID3:
+      update_metadata();
+      ui_state = nextState;
       break;
     case UI_STATE_ERROR:
       lv_label_set_text_fmt(ui_MusicTitle, player.GetError());
@@ -563,9 +595,10 @@ void audio_id3data(const char *info) {
 }
 
 void audio_eof_mp3(const char *info) {
+  ui_state = UI_STATE_PUT_ID3;
   if (!player.IsLastSong() || ui_option.repeat) {
-    ui_state = UI_STATE_NEXT;
+    nextState = UI_STATE_NEXT;
   } else {
-    ui_state = UI_STATE_STOP;
+    nextState = UI_STATE_STOP;
   }
 }

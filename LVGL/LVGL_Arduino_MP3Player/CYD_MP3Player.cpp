@@ -220,10 +220,11 @@ const char* CYD_MP3Player::GetError(void) {
 void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
   PlayList_t *list = GetPlayList(playNo);
   if (list) {
+    tags.meta = list->meta;
+
+    int n = 0;
     char *ptr, *token, *tmp[8], copy[FS_BUF_SIZE];
     const char *path = list->path.c_str();
-
-    tags.meta = list->meta;
 
     if (strlen(path) < sizeof(copy)) {
       strcpy(copy, path);
@@ -232,7 +233,6 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
       strcpy(copy, path + strlen(path) + 1 - sizeof(copy));
     }
 
-    int n = 0;
     token = strtok_r(copy, "/", &ptr);
     while (token != NULL && n < 8) {
       tmp[n++] = token;
@@ -275,10 +275,10 @@ void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
 bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
   PlayList_t *list = GetPlayList(playNo);
   if (list) {
-    list->meta.selected = meta->selected;
+    list->meta = *meta;
     return SaveMetaData(list->path.c_str(), meta);
   }
-  return true;
+  return false;
 }
 
 /*--------------------------------------------------------------------------------
