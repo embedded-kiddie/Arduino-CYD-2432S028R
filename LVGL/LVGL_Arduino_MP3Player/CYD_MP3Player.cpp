@@ -15,7 +15,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   }
   // initialize SD card
   if (!FS_DEV.begin(FS_CONFIG)) {
-    m_error = "Failed to mount the file system.";
+    m_error = "Failed to mount the SD file system.";
     return false;
   }
 
@@ -259,7 +259,7 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
       }
     }
   } else {
-    tags = {};
+    tags = {}; // never reach this line
   }
 }
 
@@ -268,7 +268,7 @@ void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
   if (list) {
     *meta = list->meta;
   } else {
-    *meta = {};
+    *meta = {}; // never reach this line
   }
 }
 
@@ -278,7 +278,7 @@ bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
     list->meta = *meta;
     return SaveMetaData(list->path.c_str(), meta);
   }
-  return false;
+  return false; // never reach this line
 }
 
 /*--------------------------------------------------------------------------------
@@ -305,7 +305,7 @@ bool CYD_MP3Player::FilePlay(const char* path) {
   if (audioConnecttoSD(path)) {
     return true;
   } else {
-    Serial.printf("Cannot play %s\n", path);
+    m_error = "Cannot play " + std::string(path);
     return false;
   }
 }
@@ -344,6 +344,9 @@ bool CYD_MP3Player::IsSelected(void) {
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Check if the next song is selected
+ *--------------------------------------------------------------------------------*/
 bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
   const int N = m_files.size();
   const int m = (m_playNo + (next ? 1 : -1) + N) % N;
@@ -363,7 +366,7 @@ bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
 bool CYD_MP3Player::AutoPlay(void) {
   if (!audioIsPlaying() && m_files.size()) {
     if (!audioConnecttoSD(m_files[m_playNo].path.c_str())) {
-      Serial.printf("fail to play: %s\n", m_files[m_playNo].path.c_str());
+      m_error = "fail to play " + m_files[m_playNo].path;
       return false;
     }
   }

@@ -366,6 +366,30 @@ static void update_epalsed_time(void) {
 }
 
 /*--------------------------------------------------------------------------------
+ * Check and update the duration
+ *--------------------------------------------------------------------------------*/
+static void update_metadata(void) {
+  MetaData_t meta;
+  uint32_t playNo = player.GetPlayNo();
+
+  player.GetMetaData(playNo, &meta);
+  if (meta.duration < id3tags.meta.duration) {
+    meta.duration = id3tags.meta.duration;
+
+    if (player.IsPlaying()) {
+      player.PauseResume();
+    }
+
+    player.PutMetaData(playNo, &meta);
+    ui_list_update_duration(playNo, meta.duration);
+
+    if (!player.IsPlaying()) {
+      player.PauseResume();
+    }
+  }
+}
+
+/*--------------------------------------------------------------------------------
  * Control next or previous play / stop or continuous play
  *--------------------------------------------------------------------------------*/
 static bool play_next(bool next) {
@@ -385,7 +409,7 @@ static bool play_next(bool next) {
     }
   }
 
-  bitClear(ui_option.repeat, 7); // clear the bit that has been forced set
+  bitClear(ui_option.repeat, 7); // clear the bit that has been temporarily forced set
 
   // update ui_control and look of the play button
   ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
@@ -405,30 +429,6 @@ static bool check_favorite(void) {
   return !ui_option.favorite || player.IsPlaying() || player.IsSelected();
 }
 
-/*--------------------------------------------------------------------------------
- * Check and update the duration
- *--------------------------------------------------------------------------------*/
-static void update_metadata(void) {
-  MetaData_t meta;
-  uint32_t playNo = player.GetPlayNo();
-
-  player.GetMetaData(playNo, &meta);
-  if (meta.duration < id3tags.meta.duration) {
-    meta.duration = id3tags.meta.duration;
-
-    if (player.IsPlaying()) {
-      audioPauseResume();
-    }
-
-    player.PutMetaData(playNo, &meta);
-    ui_list_update_duration(playNo, meta.duration);
-
-    if (!player.IsPlaying()) {
-      audioPauseResume();
-    }
-  }
-}
-
 ///////////////////// SCREENS ////////////////////
 void ui_init(void) {
   ui_ScreenMain_screen_init();
@@ -444,9 +444,13 @@ void ui_init(void) {
 bool ui_loop(void) {
   switch (ui_state) {
     case UI_STATE_INIT:
-      player.begin(MP3_PATH_ROOT, MP3_VOLUME_INI);
-      lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
-      // no break
+      if (!player.begin(MP3_PATH_ROOT, MP3_VOLUME_INI)) {
+        ui_state = UI_STATE_ERROR;
+      } else {
+        lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
+        ui_state = UI_STATE_START;
+      }
+      break;
     case UI_STATE_START:
       if (player.ScanFileList(MP3_PATH_LEVEL /* , ui_option.shuffle */)) {
         ui_set_playNo(0);
@@ -458,8 +462,7 @@ bool ui_loop(void) {
     case UI_STATE_PLAY:
       if (!check_favorite()) {
         ui_state = UI_STATE_NEXT;
-      }
-      else if (!player.AutoPlay()) {
+      } else if (!player.AutoPlay()) {
         ui_state = UI_STATE_ERROR;
       }
       break;
