@@ -2,6 +2,7 @@
  * CYD_MP3Player class definition
  *--------------------------------------------------------------------------------*/
 #include "CYD_MP3Player.h"
+#include "sdcard.h"
 #include "MD5.h"
 
 /*--------------------------------------------------------------------------------
@@ -40,6 +41,9 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   }
 
   SetVolume(volume);
+
+  // Arduino SD File System for image
+  lv_fs_arduino_sd_init();
   return true;
 }
 

@@ -5,6 +5,16 @@
 #define _CYD_MP3PLAYER_H_
 
 #include "CYD28_audio.h"
+#include "sdcard.h"
+
+// at least 97 = title(30) + "/" + artist(30) + "/" + album(30) + ".mp3" + '\0'
+#define FS_BUF_SIZE 128
+
+/*--------------------------------------------------------------------------------
+ * Metadata file
+ *--------------------------------------------------------------------------------*/
+#define META_DATA_DIR "@meta/"
+#define META_DATA_EXT ".dat"
 
 /*--------------------------------------------------------------------------------
  * Possible values for `SetVolume()`
@@ -39,33 +49,6 @@ typedef struct {
   std::string artist;
   std::string album;
 } ID3Tags_t;
-
-/*--------------------------------------------------------------------------------
- * Definition of SPI file system for audio files
- * NOTE: uncomment the followings to use SdFat 
- *  "#define SDFATFS_USED" in CYD_Audio.h
- *  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
- *--------------------------------------------------------------------------------*/
-#define SD_CLOCK  25000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
-#define SD_CS     SS
-
-#if defined (SDFATFS_USED)  // defined in CYD_Audio.h
-#define FS_DEV    SD_SDFAT  // defined in CYD_Audio.cpp
-#define FS_CONFIG SD_CS, SD_CLOCK
-#undef  FILE_APPEND
-#define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
-#undef  FILE_WRITE
-#define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
-#elif defined (_SD_H_)
-#define FS_DEV    SD
-#define FS_CONFIG SD_CS, SPI, SD_CLOCK
-#endif
-
-// at least 97 = title(30) + "/" + artist(30) + "/" + album(30) + ".mp3" + '\0'
-#define FS_BUF_SIZE 128
-
-#define META_DATA_DIR "@meta/"
-#define META_DATA_EXT ".dat"
 
 class CYD_MP3Player {
 private:
