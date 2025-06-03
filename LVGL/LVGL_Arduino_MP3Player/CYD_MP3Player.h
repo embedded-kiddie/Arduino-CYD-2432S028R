@@ -52,6 +52,10 @@ typedef struct {
 #if defined (SDFATFS_USED)  // defined in CYD_Audio.h
 #define FS_DEV    SD_SDFAT  // defined in CYD_Audio.cpp
 #define FS_CONFIG SD_CS, SD_CLOCK
+#undef  FILE_APPEND
+#define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
+#undef  FILE_WRITE
+#define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
 #elif defined (_SD_H_)
 #define FS_DEV    SD
 #define FS_CONFIG SD_CS, SPI, SD_CLOCK

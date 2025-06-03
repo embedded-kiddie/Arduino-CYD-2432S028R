@@ -76,9 +76,9 @@ const char* CYD_MP3Player::MetaDataPath(const char *path) {
 void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
   if (!audioIsPlaying()) {
     const char *file = MetaDataPath(path);
-    File fd = FS_DEV.open(file, O_READ);
+    File fd = FS_DEV.open(file, FILE_READ);
     if (fd) {
-      fd.read((void*)meta, sizeof(MetaData_t));
+      fd.read((uint8_t*)meta, sizeof(MetaData_t));
       fd.close();
     }
   }
@@ -87,10 +87,10 @@ void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
 bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
   if (!audioIsPlaying()) {
     const char *file = MetaDataPath(path);
-    File fd = FS_DEV.open(file, O_RDWR | O_CREAT | O_TRUNC);
+    File fd = FS_DEV.open(file, FILE_WRITE);
     if (fd) {
       meta->saved = meta->selected;
-      fd.write((void*)meta, sizeof(MetaData_t));
+      fd.write((uint8_t*)meta, sizeof(MetaData_t));
       fd.close();
       return true;
     }

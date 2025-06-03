@@ -45,7 +45,7 @@ static LGFX tft;
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
-#define SCREENSHORT false
+#define SCREENSHORT true
 #if SCREENSHORT
 #define USE_SDFAT // "SDFATFS_USED" should be defined in CYD_Audio.h
 #include "../src/sdcard.hpp"
