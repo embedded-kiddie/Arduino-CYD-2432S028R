@@ -5,9 +5,10 @@
 
 #include "ui.h"
 #include "ui_helpers.h"
-
 #include <stdio.h>  // for sprintf(), printf()
+
 #include "../CYD_MP3Player.h"
+static CYD_MP3Player player;
 
 #define MP3_PATH_ROOT "/MP3Player/"
 #define MP3_PATH_LEVEL 2
@@ -19,9 +20,8 @@
 #define DO_EVERY(period, prev) \
 static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; prev = now)
 
-static CYD_MP3Player player;
-static ID3Tags_t id3tags;
 static bool saveID3tags;
+static ID3Tags_t id3tags;
 static UI_State_t nextState;
 
 ///////////////////// UI LOOP ////////////////////
@@ -366,31 +366,42 @@ static void update_epalsed_time(void) {
 }
 
 /*--------------------------------------------------------------------------------
- * Check and update the duration
+ * Check and update the metadata when playback finishes
  *--------------------------------------------------------------------------------*/
 static void update_metadata(void) {
+  // prevent input while saving metadata to SD card
+  lv_indev_enable(NULL, false);
+
+  if (player.IsPlaying()) {
+    player.PauseResume();
+  }
+
+  // update favorite
+  if (saveID3tags) {
+    if (player.UpdateMetaData()) {
+      saveID3tags = false;
+    }
+  }
+
+  // update duration
   MetaData_t meta;
   uint32_t playNo = player.GetPlayNo();
-
   player.GetMetaData(playNo, &meta);
   if (meta.duration < id3tags.meta.duration) {
     meta.duration = id3tags.meta.duration;
-
-    if (player.IsPlaying()) {
-      player.PauseResume();
-    }
-
     player.PutMetaData(playNo, &meta);
     ui_list_update_duration(playNo, meta.duration);
-
-    if (!player.IsPlaying()) {
-      player.PauseResume();
-    }
   }
+
+  if (!player.IsPlaying()) {
+    player.PauseResume();
+  }
+
+  lv_indev_enable(NULL, true);
 }
 
 /*--------------------------------------------------------------------------------
- * Control next or previous play / stop or continuous play
+ * Control next/previous play or stop/continuous play
  *--------------------------------------------------------------------------------*/
 static bool play_next(bool next) {
   if (ui_ScreenPlayList) {
@@ -444,11 +455,11 @@ void ui_init(void) {
 bool ui_loop(void) {
   switch (ui_state) {
     case UI_STATE_INIT:
-      if (!player.begin(MP3_PATH_ROOT, MP3_VOLUME_INI)) {
-        ui_state = UI_STATE_ERROR;
-      } else {
+      if (player.begin(MP3_PATH_ROOT, MP3_VOLUME_INI)) {
         lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
         ui_state = UI_STATE_START;
+      } else {
+        ui_state = UI_STATE_ERROR;
       }
       break;
     case UI_STATE_START:
@@ -491,7 +502,7 @@ bool ui_loop(void) {
         ui_state = UI_STATE_STOP;
       }
       break;
-    case UI_STATE_GET_ID3:
+    case UI_STATE_ID3:
       lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
         LV_SYMBOL_AUDIO,
         id3tags.title.c_str(),
@@ -500,7 +511,7 @@ bool ui_loop(void) {
       );
       ui_state = UI_STATE_PLAY;
       break;
-    case UI_STATE_PUT_ID3:
+    case UI_STATE_EOF:
       update_metadata();
       ui_state = nextState;
       break;
@@ -592,13 +603,13 @@ void audio_id3data(const char *info) {
     } else
     if (p = strstr(info, "Album: ")) {
       id3tags.album = p + 7;
-      ui_state = UI_STATE_GET_ID3;
+      ui_state = UI_STATE_ID3;
     }
   }
 }
 
 void audio_eof_mp3(const char *info) {
-  ui_state = UI_STATE_PUT_ID3;
+  ui_state = UI_STATE_EOF;
   if (!player.IsLastSong() || ui_option.repeat) {
     nextState = UI_STATE_NEXT;
   } else {

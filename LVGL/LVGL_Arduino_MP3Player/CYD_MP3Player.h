@@ -81,12 +81,13 @@ public:
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_files.size(); }
-  void        GetID3Tags  (uint32_t playNo, ID3Tags_t &tags);
-  void        GetMetaData (uint32_t playNo, MetaData_t *meta);
-  bool        PutMetaData (uint32_t playNo, MetaData_t *meta);
   bool        ScanFileList(const char *dirname, uint8_t levels);
   uint32_t    ScanFileList(uint8_t levels, bool shuffle = true);
   uint32_t    SortFileList(bool shuffle = true);
+  void        GetID3Tags  (uint32_t playNo, ID3Tags_t &tags);
+  void        GetMetaData (uint32_t playNo, MetaData_t *meta);
+  bool        PutMetaData (uint32_t playNo, MetaData_t *meta);
+  bool        UpdateMetaData(void);
   const char* GetError(void);
 
   void        SetVolume(uint8_t vol);

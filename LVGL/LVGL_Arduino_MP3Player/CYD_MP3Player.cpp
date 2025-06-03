@@ -208,13 +208,6 @@ uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get error message
- *--------------------------------------------------------------------------------*/
-const char* CYD_MP3Player::GetError(void) {
-  return m_error.c_str();
-}
-
-/*--------------------------------------------------------------------------------
  * Get/Put ID3 tags (title, album, artist) from the file specified by id
  *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
@@ -279,6 +272,23 @@ bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
     return SaveMetaData(list->path.c_str(), meta);
   }
   return false; // never reach this line
+}
+
+bool CYD_MP3Player::UpdateMetaData(void) {
+  bool ret = true;
+  for (auto& file : m_files) {
+    if (file.meta.saved != file.meta.selected) {
+      ret &= SaveMetaData(file.path.c_str(), &file.meta);
+    }
+  }
+  return ret;
+}
+
+/*--------------------------------------------------------------------------------
+ * Get error message
+ *--------------------------------------------------------------------------------*/
+const char* CYD_MP3Player::GetError(void) {
+  return m_error.c_str();
 }
 
 /*--------------------------------------------------------------------------------
