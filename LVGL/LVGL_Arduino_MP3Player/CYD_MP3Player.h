@@ -15,6 +15,8 @@
  *--------------------------------------------------------------------------------*/
 #define META_DATA_DIR "@meta/"
 #define META_DATA_EXT ".dat"
+#define PICTURE_EXT   "bmp"
+#define PICTURE_FILE  "@picture.txt"
 
 /*--------------------------------------------------------------------------------
  * Possible values for `SetVolume()`
@@ -71,6 +73,7 @@ public:
   bool        ScanFileList(const char *dirname, uint8_t levels);
   uint32_t    ScanFileList(uint8_t levels, bool shuffle = true);
   uint32_t    SortFileList(bool shuffle = true);
+  void        GetFilePath (uint32_t playNo, char *buf, int len);
   void        GetID3Tags  (uint32_t playNo, ID3Tags_t &tags);
   void        GetMetaData (uint32_t playNo, MetaData_t *meta);
   bool        PutMetaData (uint32_t playNo, MetaData_t *meta);

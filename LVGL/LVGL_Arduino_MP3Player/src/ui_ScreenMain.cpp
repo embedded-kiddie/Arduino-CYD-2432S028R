@@ -18,15 +18,12 @@ void ui_ScreenMain_screen_init(void) {
 
   ui_ImageAlbum = lv_image_create(ui_ScreenMain);
   lv_image_set_src              (ui_ImageAlbum, &ui_img_album_png);
-  lv_obj_set_width              (ui_ImageAlbum, lv_pct(40));
-  lv_obj_set_height             (ui_ImageAlbum, lv_pct(30));
   lv_obj_set_x                  (ui_ImageAlbum, 0);
-  lv_obj_set_y                  (ui_ImageAlbum, lv_pct(-30));
+  lv_obj_set_y                  (ui_ImageAlbum, lv_pct(-29));
   lv_obj_set_align              (ui_ImageAlbum, LV_ALIGN_CENTER);
   lv_obj_add_flag               (ui_ImageAlbum, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_remove_flag            (ui_ImageAlbum, LV_OBJ_FLAG_SCROLLABLE);
-  lv_image_set_scale            (ui_ImageAlbum, 100);
-
+  
   ui_ImageWave = lv_image_create(ui_ScreenMain);
   lv_image_set_src              (ui_ImageWave, &ui_img_wave_png);
   lv_obj_set_height             (ui_ImageWave, 25);

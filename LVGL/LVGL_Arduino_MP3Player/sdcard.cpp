@@ -5,16 +5,10 @@
  *  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
  *--------------------------------------------------------------------------------*/
 #include "lvgl.h"
-
-// avoid conflict 'LV_USE_FS_ARDUINO_SD' in lvgl.h
-#if LV_USE_FS_ARDUINO_SD == 0
-#define MY_USE_FS_ARDUINO_SD
-#define MY_FS_ARDUINO_SD_LETTER 'S'
-#endif
-
-#ifdef MY_USE_FS_ARDUINO_SD
-
 #include "sdcard.h"
+
+#if PICTURE_ON_SD
+#ifdef MY_USE_FS_ARDUINO_SD
 
 /**********************
  *  STATIC PROTOTYPES
@@ -198,3 +192,4 @@ static lv_fs_res_t fs_tell(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p)
 }
 
 #endif // MY_USE_FS_ARDUINO_SD
+#endif // PICTURE_ON_SD

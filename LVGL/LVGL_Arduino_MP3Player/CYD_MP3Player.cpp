@@ -14,6 +14,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   if (m_root.back() != '/') {
     m_root += "/";
   }
+  
   // initialize SD card
   if (!FS_DEV.begin(FS_CONFIG)) {
     m_error = "Failed to mount the SD file system.";
@@ -42,8 +43,11 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
 
   SetVolume(volume);
 
+#if PICTURE_ON_SD
   // Arduino SD File System for image
   lv_fs_arduino_sd_init();
+#endif
+
   return true;
 }
 
@@ -103,7 +107,7 @@ bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get the playlist for the specified track
+ * Get the playlist for a specified track
  *--------------------------------------------------------------------------------*/
 PlayList_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
   if (m_files.size()) {
@@ -209,6 +213,19 @@ uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
   }
   Serial.printf("Total: %d\n", m_files.size());
   return m_files.size();
+}
+
+/*--------------------------------------------------------------------------------
+ * Gets the path to a specified track
+ *--------------------------------------------------------------------------------*/
+void CYD_MP3Player::GetFilePath(uint32_t playNo, char *buf, int len) {
+  PlayList_t *list = GetPlayList(playNo);
+  if (list) {
+    strncpy(buf, list->path.c_str(), len);
+    buf[len - 1] = '\0';
+  } else {
+    *buf = '\0';
+  }
 }
 
 /*--------------------------------------------------------------------------------
@@ -380,7 +397,7 @@ bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
 bool CYD_MP3Player::AutoPlay(void) {
   if (!audioIsPlaying() && m_files.size()) {
     if (!audioConnecttoSD(m_files[m_playNo].path.c_str())) {
-      m_error = "fail to play " + m_files[m_playNo].path;
+      m_error = "Failed to play " + m_files[m_playNo].path;
       return false;
     }
   }

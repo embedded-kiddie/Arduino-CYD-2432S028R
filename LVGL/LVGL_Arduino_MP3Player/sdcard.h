@@ -7,6 +7,8 @@
 #ifndef _SDCARD_H_
 #define _SDCARD_H_
 
+#include "CYD28_audio.h"
+
 #ifdef  SDFATFS_USED
 #define USE_SDFAT
 #include "SdFat.h"
@@ -16,8 +18,8 @@
 #endif
 
 #ifdef  SDFATFS_USED          // defined in CYD_Audio.h
-#define FS_DEV    SD_SDFAT    // defined in CYD_Audio.cpp
-#define FS_TYPE   fs::SDFATFS // SdFat
+#define FS_DEV    SD          // defined in CYD_Audio.cpp
+#define FS_TYPE   fs::SDFATFS // SdFat 
 #define FS_FILE   FsFile
 #define FS_MODE   int
 #define FS_CONFIG SD_CS, SD_CLOCK
@@ -36,7 +38,7 @@ enum SeekMode {
 
 #elif defined (_SD_H_)
 #define FS_DEV    SD
-#define FS_TYPE   SDFS // fs::SDFS
+#define FS_TYPE   fs::SDFS  // SDFS 
 #define FS_FILE   File
 #define FS_MODE   const char *
 #define FS_CONFIG SD_CS //, SPI, SD_CLOCK
@@ -46,6 +48,20 @@ enum SeekMode {
 #define SD_CS     SS
 
 extern FS_TYPE FS_DEV;
+
+/*--------------------------------------------------------------------------------
+ * Album cover picture location
+ *--------------------------------------------------------------------------------*/
+#define PICTURE_ON_SD   false
+
+#if PICTURE_ON_SD
+// avoid conflict 'LV_USE_FS_ARDUINO_SD' in lvgl.h
+#if LV_USE_FS_ARDUINO_SD == 0
+#define MY_USE_FS_ARDUINO_SD 1
+#define MY_FS_ARDUINO_SD_LETTER 'S'
+#endif
+
 void lv_fs_arduino_sd_init(void);
+#endif // PICTURE_ON_SD
 
 #endif // _SDCARD_H_

@@ -57,6 +57,7 @@ lv_obj_t *ui_PlayListToMainDown;
 // EVENTS
 
 // IMAGES AND IMAGE SETS
+#include "_pictures.h"
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -401,6 +402,72 @@ static void update_metadata(void) {
 }
 
 /*--------------------------------------------------------------------------------
+ * Show the picture for album
+ *--------------------------------------------------------------------------------*/
+static void display_picture(uint32_t playNo) {
+  char buf[FS_BUF_SIZE], *ptr;
+
+#if PICTURE_ON_SD
+  buf[0] = MY_FS_ARDUINO_SD_LETTER;
+  buf[1] = ':';
+  player.GetFilePath(playNo, buf + 2, sizeof(buf) - 2);
+
+  if (ptr = strrchr(buf, '.')) {
+    strcpy(ptr + 1, PICTURE_EXT);
+    if (FS_DEV.exists(buf + 2)) {
+      lv_gif_set_src(ui_ImageAlbum, buf);
+      return;
+    }
+  }
+
+  if (ptr = strrchr(buf, '/')) {
+    strcpy(ptr + 1, "@picture." PICTURE_EXT);
+    if (FS_DEV.exists(buf + 2)) {
+      lv_gif_set_src(ui_ImageAlbum, buf);
+      return;
+    }
+  }
+#else
+  player.GetFilePath(playNo, buf, sizeof(buf));
+
+  if (ptr = strrchr(buf, '/')) {
+    strcpy(ptr + 1, PICTURE_FILE);
+
+    if (FS_DEV.exists(buf)) {
+      FS_FILE file = FS_DEV.open(buf, FILE_READ);
+
+      if (file) {
+        int i = -1;
+#ifdef  SDFATFS_USED
+        String n = "";
+        while (file.available()) {
+          n += file.readString();
+        }
+        file.close();
+        if (isdigit(n[0])) {
+          i = atoi(n.c_str());
+        }
+#else // SD
+        file.read((uint8_t*)buf, sizeof(buf));
+        file.close();
+        buf[sizeof(buf) - 1] = '\0';
+        if (isdigit(buf[0])) {
+          i = atoi(buf);
+        }
+#endif // SdFat or SD
+        if (0 <= i && i < N_PICTURES) {
+          lv_image_set_src(ui_ImageAlbum, pictures[i]);
+          return;
+        }
+      }
+    }
+  }
+#endif
+
+  lv_image_set_src(ui_ImageAlbum, &ui_img_album_png);
+}
+
+/*--------------------------------------------------------------------------------
  * Control next/previous play or stop/continuous play
  *--------------------------------------------------------------------------------*/
 static bool play_next(bool next) {
@@ -422,8 +489,10 @@ static bool play_next(bool next) {
 
   bitClear(ui_option.repeat, 7); // clear the bit that has been temporarily forced set
 
-  // update ui_control and look of the play button
   ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
+  display_picture(ui_control.playNo);
+
+  // update ui_control and look of the play button
   lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
 
   if (ui_ScreenPlayList) {
@@ -516,7 +585,7 @@ bool ui_loop(void) {
       ui_state = nextState;
       break;
     case UI_STATE_ERROR:
-      lv_label_set_text_fmt(ui_MusicTitle, player.GetError());
+      lv_label_set_text_fmt(ui_MusicTitle, "%s %s", LV_SYMBOL_WARNING, player.GetError());
       ui_state = UI_STATE_IDLE;
     case UI_STATE_IDLE:
     default:
@@ -561,6 +630,7 @@ void ui_set_playNo(uint32_t track_id) {
 
   // update ui_control
   ui_control.playNo = ui_control.focusNo = track_id;
+  display_picture(track_id);
 
   // update the look of the play button
   if (ui_state != UI_STATE_PLAY) {
