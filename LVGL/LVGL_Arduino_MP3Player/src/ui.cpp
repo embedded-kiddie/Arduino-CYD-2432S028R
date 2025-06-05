@@ -370,35 +370,39 @@ static void update_epalsed_time(void) {
  * Check and update the metadata when playback finishes
  *--------------------------------------------------------------------------------*/
 static void update_metadata(void) {
-  // prevent input while saving metadata to SD card
-  lv_indev_enable(NULL, false);
-
-  if (player.IsPlaying()) {
-    player.PauseResume();
-  }
-
-  // update favorite
-  if (saveID3tags) {
-    if (player.UpdateMetaData()) {
-      saveID3tags = false;
-    }
-  }
-
-  // update duration
   MetaData_t meta;
   uint32_t playNo = player.GetPlayNo();
   player.GetMetaData(playNo, &meta);
-  if (meta.duration < id3tags.meta.duration) {
-    meta.duration = id3tags.meta.duration;
-    player.PutMetaData(playNo, &meta);
-    ui_list_update_duration(playNo, meta.duration);
-  }
 
-  if (!player.IsPlaying()) {
-    player.PauseResume();
-  }
+  if (meta.duration < id3tags.meta.duration || saveID3tags) {
 
-  lv_indev_enable(NULL, true);
+    // prevent input while saving metadata to SD card
+    lv_indev_enable(NULL, false);
+
+    if (player.IsPlaying()) {
+      player.PauseResume();
+    }
+
+    // update all Favorites that have been modified during playback
+    if (saveID3tags) {
+      if (player.UpdateMetaData()) {
+        saveID3tags = false;
+      }
+    }
+
+    // update the playback duration at the end of file
+    if (meta.duration < id3tags.meta.duration) {
+      meta.duration = id3tags.meta.duration;
+      player.PutMetaData(playNo, &meta);
+      ui_list_update_duration(playNo, meta.duration);
+    }
+
+    if (!player.IsPlaying()) {
+      player.PauseResume();
+    }
+
+    lv_indev_enable(NULL, true);
+  }
 }
 
 /*--------------------------------------------------------------------------------
@@ -428,8 +432,8 @@ static void display_picture(uint32_t playNo) {
     }
   }
 #else
+  // gets the picture number recorded in PICTURE_FILE.
   player.GetFilePath(playNo, buf, sizeof(buf));
-
   if (ptr = strrchr(buf, '/')) {
     strcpy(ptr + 1, PICTURE_FILE);
 
