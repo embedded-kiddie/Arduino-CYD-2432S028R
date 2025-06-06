@@ -111,7 +111,7 @@ bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
  *--------------------------------------------------------------------------------*/
 PlayList_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
   if (m_files.size()) {
-    return &m_files[playNo];
+    return & m_files[playNo];
   } else {
     return NULL;
   }
@@ -209,10 +209,50 @@ uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
   }
 
   for (auto& file : m_files) {
-    Serial.printf("%d/%d, %2d, %3d, %s\n", file.meta.saved, file.meta.selected, file.meta.pictNo, file.meta.duration, file.path.c_str());
+    Serial.printf("%d/%d, %2d, %3d, %s\n", file.meta.saved, file.meta.selected, file.meta.pictureNo, file.meta.duration, file.path.c_str());
   }
   Serial.printf("Total: %d\n", m_files.size());
   return m_files.size();
+}
+
+/*--------------------------------------------------------------------------------
+ * Load the picture number stored in the metadata on the SD card
+ *--------------------------------------------------------------------------------*/
+uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
+  uint32_t pictNo = 0;
+  char buf[FS_BUF_SIZE], *ptr;
+
+  // gets the picture number recorded in PICTURE_FILE.
+  GetFilePath(playNo, buf, sizeof(buf));
+  if (ptr = strrchr(buf, '/')) {
+    strcpy(ptr + 1, PICTURE_FILE);
+
+    if (FS_DEV.exists(buf)) {
+      FS_FILE file = FS_DEV.open(buf, FILE_READ);
+
+      if (file) {
+#ifdef  SDFATFS_USED
+        String n = "";
+        while (file.available()) {
+          n += file.readString();
+        }
+        file.close();
+        if (isdigit(n[0])) {
+          pictNo = atoi(n.c_str());
+        }
+#else // SD
+        file.read((uint8_t*)buf, sizeof(buf));
+        file.close();
+        buf[sizeof(buf) - 1] = '\0';
+        if (isdigit(buf[0])) {
+          pictNo = atoi(buf);
+        }
+#endif // SdFat or SD
+      }
+    }
+  }
+
+  return pictNo;
 }
 
 /*--------------------------------------------------------------------------------
@@ -229,7 +269,7 @@ void CYD_MP3Player::GetFilePath(uint32_t playNo, char *buf, int len) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get/Put ID3 tags (title, album, artist) from the file specified by id
+ * Get ID3 tags (title, album, artist) from the playlist
  *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
   PlayList_t *list = GetPlayList(playNo);
@@ -277,6 +317,9 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Get metadata from playlists and save it to a dedicated file
+ *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
   PlayList_t *list = GetPlayList(playNo);
   if (list) {

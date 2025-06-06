@@ -37,7 +37,7 @@
 typedef struct {
   bool saved    : 4;
   bool selected : 4;
-  uint8_t pictNo;
+  uint8_t pictureNo;
   uint16_t duration;
 } MetaData_t;
 
@@ -74,6 +74,7 @@ public:
   bool        ScanFileList(const char *dirname, uint8_t levels);
   uint32_t    ScanFileList(uint8_t levels, bool shuffle = true);
   uint32_t    SortFileList(bool shuffle = true);
+  uint32_t    GetPictureNo(uint32_t playNo);
   void        GetFilePath (uint32_t playNo, char *buf, int len);
   void        GetID3Tags  (uint32_t playNo, ID3Tags_t &tags);
   void        GetMetaData (uint32_t playNo, MetaData_t *meta);

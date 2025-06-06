@@ -368,46 +368,6 @@ static void update_epalsed_time(void) {
 }
 
 /*--------------------------------------------------------------------------------
- * Load the picture number stored in the metadata on the SD card
- *--------------------------------------------------------------------------------*/
-static int load_pictNo(uint32_t playNo) {
-  int pictNo = 0;
-  char buf[FS_BUF_SIZE], *ptr;
-  
-  // gets the picture number recorded in PICTURE_FILE.
-  player.GetFilePath(playNo, buf, sizeof(buf));
-  if (ptr = strrchr(buf, '/')) {
-    strcpy(ptr + 1, PICTURE_FILE);
-
-    if (FS_DEV.exists(buf)) {
-      FS_FILE file = FS_DEV.open(buf, FILE_READ);
-
-      if (file) {
-#ifdef  SDFATFS_USED
-        String n = "";
-        while (file.available()) {
-          n += file.readString();
-        }
-        file.close();
-        if (isdigit(n[0])) {
-          pictNo = atoi(n.c_str());
-        }
-#else // SD
-        file.read((uint8_t*)buf, sizeof(buf));
-        file.close();
-        buf[sizeof(buf) - 1] = '\0';
-        if (isdigit(buf[0])) {
-          pictNo = atoi(buf);
-        }
-#endif // SdFat or SD
-      }
-    }
-  }
-
-  return pictNo;
-}
-
-/*--------------------------------------------------------------------------------
  * Check and update the metadata when playback finishes
  *--------------------------------------------------------------------------------*/
 static void update_metadata(void) {
@@ -415,7 +375,7 @@ static void update_metadata(void) {
   uint32_t playNo = player.GetPlayNo();
   player.GetMetaData(playNo, &meta);
 
-  if (meta.duration < id3tags.meta.duration || meta.pictNo == 0 || saveID3tags == true) {
+  if (meta.duration < id3tags.meta.duration || meta.pictureNo == 0 || saveID3tags == true) {
 
     // prevent input while saving metadata to SD card
     lv_indev_enable(NULL, false);
@@ -432,8 +392,8 @@ static void update_metadata(void) {
     }
 
     bool update = false;
-    if (meta.pictNo == 0) {
-      meta.pictNo = load_pictNo(playNo);
+    if (meta.pictureNo == 0) {
+      meta.pictureNo = player.GetPictureNo(playNo);
       update = true;
     }
 
@@ -461,7 +421,8 @@ static void update_metadata(void) {
  *--------------------------------------------------------------------------------*/
 static void display_picture(uint32_t playNo) {
 #if PICTURE_ON_SD
-  bool disp = false;
+
+  // displaying image files on the SD card
   char buf[FS_BUF_SIZE], *ptr;
 
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
@@ -473,7 +434,7 @@ static void display_picture(uint32_t playNo) {
     if (FS_DEV.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
       lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
-      disp = true;
+      return;
     }
   }
 
@@ -482,18 +443,19 @@ static void display_picture(uint32_t playNo) {
     if (FS_DEV.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
       lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
-      disp = true;
+      return;
     }
   }
 
-  if (!disp) {
-    lv_image_set_src    (ui_AlbumImage, &ui_img_album_png);
-    lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
-  }
+  lv_image_set_src    (ui_AlbumImage, &ui_img_album_png);
+  lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
+
 #else
+
+  // displaying image files in the flash ROM
   MetaData_t meta;
   player.GetMetaData(playNo, &meta);
-  int pictNo = meta.pictNo; // load_pictNo(playNo);
+  int pictNo = meta.pictureNo;
 
   if (0 < pictNo && pictNo < N_PICTURES) {
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
@@ -502,6 +464,7 @@ static void display_picture(uint32_t playNo) {
     lv_image_set_src    (ui_AlbumImage, &ui_img_album_png);
     lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
   }
+
 #endif
 }
 
