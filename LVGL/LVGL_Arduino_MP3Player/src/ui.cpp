@@ -368,9 +368,9 @@ static void update_epalsed_time(void) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get picture number in SD
+ * Load the picture number stored in the metadata on the SD card
  *--------------------------------------------------------------------------------*/
-static int get_pictNo(uint32_t playNo) {
+static int load_pictNo(uint32_t playNo) {
   int pictNo = 0;
   char buf[FS_BUF_SIZE], *ptr;
   
@@ -433,7 +433,7 @@ static void update_metadata(void) {
 
     bool update = false;
     if (meta.pictNo == 0) {
-      meta.pictNo = get_pictNo(playNo);
+      meta.pictNo = load_pictNo(playNo);
       update = true;
     }
 
@@ -493,7 +493,7 @@ static void display_picture(uint32_t playNo) {
 #else
   MetaData_t meta;
   player.GetMetaData(playNo, &meta);
-  int pictNo = meta.pictNo; // get_pictNo(playNo);
+  int pictNo = meta.pictNo; // load_pictNo(playNo);
 
   if (0 < pictNo && pictNo < N_PICTURES) {
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);

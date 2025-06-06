@@ -209,7 +209,7 @@ uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
   }
 
   for (auto& file : m_files) {
-    Serial.printf("%d, %d, %d, %s\n", file.meta.saved, file.meta.selected, file.meta.duration, file.path.c_str());
+    Serial.printf("%d/%d, %2d, %3d, %s\n", file.meta.saved, file.meta.selected, file.meta.pictNo, file.meta.duration, file.path.c_str());
   }
   Serial.printf("Total: %d\n", m_files.size());
   return m_files.size();
