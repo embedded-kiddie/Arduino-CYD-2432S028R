@@ -425,7 +425,7 @@ static void update_metadata(void) {
     }
 
     // update all Favorites that have been modified during playback
-    if (saveID3tags == false) {
+    if (saveID3tags == true) {
       if (player.UpdateMetaData()) {
         saveID3tags = false;
       }
