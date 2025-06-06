@@ -9,12 +9,13 @@ LV_IMG_DECLARE(Past_Lives);
 LV_IMG_DECLARE(SUPER_EUROBEAT);
 
 const lv_image_dsc_t *pictures[] = {
-  /*  0 */  & DETOX,
-  /*  1 */  & Eye_of_the_Storm,
-  /*  2 */  & Gravity,
-  /*  3 */  & Niche,
-  /*  4 */  & Past_Lives,
-  /*  5 */  & SUPER_EUROBEAT,
+  /*  0 */  & ui_img_album_png,
+  /*  1 */  & DETOX,
+  /*  2 */  & Eye_of_the_Storm,
+  /*  3 */  & Gravity,
+  /*  4 */  & Niche,
+  /*  5 */  & Past_Lives,
+  /*  6 */  & SUPER_EUROBEAT,
 };
 
 #define N_PICTURES  (sizeof(pictures) / sizeof(lv_image_dsc_t *))

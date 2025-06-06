@@ -44,7 +44,7 @@ static bool update_scroll_running = false;
  *  GLOBAL FUNCTIONS
  **********************/
 void ui_list_update_icon(uint32_t track_id, bool state) {
-  if (top_num <= track_id && track_id <= end_num) {
+  if (play_list && top_num <= track_id && track_id <= end_num) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
     if (cell) {
       lv_obj_t* icon = lv_obj_get_child(cell, 0);
@@ -58,7 +58,7 @@ void ui_list_update_icon(uint32_t track_id, bool state) {
 }
 
 void ui_list_update_cell(uint32_t track_id, bool state) {
-  if (top_num <= track_id && track_id <= end_num) {
+  if (play_list && top_num <= track_id && track_id <= end_num) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
     if (cell) {
       lv_obj_t* title  = lv_obj_get_child(cell, 1);
@@ -78,7 +78,7 @@ void ui_list_update_cell(uint32_t track_id, bool state) {
 }
 
 void ui_list_update_play(uint32_t track_id, bool state) {
-  if (top_num <= track_id && track_id <= end_num) {
+  if (play_list && top_num <= track_id && track_id <= end_num) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
     if (cell) {
       lv_obj_t* icon   = lv_obj_get_child(cell, 0);
@@ -351,7 +351,7 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
  * Delete all cells and focus the specified cell when it is out of range
  *--------------------------------------------------------------------------------*/
 void ui_list_focus_playing(uint32_t track_id) {
-  if (track_id < top_num || end_num < track_id) {
+  if (play_list && track_id < top_num || end_num < track_id) {
     // delete all cells in playlist
     while (lv_obj_get_child_count(play_list)) {
       lv_obj_clean(play_list);
@@ -375,7 +375,7 @@ void ui_list_focus_playing(uint32_t track_id) {
  * Updates the duration to the specified cell
  *--------------------------------------------------------------------------------*/
 void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
-  if (top_num <= track_id && track_id <= end_num) {
+  if (play_list && top_num <= track_id && track_id <= end_num) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - top_num);
     if (cell) {
       lv_obj_t* time_label = lv_obj_get_child(cell, 3);

@@ -35,8 +35,9 @@
 #include <exception>
 
 typedef struct {
-  bool saved;
-  bool selected;
+  bool saved    : 4;
+  bool selected : 4;
+  uint8_t pictNo;
   uint16_t duration;
 } MetaData_t;
 

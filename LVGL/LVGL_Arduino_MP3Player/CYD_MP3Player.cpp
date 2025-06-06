@@ -17,7 +17,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   
   // initialize SD card
   if (!FS_DEV.begin(FS_CONFIG)) {
-    m_error = "Failed to mount the SD file system.";
+    m_error = "failed to mount: " + m_root;
     return false;
   }
 
@@ -25,7 +25,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   std::string path = m_root + META_DATA_DIR;
   if (!FS_DEV.exists(path.c_str())) {
     if (!FS_DEV.mkdir(path.c_str())) {
-      m_error = "mkdir " + path + "failed.";
+      m_error = "mkdir failed: " + path;
       return false;
     }
   }
@@ -35,7 +35,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
     path = m_root + META_DATA_DIR + dirs[i];
     if (!FS_DEV.exists(path.c_str())) {
       if (!FS_DEV.mkdir(path.c_str())) {
-        m_error = "mkdir " + path + "failed";
+      m_error = "mkdir failed: " + path;
         return false;
       }
     }

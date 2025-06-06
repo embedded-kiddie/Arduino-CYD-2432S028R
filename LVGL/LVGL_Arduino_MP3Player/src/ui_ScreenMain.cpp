@@ -16,24 +16,29 @@ void ui_ScreenMain_screen_init(void) {
   lv_obj_set_style_pad_top      (ui_ScreenMain,  10, (uint32_t)LV_PART_SCROLLBAR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_bottom   (ui_ScreenMain,   0, (uint32_t)LV_PART_SCROLLBAR | (uint32_t)LV_STATE_DEFAULT);
 
-  ui_ImageAlbum = lv_image_create(ui_ScreenMain);
-  lv_image_set_src              (ui_ImageAlbum, &ui_img_album_png);
-  lv_obj_set_x                  (ui_ImageAlbum, 0);
-  lv_obj_set_y                  (ui_ImageAlbum, lv_pct(-29));
-  lv_obj_set_align              (ui_ImageAlbum, LV_ALIGN_CENTER);
-  lv_obj_add_flag               (ui_ImageAlbum, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_remove_flag            (ui_ImageAlbum, LV_OBJ_FLAG_SCROLLABLE);
-  
-  ui_ImageWave = lv_image_create(ui_ScreenMain);
-  lv_image_set_src              (ui_ImageWave, &ui_img_wave_png);
-  lv_obj_set_height             (ui_ImageWave, 25);
-  lv_obj_set_width              (ui_ImageWave, lv_pct(65));
-  lv_obj_set_x                  (ui_ImageWave, 0);
-  lv_obj_set_y                  (ui_ImageWave, lv_pct(-6));
-  lv_obj_set_align              (ui_ImageWave, LV_ALIGN_CENTER);
-  lv_obj_remove_flag            (ui_ImageWave, LV_OBJ_FLAG_SCROLLABLE);
-  lv_image_set_scale            (ui_ImageWave, 120);
-  lv_obj_add_flag               (ui_ImageWave, /* LV_OBJ_FLAG_HIDDEN | */ LV_OBJ_FLAG_CHECKABLE);
+  ui_AlbumImage = lv_image_create(ui_ScreenMain);
+  lv_image_set_src              (ui_AlbumImage, &ui_img_album_png);
+  lv_obj_set_x                  (ui_AlbumImage, 0);
+  lv_obj_set_y                  (ui_AlbumImage, lv_pct(-29));
+  lv_obj_set_align              (ui_AlbumImage, LV_ALIGN_CENTER);
+  lv_obj_add_flag               (ui_AlbumImage, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_remove_flag            (ui_AlbumImage, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_style_init                 (&ui_AlbumStyle);
+  lv_style_set_shadow_width     (&ui_AlbumStyle, 10);
+  lv_style_set_shadow_offset_y  (&ui_AlbumStyle, 5);
+  lv_style_set_shadow_opa       (&ui_AlbumStyle, LV_OPA_50);
+
+  ui_WaveImage = lv_image_create(ui_ScreenMain);
+  lv_image_set_src              (ui_WaveImage, &ui_img_wave_png);
+  lv_obj_set_height             (ui_WaveImage, 25);
+  lv_obj_set_width              (ui_WaveImage, lv_pct(65));
+  lv_obj_set_x                  (ui_WaveImage, 0);
+  lv_obj_set_y                  (ui_WaveImage, lv_pct(-6));
+  lv_obj_set_align              (ui_WaveImage, LV_ALIGN_CENTER);
+  lv_obj_remove_flag            (ui_WaveImage, LV_OBJ_FLAG_SCROLLABLE);
+  lv_image_set_scale            (ui_WaveImage, 120);
+  lv_obj_add_flag               (ui_WaveImage, /* LV_OBJ_FLAG_HIDDEN | */ LV_OBJ_FLAG_CHECKABLE);
 
   ui_MusicTitle = lv_label_create(ui_ScreenMain);
   lv_obj_set_width              (ui_MusicTitle, lv_pct(90));

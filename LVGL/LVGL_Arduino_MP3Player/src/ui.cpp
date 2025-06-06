@@ -32,14 +32,15 @@ UI_Control_t ui_control;
 ///////////////////// VARIABLES ////////////////////
 // SCREEN: ui_ScreenMain
 lv_obj_t *ui_ScreenMain;
-lv_obj_t *ui_ImageAlbum;
-lv_obj_t *ui_ImageWave;
+lv_obj_t *ui_WaveImage;
 lv_obj_t *ui_MusicTitle;
 lv_obj_t *ui_ElapsedStart;
 lv_obj_t *ui_ElapsedEnd;
 lv_obj_t *ui_ButtonPlay;
 lv_obj_t *ui_ElapsedBar;
 lv_obj_t *ui_Volume;
+lv_obj_t *ui_AlbumImage;
+lv_style_t ui_AlbumStyle;
 
 // SCREEN: ui_ScreenOption
 lv_obj_t *ui_ScreenOption;
@@ -367,6 +368,46 @@ static void update_epalsed_time(void) {
 }
 
 /*--------------------------------------------------------------------------------
+ * Get picture number in SD
+ *--------------------------------------------------------------------------------*/
+static int get_pictNo(uint32_t playNo) {
+  int pictNo = 0;
+  char buf[FS_BUF_SIZE], *ptr;
+  
+  // gets the picture number recorded in PICTURE_FILE.
+  player.GetFilePath(playNo, buf, sizeof(buf));
+  if (ptr = strrchr(buf, '/')) {
+    strcpy(ptr + 1, PICTURE_FILE);
+
+    if (FS_DEV.exists(buf)) {
+      FS_FILE file = FS_DEV.open(buf, FILE_READ);
+
+      if (file) {
+#ifdef  SDFATFS_USED
+        String n = "";
+        while (file.available()) {
+          n += file.readString();
+        }
+        file.close();
+        if (isdigit(n[0])) {
+          pictNo = atoi(n.c_str());
+        }
+#else // SD
+        file.read((uint8_t*)buf, sizeof(buf));
+        file.close();
+        buf[sizeof(buf) - 1] = '\0';
+        if (isdigit(buf[0])) {
+          pictNo = atoi(buf);
+        }
+#endif // SdFat or SD
+      }
+    }
+  }
+
+  return pictNo;
+}
+
+/*--------------------------------------------------------------------------------
  * Check and update the metadata when playback finishes
  *--------------------------------------------------------------------------------*/
 static void update_metadata(void) {
@@ -374,7 +415,7 @@ static void update_metadata(void) {
   uint32_t playNo = player.GetPlayNo();
   player.GetMetaData(playNo, &meta);
 
-  if (meta.duration < id3tags.meta.duration || saveID3tags) {
+  if (meta.duration < id3tags.meta.duration || meta.pictNo == 0 || saveID3tags == true) {
 
     // prevent input while saving metadata to SD card
     lv_indev_enable(NULL, false);
@@ -384,17 +425,27 @@ static void update_metadata(void) {
     }
 
     // update all Favorites that have been modified during playback
-    if (saveID3tags) {
+    if (saveID3tags == false) {
       if (player.UpdateMetaData()) {
         saveID3tags = false;
       }
     }
 
+    bool update = false;
+    if (meta.pictNo == 0) {
+      meta.pictNo = get_pictNo(playNo);
+      update = true;
+    }
+
     // update the playback duration at the end of file
     if (meta.duration < id3tags.meta.duration) {
       meta.duration = id3tags.meta.duration;
-      player.PutMetaData(playNo, &meta);
       ui_list_update_duration(playNo, meta.duration);
+      update = true;
+    }
+
+    if (update) {
+      player.PutMetaData(playNo, &meta);
     }
 
     if (!player.IsPlaying()) {
@@ -409,9 +460,10 @@ static void update_metadata(void) {
  * Show the picture for album
  *--------------------------------------------------------------------------------*/
 static void display_picture(uint32_t playNo) {
+#if PICTURE_ON_SD
+  bool disp = false;
   char buf[FS_BUF_SIZE], *ptr;
 
-#if PICTURE_ON_SD
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
   buf[1] = ':';
   player.GetFilePath(playNo, buf + 2, sizeof(buf) - 2);
@@ -419,56 +471,38 @@ static void display_picture(uint32_t playNo) {
   if (ptr = strrchr(buf, '.')) {
     strcpy(ptr + 1, PICTURE_EXT);
     if (FS_DEV.exists(buf + 2)) {
-      lv_gif_set_src(ui_ImageAlbum, buf);
-      return;
+      lv_image_set_src(ui_AlbumImage, buf);
+      lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
+      disp = true;
     }
   }
 
-  if (ptr = strrchr(buf, '/')) {
+  else if (ptr = strrchr(buf, '/')) {
     strcpy(ptr + 1, "@picture." PICTURE_EXT);
     if (FS_DEV.exists(buf + 2)) {
-      lv_gif_set_src(ui_ImageAlbum, buf);
-      return;
+      lv_image_set_src(ui_AlbumImage, buf);
+      lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
+      disp = true;
     }
+  }
+
+  if (!disp) {
+    lv_image_set_src    (ui_AlbumImage, &ui_img_album_png);
+    lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
   }
 #else
-  // gets the picture number recorded in PICTURE_FILE.
-  player.GetFilePath(playNo, buf, sizeof(buf));
-  if (ptr = strrchr(buf, '/')) {
-    strcpy(ptr + 1, PICTURE_FILE);
+  MetaData_t meta;
+  player.GetMetaData(playNo, &meta);
+  int pictNo = meta.pictNo; // get_pictNo(playNo);
 
-    if (FS_DEV.exists(buf)) {
-      FS_FILE file = FS_DEV.open(buf, FILE_READ);
-
-      if (file) {
-        int i = -1;
-#ifdef  SDFATFS_USED
-        String n = "";
-        while (file.available()) {
-          n += file.readString();
-        }
-        file.close();
-        if (isdigit(n[0])) {
-          i = atoi(n.c_str());
-        }
-#else // SD
-        file.read((uint8_t*)buf, sizeof(buf));
-        file.close();
-        buf[sizeof(buf) - 1] = '\0';
-        if (isdigit(buf[0])) {
-          i = atoi(buf);
-        }
-#endif // SdFat or SD
-        if (0 <= i && i < N_PICTURES) {
-          lv_image_set_src(ui_ImageAlbum, pictures[i]);
-          return;
-        }
-      }
-    }
+  if (0 < pictNo && pictNo < N_PICTURES) {
+    lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
+    lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
+  } else {
+    lv_image_set_src    (ui_AlbumImage, &ui_img_album_png);
+    lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
   }
 #endif
-
-  lv_image_set_src(ui_ImageAlbum, &ui_img_album_png);
 }
 
 /*--------------------------------------------------------------------------------
