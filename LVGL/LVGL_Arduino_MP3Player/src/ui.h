@@ -89,7 +89,7 @@ LV_IMG_DECLARE(ui_img_1076165770);  // assets/skip-prev.png
 LV_IMG_DECLARE(ui_img_1994412056);  // assets/volume-max.png
 LV_IMG_DECLARE(ui_img_2058316518);  // assets/volume-min.png
 LV_IMG_DECLARE(ui_img_1710110385);  // assets/back-right.png
-LV_IMG_DECLARE(ui_img_713466046);   // assets/back-left.png
+//LV_IMG_DECLARE(ui_img_713466046);   // assets/back-left.png
 //LV_IMG_DECLARE(ui_img_1753861343);  // assets/bluetooth-on.png
 //LV_IMG_DECLARE(ui_img_1837194583);  // assets/bluetooth-off.png
 LV_IMG_DECLARE(ui_img_1157704237);  // assets/heart-off-small.png
