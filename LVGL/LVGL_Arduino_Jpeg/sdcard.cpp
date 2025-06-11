@@ -1,5 +1,6 @@
 /*--------------------------------------------------------------------------------
  * LVGL file system interfaces for handling an image file with SD card
+ * https://github.com/lvgl/lvgl/blob/master/src/libs/fsdrv/lv_fs_arduino_sd.cpp
  * NOTE: uncomment the followings to use SdFat
  *  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
  *--------------------------------------------------------------------------------*/
@@ -307,7 +308,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
       }
 
       FS_FILE file = FS_DEV.open(path, FILE_READ);
-#ifdef  USE_SDFAT 
+#ifdef  USE_SDFAT
       size = file.fileSize();
 #else
       size = file.size();
@@ -351,7 +352,7 @@ static lv_fs_res_t fs_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_
     LV_UNUSED(drv);
     LV_UNUSED(file_p);
 
-    if (fs_cache.position + btr > fs_cache.size) {
+    if (fs_cache.position + btr >= fs_cache.size) {
       btr = fs_cache.size - fs_cache.position;
     }
 
