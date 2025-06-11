@@ -1,5 +1,6 @@
 /*--------------------------------------------------------------------------------
  * LVGL file system interfaces for handling an image file with SD card
+ * https://github.com/lvgl/lvgl/blob/master/src/libs/fsdrv/lv_fs_arduino_sd.cpp
  * NOTE: uncomment the followings to use SdFat 
  *  "#define USE_SDFAT" in CYD_Audio.h
  *  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h

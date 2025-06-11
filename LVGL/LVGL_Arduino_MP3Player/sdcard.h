@@ -56,6 +56,7 @@ extern FS_TYPE FS_DEV;
  *  0: Load from flash rom    ('LV_USE_TJPGD' in lv_conf.h must be '0')
  *  1: Load from SD w/o cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
  *  2: Load from SD w   cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
+ * Refer To: https://github.com/lvgl/lvgl/tree/master/src/libs/tjpgd
  *--------------------------------------------------------------------------------*/
 // Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
 #if LV_USE_FS_ARDUINO_SD == 0
