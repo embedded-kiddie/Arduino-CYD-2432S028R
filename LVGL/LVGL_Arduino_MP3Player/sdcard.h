@@ -9,15 +9,11 @@
 
 #include "CYD28_audio.h"
 
-#ifdef  SDFATFS_USED
-#define USE_SDFAT
-#include "SdFat.h"
-#else
-#include "FS.h"
-#include "SD.h"
-#endif
-
 #ifdef  SDFATFS_USED          // defined in CYD_Audio.h
+
+#include "SdFat.h"
+
+#define USE_SDFAT
 #define FS_DEV    SD          // defined in CYD_Audio.cpp
 #define FS_TYPE   fs::SDFATFS // SdFat 
 #define FS_FILE   FsFile
@@ -36,13 +32,18 @@ enum SeekMode {
   SeekEnd = 2
 };
 
-#elif defined (_SD_H_)
+#else
+
+#include "FS.h"
+#include "SD.h"
+
 #define FS_DEV    SD
 #define FS_TYPE   fs::SDFS  // SDFS 
 #define FS_FILE   File
 #define FS_MODE   const char *
 #define FS_CONFIG SD_CS //, SPI, SD_CLOCK
-#endif
+
+#endif // SDFATFS_USED
 
 #define SD_CLOCK  25000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_CS     SS
@@ -50,18 +51,17 @@ enum SeekMode {
 extern FS_TYPE FS_DEV;
 
 /*--------------------------------------------------------------------------------
- * Album cover picture location
+ * Configure the method to display album pictures
+ * MY_USE_FS_ARDUINO_SD:
+ *  0: Load from flash rom    ('LV_USE_TJPGD' in lv_conf.h must be '0')
+ *  1: Load from SD w/o cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
+ *  2: Load from SD w   cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
  *--------------------------------------------------------------------------------*/
-#define PICTURE_ON_SD   false
-
-#if PICTURE_ON_SD
-// avoid conflict 'LV_USE_FS_ARDUINO_SD' in lvgl.h
+// Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
 #if LV_USE_FS_ARDUINO_SD == 0
-#define MY_USE_FS_ARDUINO_SD 1
-#define MY_FS_ARDUINO_SD_LETTER 'S'
+  #define MY_USE_FS_ARDUINO_SD 0
+  #define MY_FS_ARDUINO_SD_LETTER 'S'
+  void lv_fs_arduino_sd_init(void);
 #endif
-
-void lv_fs_arduino_sd_init(void);
-#endif // PICTURE_ON_SD
 
 #endif // _SDCARD_H_

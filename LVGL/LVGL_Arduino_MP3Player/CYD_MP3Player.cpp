@@ -43,7 +43,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
 
   SetVolume(volume);
 
-#if PICTURE_ON_SD
+#if MY_USE_FS_ARDUINO_SD != 0
   // Arduino SD File System for image
   lv_fs_arduino_sd_init();
 #endif

@@ -15,7 +15,7 @@
  *--------------------------------------------------------------------------------*/
 #define META_DATA_DIR "@meta/"
 #define META_DATA_EXT ".dat"
-#define PICTURE_EXT   "bmp"
+#define PICTURE_EXT   "jpg"
 #define PICTURE_FILE  "@picture.txt"
 
 /*--------------------------------------------------------------------------------

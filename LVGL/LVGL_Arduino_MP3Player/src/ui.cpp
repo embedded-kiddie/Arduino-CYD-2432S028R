@@ -420,7 +420,7 @@ static void update_metadata(void) {
  * Show the picture for album
  *--------------------------------------------------------------------------------*/
 static void display_picture(uint32_t playNo) {
-#if PICTURE_ON_SD
+#if MY_USE_FS_ARDUINO_SD != 0
 
   // displaying image files on the SD card
   char buf[FS_BUF_SIZE], *ptr;
@@ -438,7 +438,7 @@ static void display_picture(uint32_t playNo) {
     }
   }
 
-  else if (ptr = strrchr(buf, '/')) {
+  if (ptr = strrchr(buf, '/')) {
     strcpy(ptr + 1, "@picture." PICTURE_EXT);
     if (FS_DEV.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
@@ -456,6 +456,9 @@ static void display_picture(uint32_t playNo) {
   MetaData_t meta;
   player.GetMetaData(playNo, &meta);
   int pictNo = meta.pictureNo;
+  if (pictNo == 0) {
+    pictNo = player.GetPictureNo(playNo);
+  }
 
   if (0 < pictNo && pictNo < N_PICTURES) {
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
