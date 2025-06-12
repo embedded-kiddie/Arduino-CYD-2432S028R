@@ -54,16 +54,20 @@ extern FS_TYPE FS_DEV;
 /*--------------------------------------------------------------------------------
  * Configure the method to display album pictures
  * MY_USE_FS_ARDUINO_SD:
- *  0: Load from flash rom    ('LV_USE_TJPGD' in lv_conf.h must be '0')
- *  1: Load from SD w/o cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
- *  2: Load from SD w   cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
+ *  0: Load BIN   on flash rom    ('LV_USE_TJPGD' in lv_conf.h must be '0')
+ *  1: Load TJPGD on SD w/o cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
+ *  2: Load TJPGD on SD w   cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
  * Refer To: https://github.com/lvgl/lvgl/tree/master/src/libs/tjpgd
  *--------------------------------------------------------------------------------*/
 // Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
 #if LV_USE_FS_ARDUINO_SD == 0
-  #define MY_USE_FS_ARDUINO_SD 0
-  #define MY_FS_ARDUINO_SD_LETTER 'S'
-  void lv_fs_arduino_sd_init(void);
+  #if LV_USE_TJPGD == 0
+    #define MY_USE_FS_ARDUINO_SD 0
+  #else
+    #define MY_USE_FS_ARDUINO_SD 2
+    #define MY_FS_ARDUINO_SD_LETTER 'S'
+    void lv_fs_arduino_sd_init(void);
+  #endif
 #endif
 
 #endif // _SDCARD_H_
