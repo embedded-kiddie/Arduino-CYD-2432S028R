@@ -1,5 +1,6 @@
 /*--------------------------------------------------------------------------------
  * LVGL file system interfaces for handling an image file with SD card
+ * https://github.com/lvgl/lvgl/blob/master/src/libs/fsdrv/lv_fs_arduino_sd.cpp
  * NOTE: uncomment the followings to use SdFat
  *  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
  *--------------------------------------------------------------------------------*/
@@ -47,11 +48,15 @@ enum SeekMode {
 
 extern FS_TYPE FS_DEV;
 
-// avoid conflict 'LV_USE_FS_...' in lvgl.h
+/*--------------------------------------------------------------------------------
+ * Configure the method to display album pictures
+ * MY_USE_FS_ARDUINO_SD:
+ *  1: Load from SD w/o cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
+ *  2: Load from SD w   cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
+ * Refer To: https://github.com/lvgl/lvgl/tree/master/src/libs/tjpgd
+ *--------------------------------------------------------------------------------*/
+// Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
 #if LV_USE_FS_ARDUINO_SD == 0
-  /*--------------------------------------------------
-   * 1: without cache / 2: with cache
-   *--------------------------------------------------*/
   #define MY_USE_FS_ARDUINO_SD 2
   #define MY_FS_ARDUINO_SD_LETTER 'S'
   void lv_fs_arduino_sd_init(void);
