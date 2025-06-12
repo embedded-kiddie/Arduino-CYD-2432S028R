@@ -1,20 +1,23 @@
 /*--------------------------------------------------------------------------------
- * LVGL file system interfaces for handling an image file with SD card
+ * LVGL file system interfaces for handling an image file on SD card
  * https://github.com/lvgl/lvgl/blob/master/src/libs/fsdrv/lv_fs_arduino_sd.cpp
  * NOTE: uncomment the followings to use SdFat
+ *  "#define SDFATFS_USED" in CYD_Audio.h
  *  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
  *--------------------------------------------------------------------------------*/
-#ifndef _SDCARD_H_
-#define _SDCARD_H_
+#ifndef _SDFS_H_
+#define _SDFS_H_
 
-#if true
+#include "CYD28_audio.h"
+
+#ifdef  SDFATFS_USED          // defined in CYD_Audio.h
 
 #include "SdFat.h"
 
 #define USE_SDFAT
-#define FS_DEV    SD
-#define FS_TYPE   SdFat
-#define FS_FILE   File
+#define FS_DEV    SD          // defined in CYD_Audio.cpp
+#define FS_TYPE   fs::SDFATFS // SdFat 
+#define FS_FILE   FsFile
 #define FS_MODE   int
 #define FS_CONFIG SD_CS, SD_CLOCK
 
@@ -36,7 +39,7 @@ enum SeekMode {
 #include "SD.h"
 
 #define FS_DEV    SD
-#define FS_TYPE   SDFS
+#define FS_TYPE   fs::SDFS  // SDFS 
 #define FS_FILE   File
 #define FS_MODE   const char *
 #define FS_CONFIG SD_CS //, SPI, SD_CLOCK
@@ -67,4 +70,4 @@ extern FS_TYPE FS_DEV;
   #endif
 #endif
 
-#endif // _SDCARD_H_
+#endif // _SDFS_H_

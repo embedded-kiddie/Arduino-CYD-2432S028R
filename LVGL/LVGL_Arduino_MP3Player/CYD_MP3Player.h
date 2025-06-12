@@ -5,7 +5,7 @@
 #define _CYD_MP3PLAYER_H_
 
 #include "CYD28_audio.h"
-#include "sdcard.h"
+#include "sdfs.h"
 
 // at least 97 = title(30) + "/" + artist(30) + "/" + album(30) + ".mp3" + '\0'
 #define FS_BUF_SIZE 128

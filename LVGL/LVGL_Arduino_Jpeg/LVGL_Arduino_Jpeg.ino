@@ -37,7 +37,7 @@ static LGFX tft;
 //----------------------------------------------------------------------
 // SD card configuration
 //----------------------------------------------------------------------
-#include "sdcard.h"
+#include "sdfs.h"
 #ifdef  USE_SDFAT
 FS_TYPE FS_DEV;
 #endif
