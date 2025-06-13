@@ -59,9 +59,11 @@ extern FS_TYPE FS_DEV;
  *  2: Load TJPGD on SD w   cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
  * Refer To: https://github.com/lvgl/lvgl/tree/master/src/libs/tjpgd
  *--------------------------------------------------------------------------------*/
+#include "lvgl.h"
+
 // Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
 #if LV_USE_FS_ARDUINO_SD == 0
-  #if LV_USE_TJPGD == 0
+  #if (LV_USE_TJPGD == 0) && (LV_USE_BMP == 0)
     #define MY_USE_FS_ARDUINO_SD 0
   #else
     #define MY_USE_FS_ARDUINO_SD 2

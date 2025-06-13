@@ -15,8 +15,18 @@
  *--------------------------------------------------------------------------------*/
 #define META_DATA_DIR "@meta/"
 #define META_DATA_EXT ".dat"
-#define PICTURE_EXT   "jpg"
+
+/*--------------------------------------------------------------------------------
+ * Thumnail of album picure
+ *--------------------------------------------------------------------------------*/
 #define PICTURE_FILE  "@picture.txt"
+#if MY_USE_FS_ARDUINO_SD != 0
+  #if LV_USE_BMP
+    #define PICTURE_EXT   "bmp"
+  #elif LV_USE_TJPGD
+    #define PICTURE_EXT   "jpg"
+  #endif
+#endif
 
 /*--------------------------------------------------------------------------------
  * Possible values for `SetVolume()`

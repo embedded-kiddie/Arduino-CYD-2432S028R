@@ -209,10 +209,6 @@ void setup() {
   lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /* Touchpad should have POINTER type */
   lv_indev_set_read_cb(indev, my_touchpad_read);
 
-  lv_obj_t *label = lv_label_create(lv_screen_active());
-  lv_label_set_text( label, "Hello Arduino, I'm LVGL!" );
-  lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
-
   // initialize before activating LV_USE_FS_ARDUINO_SD
   if (!FS_DEV.begin(FS_CONFIG)) {
     Serial.println("SD Card Mount Failed");
@@ -222,10 +218,19 @@ void setup() {
   // LV_USE_FS_ARDUINO_SD
   lv_fs_arduino_sd_init();
 
-  lv_obj_t *img = lv_image_create(lv_screen_active());
-  lv_image_set_src(img, "S:/MP3Player/@picture.jpg"); // LV_USE_TJPGD
-//lv_image_set_src(img, "S:/MP3Player/Against The Current/Gravity/@picture.bmp"); // LV_USE_BMP
-  lv_obj_center(img);
+  lv_obj_t *image = lv_image_create(lv_screen_active());
+  lv_obj_t *label = lv_label_create(lv_screen_active());
+
+#if LV_USE_BMP
+  lv_image_set_src(image, "S:/MP3Player/@picture.bmp"); // LV_USE_BMP
+  lv_label_set_text(label, "Hello Arduino, I got bmp!");
+#elif LV_USE_TJPGD
+  lv_image_set_src(image, "S:/MP3Player/@picture.jpg"); // LV_USE_TJPGD
+  lv_label_set_text(label, "Hello Arduino, I got jpg!");
+#endif
+
+  lv_obj_center(image);
+  lv_obj_align(label, LV_ALIGN_CENTER, 0, lv_pct(20));
 
   Serial.println("Setup done");
 }
