@@ -177,7 +177,7 @@ static lv_fs_res_t fs_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs
 {
     LV_UNUSED(drv);
 
-    SeekMode mode;
+    SeekMode mode = SeekSet;
     if(whence == LV_FS_SEEK_SET)
         mode = SeekSet;
     else if(whence == LV_FS_SEEK_CUR)
@@ -196,9 +196,6 @@ static lv_fs_res_t fs_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs
         break;
       case SeekEnd:
         rc = my_file.seekEnd(pos);
-        break;
-      default:
-        rc = my_file.seekSet(pos);
         break;
     }
 #else
@@ -352,7 +349,7 @@ static lv_fs_res_t fs_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_
     LV_UNUSED(drv);
     LV_UNUSED(file_p);
 
-    if (fs_cache.position + btr >= fs_cache.size) {
+    if (fs_cache.position + btr > fs_cache.size) {
       btr = fs_cache.size - fs_cache.position;
     }
 
@@ -376,14 +373,15 @@ static lv_fs_res_t fs_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs
     LV_UNUSED(file_p);
 
     switch (whence) {
-      case LV_FS_SEEK_SET:
-        fs_cache.position = pos;
-        break;
       case LV_FS_SEEK_CUR:
         fs_cache.position += pos;
         break;
       case LV_FS_SEEK_END:
         fs_cache.position = (fs_cache.size - 1) - pos;
+        break;
+      case LV_FS_SEEK_SET:
+      default:
+        fs_cache.position = pos;
         break;
     }
 
