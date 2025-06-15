@@ -38,15 +38,15 @@ static LGFX tft;
 // SD card configuration
 //----------------------------------------------------------------------
 #include "sdfs.h"
-#ifdef  USE_SDFAT
-FS_TYPE FS_DEV;
-#endif
 
-#define SCREENSHORT false
+#define SCREENSHORT true
 #if SCREENSHORT
-#include "../src/sdcard.hpp"
+  #include "../src/sdcard.hpp"
 #else
-#include "../src/ESP32.hpp"
+  #include "../src/ESP32.hpp"
+  #ifdef  USE_SDFAT
+    FS_TYPE FS_DEV;
+  #endif
 #endif
 
 //----------------------------------------------------------------------
@@ -187,8 +187,18 @@ void setup() {
   Serial.begin(115200);
   while (millis() < 1000);
 
+  // initialize before activating LV_USE_FS_ARDUINO_SD
+  if (!FS_DEV.begin(FS_CONFIG)) {
+    Serial.println("SD Card Mount Failed");
+    return;
+  }
+
   tft_init();
   lv_init();
+
+#if MY_USE_FS_ARDUINO_SD
+  lv_fs_arduino_sd_init();
+#endif
 
   /* Set a tick source so that LVGL will know how much time elapsed. */
   lv_tick_set_cb(my_tick);
@@ -209,28 +219,23 @@ void setup() {
   lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /* Touchpad should have POINTER type */
   lv_indev_set_read_cb(indev, my_touchpad_read);
 
-  // initialize before activating LV_USE_FS_ARDUINO_SD
-  if (!FS_DEV.begin(FS_CONFIG)) {
-    Serial.println("SD Card Mount Failed");
-    return;
-  }
-
-  // LV_USE_FS_ARDUINO_SD
-  lv_fs_arduino_sd_init();
-
   lv_obj_t *image = lv_image_create(lv_screen_active());
   lv_obj_t *label = lv_label_create(lv_screen_active());
 
-#if LV_USE_BMP
-  lv_image_set_src(image, "S:/MP3Player/@picture.bmp"); // LV_USE_BMP
-  lv_label_set_text(label, "Hello Arduino, I got bmp!");
-#elif LV_USE_TJPGD
+#if LV_USE_TJPGD
   lv_image_set_src(image, "S:/MP3Player/@picture.jpg"); // LV_USE_TJPGD
   lv_label_set_text(label, "Hello Arduino, I got jpg!");
+#elif LV_USE_BMP
+  lv_image_set_src(image, "S:/MP3Player/@picture.bmp"); // LV_USE_BMP
+  lv_label_set_text(label, "Hello Arduino, I got bmp!");
+#else
+  LV_IMG_DECLARE(picture);
+  lv_image_set_src(image, &picture);
+  lv_label_set_text(label, "Hello Arduino, I got bin!");
 #endif
 
   lv_obj_center(image);
-  lv_obj_align(label, LV_ALIGN_CENTER, 0, lv_pct(20));
+  lv_obj_align(label, LV_ALIGN_CENTER, 0, lv_pct(30));
 
   Serial.println("Setup done");
 }

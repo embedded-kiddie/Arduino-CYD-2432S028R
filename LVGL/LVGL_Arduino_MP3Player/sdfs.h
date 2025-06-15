@@ -15,9 +15,9 @@
 #include "SdFat.h"
 
 #define USE_SDFAT
-#define FS_DEV    SD          // defined in CYD_Audio.cpp
-#define FS_TYPE   fs::SDFATFS // SdFat 
-#define FS_FILE   FsFile
+#define FS_DEV    SD          // instance in CYD_Audio.cpp
+#define FS_TYPE   fs::SDFATFS // defined  in CYD_Audio.cpp
+#define FS_FILE   FsFile      // File
 #define FS_MODE   int
 #define FS_CONFIG SD_CS, SD_CLOCK
 
@@ -38,9 +38,9 @@ enum SeekMode {
 #include "FS.h"
 #include "SD.h"
 
-#define FS_DEV    SD
-#define FS_TYPE   fs::SDFS  // SDFS 
-#define FS_FILE   File
+#define FS_DEV    SD          // instance in SD.cpp
+#define FS_TYPE   fs::SDFS    // defined  in SD.h
+#define FS_FILE   File        // FsFile
 #define FS_MODE   const char *
 #define FS_CONFIG SD_CS //, SPI, SD_CLOCK
 
@@ -52,17 +52,16 @@ enum SeekMode {
 extern FS_TYPE FS_DEV;
 
 /*--------------------------------------------------------------------------------
- * Configure the method to display album pictures
  * MY_USE_FS_ARDUINO_SD:
- *  0: Load BIN   on flash rom    ('LV_USE_TJPGD' in lv_conf.h must be '0')
- *  1: Load TJPGD on SD w/o cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
- *  2: Load TJPGD on SD w   cache ('LV_USE_TJPGD' in lv_conf.h must be '1')
+ *  0: Load binary  on flash rom    (LV_USE_[TJPGD|BMP] in lv_conf.h must be 0)
+ *  1: Load jpg/bmp on SD w/o cache (LV_USE_[TJPGD|BMP] in lv_conf.h must be 1)
+ *  2: Load jpg/bmp on SD w   cache (LV_USE_[TJPGD|BMP] in lv_conf.h must be 1)
  * Refer To: https://github.com/lvgl/lvgl/tree/master/src/libs/tjpgd
  *--------------------------------------------------------------------------------*/
 #include "lvgl.h"
 
 // Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
-#if LV_USE_FS_ARDUINO_SD == 0
+#if (LV_USE_FS_ARDUINO_SD == 0)
   #if (LV_USE_TJPGD == 0) && (LV_USE_BMP == 0)
     #define MY_USE_FS_ARDUINO_SD 0
   #else

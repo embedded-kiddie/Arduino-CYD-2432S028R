@@ -53,6 +53,17 @@ static LGFX tft;
 #include "../src/ESP32.hpp"
 #endif
 
+#define SAVE_SEQUENCIAL_BMP false
+#if SAVE_SEQUENCIAL_BMP
+#define USE_SDFAT
+#include "../src/sdcard.hpp"
+FS_TYPE sd;
+static uint32_t _skip = 0;
+static uint32_t _prev = 0;
+static uint32_t N = 0;
+static char fname[16];
+#endif
+
 //----------------------------------------------------------------------
 // Calibrate touch panel for LovyanGFX (optional)
 //----------------------------------------------------------------------
@@ -209,7 +220,11 @@ static void resolution_changed_event_cb(lv_event_t *e) {
 
 /* use Arduinos millis() as tick source */
 static uint32_t my_tick(void) {
+#if SAVE_SEQUENCIAL_BMP
+  return millis() - _skip;
+#else
   return millis();
+#endif
 }
 
 void setup() {
@@ -248,6 +263,10 @@ void setup() {
 
   Serial.begin(115200);
   ui_init();
+
+#if SAVE_SEQUENCIAL_BMP
+  sdcard_setup();
+#endif
 }
 
 void loop() {
@@ -272,4 +291,13 @@ void loop() {
     PrintESP32Memory();
 #endif
   }
+
+#if SAVE_SEQUENCIAL_BMP
+  uint32_t t = millis();
+  if (t - _skip < 45 * 1000 && t - _prev >= 66) {
+    sprintf(fname, "/%05d.bmp", N++);
+    SaveBMP24(SD, fname, tft);
+    _skip += (_prev = millis()) - t;
+  }
+#endif
 }
