@@ -50,4 +50,51 @@ void PrintESP32Memory(void) {
   printf("Min MALLOC_CAP_DMA     :%7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_DMA));
   printf("Max MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
   printf("Max MALLOC_CAP_DMA     :%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
+
+  // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
+  static constexpr char* reset_reason_all[] = {
+    "reason can not be determined",
+    "board power-on",
+    "external (pin) reset",
+    "software reboot (esp_reset())",
+    "exception and/or kernel panic",
+    "interrupt watchdog",
+    "task watchdog",
+    "other watchdog",
+    "returning from a deep sleep",
+    "brownout (software or hardware)",
+    "reset over SDIO",
+    "reset by USB peripheral",
+    "reset by JTAG",
+    "reset due to eFuse error",
+    "power glitch detected",
+    "CPU lock up (double exception)",
+  };
+  // https://github.com/espressif/esp-idf/blob/master/components/soc/esp32/include/soc/reset_reasons.h
+  static constexpr char* reset_reason_core[] = {
+    "",
+    "Power on reset",
+    "",
+    "Software resets the digital core",
+    "",
+    "Deep sleep resets the digital core",
+    "SDIO module resets the digital core",
+    "Main watch dog 0 resets digital core",
+    "Main watch dog 1 resets digital core",
+    "RTC watch dog resets digital core",
+    "",
+    "Main watch dog resets CPU",
+    "Software resets CPU",
+    "RTC watch dog resets CPU",
+    "CPU0 resets CPU1 by DPORT_APPCPU_RESETTING",
+    "Reset when the VDD voltage is not stable",
+    "RTC watch dog resets digital core and RTC module",
+  };
+
+  uint32_t X = esp_reset_reason();          // overall
+  uint32_t Y = esp_rom_get_reset_reason(0); // core0
+  uint32_t Z = esp_rom_get_reset_reason(1); // core1
+  printf("Reset reason (overall): %2d (%s)\n", X, reset_reason_all [X]);
+  printf("Reset reason (core 0) : %2d (%s)\n", Y, reset_reason_core[Y]);
+  printf("Reset reason (core 1) : %2d (%s)\n", Z, reset_reason_core[Z]);
 }
