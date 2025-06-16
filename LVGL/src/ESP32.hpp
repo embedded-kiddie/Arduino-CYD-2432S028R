@@ -52,7 +52,7 @@ void PrintESP32Memory(void) {
   printf("Max MALLOC_CAP_DMA     :%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
 
   // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
-  static constexpr char* reset_reason_all[] = {
+  static const char* reset_reason_all[] = {
     "reason can not be determined",
     "board power-on",
     "external (pin) reset",
@@ -71,7 +71,7 @@ void PrintESP32Memory(void) {
     "CPU lock up (double exception)",
   };
   // https://github.com/espressif/esp-idf/blob/master/components/soc/esp32/include/soc/reset_reasons.h
-  static constexpr char* reset_reason_core[] = {
+  static const char* reset_reason_core[] = {
     "",
     "Power on reset",
     "",
