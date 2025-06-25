@@ -43,11 +43,11 @@ static uint8_t draw_buf[DRAW_BUF_N_BUFS][DRAW_BUF_SIZE];
 static LGFX tft;
 
 //----------------------------------------------------------------------
-// SD card configuration
+// Signle or Sequentcial screenshot
 //----------------------------------------------------------------------
 #define SCREENSHORT false
 #if SCREENSHORT
-#define USE_SDFAT // "SDFATFS_USED" should be defined in CYD_Audio.h
+#include "sdfs.h"
 #include "../src/sdcard.hpp"
 #else
 #include "../src/ESP32.hpp"
@@ -55,9 +55,8 @@ static LGFX tft;
 
 #define SAVE_SEQUENCIAL_BMP false
 #if SAVE_SEQUENCIAL_BMP
-#define USE_SDFAT
+#include "sdfs.h"
 #include "../src/sdcard.hpp"
-FS_TYPE sd;
 static uint32_t _skip = 0;
 static uint32_t _prev = 0;
 static uint32_t N = 0;
@@ -263,10 +262,6 @@ void setup() {
 
   Serial.begin(115200);
   ui_init();
-
-#if SAVE_SEQUENCIAL_BMP
-  sdcard_setup();
-#endif
 }
 
 void loop() {
@@ -280,13 +275,7 @@ void loop() {
   if (Serial.available()) {
     Serial.readStringUntil('\n');
 #if SCREENSHORT
-    // Stop playing before saving screenshot
-    FS_TYPE sd;
-    if (!sd.begin(SD_CONFIG)) {
-      Serial.println("Card Mount Failed");
-      return;
-    }
-    SaveBMP24(sd, "/demo.bmp", tft);
+    SaveBMP24(FS_DEV, "/demo.bmp", tft);
 #else
     PrintESP32Memory();
 #endif
@@ -296,7 +285,7 @@ void loop() {
   uint32_t t = millis();
   if (t - _skip < 45 * 1000 && t - _prev >= 66) {
     sprintf(fname, "/%05d.bmp", N++);
-    SaveBMP24(SD, fname, tft);
+    SaveBMP24(FS_DEV, fname, tft);
     _skip += (_prev = millis()) - t;
   }
 #endif

@@ -40,10 +40,6 @@
 // #define USE_SDFAT
 
 #ifndef CYD_SD_SPI_BUS
-#define CYD_SD_SS      5
-#define CYD_SD_MOSI    23
-#define CYD_SD_MISO    19
-#define CYD_SD_SCK     18
 #define CYD_SD_SPI_BUS VSPI
 #endif
 
@@ -54,8 +50,9 @@
 
 #include "SdFat.h"
 
-#define FS_TYPE SdFat
-SdFat SD;
+#ifndef BUF_SIZE
+#define BUF_SIZE  64
+#endif
 
 #undef  FILE_APPEND
 #define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
@@ -70,17 +67,23 @@ SdFat SD;
 #define SD_SPI_METHOD SHARED_SPI
 #endif
 
-#if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+#ifndef FS_TYPE
+  #define FS_TYPE SdFat
+  FS_TYPE SD;
   #if   0
-    static SPIClass sd_spi = SPIClass(VSPI);
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK, &sd_spi) // OK
+    static SPIClass sd_spi = SPIClass(CYD_SD_SPI_BUS);
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_METHOD, SD_SPI_CLOCK, &sd_spi) // OK
   #elif 1
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)CYD_SD_SS, SD_SPI_METHOD, SD_SPI_CLOCK) // OK
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_METHOD, SD_SPI_CLOCK) // OK
   #elif 0
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)CYD_SD_SS, SD_SPI_CLOCK) // NG
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_CLOCK) // NG
+  #elif 0
+    #define SD_CONFIG (SdCsPin_t)SS // NG
   #else
-    #define SD_CONFIG (SdCsPin_t)CYD_SD_SS // NG
+    #define SD_CONFIG // NG
   #endif
+#else
+  #define SD_CONFIG FS_CONFIG
 #endif
 
 #else // ! USE_SDFAT
@@ -92,15 +95,15 @@ SdFat SD;
 #define FS_TYPE  fs::SDFS
 
 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
-#define SD_SPI_CLOCK 50000000
+#define SD_SPI_CLOCK 24000000
 
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
   static SPIClass sd_spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
-  #define SD_CONFIG CYD_SD_SS, sd_spi, SD_SPI_CLOCK
+  #define SD_CONFIG SS, sd_spi, SD_SPI_CLOCK
 #elif defined (ARDUINO_XIAO_ESP32S3) && defined (_TFT_eSPIH_)
-  #define SD_CONFIG CYD_SD_SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
+  #define SD_CONFIG SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
 #else
-  #define SD_CONFIG CYD_SD_SS, SPI, SD_SPI_CLOCK
+  #define SD_CONFIG SS, SPI, SD_SPI_CLOCK
 #endif
 
 #endif // USE_SDFAT
@@ -109,10 +112,10 @@ SdFat SD;
 #define REASSIGN_PINS
 
 // https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h#L70C9-L70C28
-int sck   = CYD_SD_SCK;   // 18
-int miso  = CYD_SD_MISO;  // 19
-int mosi  = CYD_SD_MOSI;  // 23
-int cs    = CYD_SD_SS;    //  5
+int sck   = SCK;   // 18
+int miso  = MISO;  // 19
+int mosi  = MOSI;  // 23
+int cs    = SS;    //  5
 #define SD_CONFIG cs
 //*/
 /*--------------------------------------------------------------------------------
@@ -133,7 +136,10 @@ void listDir(FS_TYPE &fs, const char *dirname, uint8_t levels) {
     return;
   }
 
-  char buf[16];
+#ifdef USE_SDFAT
+  char buf[BUF_SIZE];
+#endif
+
   File file = root.openNextFile();
   while (file) {
     if (file.isDirectory()) {
@@ -165,6 +171,7 @@ void listDir(FS_TYPE &fs, const char *dirname, uint8_t levels) {
     file = root.openNextFile();
   }
 }
+
 void createDir(FS_TYPE &fs, const char *path) {
   Serial.printf("Creating dir: %s\n", path);
   if (fs.mkdir(path)) {
@@ -248,16 +255,16 @@ void deleteFile(FS_TYPE &fs, const char *path) {
     Serial.println("Delete failed");
   }
 }
+
 void testFileIO(FS_TYPE &fs, const char *path) {
-  File file = fs.open(path);
   static uint8_t buf[512];
-  size_t len = 0;
-  uint32_t start = millis();
-  uint32_t end = start;
+  uint32_t time;
+
+  File file = fs.open(path);
   if (file) {
-    len = file.size();
-    size_t flen = len;
-    start = millis();
+    size_t len = file.size();
+    size_t siz = len;
+    time = millis();
     while (len) {
       size_t toRead = len;
       if (toRead > 512) {
@@ -266,8 +273,8 @@ void testFileIO(FS_TYPE &fs, const char *path) {
       file.read(buf, toRead);
       len -= toRead;
     }
-    end = millis() - start;
-    Serial.printf("%u bytes read for %lu ms\n", flen, end);
+    time = millis() - time;
+    Serial.printf("%u bytes read for %lu ms\n", siz, time);
     file.close();
   } else {
     Serial.println("Failed to open file for reading");
@@ -280,12 +287,12 @@ void testFileIO(FS_TYPE &fs, const char *path) {
   }
 
   size_t i;
-  start = millis();
+  time = millis();
   for (i = 0; i < 2048; i++) {
     file.write(buf, 512);
   }
-  end = millis() - start;
-  Serial.printf("%u bytes written for %lu ms\n", 2048 * 512, end);
+  time = millis() - time;
+  Serial.printf("%u bytes written for %lu ms\n", 2048 * 512, time);
   file.close();
 }
 
@@ -540,7 +547,7 @@ void sdcard_setup() {
 #else
 
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-  sd_spi.begin(CYD_SD_SCK, CYD_SD_MISO, CYD_SD_MOSI, CYD_SD_SS);
+  sd_spi.begin(SCK, MISO, MOSI, SS);
 #endif
 
   if (!SD.begin(SD_CONFIG)) {
