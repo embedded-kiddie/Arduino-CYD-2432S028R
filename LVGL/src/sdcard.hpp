@@ -39,20 +39,12 @@
  */
 // #define USE_SDFAT
 
-#ifndef CYD_SD_SPI_BUS
-#define CYD_SD_SPI_BUS VSPI
-#endif
-
 /*--------------------------------------------------------------------------------
  * SD library
  *--------------------------------------------------------------------------------*/
 #ifdef USE_SDFAT
 
 #include "SdFat.h"
-
-#ifndef BUF_SIZE
-#define BUF_SIZE  64
-#endif
 
 #undef  FILE_APPEND
 #define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
@@ -70,9 +62,12 @@
 #ifndef FS_TYPE
   #define FS_TYPE SdFat
   FS_TYPE SD;
-  #if   0
-    static SPIClass sd_spi = SPIClass(CYD_SD_SPI_BUS);
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_METHOD, SD_SPI_CLOCK, &sd_spi) // OK
+#endif
+
+#ifndef FS_CONFIG
+  #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+    static SPIClass sd_spi = SPIClass(VSPI);
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &sd_spi) // OK
   #elif 1
     #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_METHOD, SD_SPI_CLOCK) // OK
   #elif 0
@@ -84,6 +79,10 @@
   #endif
 #else
   #define SD_CONFIG FS_CONFIG
+#endif
+
+#ifndef BUF_SIZE
+#define BUF_SIZE  64
 #endif
 
 #else // ! USE_SDFAT
@@ -98,7 +97,7 @@
 #define SD_SPI_CLOCK 24000000
 
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-  static SPIClass sd_spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
+  static SPIClass sd_spi = SPIClass(VSPI); // VSPI
   #define SD_CONFIG SS, sd_spi, SD_SPI_CLOCK
 #elif defined (ARDUINO_XIAO_ESP32S3) && defined (_TFT_eSPIH_)
   #define SD_CONFIG SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
@@ -525,6 +524,10 @@ bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
 void sdcard_setup() {
 
 #ifdef  USE_SDFAT
+
+#if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+  sd_spi.begin(SCK, MISO, MOSI, SS);
+#endif
 
   if (!SD.begin(SD_CONFIG)) {
     Serial.println("SdFat: Card Mount Failed");
