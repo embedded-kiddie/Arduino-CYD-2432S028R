@@ -138,7 +138,7 @@ bool CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
 
     // skip dot file
 #ifdef SDFATFS_USED
-    char name[FS_BUF_SIZE];
+    char name[BUF_SIZE];
     file.getName(name, sizeof(name));
     std::string path = std::string(dirname);
     path += (path.at(path.size() - 1) == '/' ? "" : "/") + std::string(name);
@@ -220,7 +220,7 @@ uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
  *--------------------------------------------------------------------------------*/
 uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
   uint32_t pictNo = 0;
-  char buf[FS_BUF_SIZE], *ptr;
+  char buf[BUF_SIZE], *ptr;
 
   // gets the picture number recorded in PICTURE_FILE.
   GetFilePath(playNo, buf, sizeof(buf));
@@ -277,7 +277,7 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
     tags.meta = list->meta;
 
     int n = 0;
-    char *ptr, *token, *tmp[8], copy[FS_BUF_SIZE];
+    char *ptr, *token, *tmp[8], copy[BUF_SIZE];
     const char *path = list->path.c_str();
 
     if (strlen(path) < sizeof(copy)) {

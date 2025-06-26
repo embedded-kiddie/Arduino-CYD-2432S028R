@@ -423,7 +423,7 @@ static void display_picture(uint32_t playNo) {
 #if MY_USE_FS_ARDUINO_SD != 0
 
   // displaying image files on the SD card
-  char buf[FS_BUF_SIZE], *ptr;
+  char buf[BUF_SIZE], *ptr;
 
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
   buf[1] = ':';
