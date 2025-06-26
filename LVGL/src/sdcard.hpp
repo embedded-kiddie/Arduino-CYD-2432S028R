@@ -77,7 +77,7 @@
 #endif
 
 #ifndef BUF_SIZE
-#define BUF_SIZE  64
+#define BUF_SIZE  128
 #endif
 
 #else // ! USE_SDFAT
