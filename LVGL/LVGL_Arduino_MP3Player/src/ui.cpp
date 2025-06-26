@@ -10,9 +10,6 @@
 #include "../CYD_MP3Player.h"
 static CYD_MP3Player player;
 
-#define MP3_PATH_ROOT "/MP3Player/"
-#define MP3_PATH_LEVEL 2
-#define MP3_PATH_CONFIG MP3_PATH_ROOT, MP3_PATH_LEVEL
 #define PERIOD_TAKS1 1000 // [msec]
 #define PERIOD_TAKS2 100  // [msec]
 

@@ -69,7 +69,7 @@ bool CYD_MP3Player::CheckExtension(const char *path) {
  *--------------------------------------------------------------------------------*/
 const char* CYD_MP3Player::MetaDataPath(const char *path) {
   MD5Hex_t hex;
-  MD5::make_hash(path, hex);
+  MD5::make_hash(&path[strlen(MP3_PATH_ROOT)], hex);
   MD5::make_digest(hex, 5); // e.g. "0123456789" (get 5 x 2 characters of string)
   hex.digest[1] = '/';      // e.g. "0/23456789"
 

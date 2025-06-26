@@ -10,6 +10,10 @@
 // at least 97 = title(30) + "/" + artist(30) + "/" + album(30) + ".mp3" + '\0'
 #define BUF_SIZE 128
 
+#define MP3_PATH_ROOT "/MP3/"
+#define MP3_PATH_LEVEL 2
+#define MP3_PATH_CONFIG MP3_PATH_ROOT, MP3_PATH_LEVEL
+
 /*--------------------------------------------------------------------------------
  * Metadata file
  *--------------------------------------------------------------------------------*/
