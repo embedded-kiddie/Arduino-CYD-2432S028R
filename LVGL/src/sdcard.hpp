@@ -45,6 +45,7 @@
 #ifdef USE_SDFAT
 
 #include "SdFat.h"
+#include "SPI.h"
 
 #undef  FILE_APPEND
 #define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
@@ -54,12 +55,11 @@
 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_SPI_CLOCK 24000000
 
-// Instance of SdFat
 #ifndef SDFATFS_USED
+  // Instance of SdFat
+  #define FS_TYPE SdFat
   SdFat SD;
-#endif
 
-#ifndef FS_CONFIG
   #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
     static SPIClass sd_spi = SPIClass(VSPI);
     #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &sd_spi) // OK
@@ -73,6 +73,7 @@
     #define SD_CONFIG // NG
   #endif
 #else
+  #define FS_TYPE fs::FS
   #define SD_CONFIG FS_CONFIG
 #endif
 
@@ -86,7 +87,7 @@
 #include "SD.h"
 #include "SPI.h"
 
-#define FS_TYPE  fs::SDFS
+#define FS_TYPE fs::FS
 
 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_SPI_CLOCK 24000000
@@ -521,7 +522,9 @@ void sdcard_setup() {
 #ifdef  USE_SDFAT
 
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+#ifndef SDFATFS_USED
   sd_spi.begin(SCK, MISO, MOSI, SS);
+#endif
 #endif
 
   if (!SD.begin(SD_CONFIG)) {
