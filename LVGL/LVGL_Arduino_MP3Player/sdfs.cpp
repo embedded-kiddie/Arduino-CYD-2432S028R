@@ -25,12 +25,12 @@ static lv_fs_res_t fs_tell(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p);
 
 #ifdef USE_SDFAT
 
-static FS_FILE my_file;
+static File my_file;
 
 #else
 
 typedef struct MyFile {
-    FS_FILE file;
+    File file;
 } MyFile;
 
 #endif
@@ -82,14 +82,14 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
         flags = FILE_WRITE;
 
 #ifdef USE_SDFAT
-    my_file = FS_DEV.open(path, flags);
+    my_file = SD.open(path, flags);
     if(!my_file) {
         return NULL;
     }
 
     return (void *)&my_file;
 #else
-    FS_FILE my_file = FS_DEV.open(path, flags);
+    File my_file = SD.open(path, flags);
     if(!my_file) {
         return NULL;
     }
@@ -305,7 +305,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
         strcpy(fs_cache.path, path);
       }
 
-      FS_FILE file = FS_DEV.open(path, FILE_READ);
+      File file = SD.open(path, FILE_READ);
 #ifdef  USE_SDFAT
       size = file.fileSize();
 #else

@@ -431,7 +431,7 @@ static void display_picture(uint32_t playNo) {
 
   if (ptr = strrchr(buf, '.')) {
     strcpy(ptr + 1, PICTURE_EXT);
-    if (FS_DEV.exists(buf + 2)) {
+    if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
       lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
       return;
@@ -440,7 +440,7 @@ static void display_picture(uint32_t playNo) {
 
   if (ptr = strrchr(buf, '/')) {
     strcpy(ptr + 1, "@picture." PICTURE_EXT);
-    if (FS_DEV.exists(buf + 2)) {
+    if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
       lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
       return;

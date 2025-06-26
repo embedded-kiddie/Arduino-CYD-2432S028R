@@ -54,14 +54,9 @@
 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_SPI_CLOCK 24000000
 
-// SHARED_SPI makes SD very slow, while DEDICATED_SPI causes GFX libraries to stop working.
-#ifndef SD_SPI_METHOD
-#define SD_SPI_METHOD SHARED_SPI
-#endif
-
-#ifndef FS_TYPE
-  #define FS_TYPE SdFat
-  FS_TYPE SD;
+// Instance of SdFat
+#ifndef SDFATFS_USED
+  SdFat SD;
 #endif
 
 #ifndef FS_CONFIG
@@ -69,7 +64,7 @@
     static SPIClass sd_spi = SPIClass(VSPI);
     #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &sd_spi) // OK
   #elif 1
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_METHOD, SD_SPI_CLOCK) // OK
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SHARED_SPI, SD_SPI_CLOCK) // OK
   #elif 0
     #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_CLOCK) // NG
   #elif 0

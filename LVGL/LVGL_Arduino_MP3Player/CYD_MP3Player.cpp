@@ -16,15 +16,15 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   }
   
   // initialize SD card
-  if (!FS_DEV.begin(FS_CONFIG)) {
+  if (!SD.begin(FS_CONFIG)) {
     m_error = "failed to mount: " + m_root;
     return false;
   }
 
   // create directories for metadata
   std::string path = m_root + META_DATA_DIR;
-  if (!FS_DEV.exists(path.c_str())) {
-    if (!FS_DEV.mkdir(path.c_str())) {
+  if (!SD.exists(path.c_str())) {
+    if (!SD.mkdir(path.c_str())) {
       m_error = "mkdir failed: " + path;
       return false;
     }
@@ -33,8 +33,8 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   const char* dirs[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
   for (int i = 0; i < sizeof(dirs) / sizeof(char*); i++) {
     path = m_root + META_DATA_DIR + dirs[i];
-    if (!FS_DEV.exists(path.c_str())) {
-      if (!FS_DEV.mkdir(path.c_str())) {
+    if (!SD.exists(path.c_str())) {
+      if (!SD.mkdir(path.c_str())) {
       m_error = "mkdir failed: " + path;
         return false;
       }
@@ -84,7 +84,7 @@ const char* CYD_MP3Player::MetaDataPath(const char *path) {
 void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
   if (!audioIsPlaying()) {
     const char *file = MetaDataPath(path);
-    File fd = FS_DEV.open(file, FILE_READ);
+    File fd = SD.open(file, FILE_READ);
     if (fd) {
       fd.read((uint8_t*)meta, sizeof(MetaData_t));
       fd.close();
@@ -95,7 +95,7 @@ void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
 bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
   if (!audioIsPlaying()) {
     const char *file = MetaDataPath(path);
-    File fd = FS_DEV.open(file, FILE_WRITE);
+    File fd = SD.open(file, FILE_WRITE);
     if (fd) {
       meta->saved = meta->selected;
       fd.write((uint8_t*)meta, sizeof(MetaData_t));
@@ -227,8 +227,8 @@ uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
   if (ptr = strrchr(buf, '/')) {
     strcpy(ptr + 1, PICTURE_FILE);
 
-    if (FS_DEV.exists(buf)) {
-      FS_FILE file = FS_DEV.open(buf, FILE_READ);
+    if (SD.exists(buf)) {
+      File file = SD.open(buf, FILE_READ);
 
       if (file) {
 #ifdef  SDFATFS_USED

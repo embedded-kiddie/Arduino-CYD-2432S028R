@@ -275,7 +275,7 @@ void loop() {
   if (Serial.available()) {
     Serial.readStringUntil('\n');
 #if SCREENSHORT
-    SaveBMP24(FS_DEV, "/demo.bmp", tft);
+    SaveBMP24(SD, "/demo.bmp", tft);
 #else
     PrintESP32Memory();
 #endif
@@ -285,7 +285,7 @@ void loop() {
   uint32_t t = millis();
   if (t - _skip < 45 * 1000 && t - _prev >= 66) {
     sprintf(fname, "/%05d.bmp", N++);
-    SaveBMP24(FS_DEV, fname, tft);
+    SaveBMP24(SD, fname, tft);
     _skip += (_prev = millis()) - t;
   }
 #endif

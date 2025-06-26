@@ -66,7 +66,7 @@ typedef struct {
 class CYD_MP3Player {
 private:
   uint32_t m_playNo = 0;
-  fs::FS & m_fs = FS_DEV;
+  fs::FS & m_fs = SD;
   std::string m_error = "";
   std::string m_root = "/";
   std::vector<PlayList_t> m_files = {};

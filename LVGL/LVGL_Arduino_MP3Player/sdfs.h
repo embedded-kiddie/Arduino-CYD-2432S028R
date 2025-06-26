@@ -15,9 +15,6 @@
 #include "SdFat.h"
 
 #define USE_SDFAT
-#define FS_DEV    SD          // instance in CYD_Audio.cpp
-#define FS_TYPE   fs::SDFATFS // defined  in CYD_Audio.cpp
-#define FS_FILE   FsFile      // File
 #define FS_MODE   int
 #define FS_CONFIG SD_CS, SD_CLOCK
 
@@ -35,21 +32,16 @@ enum SeekMode {
 
 #else
 
-#include "FS.h"
 #include "SD.h"
+#include "FS.h"
 
-#define FS_DEV    SD          // instance in SD.cpp
-#define FS_TYPE   fs::SDFS    // defined  in SD.h
-#define FS_FILE   File        // FsFile
 #define FS_MODE   const char *
-#define FS_CONFIG SD_CS //, SPI, SD_CLOCK
+#define FS_CONFIG SD_CS, SPI, SD_CLOCK
 
 #endif // SdFat or SD
 
 #define SD_CLOCK  25000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_CS     SS
-
-extern FS_TYPE FS_DEV;
 
 /*--------------------------------------------------------------------------------
  * MY_USE_FS_ARDUINO_SD:
