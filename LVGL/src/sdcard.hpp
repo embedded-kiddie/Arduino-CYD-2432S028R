@@ -59,10 +59,9 @@
   // Instance of SdFat
   #define FS_TYPE SdFat
   SdFat SD;
-
   #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-    static SPIClass sd_spi = SPIClass(VSPI);
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &sd_spi) // OK
+    #define SD_SPI_BUS sd_spi
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &SD_SPI_BUS) // OK
   #elif 1
     #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SHARED_SPI, SD_SPI_CLOCK) // OK
   #elif 0
@@ -93,8 +92,8 @@
 #define SD_SPI_CLOCK 24000000
 
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-  static SPIClass sd_spi = SPIClass(VSPI); // VSPI
-  #define SD_CONFIG SS, sd_spi, SD_SPI_CLOCK
+  #define SD_SPI_BUS sd_spi
+  #define SD_CONFIG SS, SD_SPI_BUS, SD_SPI_CLOCK
 #elif defined (ARDUINO_XIAO_ESP32S3) && defined (_TFT_eSPIH_)
   #define SD_CONFIG SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
 #else
@@ -517,14 +516,15 @@ bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
  * Note the global variable 'SPI' is assigned to 'VSPI' same as 'CYD_SD_SPI_BUS'.
  * https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
  *--------------------------------------------------------------------------------*/
-void sdcard_setup() {
+#ifdef SD_SPI_BUS
+static SPIClass SD_SPI_BUS = SPIClass(VSPI);
+#endif
 
+void sdcard_setup(void) {
 #ifdef  USE_SDFAT
 
-#if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-#ifndef SDFATFS_USED
-  sd_spi.begin(SCK, MISO, MOSI, SS);
-#endif
+#ifdef SD_SPI_BUS
+  SD_SPI_BUS.begin(SCK, MISO, MOSI, SS);
 #endif
 
   if (!SD.begin(SD_CONFIG)) {
@@ -547,8 +547,8 @@ void sdcard_setup() {
 
 #else
 
-#if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-  sd_spi.begin(SCK, MISO, MOSI, SS);
+#ifdef SD_SPI_BUS
+  SD_SPI_BUS.begin(SCK, MISO, MOSI, SS);
 #endif
 
   if (!SD.begin(SD_CONFIG)) {
