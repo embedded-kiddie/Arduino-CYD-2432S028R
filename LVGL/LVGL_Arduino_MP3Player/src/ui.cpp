@@ -6,6 +6,7 @@
 #include "ui.h"
 #include "ui_helpers.h"
 #include <stdio.h>  // for sprintf(), printf()
+#include <string.h> // for strncpy(), strrchr()
 
 #include "../CYD_MP3Player.h"
 static CYD_MP3Player player;

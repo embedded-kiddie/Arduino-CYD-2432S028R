@@ -44,6 +44,12 @@ enum SeekMode {
 #define SD_CS     SS
 
 /*--------------------------------------------------------------------------------
+ * Temporary buffer size
+ * at least 97 = title(30) + "/" + artist(30) + "/" + album(30) + ".mp3" + '\0'
+ *--------------------------------------------------------------------------------*/
+#define BUF_SIZE 128
+
+/*--------------------------------------------------------------------------------
  * MY_USE_FS_ARDUINO_SD:
  *  0: Load binary  on flash rom    (LV_USE_[TJPGD|BMP] in lv_conf.h must be 0)
  *  1: Load jpg/bmp on SD w/o cache (LV_USE_[TJPGD|BMP] in lv_conf.h must be 1)

@@ -1,8 +1,11 @@
 /*--------------------------------------------------------------------------------
  * CYD_MP3Player class definition
  *--------------------------------------------------------------------------------*/
+#include <string.h>
+#include <exception>
+#include <random>
+
 #include "CYD_MP3Player.h"
-#include "sdfs.h"
 #include "MD5.h"
 
 /*--------------------------------------------------------------------------------
@@ -12,12 +15,13 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   // set root path
   m_root = root;
   if (m_root.back() != '/') {
-    m_root += "/";
+    m_root.append("/");
   }
-  
+
   // initialize SD card
   if (!SD.begin(FS_CONFIG)) {
     m_error = "failed to mount: " + m_root;
+    printf("%s\n", m_error.c_str());
     return false;
   }
 
@@ -26,6 +30,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   if (!SD.exists(path.c_str())) {
     if (!SD.mkdir(path.c_str())) {
       m_error = "mkdir failed: " + path;
+      printf("%s\n", m_error.c_str());
       return false;
     }
   }
@@ -35,20 +40,31 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
     path = m_root + META_DATA_DIR + dirs[i];
     if (!SD.exists(path.c_str())) {
       if (!SD.mkdir(path.c_str())) {
-      m_error = "mkdir failed: " + path;
+        m_error = "mkdir failed: " + path;
+        printf("%s\n", m_error.c_str());
         return false;
       }
     }
   }
 
-  SetVolume(volume);
-
 #if MY_USE_FS_ARDUINO_SD != 0
-  // Arduino SD File System for image
-  lv_fs_arduino_sd_init();
+  lv_fs_arduino_sd_init(); // Arduino SD File System for image
 #endif
 
+  SetVolume(volume);
+
   return true;
+}
+
+/*--------------------------------------------------------------------------------
+ * Get the play list for a specified track
+ *--------------------------------------------------------------------------------*/
+PlayList_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
+  if (m_list.size()) {
+    return & m_list[playNo];
+  } else {
+    return NULL;
+  }
 }
 
 /*--------------------------------------------------------------------------------
@@ -65,11 +81,24 @@ bool CYD_MP3Player::CheckExtension(const char *path) {
 }
 
 /*--------------------------------------------------------------------------------
+ * Gets the path to a specified track
+ *--------------------------------------------------------------------------------*/
+void CYD_MP3Player::GetFilePath(uint32_t playNo, char *buf, int len) {
+  PlayList_t *file = GetPlayList(playNo);
+  if (file) {
+    strncpy(buf, file->path.c_str(), len);
+    buf[len - 1] = '\0';
+  } else {
+    *buf = '\0';
+  }
+}
+
+/*--------------------------------------------------------------------------------
  * Generate a path to the metadata file
  *--------------------------------------------------------------------------------*/
-const char* CYD_MP3Player::MetaDataPath(const char *path) {
+const char* CYD_MP3Player::GetMetaPath(const char *path) {
   MD5Hex_t hex;
-  MD5::make_hash(&path[strlen(MP3_PATH_ROOT)], hex);
+  MD5::make_hash(&path[m_root.size()], hex);
   MD5::make_digest(hex, 5); // e.g. "0123456789" (get 5 x 2 characters of string)
   hex.digest[1] = '/';      // e.g. "0/23456789"
 
@@ -83,7 +112,7 @@ const char* CYD_MP3Player::MetaDataPath(const char *path) {
  *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
   if (!audioIsPlaying()) {
-    const char *file = MetaDataPath(path);
+    const char *file = GetMetaPath(path);
     File fd = SD.open(file, FILE_READ);
     if (fd) {
       fd.read((uint8_t*)meta, sizeof(MetaData_t));
@@ -94,7 +123,7 @@ void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
 
 bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
   if (!audioIsPlaying()) {
-    const char *file = MetaDataPath(path);
+    const char *file = GetMetaPath(path);
     File fd = SD.open(file, FILE_WRITE);
     if (fd) {
       meta->saved = meta->selected;
@@ -107,21 +136,10 @@ bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get the playlist for a specified track
- *--------------------------------------------------------------------------------*/
-PlayList_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
-  if (m_files.size()) {
-    return & m_files[playNo];
-  } else {
-    return NULL;
-  }
-}
-
-/*--------------------------------------------------------------------------------
- * Scan and create a list of audio m_files in a specified directory.
+ * Scan and create a list of audio m_list in a specified directory.
  *--------------------------------------------------------------------------------*/
 bool CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
-  File root = m_fs.open(dirname);
+  File root = SD.open(dirname);
   if (!root) {
     m_error = std::string("Failed to open ") + dirname;
     return false;
@@ -166,13 +184,13 @@ bool CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
         if (CheckExtension(path.c_str())) {
           MetaData_t meta = {};
           LoadMetaData(path.c_str(), &meta);
-          m_files.push_back({meta, path});
+          m_list.push_back({meta, path});
         }
 #else
         if (CheckExtension(file.path())) {
           MetaData_t meta = {};
           LoadMetaData(file.path(), &meta);
-          m_files.push_back({meta, file.path()});
+          m_list.push_back({meta, file.path()});
         }
 #endif
       } catch (const std::exception &e) {
@@ -201,18 +219,18 @@ uint32_t CYD_MP3Player::ScanFileList(uint8_t levels, bool shuffle) {
 uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
   if (shuffle) {
     std::mt19937 engine(esp_random());
-    std::shuffle(m_files.begin(), m_files.end(), engine);
+    std::shuffle(m_list.begin(), m_list.end(), engine);
   } else {
-    std::sort(m_files.begin(), m_files.end(), [](PlayList_t &a, PlayList_t &b) {
+    std::sort(m_list.begin(), m_list.end(), [](PlayList_t &a, PlayList_t &b) {
       return a.path.compare(b.path) < 0 ? true : false; // ascending order
     });
   }
 
-  for (auto& file : m_files) {
+  for (auto& file : m_list) {
     Serial.printf("%d/%d, %2d, %3d, %s\n", file.meta.saved, file.meta.selected, file.meta.pictureNo, file.meta.duration, file.path.c_str());
   }
-  Serial.printf("Total: %d\n", m_files.size());
-  return m_files.size();
+  Serial.printf("Total: %d\n", m_list.size());
+  return m_list.size();
 }
 
 /*--------------------------------------------------------------------------------
@@ -227,28 +245,25 @@ uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
   if (ptr = strrchr(buf, '/')) {
     strcpy(ptr + 1, PICTURE_FILE);
 
-    if (SD.exists(buf)) {
-      File file = SD.open(buf, FILE_READ);
-
-      if (file) {
+    File file = SD.open(buf, FILE_READ);
+    if (file) {
 #ifdef  SDFATFS_USED
-        String n = "";
-        while (file.available()) {
-          n += file.readString();
-        }
-        file.close();
-        if (isdigit(n[0])) {
-          pictNo = atoi(n.c_str());
-        }
-#else // SD
-        file.read((uint8_t*)buf, sizeof(buf));
-        file.close();
-        buf[sizeof(buf) - 1] = '\0';
-        if (isdigit(buf[0])) {
-          pictNo = atoi(buf);
-        }
-#endif // SdFat or SD
+      String n = "";
+      while (file.available()) {
+        n += file.readString();
       }
+      file.close();
+      if (isdigit(n[0])) {
+        pictNo = atoi(n.c_str());
+      }
+#else // SD
+      file.read((uint8_t*)buf, sizeof(buf));
+      file.close();
+      buf[sizeof(buf) - 1] = '\0';
+      if (isdigit(buf[0])) {
+        pictNo = atoi(buf);
+      }
+#endif // SdFat or SD
     }
   }
 
@@ -256,29 +271,16 @@ uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
 }
 
 /*--------------------------------------------------------------------------------
- * Gets the path to a specified track
- *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::GetFilePath(uint32_t playNo, char *buf, int len) {
-  PlayList_t *list = GetPlayList(playNo);
-  if (list) {
-    strncpy(buf, list->path.c_str(), len);
-    buf[len - 1] = '\0';
-  } else {
-    *buf = '\0';
-  }
-}
-
-/*--------------------------------------------------------------------------------
- * Get ID3 tags (title, album, artist) from the playlist
+ * Get ID3 tags (title, album, artist) from the play list
  *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
-  PlayList_t *list = GetPlayList(playNo);
-  if (list) {
-    tags.meta = list->meta;
+  PlayList_t *file = GetPlayList(playNo);
+  if (file) {
+    tags.meta = file->meta;
 
     int n = 0;
     char *ptr, *token, *tmp[8], copy[BUF_SIZE];
-    const char *path = list->path.c_str();
+    const char *path = file->path.c_str();
 
     if (strlen(path) < sizeof(copy)) {
       strcpy(copy, path);
@@ -318,29 +320,29 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
 }
 
 /*--------------------------------------------------------------------------------
- * Get metadata from playlists and save it to a dedicated file
+ * Get metadata from play list and save it to a dedicated file
  *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
-  PlayList_t *list = GetPlayList(playNo);
-  if (list) {
-    *meta = list->meta;
+  PlayList_t *file = GetPlayList(playNo);
+  if (file) {
+    *meta = file->meta;
   } else {
     *meta = {}; // never reach this line
   }
 }
 
 bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
-  PlayList_t *list = GetPlayList(playNo);
-  if (list) {
-    list->meta = *meta;
-    return SaveMetaData(list->path.c_str(), meta);
+  PlayList_t *file = GetPlayList(playNo);
+  if (file) {
+    file->meta = *meta;
+    return SaveMetaData(file->path.c_str(), meta);
   }
   return false; // never reach this line
 }
 
 bool CYD_MP3Player::UpdateMetaData(void) {
   bool ret = true;
-  for (auto& file : m_files) {
+  for (auto& file : m_list) {
     if (file.meta.saved != file.meta.selected) {
       ret &= SaveMetaData(file.path.c_str(), &file.meta);
     }
@@ -371,7 +373,7 @@ bool CYD_MP3Player::IsPlaying(void) {
 }
 
 bool CYD_MP3Player::IsLastSong(void) {
-  return m_playNo == m_files.size() - 1;
+  return m_playNo == m_list.size() - 1;
 }
 
 bool CYD_MP3Player::FilePlay(const char* path) {
@@ -396,7 +398,7 @@ void CYD_MP3Player::SetPlayNo(uint32_t playNo, bool stop) {
   if (stop) {
     audioStopSong();
   }
-  uint32_t size = m_files.size();
+  uint32_t size = m_list.size();
   if (size) {
     m_playNo = (playNo + size) % size;
   }
@@ -411,8 +413,8 @@ void CYD_MP3Player::PlayPrev(bool stop) {
 }
 
 bool CYD_MP3Player::IsSelected(void) {
-  if (m_files.size()) {
-    return m_files[m_playNo].meta.selected;
+  if (m_list.size()) {
+    return m_list[m_playNo].meta.selected;
   } else {
     return false;
   }
@@ -422,13 +424,13 @@ bool CYD_MP3Player::IsSelected(void) {
  * Check if the next song is selected
  *--------------------------------------------------------------------------------*/
 bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
-  const int N = m_files.size();
+  const int N = m_list.size();
   const int m = (m_playNo + (next ? 1 : -1) + N) % N;
   const int n = N - (loop ? 0 : m);
 
   for (int i = 0; i < n; i++) {
     int j = (m + (next ? i : -i) + N) % N;
-    if (m_files[j].meta.selected) {
+    if (m_list[j].meta.selected) {
       SetPlayNo(j, stop);
       return true;
     }
@@ -438,9 +440,10 @@ bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
 }
 
 bool CYD_MP3Player::AutoPlay(void) {
-  if (!audioIsPlaying() && m_files.size()) {
-    if (!audioConnecttoSD(m_files[m_playNo].path.c_str())) {
-      m_error = "Failed to play " + m_files[m_playNo].path;
+  if (!audioIsPlaying() && m_list.size()) {
+    if (!audioConnecttoSD(m_list[m_playNo].path.c_str())) {
+      m_error = "Failed to play " + m_list[m_playNo].path;
+      printf("%s\n", m_error.c_str());
       return false;
     }
   }

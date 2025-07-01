@@ -7,12 +7,19 @@
 #include "CYD28_audio.h"
 #include "sdfs.h"
 
-// at least 97 = title(30) + "/" + artist(30) + "/" + album(30) + ".mp3" + '\0'
-#define BUF_SIZE 128
-
+/*--------------------------------------------------------------------------------
+ * Audio file root folder
+ *--------------------------------------------------------------------------------*/
 #define MP3_PATH_ROOT "/MP3/"
 #define MP3_PATH_LEVEL 2
 #define MP3_PATH_CONFIG MP3_PATH_ROOT, MP3_PATH_LEVEL
+
+/*--------------------------------------------------------------------------------
+ * Possible values for `SetVolume()`
+ *--------------------------------------------------------------------------------*/
+#define MP3_VOLUME_MIN  0
+#define MP3_VOLUME_INI  6
+#define MP3_VOLUME_MAX  21
 
 /*--------------------------------------------------------------------------------
  * Metadata file
@@ -33,20 +40,10 @@
 #endif
 
 /*--------------------------------------------------------------------------------
- * Possible values for `SetVolume()`
+ * Class definition
  *--------------------------------------------------------------------------------*/
-#define MP3_VOLUME_MIN  0
-#define MP3_VOLUME_INI  6
-#define MP3_VOLUME_MAX  21
-
-/*--------------------------------------------------------------------------------
- * File name and size for ScanFileList()
- *--------------------------------------------------------------------------------*/
-#include <string.h>
 #include <string>
 #include <vector>
-#include <random>
-#include <exception>
 
 typedef struct {
   bool saved    : 4;
@@ -70,21 +67,20 @@ typedef struct {
 class CYD_MP3Player {
 private:
   uint32_t m_playNo = 0;
-  fs::FS & m_fs = SD;
   std::string m_error = "";
   std::string m_root = "/";
-  std::vector<PlayList_t> m_files = {};
+  std::vector<PlayList_t> m_list = {};
 
-  bool        CheckExtension(const char *path);
-  const char* MetaDataPath  (const char *path);
+  PlayList_t* GetPlayList   (uint32_t playNo);
+  const char* GetMetaPath   (const char *path);
   void        LoadMetaData  (const char *path, MetaData_t *meta);
   bool        SaveMetaData  (const char *path, MetaData_t *meta);
-  PlayList_t* GetPlayList   (uint32_t playNo);
+  bool        CheckExtension(const char *path);
 
 public:
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
   uint32_t    GetPlayNo(void) { return m_playNo; }
-  uint32_t    GetCounts(void) { return m_files.size(); }
+  uint32_t    GetCounts(void) { return m_list.size(); }
   bool        ScanFileList(const char *dirname, uint8_t levels);
   uint32_t    ScanFileList(uint8_t levels, bool shuffle = true);
   uint32_t    SortFileList(bool shuffle = true);

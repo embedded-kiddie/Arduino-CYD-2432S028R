@@ -1,6 +1,6 @@
 #include "CYD28_audio.h"
 
-CYD_Audio audio; 
+CYD_Audio audio;
 
 void audioTask(void *parameter);
 void CreateQueues();
@@ -24,7 +24,7 @@ void audioInit()
     xTaskCreatePinnedToCore(
         audioTask,             /* Function to implement the task */
         "audioplay",           /* Name of the task */
-        10000,                  /* Stack size in words */
+        4096,                  /* Stack size in words */
         NULL,                  /* Task input parameter */
         2 | portPRIVILEGE_BIT, /* Priority of the task */
         NULL,                  /* Task handle. */
@@ -49,7 +49,7 @@ void audioTask(void *parameter)
 	}
 	audioMessage_t audioRxTaskMessage;
 	audioMessage_t audioTxTaskMessage;
-	
+
 	audio.setVolume(21); // 0...21
 
 	while (true)
