@@ -261,6 +261,7 @@ void setup() {
   lv_indev_set_read_cb(indev, my_touchpad_read);
 
   Serial.begin(115200);
+  while (millis() < 500);
   ui_init();
 }
 

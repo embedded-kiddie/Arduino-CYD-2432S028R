@@ -425,7 +425,13 @@ static void display_picture(uint32_t playNo) {
 
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
   buf[1] = ':';
-  player.GetFilePath(playNo, buf + 2, sizeof(buf) - 2);
+
+  std::string dir = player.GetDirPath(playNo);
+  dir.append(PICTURE_FILE);
+
+  // skip drive letter "S:"
+  strncpy(&buf[2], dir.c_str(), sizeof(buf) - 2);
+  buf[sizeof(buf) - 1] = '\0';
 
   if (ptr = strrchr(buf, '.')) {
     strcpy(ptr + 1, PICTURE_EXT);
@@ -534,7 +540,7 @@ bool ui_loop(void) {
       }
       break;
     case UI_STATE_START:
-      if (player.ScanFileList(MP3_PATH_LEVEL /* , ui_option.shuffle */)) {
+      if (player.ScanPlayList(/* ui_option.shuffle */)) {
         ui_set_playNo(0);
         ui_state = UI_STATE_PLAY;
       } else {

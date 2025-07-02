@@ -1,6 +1,7 @@
 /*--------------------------------------------------------------------------------
  * CYD_MP3Player class definition
  *--------------------------------------------------------------------------------*/
+#include <ctype.h>
 #include <string.h>
 #include <exception>
 #include <random>
@@ -21,7 +22,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   // initialize SD card
   if (!SD.begin(FS_CONFIG)) {
     m_error = "failed to mount: " + m_root;
-    printf("%s\n", m_error.c_str());
+    DBG_EXEC(printf("%s\n", m_error.c_str()));
     return false;
   }
 
@@ -30,7 +31,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   if (!SD.exists(path.c_str())) {
     if (!SD.mkdir(path.c_str())) {
       m_error = "mkdir failed: " + path;
-      printf("%s\n", m_error.c_str());
+      DBG_EXEC(printf("%s\n", m_error.c_str()));
       return false;
     }
   }
@@ -41,7 +42,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
     if (!SD.exists(path.c_str())) {
       if (!SD.mkdir(path.c_str())) {
         m_error = "mkdir failed: " + path;
-        printf("%s\n", m_error.c_str());
+        DBG_EXEC(printf("%s\n", m_error.c_str()));
         return false;
       }
     }
@@ -59,7 +60,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
 /*--------------------------------------------------------------------------------
  * Get the play list for a specified track
  *--------------------------------------------------------------------------------*/
-PlayList_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
+MP3File_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
   if (m_list.size()) {
     return & m_list[playNo];
   } else {
@@ -68,52 +69,49 @@ PlayList_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
 }
 
 /*--------------------------------------------------------------------------------
- * Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
+ * Get path to the audio file
  *--------------------------------------------------------------------------------*/
-bool CYD_MP3Player::CheckExtension(const char *path) {
-  const char* ext[] = {".mp3", ".m4a", ".wav"};
-  for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
-    if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
-      return true;
-    }
+std::string CYD_MP3Player::GetDirPath(uint32_t playNo) {
+  MP3File_t *file = GetPlayList(playNo);
+  if (file) {
+    std::string path = m_tree->find(file->parent);
+    return path.append("/");
+  } else {
+    return "";
   }
-  return false;
 }
 
-/*--------------------------------------------------------------------------------
- * Gets the path to a specified track
- *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::GetFilePath(uint32_t playNo, char *buf, int len) {
-  PlayList_t *file = GetPlayList(playNo);
+std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
+  MP3File_t *file = GetPlayList(playNo);
   if (file) {
-    strncpy(buf, file->path.c_str(), len);
-    buf[len - 1] = '\0';
+    std::string path = m_tree->find(file->parent);
+    return path.append("/").append(file->name);
   } else {
-    *buf = '\0';
+    return "";
   }
 }
 
 /*--------------------------------------------------------------------------------
  * Generate a path to the metadata file
  *--------------------------------------------------------------------------------*/
-const char* CYD_MP3Player::GetMetaPath(const char *path) {
+std::string CYD_MP3Player::GetMetaPath(uint32_t playNo) {
+  std::string path = GetFilePath(playNo);
+
   MD5Hex_t hex;
-  MD5::make_hash(&path[m_root.size()], hex);
+  MD5::make_hash(&path.c_str()[m_root.size()], hex); // skip root folder
   MD5::make_digest(hex, 5); // e.g. "0123456789" (get 5 x 2 characters of string)
   hex.digest[1] = '/';      // e.g. "0/23456789"
 
-  static std::string file;
-  file = m_root + META_DATA_DIR + hex.digest + META_DATA_EXT;
-  return file.c_str();
+  return path.assign(m_root + META_DATA_DIR + hex.digest + META_DATA_EXT);
 }
 
 /*--------------------------------------------------------------------------------
  * Load/Save meta data (favorite, duration)
  *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
+void CYD_MP3Player::LoadMetaData(uint32_t playNo, MetaData_t *meta) {
   if (!audioIsPlaying()) {
-    const char *file = GetMetaPath(path);
-    File fd = SD.open(file, FILE_READ);
+    std::string file = GetMetaPath(playNo);
+    File fd = SD.open(file.c_str(), FILE_READ);
     if (fd) {
       fd.read((uint8_t*)meta, sizeof(MetaData_t));
       fd.close();
@@ -121,10 +119,10 @@ void CYD_MP3Player::LoadMetaData(const char *path, MetaData_t *meta) {
   }
 }
 
-bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
+bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
   if (!audioIsPlaying()) {
-    const char *file = GetMetaPath(path);
-    File fd = SD.open(file, FILE_WRITE);
+    std::string file = GetMetaPath(playNo);
+    File fd = SD.open(file.c_str(), FILE_WRITE);
     if (fd) {
       meta->saved = meta->selected;
       fd.write((uint8_t*)meta, sizeof(MetaData_t));
@@ -138,98 +136,39 @@ bool CYD_MP3Player::SaveMetaData(const char *path, MetaData_t *meta) {
 /*--------------------------------------------------------------------------------
  * Scan and create a list of audio m_list in a specified directory.
  *--------------------------------------------------------------------------------*/
-bool CYD_MP3Player::ScanFileList(const char *dirname, uint8_t levels) {
-  File root = SD.open(dirname);
-  if (!root) {
-    m_error = std::string("Failed to open ") + dirname;
-    return false;
+uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
+  m_tree = new Node(m_root.c_str());
+  File dirs = SD.open(m_root.c_str());
+  m_tree->scan_dir(dirs);
+  m_tree->sort();
+  m_tree->traverse();
+  dirs.close();
+
+  scan_file(m_tree);
+
+  int i = 0;
+  for (auto &file : m_list) {
+    LoadMetaData(i++, &file.meta);
   }
 
-  if (!root.isDirectory()) {
-    m_error = dirname + std::string("is not a directory.");
-    return false;
-  }
-
-  File file = root.openNextFile();
-  while (file) {
-    bool isDir = file.isDirectory();
-
-    // skip dot file
-#ifdef SDFATFS_USED
-    char name[BUF_SIZE];
-    file.getName(name, sizeof(name));
-    std::string path = std::string(dirname);
-    path += (path.at(path.size() - 1) == '/' ? "" : "/") + std::string(name);
-    if (file.isHidden()) {
-      // Serial.printf("%s is skipped.\n", name);
-    }
-#else
-    const char *p = strrchr(file.path(), '/');
-    if (p[p ? 1 : 0] == '.') {
-      // Serial.printf("%s is skipped.\n", file.path());
-    }
-#endif
-
-    else if (isDir && levels) {
-#ifdef SDFATFS_USED
-      ScanFileList(path.c_str(), levels - 1);
-#else
-      ScanFileList(file.path(), levels - 1);
-#endif
-    }
-
-    else if (!isDir) {
-      try {
-#ifdef SDFATFS_USED
-        if (CheckExtension(path.c_str())) {
-          MetaData_t meta = {};
-          LoadMetaData(path.c_str(), &meta);
-          m_list.push_back({meta, path});
-        }
-#else
-        if (CheckExtension(file.path())) {
-          MetaData_t meta = {};
-          LoadMetaData(file.path(), &meta);
-          m_list.push_back({meta, file.path()});
-        }
-#endif
-      } catch (const std::exception &e) {
-        m_error = std::string("Exception: ") + e.what();
-        return false;
-      }
-    }
-
-    file = root.openNextFile();
-  }
-
-  return (m_error == "");
-}
-
-uint32_t CYD_MP3Player::ScanFileList(uint8_t levels, bool shuffle) {
-  if (ScanFileList(m_root.c_str(), levels)) {
-    return SortFileList(shuffle);
-  } else {
-    return false;
-  }
+  return SortPlayList(shuffle);
 }
 
 /*--------------------------------------------------------------------------------
  * Sort file list
  *--------------------------------------------------------------------------------*/
-uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
+uint32_t CYD_MP3Player::SortPlayList(bool shuffle) {
   if (shuffle) {
     std::mt19937 engine(esp_random());
     std::shuffle(m_list.begin(), m_list.end(), engine);
-  } else {
-    std::sort(m_list.begin(), m_list.end(), [](PlayList_t &a, PlayList_t &b) {
-      return a.path.compare(b.path) < 0 ? true : false; // ascending order
-    });
   }
 
-  for (auto& file : m_list) {
-    Serial.printf("%d/%d, %2d, %3d, %s\n", file.meta.saved, file.meta.selected, file.meta.pictureNo, file.meta.duration, file.path.c_str());
-  }
-  Serial.printf("Total: %d\n", m_list.size());
+  DBG_EXEC({
+    m_tree->print_tree();
+    print_files(m_tree);
+    printf("Total: %d\n", m_list.size());
+  });
+
   return m_list.size();
 }
 
@@ -238,33 +177,31 @@ uint32_t CYD_MP3Player::SortFileList(bool shuffle) {
  *--------------------------------------------------------------------------------*/
 uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
   uint32_t pictNo = 0;
-  char buf[BUF_SIZE], *ptr;
 
   // gets the picture number recorded in PICTURE_FILE.
-  GetFilePath(playNo, buf, sizeof(buf));
-  if (ptr = strrchr(buf, '/')) {
-    strcpy(ptr + 1, PICTURE_FILE);
+  std::string path = GetDirPath(playNo);
+  path.append(PICTURE_FILE);
 
-    File file = SD.open(buf, FILE_READ);
-    if (file) {
+  File file = SD.open(path.c_str(), FILE_READ);
+  if (file) {
 #ifdef  SDFATFS_USED
-      String n = "";
-      while (file.available()) {
-        n += file.readString();
-      }
-      file.close();
-      if (isdigit(n[0])) {
-        pictNo = atoi(n.c_str());
-      }
-#else // SD
-      file.read((uint8_t*)buf, sizeof(buf));
-      file.close();
-      buf[sizeof(buf) - 1] = '\0';
-      if (isdigit(buf[0])) {
-        pictNo = atoi(buf);
-      }
-#endif // SdFat or SD
+    String n = "";
+    while (file.available()) {
+      n += file.readString();
     }
+    file.close();
+    if (isdigit(n[0])) {
+      pictNo = atoi(n.c_str());
+    }
+#else // SD
+    char buf[BUF_SIZE];
+    file.read((uint8_t*)buf, sizeof(buf));
+    file.close();
+    buf[sizeof(buf) - 1] = '\0';
+    if (isdigit(buf[0])) {
+      pictNo = atoi(buf);
+    }
+#endif // SdFat or SD
   }
 
   return pictNo;
@@ -274,19 +211,22 @@ uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
  * Get ID3 tags (title, album, artist) from the play list
  *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
-  PlayList_t *file = GetPlayList(playNo);
+  MP3File_t *file = GetPlayList(playNo);
   if (file) {
     tags.meta = file->meta;
 
     int n = 0;
     char *ptr, *token, *tmp[8], copy[BUF_SIZE];
-    const char *path = file->path.c_str();
+    std::string path = GetFilePath(playNo);
 
-    if (strlen(path) < sizeof(copy)) {
-      strcpy(copy, path);
+    if (path.size() < sizeof(copy)) {
+      strcpy(copy, path.c_str());
     } else {
       // Copy a string including the null character from the end
-      strcpy(copy, path + strlen(path) + 1 - sizeof(copy));
+      strcpy(copy, path.c_str() + path.size() + 1 - sizeof(copy));
+      if (!isprint(copy[0])) {
+        copy[0] = ' ';
+      }
     }
 
     token = strtok_r(copy, "/", &ptr);
@@ -323,7 +263,7 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
  * Get metadata from play list and save it to a dedicated file
  *--------------------------------------------------------------------------------*/
 void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
-  PlayList_t *file = GetPlayList(playNo);
+  MP3File_t *file = GetPlayList(playNo);
   if (file) {
     *meta = file->meta;
   } else {
@@ -332,20 +272,22 @@ void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
 }
 
 bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
-  PlayList_t *file = GetPlayList(playNo);
+  MP3File_t *file = GetPlayList(playNo);
   if (file) {
     file->meta = *meta;
-    return SaveMetaData(file->path.c_str(), meta);
+    return SaveMetaData(playNo, meta);
   }
   return false; // never reach this line
 }
 
 bool CYD_MP3Player::UpdateMetaData(void) {
   bool ret = true;
+  int i = 0;
   for (auto& file : m_list) {
     if (file.meta.saved != file.meta.selected) {
-      ret &= SaveMetaData(file.path.c_str(), &file.meta);
+      ret &= SaveMetaData(i, &file.meta);
     }
+    i++;
   }
   return ret;
 }
@@ -441,9 +383,10 @@ bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
 
 bool CYD_MP3Player::AutoPlay(void) {
   if (!audioIsPlaying() && m_list.size()) {
-    if (!audioConnecttoSD(m_list[m_playNo].path.c_str())) {
-      m_error = "Failed to play " + m_list[m_playNo].path;
-      printf("%s\n", m_error.c_str());
+    std::string path = GetFilePath(m_playNo);
+    if (!audioConnecttoSD(path.c_str())) {
+      m_error = "Failed to play " + path;
+      DBG_EXEC(printf("%s\n", m_error.c_str()));
       return false;
     }
   }
