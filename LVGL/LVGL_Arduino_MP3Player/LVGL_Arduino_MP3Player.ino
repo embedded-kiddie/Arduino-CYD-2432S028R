@@ -273,6 +273,14 @@ void loop() {
     enable_display(false);
   }
 
+#if SAVE_SEQUENCIAL_BMP
+  uint32_t t = millis();
+  if (t - _skip < 45 * 1000 && t - _prev >= 66) {
+    sprintf(fname, "/%05d.bmp", N++);
+    SaveBMP24(SD, fname, tft);
+    _skip += (_prev = millis()) - t;
+  }
+#else
   if (Serial.available()) {
     Serial.readStringUntil('\n');
 #if SCREENSHORT
@@ -280,14 +288,6 @@ void loop() {
 #else
     PrintESP32Memory();
 #endif
-  }
-
-#if SAVE_SEQUENCIAL_BMP
-  uint32_t t = millis();
-  if (t - _skip < 45 * 1000 && t - _prev >= 66) {
-    sprintf(fname, "/%05d.bmp", N++);
-    SaveBMP24(SD, fname, tft);
-    _skip += (_prev = millis()) - t;
   }
 #endif
 }

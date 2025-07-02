@@ -415,24 +415,22 @@ static void update_metadata(void) {
 }
 
 /*--------------------------------------------------------------------------------
- * Show the picture for album
+ * Display a covoer picture on SD or flash
  *--------------------------------------------------------------------------------*/
 static void display_picture(uint32_t playNo) {
 #if MY_USE_FS_ARDUINO_SD != 0
 
-  // displaying image files on the SD card
+  // displaying an image file on SD card
   char buf[BUF_SIZE], *ptr;
-
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
   buf[1] = ':';
 
-  std::string dir = player.GetDirPath(playNo);
-  dir.append(PICTURE_FILE);
-
   // skip drive letter "S:"
+  std::string dir = player.GetFilePath(playNo);
   strncpy(&buf[2], dir.c_str(), sizeof(buf) - 2);
   buf[sizeof(buf) - 1] = '\0';
 
+  // title.[bmp|jpg]
   if (ptr = strrchr(buf, '.')) {
     strcpy(ptr + 1, PICTURE_EXT);
     if (SD.exists(buf + 2)) {
@@ -442,6 +440,7 @@ static void display_picture(uint32_t playNo) {
     }
   }
 
+  // @picture.[bmp|jpg]
   if (ptr = strrchr(buf, '/')) {
     strcpy(ptr + 1, "@picture." PICTURE_EXT);
     if (SD.exists(buf + 2)) {
@@ -456,7 +455,7 @@ static void display_picture(uint32_t playNo) {
 
 #else
 
-  // displaying image files in the flash ROM
+  // displaying an image file on flash ROM
   MetaData_t meta;
   player.GetMetaData(playNo, &meta);
   int pictNo = meta.pictureNo;
