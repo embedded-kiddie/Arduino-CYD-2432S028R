@@ -109,7 +109,7 @@ public:
   void        SetVolume(uint8_t vol);
   uint8_t     GetVolumePerCent(void);
   bool        IsPlaying(void);
-  bool        IsLastSong(void);
+  bool        IsLastSong(bool selected);
   bool        FilePlay(const char *path);
   void        StopPlay(void);
   void        PauseResume(void);

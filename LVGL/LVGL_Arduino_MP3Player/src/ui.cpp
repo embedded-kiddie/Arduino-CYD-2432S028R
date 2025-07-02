@@ -687,7 +687,7 @@ void audio_id3data(const char *info) {
 
 void audio_eof_mp3(const char *info) {
   ui_state = UI_STATE_EOF;
-  if (!player.IsLastSong() || ui_option.repeat) {
+  if (!player.IsLastSong(ui_option.favorite) || ui_option.repeat) {
     nextState = UI_STATE_NEXT;
   } else {
     nextState = UI_STATE_STOP;

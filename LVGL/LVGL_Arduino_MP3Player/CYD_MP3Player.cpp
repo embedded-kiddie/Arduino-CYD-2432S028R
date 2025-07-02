@@ -314,8 +314,19 @@ bool CYD_MP3Player::IsPlaying(void) {
   return audioIsPlaying();
 }
 
-bool CYD_MP3Player::IsLastSong(void) {
-  return m_playNo == m_list.size() - 1;
+bool CYD_MP3Player::IsLastSong(bool selected) {
+  const int n = m_list.size();
+  if (selected) {
+    for (int i = m_playNo + 1; i < n; i++) {
+      MP3File_t* file = GetPlayList(i);
+      if (file->meta.selected) {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return m_playNo == n - 1;
+  }
 }
 
 bool CYD_MP3Player::FilePlay(const char* path) {
