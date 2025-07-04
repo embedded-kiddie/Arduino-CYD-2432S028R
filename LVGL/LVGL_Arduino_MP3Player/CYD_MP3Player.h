@@ -5,7 +5,7 @@
 #define _CYD_MP3PLAYER_H_
 
 #include "CYD28_audio.h"
-#include "sdfs.h"
+#include "sdspi.h"
 #include "tree.hpp"
 #include "debug.h"
 

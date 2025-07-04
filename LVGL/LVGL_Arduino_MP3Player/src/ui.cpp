@@ -8,6 +8,7 @@
 #include <stdio.h>  // for sprintf(), printf()
 #include <string.h> // for strncpy(), strrchr()
 
+#include "../sdfs.h"
 #include "../CYD_MP3Player.h"
 static CYD_MP3Player player;
 
