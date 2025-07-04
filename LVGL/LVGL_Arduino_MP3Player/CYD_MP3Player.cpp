@@ -20,7 +20,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   }
 
   // initialize SD card
-  if (!SD.begin(FS_CONFIG)) {
+  if (!SD.begin(SD_CONFIG)) {
     m_error = "failed to mount: " + m_root;
     DBG_EXEC(printf("%s\n", m_error.c_str()));
     return false;

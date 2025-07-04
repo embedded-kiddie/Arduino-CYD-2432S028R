@@ -8,6 +8,7 @@
 #ifndef _SDFS_H_
 #define _SDFS_H_
 
+#include "CYD28_audio.h"
 #include "sdspi.h"
 
 /*--------------------------------------------------------------------------------

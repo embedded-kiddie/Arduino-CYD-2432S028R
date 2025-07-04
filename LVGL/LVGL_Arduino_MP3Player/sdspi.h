@@ -8,15 +8,12 @@
 #ifndef _SDSPI_H_
 #define _SDSPI_H_
 
-#include "CYD28_audio.h"
-
 #ifdef  SDFATFS_USED          // defined in CYD_Audio.h
+#define USE_SDFAT
 
 #include "SdFat.h"
 
-#define USE_SDFAT
-#define FS_MODE   int
-#define FS_CONFIG SD_CS, SD_CLOCK
+#define SD_CONFIG SD_CS, SD_CLOCK
 
 // alternatives to FS.h definitions
 #undef  FILE_APPEND
@@ -35,13 +32,12 @@ enum SeekMode {
 #include "SD.h"
 #include "FS.h"
 
-#define FS_MODE   const char *
-#define FS_CONFIG SD_CS, SPI, SD_CLOCK
+#define SD_CONFIG SD_CS, SPI, SD_CLOCK
 
 #endif // SdFat or SD
 
-#define SD_CLOCK  25000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_CS     SS
+#define SD_CLOCK  25000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 
 /*--------------------------------------------------------------------------------
  * Temporary buffer size

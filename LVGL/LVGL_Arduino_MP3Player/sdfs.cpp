@@ -25,10 +25,12 @@ static lv_fs_res_t fs_tell(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p);
 
 #ifdef USE_SDFAT
 
+#define FS_MODE int
 static File my_file;
 
 #else
 
+#define FS_MODE const char *
 typedef struct MyFile {
     File file;
 } MyFile;
