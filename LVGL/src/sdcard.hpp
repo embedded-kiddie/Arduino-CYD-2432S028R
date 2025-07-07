@@ -73,7 +73,7 @@
   #endif
 #else
   #define FS_TYPE fs::FS
-  #define SD_CONFIG FS_CONFIG
+  #define SD_CONFIG SS SD_SPI_CLOCK
 #endif
 
 #ifndef BUF_SIZE

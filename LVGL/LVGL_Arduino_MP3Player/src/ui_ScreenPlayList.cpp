@@ -263,8 +263,8 @@ static void scroll_cb(lv_event_t *e) {
  * Initialize the style of each cell in the playlist
  *--------------------------------------------------------------------------------*/
 static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
-  static const int32_t grid_cols[] = { LV_GRID_CONTENT, LV_GRID_FR(1), (int32_t)ui_img_1157704237.header.w, LV_GRID_TEMPLATE_LAST };
-  static const int32_t grid_rows[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
+  static const lv_coord_t grid_cols[] = { LV_GRID_CONTENT, LV_GRID_FR(1), (int32_t)ui_img_1157704237.header.w, LV_GRID_TEMPLATE_LAST };
+  static const lv_coord_t grid_rows[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
 
   lv_style_init                     (&style_button);
   lv_style_set_bg_opa               (&style_button, LV_OPA_TRANSP);

@@ -9,6 +9,7 @@
 #define _SDSPI_H_
 
 #ifdef  SDFATFS_USED          // defined in CYD_Audio.h
+
 #define USE_SDFAT
 
 #include "SdFat.h"
@@ -29,6 +30,7 @@ enum SeekMode {
 
 #else
 
+#include "SPI.h"
 #include "SD.h"
 #include "FS.h"
 

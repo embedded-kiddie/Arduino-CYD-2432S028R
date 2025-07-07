@@ -6,7 +6,7 @@
 
 TFT_eSPI tft = TFT_eSPI();
 
-#if   1
+#if   0
 #include <XPT2046_Bitbang.h>
 #else
 #include <XPT2046_Touchscreen.h>
@@ -21,7 +21,7 @@ XPT2046_ScreenPoint sp(TOUCH_CS, TOUCH_IRQ);
 XPT2046_ScreenPoint sp(TOUCH_MOSI, TOUCH_MISO, TOUCH_CLK, TOUCH_CS);
 #endif
 
-#define ROTATION    3 // Panel: CW --> Screen: CCW (0,2: portrait / 1,3: landscape)
+#define ROTATION    0 // Panel: CW --> Screen: CCW (0,2: portrait / 1,3: landscape)
 #define CALIBRATED  false // false: Execute calibrateTouch()
 
 /*----------------------------------------------------------------------
@@ -77,11 +77,11 @@ void setup() {
   sp.calibrateTouch(cal, &tft, TFT_WHITE, TFT_BLACK);
 
   printf("\n// XPT2046\n");
-  printf(".cal = { ");
-  for (int i = 0; i < 5; ++i) {
-    printf("%d", cal[i]);
-    printf(i < 4 ? ", " : ", 0, },\n");
+  printf(".cal = {");
+  for (int i = 0; i < 4; ++i) {
+    printf("%d, ", cal[i]);
   }
+  printf("%d}\n", ROTATION);
 
   sp.setTouch(static_cast<const uint16_t*>(cal));
 #endif

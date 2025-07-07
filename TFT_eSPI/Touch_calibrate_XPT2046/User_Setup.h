@@ -10,7 +10,7 @@
 
 // false: Panel driver: ILI9341 (micro-USB x 1 type)
 // true : Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
-#define DISPLAY_CYD_2USB  true
+#define DISPLAY_CYD_2USB  false
 
 // User defined information reported by "Read_User_Setup" test & diagnostics example
 #define USER_SETUP_INFO "User_Setup_CYD"
