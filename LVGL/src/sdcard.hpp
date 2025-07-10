@@ -53,7 +53,7 @@
 #define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
 
 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
-#define SD_SPI_CLOCK 24000000
+#define SD_SPI_CLOCK 25000000
 
 #ifndef SDFATFS_USED
   // Instance of SdFat
@@ -73,7 +73,7 @@
   #endif
 #else
   #define FS_TYPE fs::FS
-  #define SD_CONFIG SS SD_SPI_CLOCK
+  #define SD_CONFIG SS, SD_SPI_CLOCK
 #endif
 
 #ifndef BUF_SIZE
@@ -89,7 +89,7 @@
 #define FS_TYPE fs::FS
 
 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
-#define SD_SPI_CLOCK 24000000
+#define SD_SPI_CLOCK 25000000
 
 #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
   #define SD_SPI_BUS sd_spi
