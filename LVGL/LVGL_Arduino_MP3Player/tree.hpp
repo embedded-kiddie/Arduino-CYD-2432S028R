@@ -7,7 +7,7 @@
 #define _TREE_H_
 
 /*--------------------------------------------------------------------------------
- * SD library
+ * SD file system configuration
  *--------------------------------------------------------------------------------*/
 #include "sdfs.h"
 
@@ -18,6 +18,7 @@
 #include <vector>
 #include <exception>
 #include <assert.h>
+#include <string.h>
 
 class Node {
 private:
@@ -38,10 +39,14 @@ public:
     for (auto &n : this->children) {
       delete n;
     }
+    this->children.clear();
     this->name.clear();
   }
 
-public:
+  const size_t size(void) {
+    return n_leafs;
+  }
+
   Node* append(const char * name) {
     Node *node = new Node(name);
     assert(node);
@@ -51,6 +56,29 @@ public:
       assert(false); //  e.what()
     }
     return node;
+  }
+
+  void scan_dir(File &dir, Node *node) {
+    for (File entry = dir.openNextFile(); entry; entry = dir.openNextFile()) {
+      if (entry.isDirectory()) {
+#ifdef USE_SDFAT
+        char buf[BUF_SIZE];
+        entry.getName(buf, sizeof(buf));
+        if (buf[0] != '@') {
+          scan_dir(entry, node->append(buf));
+        }
+#else
+        if (entry.name()[0] != '@') {
+          scan_dir(entry, node->append(entry.name()));
+        }
+#endif
+      }
+      entry.close();
+    }
+
+    std::sort(node->children.begin(), node->children.end(), [](Node *a, Node *b) {
+      return a->name.compare(b->name) < 0 ? true : false; // ascending order
+    });
   }
 
 private:
@@ -67,61 +95,11 @@ private:
   }
 
 public:
-  void traverse() {
-    n_leafs = 0;
-    traverse_node(this);
-  }
-
-  const size_t size(void) {
-    return n_leafs;
-  }
-
-private:
-  void sort_node(Node *node) {
-    std::sort(node->children.begin(), node->children.end(), [](Node *a, Node *b) {
-      return a->name.compare(b->name) < 0 ? true : false; // ascending order
-    });
-    for (auto &n : node->children) {
-      if (n->children.size() > 1) {
-        sort_node(n);
-      }
-    }
-  }
-
-public:
-  void sort(void) {
-    if (this->children.size() > 1) {
-      sort_node(this);
-    }
-  }
-
-public:
-  void scan_dir(File &dir, Node *node) {
-    while (true) {
-      File entry = dir.openNextFile();
-      if (!entry) {
-        break;
-      }
-      if (entry.isDirectory()) {
-#ifdef USE_SDFAT
-        char buf[BUF_SIZE];
-        entry.getName(buf, sizeof(buf));
-        if (buf[0] != '@') {
-          scan_dir(entry, node->append(buf));
-        }
-#else
-        if (entry.name()[0] != '@') {
-          scan_dir(entry, node->append(entry.name()));
-        }
-#endif
-      }
-      entry.close();
-    }
-  }
-
-public:
   void scan_dir(File &dir) {
     scan_dir(dir, this);
+
+    n_leafs = 0;
+    traverse_node(this);
   }
 
 private:
@@ -161,13 +139,13 @@ public:
   }
 
 private:
-  void print_node(Node * node, int i) {
-    ++i;
+  void print_node(Node * node, int indent) {
+    ++indent;
     for (auto &n : node->children) {
-      for (int j = 0; j < i; j++) printf("  ");
+      for (int j = 0; j < indent; j++) { printf("  "); }
       printf("%d %s (%d)\n", n->id, n->name.c_str(), n->children.size());
       if (n->children.size()) {
-        print_node(n, i);
+        print_node(n, indent);
       }
     }
   }

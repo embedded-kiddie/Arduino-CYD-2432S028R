@@ -140,8 +140,6 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
   m_tree = new Node(m_root.c_str());
   File dirs = SD.open(m_root.c_str());
   m_tree->scan_dir(dirs);
-  m_tree->sort();
-  m_tree->traverse();
   dirs.close();
 
   scan_file(m_tree);
