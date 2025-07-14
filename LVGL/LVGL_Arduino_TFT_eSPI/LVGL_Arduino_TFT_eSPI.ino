@@ -44,12 +44,12 @@ XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
  *as the examples and demos are now part of the main LVGL library. */
 
 //#include <examples/lv_examples.h>
-#include <demos/lv_demos.h>
+//#include <demos/lv_demos.h>
 
 /*Set to your screen resolution and rotation*/
 #define TFT_HOR_RES   TFT_WIDTH   // 240
 #define TFT_VER_RES   TFT_HEIGHT  // 320
-#define TFT_ROTATION  LV_DISPLAY_ROTATION_270 // LV_DISPLAY_ROTATION_{0|90|180|270}
+#define TFT_ROTATION  LV_DISPLAY_ROTATION_0 // LV_DISPLAY_ROTATION_{0|90|180|270}
 
 /*LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes*/
 #define DRAW_BUF_SIZE (TFT_HOR_RES * TFT_VER_RES / 10 * (LV_COLOR_DEPTH / 8))
@@ -123,6 +123,12 @@ void setup() {
 
   lv_example_checkbox_1();
   //lv_example_checkbox_2();
+
+#else
+
+  lv_obj_t *label = lv_label_create(lv_screen_active());
+  lv_label_set_text( label, "Hello Arduino, I'm LVGL!" );
+  lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
 
 #endif
 

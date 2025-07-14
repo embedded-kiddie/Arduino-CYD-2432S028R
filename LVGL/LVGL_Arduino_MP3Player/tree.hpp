@@ -26,7 +26,7 @@ private:
   static std::string path;
   static uint16_t n_leafs;
 public:
-  uint16_t id;
+  uint16_t key;
   std::string name;
   std::vector<Node*> children;
 
@@ -88,10 +88,10 @@ private:
       if (n->children.size()) {
         traverse_node(n);
       } else {
-        n->id = n_leafs++;
+        n->key = n_leafs++;
       }
     }
-    node->id = n_leafs - 1;
+    node->key = n_leafs - 1;
   }
 
 public:
@@ -103,14 +103,14 @@ public:
   }
 
 private:
-  bool find_node(Node * node, int id) {
+  bool find_node(Node * node, int key) {
     for (auto &n : node->children) {
       // within the range ?
-      if (n->id >= id) {
+      if (n->key >= key) {
         // are there any subtrees?
         if (n->children.size()) {
           path.append(n->name).append("/");
-          if (find_node(n, id)) {
+          if (find_node(n, key)) {
             return found;
           }
         }
@@ -126,12 +126,12 @@ private:
   }
 
 public:
-  std::string find(int id) {
+  std::string find(int key) {
     // initialize static variables
     found = false;
     path = this->name;
 
-    if (find_node(this, id)) {
+    if (find_node(this, key)) {
       return path;
     } else {
       return "";
@@ -143,7 +143,7 @@ private:
     ++indent;
     for (auto &n : node->children) {
       for (int j = 0; j < indent; j++) { printf("  "); }
-      printf("%d %s (%d)\n", n->id, n->name.c_str(), n->children.size());
+      printf("%3d %s (%d)\n", n->key, n->name.c_str(), n->children.size());
       if (n->children.size()) {
         print_node(n, indent);
       }
@@ -152,7 +152,7 @@ private:
 
 public:
   void print_tree(void) {
-    printf("%d %s (%d)\n", this->id, this->name.c_str(), this->children.size());
+    printf("%3d %s (%d)\n", this->key, this->name.c_str(), this->children.size());
     print_node(this, 0);
   }
 };
