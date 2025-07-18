@@ -10,7 +10,9 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_remove_flag            (ui_ScreenOption, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_style_bg_color     (ui_ScreenOption, UI_COLOR_BACKGROUND,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_opa       (ui_ScreenOption, 255,                  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_ALL, NULL);
 
+#if !USE_CONST_STYLE
   lv_obj_t *ui_OptionToMainRight = lv_checkbox_create(ui_ScreenOption);
   lv_checkbox_set_text          (ui_OptionToMainRight, "");
   lv_obj_set_width              (ui_OptionToMainRight, 27);
@@ -21,24 +23,79 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_add_flag               (ui_OptionToMainRight, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
   lv_obj_set_style_bg_image_src (ui_OptionToMainRight, &ui_img_1710110385,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_image_src (ui_OptionToMainRight, &ui_img_1710110385,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_bg_image_src (ui_OptionToMainRight, &ui_img_1710110385,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_color     (ui_OptionToMainRight, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_radius       (ui_OptionToMainRight, LV_RADIUS_CIRCLE,    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_radius       (ui_OptionToMainRight, LV_RADIUS_CIRCLE,    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_radius       (ui_OptionToMainRight, LV_RADIUS_CIRCLE,    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_border_width (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_left     (ui_OptionToMainRight,   8,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_right    (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_top      (ui_OptionToMainRight,   8,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_bottom   (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa       (ui_OptionToMainRight, 255,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+
+  lv_obj_set_style_bg_image_src (ui_OptionToMainRight, &ui_img_1710110385,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_radius       (ui_OptionToMainRight, LV_RADIUS_CIRCLE,    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_border_width (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_left     (ui_OptionToMainRight,  10,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_right    (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_top      (ui_OptionToMainRight,  10,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom   (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
+  lv_obj_set_style_bg_image_src (ui_OptionToMainRight, &ui_img_1710110385,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_bg_color     (ui_OptionToMainRight, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_bg_opa       (ui_OptionToMainRight, 255,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_add_event_cb           (ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_ALL, NULL);
+#else
+  static const lv_style_const_prop_t style_prop_common[] = {
+    LV_STYLE_CONST_WIDTH(27),
+    LV_STYLE_CONST_HEIGHT(27),
+    LV_STYLE_CONST_X(LV_PCT_X(42)),
+    LV_STYLE_CONST_Y(LV_PCT_Y(-44)),
+    LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
+    LV_STYLE_CONST_PROPS_END
+  };
+
+  static const lv_style_const_prop_t style_prop_default[] = {
+    LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1710110385),
+    LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+    LV_STYLE_CONST_BORDER_WIDTH(0),
+    LV_STYLE_CONST_PAD_LEFT(8),
+    LV_STYLE_CONST_PAD_RIGHT(0),
+    LV_STYLE_CONST_PAD_TOP(8),
+    LV_STYLE_CONST_PAD_BOTTOM(0),
+    LV_STYLE_CONST_PROPS_END
+  };
+
+  static const lv_style_const_prop_t style_prop_pressed[] = {
+    LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1710110385),
+    LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+    LV_STYLE_CONST_BORDER_WIDTH(0),
+    LV_STYLE_CONST_PAD_LEFT(10),
+    LV_STYLE_CONST_PAD_RIGHT(0),
+    LV_STYLE_CONST_PAD_TOP(10),
+    LV_STYLE_CONST_PAD_BOTTOM(0),
+    LV_STYLE_CONST_PROPS_END
+  };
+
+  static const lv_style_const_prop_t style_prop_checked[] = {
+    LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1710110385),
+    LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+    LV_STYLE_CONST_BG_OPA(255),
+    LV_STYLE_CONST_PROPS_END
+  };
+
+  static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+  static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+  static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
+  static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+
+  lv_obj_t *ui_OptionToMainRight = lv_checkbox_create(ui_ScreenOption);
+  lv_checkbox_set_text(ui_OptionToMainRight, "");
+  lv_obj_add_style    (ui_OptionToMainRight, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_add_style    (ui_OptionToMainRight, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_add_style    (ui_OptionToMainRight, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_add_style    (ui_OptionToMainRight, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_add_event_cb (ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_ALL, NULL);
+#endif
+
+#if   false
   lv_obj_t *ui_FavoriteLabel = lv_label_create(ui_ScreenOption);
   lv_obj_set_width              (ui_FavoriteLabel, LV_SIZE_CONTENT);
   lv_obj_set_height             (ui_FavoriteLabel, LV_SIZE_CONTENT);
@@ -53,6 +110,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_x                  (ui_FavoriteSwitch, lv_pct(-24));
   lv_obj_set_y                  (ui_FavoriteSwitch, lv_pct(-30));
   lv_obj_set_align              (ui_FavoriteSwitch, LV_ALIGN_CENTER);
+  lv_obj_add_event_cb           (ui_FavoriteSwitch, ui_event_FavoriteSwitch, LV_EVENT_ALL, NULL);
 
   lv_obj_t *ui_FavoriteDropdown = lv_dropdown_create(ui_ScreenOption);
   lv_dropdown_set_options       (ui_FavoriteDropdown, "List 1\nList 2\nList 3");
@@ -62,6 +120,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_y                  (ui_FavoriteDropdown, lv_pct(-15));
   lv_obj_set_align              (ui_FavoriteDropdown, LV_ALIGN_CENTER);
   lv_obj_add_flag               (ui_FavoriteDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+  lv_obj_add_event_cb           (ui_FavoriteDropdown, ui_event_FavoriteDropdown, LV_EVENT_ALL, NULL);
 
   ui_FavoriteClearButton = lv_button_create(ui_ScreenOption);
   lv_obj_set_width              (ui_FavoriteClearButton, 80);
@@ -82,7 +141,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_style_text_opa     (ui_FavoriteClearLabel, 255,                  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_text_font    (ui_FavoriteClearLabel, LV_FONT_DEFAULT,      (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
 
-  ui_FavoriteNewButton = lv_button_create(ui_ScreenOption);
+  lv_obj_t *ui_FavoriteNewButton = lv_button_create(ui_ScreenOption);
   lv_obj_set_width              (ui_FavoriteNewButton, 80);
   lv_obj_set_height             (ui_FavoriteNewButton, 30);
   lv_obj_set_x                  (ui_FavoriteNewButton, lv_pct(23));
@@ -114,6 +173,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_x                  (ui_BacklightSwitch, lv_pct(-24));
   lv_obj_set_y                  (ui_BacklightSwitch, lv_pct(10));
   lv_obj_set_align              (ui_BacklightSwitch, LV_ALIGN_CENTER);
+  lv_obj_add_event_cb           (ui_BacklightSwitch, ui_event_BacklightSwitch, LV_EVENT_ALL, NULL);
 
   ui_BacklightRoller = lv_roller_create(ui_ScreenOption);
   lv_roller_set_options         (ui_BacklightRoller, "30 sec\n1 min\n2 min\n5 min", LV_ROLLER_MODE_NORMAL);
@@ -139,6 +199,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_x                  (ui_SleepTimerSwitch, lv_pct(22));
   lv_obj_set_y                  (ui_SleepTimerSwitch, lv_pct(10));
   lv_obj_set_align              (ui_SleepTimerSwitch, LV_ALIGN_CENTER);
+  lv_obj_add_event_cb           (ui_SleepTimerSwitch, ui_event_SleepTimerSwitch, LV_EVENT_ALL, NULL);
 
   ui_SleepTimerRoller = lv_roller_create(ui_ScreenOption);
   lv_roller_set_options         (ui_SleepTimerRoller, "30 min\n60 min\n90 min\n120 min\n180 min", LV_ROLLER_MODE_NORMAL);
@@ -149,11 +210,111 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_align              (ui_SleepTimerRoller, LV_ALIGN_CENTER);
   lv_obj_add_state              (ui_SleepTimerRoller, LV_STATE_DISABLED);
   lv_obj_set_style_text_font    (ui_SleepTimerRoller, LV_FONT_DEFAULT, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-
-  lv_obj_add_event_cb(ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_FavoriteSwitch,    ui_event_FavoriteSwitch,    LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_FavoriteDropdown,  ui_event_FavoriteDropdown,  LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_BacklightSwitch,   ui_event_BacklightSwitch,   LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_SleepTimerSwitch,  ui_event_SleepTimerSwitch,  LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_ScreenOption,      ui_event_ScreenOption,      LV_EVENT_ALL, NULL);
+#else
+  {
+    lv_obj_t *obj = lv_label_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 10, 14);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_label_set_text(obj, "Playlist");
+  }
+  {
+    lv_obj_t *obj = lv_dropdown_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 10, 39);
+    lv_obj_set_size(obj, 99, LV_SIZE_CONTENT);
+    lv_dropdown_set_options(obj, "List 1\nList 2\nList 3");
+    lv_dropdown_set_selected(obj, 0);
+  }
+  {
+    lv_obj_t *obj = lv_list_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 9, 105);
+    lv_obj_set_size(obj, 221, 125);
+  }
+  {
+    lv_obj_t *obj = lv_obj_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 10, 105);
+    lv_obj_set_size(obj, 220, 121);
+    lv_obj_set_style_pad_left     (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top      (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right    (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom   (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa       (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_radius       (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  }
+  {
+    lv_obj_t *obj = lv_label_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 47, 120);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_label_set_text(obj, "Text");
+  }
+  {
+    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 17, 118);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_checkbox_set_text(obj, "");
+  }
+  {
+    lv_obj_t *obj = lv_label_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 9, 84);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_label_set_text(obj, "Album");
+  }
+  {
+    lv_obj_t *obj = lv_label_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 9, 241);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_label_set_text(obj, "Backlight Off");
+  }
+  {
+    lv_obj_t *obj = lv_label_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 131, 241);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_label_set_text(obj, "Sleep Timer");
+  }
+  {
+    lv_obj_t *obj = lv_dropdown_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 9, 269);
+    lv_obj_set_size(obj, 104, LV_SIZE_CONTENT);
+    lv_dropdown_set_options(obj, "Disable\n30 sec\n1 min\n2 min\n5 min");
+    lv_dropdown_set_dir(obj, LV_DIR_TOP);
+    lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
+    lv_dropdown_set_selected(obj, 0);
+    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  }
+  {
+    lv_obj_t *obj = lv_dropdown_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 123, 269);
+    lv_obj_set_size(obj, 107, LV_SIZE_CONTENT);
+    lv_dropdown_set_options(obj, "Disable\n30 min\n60 min\n90 min\n120 min");
+    lv_dropdown_set_dir(obj, LV_DIR_TOP);
+    lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
+    lv_dropdown_set_selected(obj, 0);
+    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  }
+  {
+    lv_obj_t *obj = lv_imgbtn_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 131, 45);
+    lv_obj_set_size(obj, 16, 15);
+    lv_imgbtn_set_src(obj, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_1157704237, NULL);
+    lv_imgbtn_set_src(obj, LV_IMGBTN_STATE_PRESSED,  NULL, &ui_img_628457255,  NULL);
+  }
+  {
+    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 17, 146);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_checkbox_set_text(obj, "");
+  }
+  {
+    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 17, 174);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_checkbox_set_text(obj, "");
+  }
+  {
+    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, 17, 201);
+    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_checkbox_set_text(obj, "");
+  }
+#endif
 }

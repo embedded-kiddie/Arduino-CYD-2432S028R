@@ -1,3 +1,7 @@
+#include "Esp.h"
+#include "chip-debug-report.h"
+#include "freertos_stats.h"
+
 void PrintESP32Memory(void) {
   /*
     https://en.cppreference.com/w/cpp/compiler_support
@@ -33,23 +37,14 @@ void PrintESP32Memory(void) {
 
   printf("MCU model   :%s R%d\n", ESP.getChipModel(), ESP.getChipRevision());
   printf("ESP-IDF ver :%d.%d.%d %s\n", ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH, cpp_ver);
-  printf("Sketch space:%7d\n", ESP.getFreeSketchSpace());
-  printf("Sketch size :%7d\n", ESP.getSketchSize());
-  printf("Heap total  :%7d\n", ESP.getHeapSize());
-  printf("Heap free   :%7d\n", esp_get_free_internal_heap_size());
-  printf("Heap remain :%7d\n", ESP.getMinFreeHeap());
-  printf("Heap lowest :%7d\n", esp_get_minimum_free_heap_size());
 
-  // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/heap_debug.html
-  // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/mem_alloc.html
-  if (psramInit()) {
-    printf("PSRAM total :%7d\n", ESP.getPsramSize());
-    printf("PSRAM lowest:%7d\n", ESP.getMinFreePsram());
-  }
-  printf("Min MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL));
-  printf("Min MALLOC_CAP_DMA     :%7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_DMA));
-  printf("Max MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
-  printf("Max MALLOC_CAP_DMA     :%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
+  // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/chip-debug-report.cpp
+//printAfterSetupInfo();
+
+  // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/freertos_stats.h
+  // https://forum.arduino.cc/t/how-to-make-tasks-and-determine-stack-size-in-freertos/978325/29
+  // uxTaskGetStackHighWaterMark()
+//printRunningTasks(Serial);
 
   // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
   static const char* reset_reason_all[] = {
@@ -94,7 +89,27 @@ void PrintESP32Memory(void) {
   uint32_t X = esp_reset_reason();          // overall
   uint32_t Y = esp_rom_get_reset_reason(0); // core0
   uint32_t Z = esp_rom_get_reset_reason(1); // core1
+  printf("============ Reset Reason =============\n");
   printf("Reset reason (overall): %2d (%s)\n", X, reset_reason_all [X]);
   printf("Reset reason (core 0) : %2d (%s)\n", Y, reset_reason_core[Y]);
   printf("Reset reason (core 1) : %2d (%s)\n", Z, reset_reason_core[Z]);
+
+  printf("============ Memory Usage =============\n");
+  printf("Sketch space:%7d\n", ESP.getFreeSketchSpace());
+  printf("Sketch size :%7d\n", ESP.getSketchSize());
+  printf("Heap total  :%7d\n", ESP.getHeapSize());
+  printf("Heap free   :%7d\n", esp_get_free_internal_heap_size());
+  printf("Heap remain :%7d\n", ESP.getMinFreeHeap());
+  printf("Heap lowest :%7d\n", esp_get_minimum_free_heap_size());
+
+  // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/heap_debug.html
+  // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/mem_alloc.html
+  if (psramInit()) {
+    printf("PSRAM total :%7d\n", ESP.getPsramSize());
+    printf("PSRAM lowest:%7d\n", ESP.getMinFreePsram());
+  }
+  printf("Min MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL));
+  printf("Min MALLOC_CAP_DMA     :%7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_DMA));
+  printf("Max MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
+  printf("Max MALLOC_CAP_DMA     :%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
 }

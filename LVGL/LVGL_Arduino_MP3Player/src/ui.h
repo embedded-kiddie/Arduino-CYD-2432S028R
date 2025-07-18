@@ -10,6 +10,13 @@
 #include "ui_helpers.h"
 #include "ui_events.h"
 
+// https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
+#define USE_CONST_STYLE 0
+#define SCREEN_WIDTH  240
+#define SCREEN_HEIGHT 320
+#define LV_PCT_X(a)   (SCREEN_WIDTH  * (a) / 100)
+#define LV_PCT_Y(a)   (SCREEN_HEIGHT * (a) / 100)
+
 // SCREEN: ui_ScreenMain
 extern lv_obj_t *ui_ScreenMain;
 extern lv_obj_t *ui_WaveImage;
@@ -38,17 +45,19 @@ void ui_event_VolumeMin   (lv_event_t *e);
 
 // SCREEN: ui_ScreenOption
 extern lv_obj_t *ui_ScreenOption;
+#if   false
 extern lv_obj_t *ui_BacklightRoller;
 extern lv_obj_t *ui_SleepTimerRoller;
 extern lv_obj_t *ui_FavoriteNewButton;
 extern lv_obj_t *ui_FavoriteClearButton;
-void ui_ScreenOption_screen_init(void);
-void ui_event_ScreenOption      (lv_event_t *e);
-void ui_event_OptionToMainRight (lv_event_t *e);
 void ui_event_FavoriteDropdown  (lv_event_t *e);
 void ui_event_FavoriteSwitch    (lv_event_t *e);
 void ui_event_BacklightSwitch   (lv_event_t *e);
 void ui_event_SleepTimerSwitch  (lv_event_t *e);
+#endif
+void ui_ScreenOption_screen_init(void);
+void ui_event_ScreenOption      (lv_event_t *e);
+void ui_event_OptionToMainRight (lv_event_t *e);
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
@@ -75,29 +84,30 @@ void ui_event_MenuBluetoothOff  (lv_event_t *e);
 // EVENTS
 
 // IMAGES AND IMAGE SETS
-LV_IMG_DECLARE(ui_img_album_png);   // assets/album.png
-LV_IMG_DECLARE(ui_img_wave_png);    // assets/wave.png
-LV_IMG_DECLARE(ui_img_menu_png);    // assets/menu.png
-LV_IMG_DECLARE(ui_img_511832737);   // assets/heart-off.png
-LV_IMG_DECLARE(ui_img_1050326551);  // assets/heart-on.png
-LV_IMG_DECLARE(ui_img_repeat_png);  // assets/repeat.png
-LV_IMG_DECLARE(ui_img_shuffle_png); // assets/shuffle.png
-LV_IMG_DECLARE(ui_img_play_png);    // assets/play.png
-LV_IMG_DECLARE(ui_img_pause_png);   // assets/pause.png
-LV_IMG_DECLARE(ui_img_715969206);   // assets/skip-next.png
-LV_IMG_DECLARE(ui_img_1076165770);  // assets/skip-prev.png
-LV_IMG_DECLARE(ui_img_1994412056);  // assets/volume-max.png
-LV_IMG_DECLARE(ui_img_2058316518);  // assets/volume-min.png
-LV_IMG_DECLARE(ui_img_1710110385);  // assets/back-right.png
-//LV_IMG_DECLARE(ui_img_713466046);   // assets/back-left.png
-//LV_IMG_DECLARE(ui_img_1753861343);  // assets/bluetooth-on.png
-//LV_IMG_DECLARE(ui_img_1837194583);  // assets/bluetooth-off.png
-LV_IMG_DECLARE(ui_img_1157704237);  // assets/heart-off-small.png
-LV_IMG_DECLARE(ui_img_628457255);   // assets/heart-on-small.png
-LV_IMG_DECLARE(ui_img_1668913270);  // assets/back-up.png
-LV_IMG_DECLARE(ui_img_365069097);   // assets/back-down.png
-LV_IMG_DECLARE(ui_img_list_play);   // assets/list-play.png
-LV_IMG_DECLARE(ui_img_list_pause);  // assets/list-pause.png
+LV_IMAGE_DECLARE(ui_img_album_png);   // assets/album.png
+LV_IMAGE_DECLARE(ui_img_wave_png);    // assets/wave.png
+LV_IMAGE_DECLARE(ui_img_menu_png);    // assets/menu.png
+LV_IMAGE_DECLARE(ui_img_511832737);   // assets/heart-off.png
+LV_IMAGE_DECLARE(ui_img_1050326551);  // assets/heart-on.png
+LV_IMAGE_DECLARE(ui_img_repeat_png);  // assets/repeat.png
+LV_IMAGE_DECLARE(ui_img_shuffle_png); // assets/shuffle.png
+LV_IMAGE_DECLARE(ui_img_play_png);    // assets/play.png
+LV_IMAGE_DECLARE(ui_img_pause_png);   // assets/pause.png
+LV_IMAGE_DECLARE(ui_img_715969206);   // assets/skip-next.png
+LV_IMAGE_DECLARE(ui_img_1076165770);  // assets/skip-prev.png
+LV_IMAGE_DECLARE(ui_img_1994412056);  // assets/volume-max.png
+LV_IMAGE_DECLARE(ui_img_2058316518);  // assets/volume-min.png
+LV_IMAGE_DECLARE(ui_img_1710110385);  // assets/back-right.png
+//LV_IMAGE_DECLARE(ui_img_713466046);   // assets/back-left.png
+//LV_IMAGE_DECLARE(ui_img_1753861343);  // assets/bluetooth-on.png
+//LV_IMAGE_DECLARE(ui_img_1837194583);  // assets/bluetooth-off.png
+LV_IMAGE_DECLARE(ui_img_1157704237);  // assets/heart-off-small.png
+LV_IMAGE_DECLARE(ui_img_628457255);   // assets/heart-on-small.png
+LV_IMAGE_DECLARE(ui_img_1668913270);  // assets/back-up.png
+LV_IMAGE_DECLARE(ui_img_365069097);   // assets/back-down.png
+LV_IMAGE_DECLARE(ui_img_list_play);   // assets/list-play.png
+LV_IMAGE_DECLARE(ui_img_list_pause);  // assets/list-pause.png
+LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 
 // UI INIT
 void ui_init(void);

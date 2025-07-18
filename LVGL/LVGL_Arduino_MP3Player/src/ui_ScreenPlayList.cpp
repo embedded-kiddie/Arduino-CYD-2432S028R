@@ -26,19 +26,101 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags);
  **********************/
 static lv_obj_t *play_list;
 static lv_obj_t *slider;
-static lv_style_t style_button;
-static lv_style_t style_button_pressed;
-static lv_style_t style_button_checked;
-//static lv_style_t style_button_disable;
+static lv_style_t style_grid;
+
+static int32_t top_num, end_num; // hold the the highest/lowest number currently loaded in the playlist
+static bool update_scroll_running = false;
+
+#undef  USE_CONST_STYLE
+#define USE_CONST_STYLE 1
+
+#if !USE_CONST_STYLE
+static lv_style_t style_cell;
+static lv_style_t style_cell_pressed;
+static lv_style_t style_cell_checked;
+//static lv_style_t style_cell_disable;
 static lv_style_t style_title;
 static lv_style_t style_artist;
 static lv_style_t style_time;
 static lv_style_t style_heart;
 static lv_style_t style_menu_back;
-LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
+#else
+static const lv_style_const_prop_t style_cell_prop[] = {
+  LV_STYLE_CONST_BG_OPA(LV_OPA_TRANSP),
+  LV_STYLE_CONST_LAYOUT(LV_LAYOUT_GRID),
+  LV_STYLE_CONST_PAD_RIGHT(20),
+  LV_STYLE_CONST_PROPS_END
+};
 
-static int32_t top_num, end_num; // hold the the highest/lowest number currently loaded in the playlist
-static bool update_scroll_running = false;
+static const lv_style_const_prop_t style_cell_pressed_prop[] = {
+  LV_STYLE_CONST_BG_OPA(LV_OPA_COVER),
+  LV_STYLE_CONST_BG_COLOR(UI_COLOR_LIST_DEFAULT),
+  LV_STYLE_CONST_PROPS_END
+};
+
+static const lv_style_const_prop_t style_cell_checked_prop[] = {
+  LV_STYLE_CONST_BG_OPA(LV_OPA_COVER),
+  LV_STYLE_CONST_BG_COLOR(UI_COLOR_LIST_DEFAULT),
+  LV_STYLE_CONST_PROPS_END
+};
+
+static const lv_style_const_prop_t style_title_prop[] = {
+  LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LIST_LABEL_MARGINE),
+  LV_STYLE_CONST_HEIGHT(LIST_FONT_MEDIUM_HEIGHT),
+  LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_MEDIUM),
+  LV_STYLE_CONST_TEXT_COLOR(UI_COLOR_BACKGROUND),
+  LV_STYLE_CONST_PROPS_END
+};
+
+static const lv_style_const_prop_t style_artist_prop[] = {
+  LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LIST_LABEL_MARGINE),
+  LV_STYLE_CONST_HEIGHT(LIST_FONT_SMALL_HEIGHT),
+  LV_STYLE_CONST_PAD_RIGHT(5),
+  LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
+  LV_STYLE_CONST_TEXT_COLOR(UI_COLOR_LIST_ARTIST),
+  LV_STYLE_CONST_PROPS_END
+};
+
+static const lv_style_const_prop_t style_time_prop[] = {
+  LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
+  LV_STYLE_CONST_TEXT_COLOR(UI_COLOR_BACKGROUND),
+  LV_STYLE_CONST_PROPS_END
+};
+
+static const lv_style_const_prop_t style_heart_prop[] = {
+  LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+  LV_STYLE_CONST_BG_OPA(0),
+  LV_STYLE_CONST_BORDER_WIDTH(0),
+  LV_STYLE_CONST_PAD_LEFT(-5), // slightly offset to the right
+  LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+  LV_STYLE_CONST_PROPS_END
+};
+
+static const lv_style_const_prop_t style_menu_back_prop[] = {
+  LV_STYLE_CONST_BG_COLOR(UI_COLOR_LIST_DEFAULT),
+  LV_STYLE_CONST_SHADOW_COLOR(UI_COLOR_LIST_SHADOW),
+  LV_STYLE_CONST_BG_OPA(255),
+  LV_STYLE_CONST_BORDER_WIDTH(0),
+  LV_STYLE_CONST_SHADOW_OPA(255),
+  LV_STYLE_CONST_SHADOW_WIDTH(1),
+  LV_STYLE_CONST_SHADOW_SPREAD(0),
+  LV_STYLE_CONST_SHADOW_OFFSET_X(0),
+  LV_STYLE_CONST_PAD_LEFT(249),
+  LV_STYLE_CONST_PAD_TOP(8),
+  LV_STYLE_CONST_PAD_RIGHT(0),
+  LV_STYLE_CONST_PAD_BOTTOM(0),
+  LV_STYLE_CONST_PROPS_END
+};
+
+static LV_STYLE_CONST_INIT(style_cell,          (void*)style_cell_prop);
+static LV_STYLE_CONST_INIT(style_cell_pressed,  (void*)style_cell_pressed_prop);
+static LV_STYLE_CONST_INIT(style_cell_checked,  (void*)style_cell_checked_prop);
+static LV_STYLE_CONST_INIT(style_title,         (void*)style_title_prop);
+static LV_STYLE_CONST_INIT(style_artist,        (void*)style_artist_prop);
+static LV_STYLE_CONST_INIT(style_time,          (void*)style_time_prop);
+static LV_STYLE_CONST_INIT(style_heart,         (void*)style_heart_prop);
+static LV_STYLE_CONST_INIT(style_menu_back,     (void*)style_menu_back_prop);
+#endif // USE_CONST_STYLE
 
 /**********************
  *  GLOBAL FUNCTIONS
@@ -146,10 +228,11 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_remove_style_all       (cell);
   lv_obj_set_size               (cell, lv_pct(100), LIST_CELL_HEIGHT);
 
-  lv_obj_add_style              (cell, &style_button, 0);
-  lv_obj_add_style              (cell, &style_button_pressed, LV_STATE_PRESSED);
-  lv_obj_add_style              (cell, &style_button_checked, LV_STATE_CHECKED);
-//lv_obj_add_style              (cell, &style_button_disable, LV_STATE_DISABLED);
+  lv_obj_add_style              (cell, &style_grid, 0);
+  lv_obj_add_style              (cell, &style_cell, 0);
+  lv_obj_add_style              (cell, &style_cell_pressed, LV_STATE_PRESSED);
+  lv_obj_add_style              (cell, &style_cell_checked, LV_STATE_CHECKED);
+//lv_obj_add_style              (cell, &style_cell_disable, LV_STATE_DISABLED);
   lv_obj_add_event_cb           (cell, list_click_event_cb, LV_EVENT_CLICKED, (void*)track_id);
 
   lv_obj_t* icon = lv_image_create(cell);
@@ -266,26 +349,29 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   static const lv_coord_t grid_cols[] = { LV_GRID_CONTENT, LV_GRID_FR(1), (int32_t)ui_img_1157704237.header.w, LV_GRID_TEMPLATE_LAST };
   static const lv_coord_t grid_rows[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
 
-  lv_style_init                     (&style_button);
-  lv_style_set_bg_opa               (&style_button, LV_OPA_TRANSP);
-  lv_style_set_grid_column_dsc_array(&style_button, grid_cols);
-  lv_style_set_grid_row_dsc_array   (&style_button, grid_rows);
-  lv_style_set_grid_row_align       (&style_button, LV_GRID_ALIGN_CENTER);
-  lv_style_set_layout               (&style_button, LV_LAYOUT_GRID);
-  lv_style_set_pad_right            (&style_button, 20);
+  lv_style_init                     (&style_grid);
+  lv_style_set_grid_column_dsc_array(&style_grid, grid_cols);
+  lv_style_set_grid_row_dsc_array   (&style_grid, grid_rows);
+  lv_style_set_grid_row_align       (&style_grid, LV_GRID_ALIGN_CENTER);
 
-  lv_style_init               (&style_button_pressed);
-  lv_style_set_bg_opa         (&style_button_pressed, LV_OPA_COVER);
-  lv_style_set_bg_color       (&style_button_pressed, UI_COLOR_LIST_DEFAULT);
+#if !USE_CONST_STYLE
+  lv_style_init                     (&style_cell);
+  lv_style_set_bg_opa               (&style_cell, LV_OPA_TRANSP);
+  lv_style_set_layout               (&style_cell, LV_LAYOUT_GRID);
+  lv_style_set_pad_right            (&style_cell, 20);
 
-  lv_style_init               (&style_button_checked);
-  lv_style_set_bg_opa         (&style_button_checked, LV_OPA_COVER);
-  lv_style_set_bg_color       (&style_button_checked, UI_COLOR_LIST_DEFAULT);
-/*
-  lv_style_init               (&style_button_disable);
-  lv_style_set_text_opa       (&style_button_disable, LV_OPA_40);
-  lv_style_set_image_opa      (&style_button_disable, LV_OPA_40);
-*/
+  lv_style_init               (&style_cell_pressed);
+  lv_style_set_bg_opa         (&style_cell_pressed, LV_OPA_COVER);
+  lv_style_set_bg_color       (&style_cell_pressed, UI_COLOR_LIST_DEFAULT);
+
+  lv_style_init               (&style_cell_checked);
+  lv_style_set_bg_opa         (&style_cell_checked, LV_OPA_COVER);
+  lv_style_set_bg_color       (&style_cell_checked, UI_COLOR_LIST_DEFAULT);
+#if 0
+  lv_style_init               (&style_cell_disable);
+  lv_style_set_text_opa       (&style_cell_disable, LV_OPA_40);
+  lv_style_set_image_opa      (&style_cell_disable, LV_OPA_40);
+#endif
   lv_style_init               (&style_title);
   lv_style_set_width          (&style_title, lv_obj_get_width (lv_scr_act()) - LIST_LABEL_MARGINE);
   lv_style_set_height         (&style_title, LIST_FONT_MEDIUM_HEIGHT);
@@ -323,6 +409,7 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_pad_right      (&style_menu_back,   0);
   lv_style_set_pad_top        (&style_menu_back,   8);
   lv_style_set_pad_bottom     (&style_menu_back,   0);
+#endif
 
   // Create an empty transparent container
   lv_obj_t* list = lv_obj_create(parent);

@@ -76,6 +76,7 @@ public:
   ~CYD_MP3Player() {
     if (m_tree) {
       delete m_tree;
+      m_tree = NULL;
     }
   }
 
