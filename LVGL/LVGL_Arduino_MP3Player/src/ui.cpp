@@ -57,7 +57,9 @@ lv_obj_t *ui_PlayListToMainDown;
 // EVENTS
 
 // IMAGES AND IMAGE SETS
+#if MY_USE_FS_ARDUINO_SD == 0
 #include "_pictures.h"
+#endif
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
@@ -443,7 +445,7 @@ static void display_picture(uint32_t playNo) {
 
   // @picture.[bmp|jpg]
   if (ptr = strrchr(buf, '/')) {
-    strcpy(ptr + 1, "@picture." PICTURE_EXT);
+    strcpy(ptr + 1, PICTURE_BASE PICTURE_EXT);
     if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
       lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
@@ -454,7 +456,7 @@ static void display_picture(uint32_t playNo) {
   lv_image_set_src    (ui_AlbumImage, &ui_img_album_png);
   lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
 
-#else
+#else // MY_USE_FS_ARDUINO_SD == 0
 
   // displaying an image file on flash ROM
   MetaData_t meta;

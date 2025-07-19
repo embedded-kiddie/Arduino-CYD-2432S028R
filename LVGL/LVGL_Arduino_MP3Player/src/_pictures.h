@@ -1,12 +1,12 @@
 #ifndef _PICTURES_H_
 #define _PICTURES_H_
 
-LV_IMG_DECLARE(DETOX);
-LV_IMG_DECLARE(Eye_of_the_Storm);
-LV_IMG_DECLARE(Gravity);
-LV_IMG_DECLARE(Niche);
-LV_IMG_DECLARE(Past_Lives);
-LV_IMG_DECLARE(SUPER_EUROBEAT);
+LV_IMAGE_DECLARE(DETOX);
+LV_IMAGE_DECLARE(Eye_of_the_Storm);
+LV_IMAGE_DECLARE(Gravity);
+LV_IMAGE_DECLARE(Niche);
+LV_IMAGE_DECLARE(Past_Lives);
+LV_IMAGE_DECLARE(SUPER_EUROBEAT);
 
 const lv_image_dsc_t *pictures[] = {
   /*  0 */  & ui_img_album_png,

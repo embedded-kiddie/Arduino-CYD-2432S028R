@@ -29,6 +29,8 @@
     #define MY_FS_ARDUINO_SD_LETTER 'S'
     void lv_fs_arduino_sd_init(void);
   #endif
+#else
+  #error "LV_USE_FS_ARDUINO_SD" cannot be enabled in "lv_conf.h".
 #endif
 
 #endif // _SDFS_H_

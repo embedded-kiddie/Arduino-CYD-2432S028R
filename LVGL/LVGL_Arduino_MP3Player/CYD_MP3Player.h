@@ -30,8 +30,10 @@
 /*--------------------------------------------------------------------------------
  * Thumnail of album picure
  *--------------------------------------------------------------------------------*/
-#define PICTURE_FILE  "@picture.txt"
-#if MY_USE_FS_ARDUINO_SD != 0
+#define PICTURE_BASE  "@picture."
+#if MY_USE_FS_ARDUINO_SD == 0
+  #define PICTURE_EXT "txt"
+#else
   #if LV_USE_BMP
     #define PICTURE_EXT   "bmp"
   #elif LV_USE_TJPGD
