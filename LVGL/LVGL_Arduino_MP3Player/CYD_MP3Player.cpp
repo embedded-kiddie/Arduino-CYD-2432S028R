@@ -178,7 +178,7 @@ uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
 
   // gets the picture number recorded in PICTURE_FILE.
   std::string path = GetDirPath(playNo);
-  path.append(PICTURE_BASE PICTURE_EXT);
+  path.append(PICTURE_BASE "txt");
 
   File file = SD.open(path.c_str(), FILE_READ);
   if (file) {

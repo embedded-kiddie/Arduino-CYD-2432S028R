@@ -38,7 +38,7 @@ TFT_eSprite spr = TFT_eSprite(&tft); // Sprite object
 // =======================================================================================
 
 void setup()   {
-  Serial.begin(250000); // Debug only
+  Serial.begin(115200); // Debug only
 
   tft.begin();  // initialize
   tft.setRotation(0);

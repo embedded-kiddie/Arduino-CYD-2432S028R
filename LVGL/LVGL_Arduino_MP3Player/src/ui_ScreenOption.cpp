@@ -5,6 +5,9 @@
 
 #include "ui.h"
 
+// https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
+#define USE_CONST_STYLE 1
+
 void ui_ScreenOption_screen_init(void) {
   ui_ScreenOption = lv_obj_create(NULL);
   lv_obj_remove_flag            (ui_ScreenOption, LV_OBJ_FLAG_SCROLLABLE);
@@ -43,7 +46,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_style_bg_opa       (ui_OptionToMainRight, 255,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_add_event_cb           (ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_ALL, NULL);
 #else
-  static const lv_style_const_prop_t style_prop_common[] = {
+  static constexpr lv_style_const_prop_t style_prop_common[] = {
     LV_STYLE_CONST_WIDTH(27),
     LV_STYLE_CONST_HEIGHT(27),
     LV_STYLE_CONST_X(LV_PCT_X(42)),
@@ -51,8 +54,7 @@ void ui_ScreenOption_screen_init(void) {
     LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
     LV_STYLE_CONST_PROPS_END
   };
-
-  static const lv_style_const_prop_t style_prop_default[] = {
+  static constexpr lv_style_const_prop_t style_prop_default[] = {
     LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1710110385),
     LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
     LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -62,8 +64,7 @@ void ui_ScreenOption_screen_init(void) {
     LV_STYLE_CONST_PAD_BOTTOM(0),
     LV_STYLE_CONST_PROPS_END
   };
-
-  static const lv_style_const_prop_t style_prop_pressed[] = {
+  static constexpr lv_style_const_prop_t style_prop_pressed[] = {
     LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1710110385),
     LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
     LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -73,14 +74,12 @@ void ui_ScreenOption_screen_init(void) {
     LV_STYLE_CONST_PAD_BOTTOM(0),
     LV_STYLE_CONST_PROPS_END
   };
-
-  static const lv_style_const_prop_t style_prop_checked[] = {
+  static constexpr lv_style_const_prop_t style_prop_checked[] = {
     LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1710110385),
     LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
     LV_STYLE_CONST_BG_OPA(255),
     LV_STYLE_CONST_PROPS_END
   };
-
   static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
   static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
   static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);

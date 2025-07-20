@@ -227,6 +227,23 @@ static uint32_t my_tick(void) {
 }
 
 void setup() {
+  Serial.begin(115200);
+  while (millis() < 500);
+/*
+  lv_color_t c[] = {
+    UI_COLOR_BACKGROUND,
+    UI_COLOR_SLIDER,
+    UI_COLOR_CHECKBOX,
+    UI_COLOR_LIST_DEFAULT,
+    UI_COLOR_LIST_PRESSED,
+    UI_COLOR_LIST_SHADOW,
+    UI_COLOR_LIST_ARTIST,
+    UI_COLOR_LIST_SLIDER,
+  };
+  for (int i = 0; i < sizeof(c) / sizeof(lv_color_t); i++) {
+    Serial.printf("{ .blue = 0x%02x, .green = 0x%02x, .red = 0x%02x }\n", c[i].blue, c[i].green, c[i].red);
+  }
+//*/
   tft_init();
   lv_init();
 
@@ -260,8 +277,6 @@ void setup() {
   lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /* Touchpad should have POINTER type */
   lv_indev_set_read_cb(indev, my_touchpad_read);
 
-  Serial.begin(115200);
-  while (millis() < 500);
   ui_init();
 }
 

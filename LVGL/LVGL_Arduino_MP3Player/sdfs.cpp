@@ -316,6 +316,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
       fs_cache.buffer = (char *)heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
       if (fs_cache.buffer) {
         fs_cache.size = file.read((uint8_t *)fs_cache.buffer, size);
+        assert(fs_cache.size == size);
       }
       file.close();
     }

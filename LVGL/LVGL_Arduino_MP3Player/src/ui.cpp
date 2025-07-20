@@ -42,7 +42,7 @@ lv_style_t ui_AlbumStyle;
 
 // SCREEN: ui_ScreenOption
 lv_obj_t *ui_ScreenOption;
-#if !USE_CONST_STYLE
+#if   false
 lv_obj_t *ui_BacklightRoller;
 lv_obj_t *ui_SleepTimerRoller;
 //lv_obj_t *ui_FavoriteNewButton;
@@ -238,21 +238,21 @@ void ui_event_OptionToMainRight(lv_event_t *e) {
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
-#if !USE_CONST_STYLE
+#if   false
+void ui_event_FavoriteSwitch(lv_event_t * e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_VALUE_CHANGED) {
+    (e);
+    _ui_state_modify(ui_FavoriteClearButton, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+  }
+}
+
 void ui_event_FavoriteDropdown(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_VALUE_CHANGED) {
     (e);
-  }
-}
-
-void ui_event_FavoriteSwitch(lv_event_t * e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
-
-  if ( event_code == LV_EVENT_VALUE_CHANGED) {
-    (e);
-    _ui_state_modify(ui_FavoriteClearButton, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
   }
 }
 
@@ -277,7 +277,7 @@ void ui_event_SleepTimerSwitch(lv_event_t *e) {
     ui_option.sleepTimer = lv_obj_get_state(obj) & LV_STATE_CHECKED;
   }
 }
-#endif // USE_CONST_STYLE
+#endif
 /*--------------------------------------------------------------------------------
  * Event handlers for Screen Playlist
  *--------------------------------------------------------------------------------*/

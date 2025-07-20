@@ -5,6 +5,9 @@
 
 #include "ui.h"
 
+// https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
+#define USE_CONST_STYLE 1
+
 void ui_ScreenMain_screen_init(void) {
   ui_ScreenMain = lv_obj_create(NULL);
   lv_obj_set_style_bg_color     (ui_ScreenMain, UI_COLOR_BACKGROUND,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
@@ -117,7 +120,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   lv_obj_t *ui_MenuDotMain = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(27),
       LV_STYLE_CONST_HEIGHT(27),
       LV_STYLE_CONST_X(LV_PCT_X(-40)),
@@ -125,7 +128,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_menu_png),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -135,7 +138,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_pressed[] = {
+    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_menu_png),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -145,7 +148,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_menu_png),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
@@ -195,7 +198,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   lv_obj_t *ui_Favorite = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(25),
       LV_STYLE_CONST_HEIGHT(25),
       LV_STYLE_CONST_X(LV_PCT_X(40)),
@@ -203,7 +206,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_511832737),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -213,7 +216,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1050326551),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
@@ -264,7 +267,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   lv_obj_t *ui_Repeat = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(25),
       LV_STYLE_CONST_HEIGHT(25),
       LV_STYLE_CONST_X(LV_PCT_X(40)),
@@ -272,7 +275,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_repeat_png),
       LV_STYLE_CONST_BG_IMAGE_RECOLOR(UI_COLOR_CHECKBOX),
       LV_STYLE_CONST_RADIUS(5),
@@ -285,7 +288,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_repeat_png),
       LV_STYLE_CONST_BG_IMAGE_RECOLOR(UI_COLOR_BACKGROUND),
       LV_STYLE_CONST_BG_IMAGE_OPA(255),
@@ -332,7 +335,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   lv_obj_t *ui_Shuffle = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(25),
       LV_STYLE_CONST_HEIGHT(25),
       LV_STYLE_CONST_X(LV_PCT_X(-40)),
@@ -340,7 +343,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_shuffle_png),
       LV_STYLE_CONST_BG_IMAGE_RECOLOR(UI_COLOR_CHECKBOX),
       LV_STYLE_CONST_RADIUS(5),
@@ -353,7 +356,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_shuffle_png),
       LV_STYLE_CONST_BG_IMAGE_RECOLOR(UI_COLOR_BACKGROUND),
       LV_STYLE_CONST_BG_IMAGE_OPA(255),
@@ -402,7 +405,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   ui_ButtonPlay = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(50),
       LV_STYLE_CONST_HEIGHT(50),
       LV_STYLE_CONST_X(LV_PCT_X(2)),
@@ -410,7 +413,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_play_png),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -420,7 +423,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_pause_png),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
@@ -481,7 +484,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   lv_obj_t *ui_ButtonNext = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(45),
       LV_STYLE_CONST_HEIGHT(45),
       LV_STYLE_CONST_X(LV_PCT_X(27)),
@@ -489,7 +492,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_715969206),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -499,7 +502,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_715969206),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
@@ -511,7 +514,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_pressed[] = {
+    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_715969206),
       LV_STYLE_CONST_BORDER_WIDTH(0),
       LV_STYLE_CONST_PAD_LEFT(26),
@@ -571,7 +574,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   lv_obj_t *ui_ButtonPrev = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(45),
       LV_STYLE_CONST_HEIGHT(45),
       LV_STYLE_CONST_X(LV_PCT_X(-22)),
@@ -579,7 +582,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1076165770),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -589,7 +592,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1076165770),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
@@ -601,7 +604,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_pressed[] = {
+    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1076165770),
       LV_STYLE_CONST_BORDER_WIDTH(0),
       LV_STYLE_CONST_PAD_LEFT(26),
@@ -659,7 +662,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   lv_obj_t *ui_VolumeMax = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(40),
       LV_STYLE_CONST_HEIGHT(40),
       LV_STYLE_CONST_X(LV_PCT_X(40)),
@@ -667,7 +670,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1994412056),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -677,7 +680,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1994412056),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
@@ -688,7 +691,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_pressed[] = {
+    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_1994412056),
       LV_STYLE_CONST_PAD_LEFT(24),
       LV_STYLE_CONST_PAD_TOP(24),
@@ -745,7 +748,7 @@ void ui_ScreenMain_screen_init(void) {
 #else
   lv_obj_t *ui_VolumeMin = lv_checkbox_create(ui_ScreenMain);
   {
-    static const lv_style_const_prop_t style_prop_common[] = {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(40),
       LV_STYLE_CONST_HEIGHT(40),
       LV_STYLE_CONST_X(LV_PCT_X(-39)),
@@ -753,7 +756,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_default[] = {
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_2058316518),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -763,7 +766,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_checked[] = {
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_2058316518),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
@@ -774,7 +777,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static const lv_style_const_prop_t style_prop_pressed[] = {
+    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
       LV_STYLE_CONST_BG_IMAGE_SRC(&ui_img_2058316518),
       LV_STYLE_CONST_PAD_LEFT(24),
       LV_STYLE_CONST_PAD_TOP(24),
