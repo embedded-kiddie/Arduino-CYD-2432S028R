@@ -35,9 +35,9 @@
   #define PICTURE_EXT "txt"
 #else
   #if LV_USE_BMP
-    #define PICTURE_EXT   "bmp"
+    #define PICTURE_EXT   "bmp" // 96x96 (must be RGB565)
   #elif LV_USE_TJPGD
-    #define PICTURE_EXT   "jpg"
+    #define PICTURE_EXT   "jpg" // 96x96
   #endif
 #endif
 

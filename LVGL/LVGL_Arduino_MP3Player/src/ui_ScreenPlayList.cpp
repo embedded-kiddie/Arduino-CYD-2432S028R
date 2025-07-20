@@ -32,7 +32,7 @@ static int32_t top_num, end_num; // hold the the highest/lowest number currently
 static bool update_scroll_running = false;
 
 #undef  USE_CONST_STYLE
-#define USE_CONST_STYLE 1
+#define USE_CONST_STYLE 0
 
 #if !USE_CONST_STYLE
 static lv_style_t style_cell;
