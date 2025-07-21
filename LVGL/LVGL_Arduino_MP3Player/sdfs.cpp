@@ -8,6 +8,14 @@
 #include "lvgl.h"
 #include "sdfs.h"
 
+#if LV_MEM_SIZE > (64 * 1024U)
+#define MY_MALLOC(size) lv_malloc(size)
+#define MY_FREE(addr)   lv_free(addr)
+#else
+#define MY_MALLOC(size) heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+#define MY_FREE(addr)   free(addr)
+#endif
+
 #if MY_USE_FS_ARDUINO_SD == 1
 /*--------------------------------------------------------------------------------
  * Without cache
@@ -293,16 +301,18 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     LV_UNUSED(mode);
 
     if (fs_cache.path && strcmp(fs_cache.path, path) != 0) {
-      free(fs_cache.path);
+      MY_FREE(fs_cache.path);
       fs_cache.path = 0;
       if (fs_cache.buffer) {
-        free(fs_cache.buffer);
+        MY_FREE(fs_cache.buffer);
+        fs_cache.buffer = 0;
       }
     }
 
     if (!fs_cache.path) {
       size_t size = strlen(path);
-      fs_cache.path = (char *)heap_caps_malloc(size + 1, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+      fs_cache.path = (char *)MY_MALLOC(size + 1);
+      assert(fs_cache.path);
       if (fs_cache.path) {
         strcpy(fs_cache.path, path);
       }
@@ -313,7 +323,8 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
 #else
       size = file.size();
 #endif
-      fs_cache.buffer = (char *)heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+      fs_cache.buffer = (char *)MY_MALLOC(size);
+      assert(fs_cache.buffer);
       if (fs_cache.buffer) {
         fs_cache.size = file.read((uint8_t *)fs_cache.buffer, size);
         assert(fs_cache.size == size);

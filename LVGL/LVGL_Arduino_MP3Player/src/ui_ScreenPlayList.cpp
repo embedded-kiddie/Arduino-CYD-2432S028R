@@ -104,14 +104,14 @@ static constexpr lv_style_const_prop_t style_menu_back_prop[] = {
   LV_STYLE_CONST_PAD_BOTTOM(0),
   LV_STYLE_CONST_PROPS_END
 };
-static LV_STYLE_CONST_INIT(style_cell,          (void*)style_cell_prop);
-static LV_STYLE_CONST_INIT(style_cell_pressed,  (void*)style_cell_pressed_prop);
-static LV_STYLE_CONST_INIT(style_cell_checked,  (void*)style_cell_checked_prop);
-static LV_STYLE_CONST_INIT(style_title,         (void*)style_title_prop);
-static LV_STYLE_CONST_INIT(style_artist,        (void*)style_artist_prop);
-static LV_STYLE_CONST_INIT(style_time,          (void*)style_time_prop);
-static LV_STYLE_CONST_INIT(style_heart,         (void*)style_heart_prop);
-static LV_STYLE_CONST_INIT(style_menu_back,     (void*)style_menu_back_prop);
+static LV_STYLE_CONSTEXPR_INIT(style_cell,          (void*)style_cell_prop);
+static LV_STYLE_CONSTEXPR_INIT(style_cell_pressed,  (void*)style_cell_pressed_prop);
+static LV_STYLE_CONSTEXPR_INIT(style_cell_checked,  (void*)style_cell_checked_prop);
+static LV_STYLE_CONSTEXPR_INIT(style_title,         (void*)style_title_prop);
+static LV_STYLE_CONSTEXPR_INIT(style_artist,        (void*)style_artist_prop);
+static LV_STYLE_CONSTEXPR_INIT(style_time,          (void*)style_time_prop);
+static LV_STYLE_CONSTEXPR_INIT(style_heart,         (void*)style_heart_prop);
+static LV_STYLE_CONSTEXPR_INIT(style_menu_back,     (void*)style_menu_back_prop);
 #endif // USE_CONST_STYLE
 
 /**********************

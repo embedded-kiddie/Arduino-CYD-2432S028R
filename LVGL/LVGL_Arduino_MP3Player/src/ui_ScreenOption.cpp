@@ -80,10 +80,10 @@ void ui_ScreenOption_screen_init(void) {
     LV_STYLE_CONST_BG_OPA(255),
     LV_STYLE_CONST_PROPS_END
   };
-  static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
-  static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
-  static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
-  static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+  static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
+  static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
+  static LV_STYLE_CONSTEXPR_INIT(style_pressed, (void*)style_prop_pressed);
+  static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
 
   lv_obj_t *ui_OptionToMainRight = lv_checkbox_create(ui_ScreenOption);
   lv_checkbox_set_text(ui_OptionToMainRight, "");
