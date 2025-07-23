@@ -25,12 +25,14 @@
   #if (LV_USE_TJPGD == 0) && (LV_USE_BMP == 0)
     #define MY_USE_FS_ARDUINO_SD 0
   #else
-    #define MY_USE_FS_ARDUINO_SD 2
+    #define MY_USE_FS_ARDUINO_SD 2  // 1:without cache, 2: with cache
     #define MY_FS_ARDUINO_SD_LETTER 'S'
     void lv_fs_arduino_sd_init(void);
+    void fs_clear_cache(void);
   #endif
 #else
-  #error "LV_USE_FS_ARDUINO_SD" cannot be enabled in "lv_conf.h".
+  #define MY_USE_FS_ARDUINO_SD 0
+  #define MY_FS_ARDUINO_SD_LETTER 'S'
 #endif
 
 #endif // _SDFS_H_

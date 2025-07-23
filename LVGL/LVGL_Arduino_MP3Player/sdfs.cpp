@@ -45,6 +45,8 @@ typedef struct MyFile {
 
 #endif
 
+void fs_clear_cache(void) {}
+
 /**
  * Register a driver for the SD File System interface
  */
@@ -196,7 +198,7 @@ static lv_fs_res_t fs_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs
     else if(whence == LV_FS_SEEK_END)
         mode = SeekEnd;
 
-#ifdef  USE_SDFAT
+#ifdef USE_SDFAT
     int rc;
     switch (mode) {
       case SeekSet:
@@ -228,7 +230,7 @@ static lv_fs_res_t fs_tell(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p)
 {
     LV_UNUSED(drv);
 
-#ifdef  USE_SDFAT
+#ifdef USE_SDFAT
     *pos_p = my_file.curPosition();
 #else
     MyFile * lf = (MyFile *)file_p;
@@ -260,13 +262,25 @@ typedef struct {
 } FsCache_t;
 
 static FsCache_t fs_cache = {};
+static lv_fs_drv_t fs_drv;
+
+void fs_clear_cache(void) {
+  if (fs_cache.path) {
+    MY_FREE(fs_cache.path);
+    fs_cache.path = 0;
+  }
+
+  if (fs_cache.buffer) {
+    MY_FREE(fs_cache.buffer);
+    fs_cache.buffer = 0;
+  }
+}
 
 /**
  * Register a driver for the SD File System interface
  */
 void lv_fs_arduino_sd_init(void)
 {
-    static lv_fs_drv_t fs_drv;
     lv_fs_drv_init(&fs_drv);
 
     fs_drv.letter = MY_FS_ARDUINO_SD_LETTER;
@@ -301,12 +315,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     LV_UNUSED(mode);
 
     if (fs_cache.path && strcmp(fs_cache.path, path) != 0) {
-      MY_FREE(fs_cache.path);
-      fs_cache.path = 0;
-      if (fs_cache.buffer) {
-        MY_FREE(fs_cache.buffer);
-        fs_cache.buffer = 0;
-      }
+      fs_clear_cache();
     }
 
     if (!fs_cache.path) {
@@ -318,7 +327,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
       }
 
       File file = SD.open(path, FILE_READ);
-#ifdef  USE_SDFAT
+#ifdef USE_SDFAT
       size = file.fileSize();
 #else
       size = file.size();

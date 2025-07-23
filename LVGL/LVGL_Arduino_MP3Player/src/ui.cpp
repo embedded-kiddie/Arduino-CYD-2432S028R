@@ -57,7 +57,7 @@ lv_obj_t *ui_PlayListToMainDown;
 // EVENTS
 
 // IMAGES AND IMAGE SETS
-#if MY_USE_FS_ARDUINO_SD == 0
+#if (LV_USE_FS_ARDUINO_SD == 0) && (MY_USE_FS_ARDUINO_SD == 0)
 #include "_pictures.h"
 #endif
 
@@ -421,7 +421,7 @@ static void update_metadata(void) {
  * Display a covoer picture on SD or flash
  *--------------------------------------------------------------------------------*/
 static void display_picture(uint32_t playNo) {
-#if MY_USE_FS_ARDUINO_SD != 0
+#if (LV_USE_FS_ARDUINO_SD != 0) || (MY_USE_FS_ARDUINO_SD != 0)
 
   // displaying an image file on SD card
   char buf[BUF_SIZE], *ptr;

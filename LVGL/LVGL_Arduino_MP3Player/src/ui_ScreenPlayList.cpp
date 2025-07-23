@@ -331,8 +331,9 @@ static void scroll_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_SCROLL) {
-    lv_obj_t *obj = lv_event_get_target_obj(e);
-    update_scroll(obj);
+    // lv_obj_t *obj = lv_event_get_target_obj(e);
+    // assert(obj == play_list);
+    update_scroll(play_list);
   }
 }
 
