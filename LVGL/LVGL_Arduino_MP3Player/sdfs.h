@@ -28,7 +28,7 @@
     #define MY_USE_FS_ARDUINO_SD 2  // 1:without cache, 2: with cache
     #define MY_FS_ARDUINO_SD_LETTER 'S'
     void lv_fs_arduino_sd_init(void);
-    void fs_clear_cache(void);
+    void lv_fs_clear_cache(void);
   #endif
 #else
   #define MY_USE_FS_ARDUINO_SD 0

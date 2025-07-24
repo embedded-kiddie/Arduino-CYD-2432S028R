@@ -45,7 +45,7 @@ typedef struct MyFile {
 
 #endif
 
-void fs_clear_cache(void) {}
+void lv_fs_clear_cache(void) {}
 
 /**
  * Register a driver for the SD File System interface
@@ -264,7 +264,7 @@ typedef struct {
 static FsCache_t fs_cache = {};
 static lv_fs_drv_t fs_drv;
 
-void fs_clear_cache(void) {
+void lv_fs_clear_cache(void) {
   if (fs_cache.path) {
     MY_FREE(fs_cache.path);
     fs_cache.path = 0;
@@ -315,7 +315,7 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     LV_UNUSED(mode);
 
     if (fs_cache.path && strcmp(fs_cache.path, path) != 0) {
-      fs_clear_cache();
+      lv_fs_clear_cache();
     }
 
     if (!fs_cache.path) {

@@ -31,10 +31,14 @@
  * Thumnail of album picure
  *--------------------------------------------------------------------------------*/
 #define PICTURE_BASE  "@picture."
-#if LV_USE_BMP
-  #define PICTURE_EXT "bmp" // 96x96 (must be RGB565)
-#elif LV_USE_TJPGD
-  #define PICTURE_EXT "jpg" // 96x96
+#if MY_USE_FS_ARDUINO_SD
+  #if LV_USE_BMP
+    #define PICTURE_EXT "bmp" // 96x96 (must be RGB565)
+  #elif LV_USE_TJPGD
+    #define PICTURE_EXT "jpg" // 96x96
+  #else
+    #error "LV_USE_BMP or LV_USE_TJPGD should be enabled."
+  #endif
 #else
   #define PICTURE_EXT "txt" // image in flash
 #endif

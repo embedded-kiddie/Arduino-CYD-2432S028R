@@ -91,14 +91,16 @@
 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_SPI_CLOCK 25000000
 
-#if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-  #define SD_SPI_BUS sd_spi
-  #define SD_CONFIG SS, SD_SPI_BUS, SD_SPI_CLOCK
-#elif defined (ARDUINO_XIAO_ESP32S3) && defined (_TFT_eSPIH_)
-  #define SD_CONFIG SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
-#else
-  #define SD_CONFIG SS, SPI, SD_SPI_CLOCK
-#endif
+#ifndef SD_CONFIG
+  #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+    #define SD_SPI_BUS sd_spi
+    #define SD_CONFIG SS, SD_SPI_BUS, SD_SPI_CLOCK
+  #elif defined (ARDUINO_XIAO_ESP32S3) && defined (_TFT_eSPIH_)
+    #define SD_CONFIG SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
+  #else
+    #define SD_CONFIG SS, SPI, SD_SPI_CLOCK
+  #endif
+#endif // SD_CONFIG
 
 #endif // USE_SDFAT
 
