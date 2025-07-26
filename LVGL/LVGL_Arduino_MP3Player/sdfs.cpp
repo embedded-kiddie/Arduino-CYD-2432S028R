@@ -43,6 +43,13 @@ typedef struct MyFile {
     File file;
 } MyFile;
 
+// alternative to FS.h definition
+enum SeekMode {
+  SeekSet = 0,
+  SeekCur = 1,
+  SeekEnd = 2
+};
+
 #endif
 
 void lv_fs_clear_cache(void) {}

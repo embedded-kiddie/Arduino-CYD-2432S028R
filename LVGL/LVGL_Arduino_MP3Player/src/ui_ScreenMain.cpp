@@ -6,7 +6,7 @@
 #include "ui.h"
 
 // https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
-#define USE_CONST_STYLE 1
+#define USE_CONST_STYLE 0
 
 void ui_ScreenMain_screen_init(void) {
   ui_ScreenMain = lv_obj_create(NULL);
@@ -155,10 +155,10 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_BG_OPA(255),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_pressed, (void*)style_prop_pressed);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
     lv_checkbox_set_text(ui_MenuDotMain, "");
     lv_obj_add_flag     (ui_MenuDotMain, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -227,9 +227,9 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
     lv_checkbox_set_text(ui_Favorite, "");
     lv_obj_add_flag     (ui_Favorite, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -295,9 +295,9 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_BG_IMAGE_RECOLOR_OPA(255),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
     lv_checkbox_set_text(ui_Repeat, "");
     lv_obj_add_flag     (ui_Repeat, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -363,9 +363,9 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_BG_IMAGE_RECOLOR_OPA(255),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
     lv_checkbox_set_text(ui_Shuffle, "");
     lv_obj_add_flag     (ui_Shuffle, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -435,9 +435,9 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
     lv_checkbox_set_text(ui_ButtonPlay, "");
     lv_obj_add_flag     (ui_ButtonPlay, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -523,10 +523,10 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
-    static LV_STYLE_CONSTEXPR_INIT(style_pressed, (void*)style_prop_pressed);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
 
     lv_checkbox_set_text(ui_ButtonNext, "");
     lv_obj_add_flag     (ui_ButtonNext, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -613,10 +613,10 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
-    static LV_STYLE_CONSTEXPR_INIT(style_pressed, (void*)style_prop_pressed);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
 
     lv_checkbox_set_text(ui_ButtonPrev, "");
     lv_obj_add_flag     (ui_ButtonPrev, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -699,10 +699,10 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
-    static LV_STYLE_CONSTEXPR_INIT(style_pressed, (void*)style_prop_pressed);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
 
     lv_checkbox_set_text(ui_VolumeMax, "");
     lv_obj_add_flag     (ui_VolumeMax, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
@@ -785,10 +785,10 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PAD_BOTTOM(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONSTEXPR_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONSTEXPR_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONSTEXPR_INIT(style_checked, (void*)style_prop_checked);
-    static LV_STYLE_CONSTEXPR_INIT(style_pressed, (void*)style_prop_pressed);
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+    static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
 
     lv_checkbox_set_text(ui_VolumeMin, "");
     lv_obj_add_flag     (ui_VolumeMin, LV_OBJ_FLAG_SCROLL_ON_FOCUS);

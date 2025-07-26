@@ -22,12 +22,6 @@
 #undef  FILE_WRITE
 #define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
 
-enum SeekMode {
-  SeekSet = 0,
-  SeekCur = 1,
-  SeekEnd = 2
-};
-
 #else
 
 #include "SPI.h"

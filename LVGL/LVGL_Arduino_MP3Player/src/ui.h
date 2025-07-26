@@ -15,16 +15,6 @@
 #define LV_PCT_X(a)   (SCREEN_WIDTH  * (a) / 100)
 #define LV_PCT_Y(a)   (SCREEN_HEIGHT * (a) / 100)
 
-// "var_name" is placed in the D-Cache area
-// https://developer.espressif.com/blog/esp32-memory-map-101/
-// https://github.com/lvgl/lvgl/blob/master/src/misc/lv_style.h#L61
-#define LV_STYLE_CONSTEXPR_INIT(var_name, prop_array)                   \
-    constexpr lv_style_t var_name = {                                   \
-        .values_and_props = (void*)prop_array,                          \
-        .has_group = 0xFFFFFFFF,                                        \
-        .prop_cnt = 255,                                                \
-    }
-
 // SCREEN: ui_ScreenMain
 extern lv_obj_t *ui_ScreenMain;
 extern lv_obj_t *ui_WaveImage;
