@@ -8,7 +8,7 @@
 #ifndef _SDSPI_H_
 #define _SDSPI_H_
 
-#ifdef  SDFATFS_USED          // defined in CYD_Audio.h
+#ifdef  SDFATFS_USED  // defined in CYD_Audio.h
 
 #define USE_SDFAT
 
@@ -25,8 +25,6 @@
 #else
 
 #include "SPI.h"
-#include "SD.h"
-#include "FS.h"
 
 #define SD_CONFIG SD_CS, SPI, SD_CLOCK
 

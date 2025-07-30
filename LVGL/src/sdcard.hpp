@@ -37,6 +37,9 @@
  * For more info see file README.md in this library or on URL:
  * https://github.com/espressif/arduino-esp32/tree/master/libraries/SD
  */
+#ifndef _SDCARD_HPP_
+#define _SDCARD_HPP_
+
 // #define USE_SDFAT
 
 /*--------------------------------------------------------------------------------
@@ -58,18 +61,22 @@
 #ifndef SDFATFS_USED
   // Instance of SdFat
   #define FS_TYPE SdFat
-  SdFat SD;
-  #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-    #define SD_SPI_BUS sd_spi
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &SD_SPI_BUS) // OK
-  #elif 1
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SHARED_SPI, SD_SPI_CLOCK) // OK
-  #elif 0
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_CLOCK) // NG
-  #elif 0
-    #define SD_CONFIG (SdCsPin_t)SS // NG
-  #else
-    #define SD_CONFIG // NG
+  extern SdFat SD;
+  #ifndef SD_SPI_BUS
+    #undef SD_CONFIG
+    #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+      #define SD_SPI_BUS sd_spi
+      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &SD_SPI_BUS) // OK
+      #define DECLARE_SD_SPI_BUS SPIClass SD_SPI_BUS = SPIClass(VSPI)
+    #elif 1
+      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SHARED_SPI, SD_SPI_CLOCK) // OK
+    #elif 0
+      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_CLOCK) // NG
+    #elif 0
+      #define SD_CONFIG (SdCsPin_t)SS // NG
+    #else
+      #define SD_CONFIG // NG
+    #endif
   #endif
 #else
   #define FS_TYPE fs::FS
@@ -82,9 +89,7 @@
 
 #else // ! USE_SDFAT
 
-#include "FS.h"
 #include "SD.h"
-#include "SPI.h"
 
 #define FS_TYPE fs::FS
 
@@ -518,11 +523,11 @@ bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
  * Note the global variable 'SPI' is assigned to 'VSPI' same as 'CYD_SD_SPI_BUS'.
  * https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
  *--------------------------------------------------------------------------------*/
+void sdcard_setup(void) {
 #ifdef SD_SPI_BUS
-static SPIClass SD_SPI_BUS = SPIClass(VSPI);
+  static DECLARE_SD_SPI_BUS;
 #endif
 
-void sdcard_setup(void) {
 #ifdef  USE_SDFAT
 
 #ifdef SD_SPI_BUS
@@ -560,3 +565,4 @@ void sdcard_setup(void) {
 
 #endif // USE_SDFAT
 }
+#endif // _SDCARD_HPP_
