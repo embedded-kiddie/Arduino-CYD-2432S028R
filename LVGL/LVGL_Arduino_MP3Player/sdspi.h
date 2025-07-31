@@ -24,7 +24,7 @@
 
 #else
 
-#include "SPI.h"
+#include "SD.h"
 
 #define SD_CONFIG SD_CS, SPI, SD_CLOCK
 

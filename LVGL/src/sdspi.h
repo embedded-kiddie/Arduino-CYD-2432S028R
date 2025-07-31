@@ -17,9 +17,13 @@ extern SdFat SD;
 
 // SPI bus configuration
 // Note: It assumes that the LCD is assigned to HSPI.
+#if   1
 #define SD_SPI_BUS sd_spi
 #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &SD_SPI_BUS)
 #define DECLARE_SD_SPI_BUS SPIClass SD_SPI_BUS = SPIClass(VSPI)
+#else
+#define SD_CONFIG SD_CS, SD_SPI_CLOCK
+#endif
 
 // alternatives to FS.h definitions
 #undef  FILE_APPEND

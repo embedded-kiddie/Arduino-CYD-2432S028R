@@ -162,7 +162,7 @@ private:
 
     // extract audio files in the parents directory
     for (int i = 0, parent = 0; parent < n; parent++) {
-      std::string path = tree->find(parent);
+      std::string path = tree->find_path(parent);
       File file, dir = SD.open(path.c_str());
 
       while (file = dir.openNextFile()) {
@@ -190,7 +190,7 @@ private:
   void print_files(Node* tree) {
     int i = 0; 
     for (auto &f : m_list) {
-      std::string path = tree->find(f.parent);
+      std::string path = tree->find_path(f.parent);
       printf("No %3d: %d/%d, %2d, %3d, %s/%s\n", i++, f.meta.saved, f.meta.selected, f.meta.pictureNo, f.meta.duration, path.c_str(), f.name.c_str());
     }
   }

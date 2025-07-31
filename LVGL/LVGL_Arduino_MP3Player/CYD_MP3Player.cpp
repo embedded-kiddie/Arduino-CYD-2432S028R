@@ -74,7 +74,7 @@ MP3File_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
 std::string CYD_MP3Player::GetDirPath(uint32_t playNo) {
   MP3File_t *file = GetPlayList(playNo);
   if (file) {
-    std::string path = m_tree->find(file->parent);
+    std::string path = m_tree->find_path(file->parent);
     return path.append("/");
   } else {
     return "";
@@ -84,7 +84,7 @@ std::string CYD_MP3Player::GetDirPath(uint32_t playNo) {
 std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
   MP3File_t *file = GetPlayList(playNo);
   if (file) {
-    std::string path = m_tree->find(file->parent);
+    std::string path = m_tree->find_path(file->parent);
     return path.append("/").append(file->name);
   } else {
     return "";
