@@ -158,7 +158,7 @@ private:
    * Scan audio files and make a play list
    *--------------------------------------------------------------------------------*/
   void scan_file(Node* tree) {
-    const size_t n = tree->size();
+    const size_t n = tree->get_n_leafs();
 
     // extract audio files in the parents directory
     for (int i = 0, parent = 0; parent < n; parent++) {
