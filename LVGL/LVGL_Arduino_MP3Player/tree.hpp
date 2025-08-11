@@ -17,6 +17,8 @@
 #include <assert.h>
 #include <string.h>
 
+#define AUDIO_FILE_EXT  {".mp3", ".m4a", ".wav"}
+
 /*----------------------------------------------------------------------
  * Class definition
  *----------------------------------------------------------------------*/
@@ -24,13 +26,16 @@ class Node {
 private:
   static bool found;            // node search flag
   static std::string path;      // file path search result
-  static uint16_t n_leafs;      // number of leaf nodes
+  static uint32_t n_nodes;      // number of nodes
+  static uint32_t n_leafs;      // number of leaf nodes
+  static uint32_t n_depth;      // depth of tree
 public:
   uint16_t key;                 // a key assigned to each node
   std::string name;             // folder name or file name
   std::vector<Node*> children;  // a set of child nodes
 
   Node(const char * name) {
+    n_nodes++;
     this->name = name;
   }
 
@@ -42,9 +47,15 @@ public:
     this->name.clear();
   }
 
-  // number of leaf nodes
-  const size_t size(void) {
+  // number of nodes / leaf nodes / depth
+  const uint32_t get_n_nodes(void) {
+    return n_nodes;
+  }
+  const uint32_t get_n_leafs(void) {
     return n_leafs;
+  }
+  const uint32_t get_n_depth(void) {
+    return n_depth;
   }
 
   // creates a new node and adds it to the set of children
@@ -62,7 +73,7 @@ public:
 private:
   // check the file extension
   bool check_ext(const char *path) {
-    const char* ext[] = {".mp3", ".m4a", ".wav"};
+    const char* ext[] = AUDIO_FILE_EXT;
     for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
       if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
         return true;
@@ -81,6 +92,7 @@ private:
 #else
       const char *name = entry.name();
 #endif
+      if (name[0] == '@') { continue; }
       if (entry.isDirectory()) {
         scan_node(entry, node->append(name), scan_file);
       }
@@ -97,32 +109,33 @@ private:
   }
 
   // traverse by preorder
-  void traverse_node(Node *node) {
+  uint32_t traverse_node(Node *node) {
+    uint32_t depth = 0;
     for (auto &n : node->children) {
       if (n->children.size()) {
-        traverse_node(n);
+        uint32_t d = traverse_node(n);
+        depth = max(depth, d);
       } else {
         n->key = n_leafs++;
       }
     }
     node->key = n_leafs - 1;
+    return depth + 1;
   }
 
 public:
   // create a file tree
   void scan_file(File &dir) {
+    n_nodes = n_leafs = 0;
     scan_node(dir, this, true);
-
-    n_leafs = 0;
-    traverse_node(this);
+    n_depth = traverse_node(this);
   }
 
   // create a directory tree
   void scan_dir(File &dir) {
+    n_nodes = n_leafs = 0;
     scan_node(dir, this, false);
-
-    n_leafs = 0;
-    traverse_node(this);
+    n_depth = traverse_node(this);
   }
 
 private:

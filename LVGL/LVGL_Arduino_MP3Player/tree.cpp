@@ -10,4 +10,6 @@
  *----------------------------------------------------------------------*/
 bool        Node::found;
 std::string Node::path;
-uint16_t    Node::n_leafs;
+uint32_t    Node::n_nodes;
+uint32_t    Node::n_leafs;
+uint32_t    Node::n_depth;
