@@ -16,4 +16,5 @@
 !LVGL_Arduino_FontManager/*
 !LVGL_Arduino_EEZ/*
 !LVGL_Arduino_Jpeg/*
+!LVGL_Arduino_FileList/*
 
