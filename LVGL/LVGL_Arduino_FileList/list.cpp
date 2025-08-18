@@ -35,7 +35,6 @@ static lv_obj_t *get_parent(lv_obj_t *cell) {
 // https://docs.lvgl.io/master/details/widgets/table.html
 //--------------------------------------------------------------------
 static void draw_image_cb(lv_event_t *e) {
-  lv_obj_t *cell = lv_event_get_target_obj(e);
   lv_draw_task_t *draw_task = lv_event_get_draw_task(e);
   lv_draw_dsc_base_t *base_dsc = (lv_draw_dsc_base_t *)lv_draw_task_get_draw_dsc(draw_task);
 
@@ -45,6 +44,7 @@ static void draw_image_cb(lv_event_t *e) {
 
   if (type == LV_DRAW_TASK_TYPE_FILL) {
     CellData_t data;
+    lv_obj_t *cell = lv_event_get_target_obj(e);
     data.user_data = lv_obj_get_user_data(cell);
 
     // Do not draw if parent cell is folded
