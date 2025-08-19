@@ -65,11 +65,6 @@ static void draw_image_cb(lv_event_t *e) {
       img = (const lv_image_dsc_t*)(data.status ? &img_checked : &img_checkbox);
     }
 
-    lv_draw_rect_dsc_t rect_dsc;
-    lv_draw_rect_dsc_init(&rect_dsc);
-    rect_dsc.bg_image_src = (const void *)img;
-    rect_dsc.bg_color = data.type ? CELL_COLOR_LEAF : CELL_COLOR_NODE;
- 
     lv_area_t area;
     area.x1 = 0;
     area.x2 = img->header.w - 1;
@@ -79,7 +74,19 @@ static void draw_image_cb(lv_event_t *e) {
     lv_draw_task_get_area(draw_task, &draw_task_area);
     lv_area_align(&draw_task_area, &area, LV_ALIGN_LEFT_MID, (data.depth + 1) * CELL_PADDING_SIZE, 0);
 
+#if 1
+    lv_draw_rect_dsc_t rect_dsc;
+    lv_draw_rect_dsc_init(&rect_dsc);
+    rect_dsc.bg_image_src = (const void *)img;
+    rect_dsc.bg_color = data.type ? CELL_COLOR_LEAF : CELL_COLOR_NODE;
     lv_draw_rect(base_dsc->layer, &rect_dsc, &area);
+#else
+    lv_draw_image_dsc_t img_dsc;
+    lv_draw_image_dsc_init(&img_dsc);
+    img_dsc.src = (const void *)img;
+    img_dsc.recolor = lv_color_black();
+    lv_draw_image(base_dsc->layer, &img_dsc, &area);
+#endif
   }
 }
 
