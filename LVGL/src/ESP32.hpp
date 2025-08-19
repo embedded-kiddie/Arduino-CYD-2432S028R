@@ -112,4 +112,11 @@ void PrintESP32Memory(void) {
   printf("Min MALLOC_CAP_DMA     :%7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_DMA));
   printf("Max MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
   printf("Max MALLOC_CAP_DMA     :%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
+
+#ifdef LVGL_H
+  /* LVGL memory usage */
+  lv_mem_monitor_t mon;
+  lv_mem_monitor(&mon);
+  printf("LVGL memory usage      : Remaining (min): %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
+#endif
 }
