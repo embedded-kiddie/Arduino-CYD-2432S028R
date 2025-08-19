@@ -58,26 +58,28 @@ static void draw_image_cb(lv_event_t *e) {
     }
 
     // Draw icon image
-    lv_draw_rect_dsc_t rect_dsc;
-    lv_draw_rect_dsc_init(&rect_dsc);
     const lv_image_dsc_t *img;
     if (data.type == TYPE_NODE) {
       img = (const lv_image_dsc_t*)(data.status ? &symbol_right : &symbol_down);
-      rect_dsc.bg_color = CELL_COLOR_NODE;
     } else {
       img = (const lv_image_dsc_t*)(data.status ? &img_checked : &img_checkbox);
     }
-    rect_dsc.bg_image_src = (const void *)img;
 
-    lv_area_t sw_area;
-    sw_area.x1 = 0;
-    sw_area.x2 = img->header.w;
-    sw_area.y1 = 0;
-    sw_area.y2 = img->header.h;
+    lv_draw_rect_dsc_t rect_dsc;
+    lv_draw_rect_dsc_init(&rect_dsc);
+    rect_dsc.bg_image_src = (const void *)img;
+    rect_dsc.bg_color = data.type ? CELL_COLOR_LEAF : CELL_COLOR_NODE;
+ 
+    lv_area_t area;
+    area.x1 = 0;
+    area.x2 = img->header.w - 1;
+    area.y1 = 0;
+    area.y2 = img->header.h - 1;
     lv_area_t draw_task_area;
     lv_draw_task_get_area(draw_task, &draw_task_area);
-    lv_area_align(&draw_task_area, &sw_area, LV_ALIGN_LEFT_MID, (data.depth + 1) * CELL_PADDING_SIZE, 0);
-    lv_draw_rect(base_dsc->layer, &rect_dsc, &sw_area);
+    lv_area_align(&draw_task_area, &area, LV_ALIGN_LEFT_MID, (data.depth + 1) * CELL_PADDING_SIZE, 0);
+
+    lv_draw_rect(base_dsc->layer, &rect_dsc, &area);
   }
 }
 
