@@ -10,6 +10,18 @@
 #include "ui_helpers.h"
 #include "ui_events.h"
 
+// Debug
+#define DEBUG true
+#if     DEBUG
+#include <assert.h>
+#define DBG_EXEC(x)   x
+#define DBG_ASSERT(x) assert(x)
+#else
+#define DBG_EXEC(x)
+#define DBG_ASSERT(x)
+#endif
+
+// Screen size
 #define SCREEN_WIDTH  240
 #define SCREEN_HEIGHT 320
 #define LV_PCT_X(a)   (SCREEN_WIDTH  * (a) / 100)
@@ -39,7 +51,6 @@ void ui_event_ButtonNext  (lv_event_t *e);
 void ui_event_ButtonPrev  (lv_event_t *e);
 void ui_event_VolumeMax   (lv_event_t *e);
 void ui_event_VolumeMin   (lv_event_t *e);
-// CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenOption
 extern lv_obj_t *ui_ScreenOption;
@@ -56,7 +67,6 @@ void ui_event_SleepTimerSwitch  (lv_event_t *e);
 void ui_ScreenOption_screen_init(void);
 void ui_event_ScreenOption      (lv_event_t *e);
 void ui_event_OptionToMainRight (lv_event_t *e);
-// CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenPlayList
 extern lv_obj_t *ui_ScreenPlayList;
@@ -79,9 +89,6 @@ void ui_event_MenuBackToLeft    (lv_event_t *e);
 void ui_event_MenuBluetoothOn   (lv_event_t *e);
 void ui_event_MenuBluetoothOff  (lv_event_t *e);
 #endif
-// CUSTOM VARIABLES
-
-// EVENTS
 
 // IMAGES AND IMAGE SETS
 LV_IMAGE_DECLARE(ui_img_album_png);   // assets/album.png

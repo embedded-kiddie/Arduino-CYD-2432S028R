@@ -13,7 +13,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_remove_flag            (ui_ScreenOption, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_style_bg_color     (ui_ScreenOption, UI_COLOR_BACKGROUND,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_opa       (ui_ScreenOption, 255,                  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_GESTURE, NULL);
 
 #if !USE_CONST_STYLE
   lv_obj_t *ui_OptionToMainRight = lv_checkbox_create(ui_ScreenOption);
@@ -44,7 +44,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_style_bg_image_src (ui_OptionToMainRight, &ui_img_1710110385,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_color     (ui_OptionToMainRight, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_opa       (ui_OptionToMainRight, 255,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_add_event_cb           (ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb           (ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_CLICKED, NULL);
 #else
   static constexpr lv_style_const_prop_t style_prop_common[] = {
     LV_STYLE_CONST_WIDTH(27),
@@ -119,7 +119,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_y                  (ui_FavoriteDropdown, lv_pct(-15));
   lv_obj_set_align              (ui_FavoriteDropdown, LV_ALIGN_CENTER);
   lv_obj_add_flag               (ui_FavoriteDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-  lv_obj_add_event_cb           (ui_FavoriteDropdown, ui_event_FavoriteDropdown, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb           (ui_FavoriteDropdown, ui_event_FavoriteDropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
   ui_FavoriteClearButton = lv_button_create(ui_ScreenOption);
   lv_obj_set_width              (ui_FavoriteClearButton, 80);
@@ -172,7 +172,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_x                  (ui_BacklightSwitch, lv_pct(-24));
   lv_obj_set_y                  (ui_BacklightSwitch, lv_pct(10));
   lv_obj_set_align              (ui_BacklightSwitch, LV_ALIGN_CENTER);
-  lv_obj_add_event_cb           (ui_BacklightSwitch, ui_event_BacklightSwitch, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb           (ui_BacklightSwitch, ui_event_BacklightSwitch, LV_EVENT_CLICKED, NULL);
 
   ui_BacklightRoller = lv_roller_create(ui_ScreenOption);
   lv_roller_set_options         (ui_BacklightRoller, "30 sec\n1 min\n2 min\n5 min", LV_ROLLER_MODE_NORMAL);
@@ -198,7 +198,7 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_set_x                  (ui_SleepTimerSwitch, lv_pct(22));
   lv_obj_set_y                  (ui_SleepTimerSwitch, lv_pct(10));
   lv_obj_set_align              (ui_SleepTimerSwitch, LV_ALIGN_CENTER);
-  lv_obj_add_event_cb           (ui_SleepTimerSwitch, ui_event_SleepTimerSwitch, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb           (ui_SleepTimerSwitch, ui_event_SleepTimerSwitch, LV_EVENT_CLICKED, NULL);
 
   ui_SleepTimerRoller = lv_roller_create(ui_ScreenOption);
   lv_roller_set_options         (ui_SleepTimerRoller, "30 min\n60 min\n90 min\n120 min\n180 min", LV_ROLLER_MODE_NORMAL);

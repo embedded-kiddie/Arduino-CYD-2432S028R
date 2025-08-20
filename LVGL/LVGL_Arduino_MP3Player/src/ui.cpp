@@ -73,15 +73,16 @@ lv_obj_t *ui_PlayListToMainDown;
  * Event handlers for Screen Main
  *--------------------------------------------------------------------------------*/
 void ui_event_ScreenMain(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_GESTURE);
 
-  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_RIGHT) {
-    lv_indev_wait_release(lv_indev_active());
+  lv_indev_wait_release(lv_indev_active());
+  lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
+
+  if (dir == LV_DIR_RIGHT) {
     _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
   }
 
-  else if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
-    lv_indev_wait_release(lv_indev_active());
+  else if (dir == LV_DIR_TOP) {
     _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
 
     lv_obj_set_align  (ui_ContainerPlayList,  LV_ALIGN_BOTTOM_MID);
@@ -91,8 +92,7 @@ void ui_event_ScreenMain(lv_event_t *e) {
     ui_list_focus_playing(player.GetPlayNo());
   }
 
-  else if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM) {
-    lv_indev_wait_release(lv_indev_active());
+  else if (dir == LV_DIR_BOTTOM) {
     _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenPlayList_screen_init);
 
     lv_obj_set_align  (ui_ContainerPlayList,  LV_ALIGN_TOP_MID);
@@ -102,114 +102,91 @@ void ui_event_ScreenMain(lv_event_t *e) {
     ui_list_focus_playing(player.GetPlayNo());
   }
 #if false
-  else if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
-    lv_indev_wait_release(lv_indev_active());
+  else if (dir == LV_DIR_LEFT) {
     _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
   }
 #endif
 }
 
 void ui_event_MenuDotMain(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
-  }
+  _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
 }
 
 void ui_event_Favorite(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    lv_obj_t *obj = lv_event_get_target_obj(e);
-    ui_option.favorite = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-  }
+  lv_obj_t *obj = lv_event_get_target_obj(e);
+  ui_option.favorite = lv_obj_get_state(obj) & LV_STATE_CHECKED;
 }
 
 void ui_event_Repeat(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    lv_obj_t *obj = lv_event_get_target_obj(e);
-    ui_option.repeat = (uint8_t)(lv_obj_get_state(obj) & LV_STATE_CHECKED ? 1 : 0);
-  }
+  lv_obj_t *obj = lv_event_get_target_obj(e);
+  ui_option.repeat = (uint8_t)(lv_obj_get_state(obj) & LV_STATE_CHECKED ? 1 : 0);
 }
 
 void ui_event_Shuffle(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    lv_obj_t *obj = lv_event_get_target_obj(e);
-    ui_option.shuffle = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
-  }
+  lv_obj_t *obj = lv_event_get_target_obj(e);
+  ui_option.shuffle = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
 }
 
 void ui_event_ButtonPlay(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    lv_state_t state = lv_obj_get_state(ui_ButtonPlay);
-    ui_state = state & LV_STATE_CHECKED ? UI_STATE_RESUME : UI_STATE_PAUSE;
-  }
+  lv_state_t state = lv_obj_get_state(ui_ButtonPlay);
+  ui_state = state & LV_STATE_CHECKED ? UI_STATE_RESUME : UI_STATE_PAUSE;
 }
 
 void ui_event_ButtonNext(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    ui_state = UI_STATE_NEXT;
-    bitSet(ui_option.repeat, 7); // force to set the bit temporarily
-  }
+  ui_state = UI_STATE_NEXT;
+  bitSet(ui_option.repeat, 7); // force to set the bit temporarily
 }
 
 void ui_event_ButtonPrev(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    ui_state = UI_STATE_PREV;
-    bitSet(ui_option.repeat, 7); // force to set the bit temporarily
-  }
+  ui_state = UI_STATE_PREV;
+  bitSet(ui_option.repeat, 7); // force to set the bit temporarily
 }
 
 void ui_event_VolumeMax(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    int vol = lv_slider_get_value(ui_Volume) + 1;
-    vol = constrain(vol, MP3_VOLUME_MIN, MP3_VOLUME_MAX);
-    lv_slider_set_value(ui_Volume, vol, LV_ANIM_OFF);
-    player.SetVolume(vol);
-  }
+  int vol = lv_slider_get_value(ui_Volume) + 1;
+  vol = constrain(vol, MP3_VOLUME_MIN, MP3_VOLUME_MAX);
+  lv_slider_set_value(ui_Volume, vol, LV_ANIM_OFF);
+  player.SetVolume(vol);
 }
 
 void ui_event_VolumeMin(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    int vol = lv_slider_get_value(ui_Volume) - 1;
-    vol = constrain(vol, MP3_VOLUME_MIN, MP3_VOLUME_MAX);
-    lv_slider_set_value(ui_Volume, vol, LV_ANIM_OFF);
-    player.SetVolume(vol);
-  }
+  int vol = lv_slider_get_value(ui_Volume) - 1;
+  vol = constrain(vol, MP3_VOLUME_MIN, MP3_VOLUME_MAX);
+  lv_slider_set_value(ui_Volume, vol, LV_ANIM_OFF);
+  player.SetVolume(vol);
 }
 
 void ui_event_Volume(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
-  if (event_code == LV_EVENT_VALUE_CHANGED) {
-    int vol = lv_slider_get_value(ui_Volume);
-    player.SetVolume(vol);
-  }
+  int vol = lv_slider_get_value(ui_Volume);
+  player.SetVolume(vol);
 }
 
 void ui_event_ElapsedBar(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
-  if (event_code == LV_EVENT_VALUE_CHANGED) {
-    if (player.IsPlaying()) {
-      uint32_t elapsed = lv_slider_get_value(ui_ElapsedBar);
-      audioSetElapsedTime(elapsed);
-    }
+  if (player.IsPlaying()) {
+    uint32_t elapsed = lv_slider_get_value(ui_ElapsedBar);
+    audioSetElapsedTime(elapsed);
   }
 }
 
@@ -217,134 +194,108 @@ void ui_event_ElapsedBar(lv_event_t *e) {
  * Event handlers for Screen Option
  *--------------------------------------------------------------------------------*/
 void ui_event_ScreenOption(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_GESTURE);
 
-  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
+  if (lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
     lv_indev_wait_release(lv_indev_active());
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
   }
 }
 
 void ui_event_OptionToMainRight(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
-  }
+  _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
 }
 #if   false
 void ui_event_FavoriteSwitch(lv_event_t * e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
-  if (event_code == LV_EVENT_VALUE_CHANGED) {
-    (e);
-    _ui_state_modify(ui_FavoriteClearButton, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-  }
+  _ui_state_modify(ui_FavoriteClearButton, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
 }
 
 void ui_event_FavoriteDropdown(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
-
-  if (event_code == LV_EVENT_VALUE_CHANGED) {
-    (e);
-  }
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+  ;
 }
 
 void ui_event_BacklightSwitch(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_state_modify(ui_BacklightRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+  _ui_state_modify(ui_BacklightRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
 
-    lv_obj_t *obj = lv_event_get_target_obj(e);
-    ui_option.backlight = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-  }
+  lv_obj_t *obj = lv_event_get_target_obj(e);
+  ui_option.backlight = lv_obj_get_state(obj) & LV_STATE_CHECKED;
 }
 
 void ui_event_SleepTimerSwitch(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_state_modify(ui_SleepTimerRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
+  _ui_state_modify(ui_SleepTimerRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
 
-    lv_obj_t *obj = lv_event_get_target_obj(e);
-    ui_option.sleepTimer = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-  }
+  lv_obj_t *obj = lv_event_get_target_obj(e);
+  ui_option.sleepTimer = lv_obj_get_state(obj) & LV_STATE_CHECKED;
 }
 #endif
 /*--------------------------------------------------------------------------------
  * Event handlers for Screen Playlist
  *--------------------------------------------------------------------------------*/
 void ui_event_ScreenPlayList(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_SCREEN_UNLOADED);
 
-  if (event_code == LV_EVENT_SCREEN_UNLOADED) {
-    lv_indev_wait_release(lv_indev_active());
-    ui_ScreenPlayList_screen_deinit();
-  }
+  lv_indev_wait_release(lv_indev_active());
+  ui_ScreenPlayList_screen_deinit();
 }
 
 void ui_event_PlayList_Heart(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    MetaData_t meta;
-    uint32_t track_id = (uint32_t)lv_event_get_user_data(e);
-    player.GetMetaData(track_id, &meta);
+  MetaData_t meta;
+  uint32_t track_id = (uint32_t)lv_event_get_user_data(e);
+  player.GetMetaData(track_id, &meta);
 
-    lv_obj_t *obj = (lv_obj_t*)lv_event_get_current_target(e);
-    meta.selected = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+  lv_obj_t *obj = (lv_obj_t*)lv_event_get_current_target(e);
+  meta.selected = lv_obj_get_state(obj) & LV_STATE_CHECKED;
 
-    // prevent input while saving metadata to SD card
-    lv_indev_enable(NULL, false);
-    bool saved = player.PutMetaData(track_id, &meta);
-    lv_indev_enable(NULL, true);
+  // prevent input while saving metadata to SD card
+  lv_indev_enable(NULL, false);
+  bool saved = player.PutMetaData(track_id, &meta);
+  lv_indev_enable(NULL, true);
 
-    // in case the metadata file cannot be saved, save it separately
-    if (!saved) {
-      saveID3tags = true;
-    }
+  // in case the metadata file cannot be saved, save it separately
+  if (!saved) {
+    saveID3tags = true;
   }
 }
 
 void ui_event_PlayListToMainUp(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
-  }
+  _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
 }
 
 void ui_event_PlayListToMainDown(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
-  }
+  _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
 }
 #if false
 void ui_event_MenuBackToLeft(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenMain_screen_init);
-  }
+  _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenMain_screen_init);
 }
 
 void ui_event_MenuBluetoothOn(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
-  }
+  _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
 }
 
 void ui_event_MenuBluetoothOff(lv_event_t *e) {
-  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
-  }
+  _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
 }
 #endif
 /////////////////// LOCAL FUNCTIONS //////////////////
