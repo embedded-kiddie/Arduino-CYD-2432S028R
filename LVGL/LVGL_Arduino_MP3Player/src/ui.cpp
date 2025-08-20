@@ -81,31 +81,25 @@ void ui_event_ScreenMain(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
-    if (!ui_ContainerPlayList) {
-      ui_ScreenPlayList_screen_init(); // initialize ui_ScreenPlayList and ui_ContainerPlayList
-    }
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
 
     lv_obj_set_align  (ui_ContainerPlayList,  LV_ALIGN_BOTTOM_MID);
     lv_obj_add_flag   (ui_PlayListToMainUp,   LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
 
     ui_list_focus_playing(player.GetPlayNo());
-    lv_indev_wait_release(lv_indev_active());
-    lv_screen_load_anim(ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, false);
   }
 
   else if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM) {
-    if (!ui_ContainerPlayList) {
-      ui_ScreenPlayList_screen_init(); // initialize ui_ScreenPlayList and ui_ContainerPlayList
-    }
+    lv_indev_wait_release(lv_indev_active());
+    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenPlayList_screen_init);
 
     lv_obj_set_align  (ui_ContainerPlayList,  LV_ALIGN_TOP_MID);
     lv_obj_remove_flag(ui_PlayListToMainUp,   LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag   (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
 
     ui_list_focus_playing(player.GetPlayNo());
-    lv_indev_wait_release(lv_indev_active());
-    lv_screen_load_anim(ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, false);
   }
 #if false
   else if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
@@ -281,6 +275,15 @@ void ui_event_SleepTimerSwitch(lv_event_t *e) {
 /*--------------------------------------------------------------------------------
  * Event handlers for Screen Playlist
  *--------------------------------------------------------------------------------*/
+void ui_event_ScreenPlayList(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+
+  if (event_code == LV_EVENT_SCREEN_UNLOADED) {
+    lv_indev_wait_release(lv_indev_active());
+    ui_ScreenPlayList_screen_deinit();
+  }
+}
+
 void ui_event_PlayList_Heart(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
