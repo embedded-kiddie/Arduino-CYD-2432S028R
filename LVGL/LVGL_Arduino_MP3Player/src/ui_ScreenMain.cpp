@@ -6,7 +6,7 @@
 #include "ui.h"
 
 // https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
-#define USE_CONST_STYLE 0
+#define USE_CONST_STYLE 1
 
 void ui_ScreenMain_screen_init(void) {
   ui_ScreenMain = lv_obj_create(NULL);
@@ -819,16 +819,16 @@ void ui_ScreenMain_screen_init(void) {
   // Compensating for LVGL9.1 draw crash with bar/slider max value when top-padding is nonzero and right-padding is 0
   if (lv_obj_get_style_pad_top  (ui_Volume, (uint32_t)LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_Volume, lv_obj_get_style_pad_right(ui_Volume, (uint32_t)LV_PART_MAIN) + 1, (uint32_t)LV_PART_MAIN);
 
-  lv_obj_add_event_cb(ui_MenuDotMain, ui_event_MenuDotMain, LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_Favorite,    ui_event_Favorite,    LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_Repeat,      ui_event_Repeat,      LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_Shuffle,     ui_event_Shuffle,     LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_ButtonPlay,  ui_event_ButtonPlay,  LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_ButtonNext,  ui_event_ButtonNext,  LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_ButtonPrev,  ui_event_ButtonPrev,  LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_VolumeMax,   ui_event_VolumeMax,   LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_VolumeMin,   ui_event_VolumeMin,   LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_Volume,      ui_event_Volume,      LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_ElapsedBar,  ui_event_ElapsedBar,  LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_ScreenMain,  ui_event_ScreenMain,  LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb(ui_MenuDotMain, ui_event_MenuDotMain, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_Favorite,    ui_event_Favorite,    LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_Repeat,      ui_event_Repeat,      LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_Shuffle,     ui_event_Shuffle,     LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_ButtonPlay,  ui_event_ButtonPlay,  LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_ButtonNext,  ui_event_ButtonNext,  LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_ButtonPrev,  ui_event_ButtonPrev,  LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_VolumeMax,   ui_event_VolumeMax,   LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_VolumeMin,   ui_event_VolumeMin,   LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_Volume,      ui_event_Volume,      LV_EVENT_VALUE_CHANGED, NULL);
+  lv_obj_add_event_cb(ui_ElapsedBar,  ui_event_ElapsedBar,  LV_EVENT_VALUE_CHANGED, NULL);
+  lv_obj_add_event_cb(ui_ScreenMain,  ui_event_ScreenMain,  LV_EVENT_GESTURE, NULL);
 }

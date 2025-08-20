@@ -252,7 +252,7 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_checkbox_set_text          (heart, "");
   lv_obj_set_state              (heart, LV_STATE_CHECKED, tags.meta.selected);
   lv_obj_set_grid_cell          (heart, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
-  lv_obj_add_event_cb           (heart, ui_event_PlayList_Heart, LV_EVENT_ALL, (void*)track_id);
+  lv_obj_add_event_cb           (heart, ui_event_PlayList_Heart, LV_EVENT_CLICKED, (void*)track_id);
   lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_add_style              (heart, &style_heart,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
@@ -412,7 +412,7 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_obj_set_size             (list, lv_pct(100), lv_pct(100));
   lv_obj_set_align            (list, LV_ALIGN_CENTER);
   lv_obj_set_flex_flow        (list, LV_FLEX_FLOW_COLUMN);
-  lv_obj_add_event_cb         (list, scroll_cb, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb         (list, scroll_cb, LV_EVENT_SCROLL, NULL);
 
   // Creating a slider as an alternative to a scrollbar
   slider = lv_slider_create(parent); // attach to ui_ContainerPlayList
@@ -561,7 +561,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_right      (ui_MenuBackToLeft,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_top        (ui_MenuBackToLeft, 10,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom     (ui_MenuBackToLeft,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_add_event_cb             (ui_MenuBackToLeft, ui_event_MenuBackToLeft, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb             (ui_MenuBackToLeft, ui_event_MenuBackToLeft, LV_EVENT_CLICKED, NULL);
 
   lv_obj_t *ui_MenuBluetoothOn = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text            (ui_MenuBluetoothOn, "");
@@ -623,12 +623,12 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_pad_top        (ui_MenuBluetoothOff,  0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom     (ui_MenuBluetoothOff,  0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
-  lv_obj_add_event_cb             (ui_MenuBluetoothOn,  ui_event_MenuBluetoothOn,   LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb             (ui_MenuBluetoothOff, ui_event_MenuBluetoothOff,  LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb             (ui_MenuBluetoothOn,  ui_event_MenuBluetoothOn,   LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb             (ui_MenuBluetoothOff, ui_event_MenuBluetoothOff,  LV_EVENT_CLICKED, NULL);
 #endif
   lv_obj_add_event_cb(ui_ScreenPlayList,      ui_event_ScreenPlayList,      LV_EVENT_SCREEN_UNLOADED, NULL);
-  lv_obj_add_event_cb(ui_PlayListToMainUp,    ui_event_PlayListToMainUp,    LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_PlayListToMainDown,  ui_event_PlayListToMainDown,  LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb(ui_PlayListToMainUp,    ui_event_PlayListToMainUp,    LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_PlayListToMainDown,  ui_event_PlayListToMainDown,  LV_EVENT_CLICKED, NULL);
 
   // Initialize play list container
   play_list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
