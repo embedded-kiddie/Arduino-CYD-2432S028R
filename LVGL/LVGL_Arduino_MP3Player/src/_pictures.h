@@ -9,7 +9,7 @@ LV_IMAGE_DECLARE(Past_Lives);
 LV_IMAGE_DECLARE(SUPER_EUROBEAT);
 
 const lv_image_dsc_t *pictures[] = {
-  /*  0 */  & ui_img_album_png,
+  /*  0 */  & ui_img_album,
   /*  1 */  & DETOX,
   /*  2 */  & Eye_of_the_Storm,
   /*  3 */  & Gravity,

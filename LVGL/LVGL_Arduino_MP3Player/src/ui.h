@@ -10,16 +10,7 @@
 #include "ui_helpers.h"
 #include "ui_events.h"
 
-// Debug
-#define DEBUG true
-#if     DEBUG
-#include <assert.h>
-#define DBG_EXEC(x)   x
-#define DBG_ASSERT(x) assert(x)
-#else
-#define DBG_EXEC(x)
-#define DBG_ASSERT(x)
-#endif
+#include "debug.h"
 
 // Screen size
 #define SCREEN_WIDTH  240
@@ -91,27 +82,27 @@ void ui_event_MenuBluetoothOff  (lv_event_t *e);
 #endif
 
 // IMAGES AND IMAGE SETS
-LV_IMAGE_DECLARE(ui_img_album_png);   // assets/album.png
-LV_IMAGE_DECLARE(ui_img_wave_png);    // assets/wave.png
-LV_IMAGE_DECLARE(ui_img_menu_png);    // assets/menu.png
-LV_IMAGE_DECLARE(ui_img_511832737);   // assets/heart-off.png
-LV_IMAGE_DECLARE(ui_img_1050326551);  // assets/heart-on.png
-LV_IMAGE_DECLARE(ui_img_repeat_png);  // assets/repeat.png
-LV_IMAGE_DECLARE(ui_img_shuffle_png); // assets/shuffle.png
-LV_IMAGE_DECLARE(ui_img_play_png);    // assets/play.png
-LV_IMAGE_DECLARE(ui_img_pause_png);   // assets/pause.png
-LV_IMAGE_DECLARE(ui_img_715969206);   // assets/skip-next.png
-LV_IMAGE_DECLARE(ui_img_1076165770);  // assets/skip-prev.png
-LV_IMAGE_DECLARE(ui_img_1994412056);  // assets/volume-max.png
-LV_IMAGE_DECLARE(ui_img_2058316518);  // assets/volume-min.png
-LV_IMAGE_DECLARE(ui_img_1710110385);  // assets/back-right.png
-//LV_IMAGE_DECLARE(ui_img_713466046);   // assets/back-left.png
-//LV_IMAGE_DECLARE(ui_img_1753861343);  // assets/bluetooth-on.png
-//LV_IMAGE_DECLARE(ui_img_1837194583);  // assets/bluetooth-off.png
-LV_IMAGE_DECLARE(ui_img_1157704237);  // assets/heart-off-small.png
-LV_IMAGE_DECLARE(ui_img_628457255);   // assets/heart-on-small.png
-LV_IMAGE_DECLARE(ui_img_1668913270);  // assets/back-up.png
-LV_IMAGE_DECLARE(ui_img_365069097);   // assets/back-down.png
+LV_IMAGE_DECLARE(ui_img_album);       // assets/ui_img_album.png
+LV_IMAGE_DECLARE(ui_img_wave);        // assets/ui_img_wave.png
+LV_IMAGE_DECLARE(ui_img_menu);        // assets/ui_img_menu.png
+LV_IMAGE_DECLARE(ui_img_heart_off);   // assets/ui_img_heart_off.png
+LV_IMAGE_DECLARE(ui_img_heart_on);    // assets/ui_img_heart_on.png
+LV_IMAGE_DECLARE(ui_img_repeat);      // assets/ui_img_repeat.png
+LV_IMAGE_DECLARE(ui_img_shuffle);     // assets/ui_img_shuffle.png
+LV_IMAGE_DECLARE(ui_img_play);        // assets/ui_img_play.png
+LV_IMAGE_DECLARE(ui_img_pause);       // assets/ui_img_pause.png
+LV_IMAGE_DECLARE(ui_img_skip_next);   // assets/ui_img_skip_next.png
+LV_IMAGE_DECLARE(ui_img_skip_prev);   // assets/ui_img_skip_prev.png
+LV_IMAGE_DECLARE(ui_img_vol_max);     // assets/ui_img_vol_max.png
+LV_IMAGE_DECLARE(ui_img_vol_min);     // assets/ui_img_vol_min.png
+LV_IMAGE_DECLARE(ui_img_back_right);  // assets/ui_img_back_right.png
+//LV_IMAGE_DECLARE(ui_img_back_left);   // assets/ui_img_back_left.png
+//LV_IMAGE_DECLARE(ui_img_bluetooth_on);  // assets/ui_img_bluetooth_on.png
+//LV_IMAGE_DECLARE(ui_img_bluetooth_off);  // assets/ui_img_bluetooth_off.png
+LV_IMAGE_DECLARE(ui_img_heart_off_small);  // assets/ui_img_heart_off_small.png
+LV_IMAGE_DECLARE(ui_img_heart_on_small);   // assets/ui_img_heart_on_small.png
+LV_IMAGE_DECLARE(ui_img_back_up);     // assets/ui_img_back_up.png
+LV_IMAGE_DECLARE(ui_img_back_down);   // assets/ui_img_back_down.png
 LV_IMAGE_DECLARE(ui_img_list_play);   // assets/list-play.png
 LV_IMAGE_DECLARE(ui_img_list_pause);  // assets/list-pause.png
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
@@ -127,7 +118,7 @@ void ui_set_playNo(uint32_t playNo);
 uint32_t ui_get_playNo(void);
 uint32_t ui_get_counts(void);
 
-#define UI_COLOR_BACKGROUND   { .blue = 0xff, .green = 0xff, .red = 0xff }  // lv_color_hex(0xffffff)
+#define UI_COLOR_BACKGROUND   { .blue = 0xf5, .green = 0xf5, .red = 0xf5 }  // lv_color_hex(0xf5f5f5)
 #define UI_COLOR_SLIDER       { .blue = 0x00, .green = 0x00, .red = 0x00 }  // lv_color_hex(0x000000)
 #define UI_COLOR_CHECKBOX     { .blue = 0xff, .green = 0x40, .red = 0x40 }  // lv_color_hex(0x4040ff)
 #define UI_COLOR_LIST_DEFAULT { .blue = 0x7f, .green = 0x5a, .red = 0x5a }  // lv_color_hex(0x5a5a7f)

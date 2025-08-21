@@ -194,11 +194,16 @@ void ui_event_ElapsedBar(lv_event_t *e) {
  * Event handlers for Screen Option
  *--------------------------------------------------------------------------------*/
 void ui_event_ScreenOption(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_GESTURE);
+  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(event_code == LV_EVENT_GESTURE || event_code == LV_EVENT_SCREEN_UNLOADED);
 
-  if (lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
     lv_indev_wait_release(lv_indev_active());
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
+  }
+
+  else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
+    printf("ui_event_ScreenOption: unloaded.\n");
   }
 }
 
@@ -407,7 +412,7 @@ static void display_picture(uint32_t playNo) {
     }
   }
 
-  lv_image_set_src    (ui_AlbumImage, &ui_img_album_png);
+  lv_image_set_src    (ui_AlbumImage, &ui_img_album);
   lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
 
 #else // MY_USE_FS_ARDUINO_SD == 0
@@ -424,7 +429,7 @@ static void display_picture(uint32_t playNo) {
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
     lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
   } else {
-    lv_image_set_src    (ui_AlbumImage, &ui_img_album_png);
+    lv_image_set_src    (ui_AlbumImage, &ui_img_album);
     lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
   }
 
