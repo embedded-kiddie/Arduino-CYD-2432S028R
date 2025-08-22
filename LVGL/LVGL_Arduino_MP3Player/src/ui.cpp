@@ -38,7 +38,6 @@ lv_obj_t *ui_ButtonPlay;
 lv_obj_t *ui_ElapsedBar;
 lv_obj_t *ui_Volume;
 lv_obj_t *ui_AlbumImage;
-lv_style_t ui_AlbumStyle;
 
 // SCREEN: ui_ScreenOption
 lv_obj_t *ui_ScreenOption;
@@ -54,7 +53,14 @@ lv_obj_t *ui_ContainerPlayList;
 lv_obj_t *ui_PlayListToMainUp;
 lv_obj_t *ui_PlayListToMainDown;
 
-// EVENTS
+// STYLES
+static constexpr lv_style_const_prop_t style_prop_album[] = {
+  LV_STYLE_CONST_SHADOW_WIDTH(10),
+  LV_STYLE_CONST_SHADOW_OFFSET_Y(5),
+  LV_STYLE_CONST_SHADOW_OPA(LV_OPA_50),
+  LV_STYLE_CONST_PROPS_END
+};
+static LV_STYLE_CONST_INIT(album_style, (void*)style_prop_album);
 
 // IMAGES AND IMAGE SETS
 #if (LV_USE_FS_ARDUINO_SD == 0) && (MY_USE_FS_ARDUINO_SD == 0)
@@ -397,7 +403,7 @@ static void display_picture(uint32_t playNo) {
     strcpy(ptr + 1, PICTURE_EXT);
     if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
-      lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
+      lv_obj_add_style(ui_AlbumImage, &album_style, 0);
       return;
     }
   }
@@ -407,13 +413,13 @@ static void display_picture(uint32_t playNo) {
     strcpy(ptr + 1, PICTURE_BASE PICTURE_EXT);
     if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
-      lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
+      lv_obj_add_style(ui_AlbumImage, &album_style, 0);
       return;
     }
   }
 
   lv_image_set_src    (ui_AlbumImage, &img_album);
-  lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
+  lv_obj_remove_style (ui_AlbumImage, &album_style, 0);
 
 #else // MY_USE_FS_ARDUINO_SD == 0
 
@@ -427,10 +433,10 @@ static void display_picture(uint32_t playNo) {
 
   if (0 < pictNo && pictNo < N_PICTURES) {
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
-    lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
+    lv_obj_add_style(ui_AlbumImage, &album_style, 0);
   } else {
     lv_image_set_src    (ui_AlbumImage, &img_album);
-    lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
+    lv_obj_remove_style (ui_AlbumImage, &album_style, 0);
   }
 
 #endif

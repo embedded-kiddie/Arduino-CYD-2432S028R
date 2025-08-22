@@ -6,11 +6,11 @@
 #include "ui.h"
 
 // https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
-#define USE_CONST_STYLE 0
+#define USE_CONST_STYLE 1
 
 void ui_ScreenOption_screen_init(void) {
   ui_ScreenOption = lv_obj_create(NULL);
-  lv_obj_set_style_bg_color     (ui_ScreenOption, UI_COLOR_BACKGROUND,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_color     (ui_ScreenOption, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_GESTURE, NULL);
   lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_SCREEN_UNLOADED, NULL);
 
@@ -49,8 +49,8 @@ void ui_ScreenOption_screen_init(void) {
   };
   static constexpr lv_style_const_prop_t style_prop_default[] = {
     LV_STYLE_CONST_BG_IMAGE_SRC(&img_back_right),
-      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+    LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+    LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
     LV_STYLE_CONST_BORDER_WIDTH(0),
     LV_STYLE_CONST_PAD_LEFT(8),
     LV_STYLE_CONST_PAD_RIGHT(0),

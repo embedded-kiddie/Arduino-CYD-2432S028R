@@ -28,7 +28,6 @@ extern lv_obj_t *ui_ButtonPlay;
 extern lv_obj_t *ui_ElapsedBar;
 extern lv_obj_t *ui_Volume;
 extern lv_obj_t *ui_AlbumImage;
-extern lv_style_t ui_AlbumStyle;
 void ui_ScreenMain_screen_init(void);
 void ui_event_ScreenMain  (lv_event_t *e);
 void ui_event_ButtonPlay  (lv_event_t *e);
