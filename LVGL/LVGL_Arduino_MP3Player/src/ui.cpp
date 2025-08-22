@@ -412,7 +412,7 @@ static void display_picture(uint32_t playNo) {
     }
   }
 
-  lv_image_set_src    (ui_AlbumImage, &ui_img_album);
+  lv_image_set_src    (ui_AlbumImage, &img_album);
   lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
 
 #else // MY_USE_FS_ARDUINO_SD == 0
@@ -429,7 +429,7 @@ static void display_picture(uint32_t playNo) {
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
     lv_obj_add_style(ui_AlbumImage, &ui_AlbumStyle, 0);
   } else {
-    lv_image_set_src    (ui_AlbumImage, &ui_img_album);
+    lv_image_set_src    (ui_AlbumImage, &img_album);
     lv_obj_remove_style (ui_AlbumImage, &ui_AlbumStyle, 0);
   }
 
