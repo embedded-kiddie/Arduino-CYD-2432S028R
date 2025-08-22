@@ -7,6 +7,8 @@ LV_IMAGE_DECLARE(Gravity);
 LV_IMAGE_DECLARE(Niche);
 LV_IMAGE_DECLARE(Past_Lives);
 LV_IMAGE_DECLARE(SUPER_EUROBEAT);
+LV_IMAGE_DECLARE(a_nation_vol2);
+LV_IMAGE_DECLARE(Amazing);
 
 const lv_image_dsc_t *pictures[] = {
   /*  0 */  & img_album,
@@ -16,6 +18,8 @@ const lv_image_dsc_t *pictures[] = {
   /*  4 */  & Niche,
   /*  5 */  & Past_Lives,
   /*  6 */  & SUPER_EUROBEAT,
+  /*  7 */  & a_nation_vol2,
+  /*  8 */  & Amazing,
 };
 
 #define N_PICTURES  (sizeof(pictures) / sizeof(lv_image_dsc_t *))
