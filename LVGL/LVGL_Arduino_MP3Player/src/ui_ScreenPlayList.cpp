@@ -363,13 +363,13 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_image_opa      (&style_cell_disable, LV_OPA_40);
 */
   lv_style_init               (&style_title);
-  lv_style_set_width          (&style_title, lv_obj_get_width (lv_scr_act()) - LIST_LABEL_MARGINE);
+  lv_style_set_width          (&style_title, lv_obj_get_width (lv_screen_active()) - LIST_LABEL_MARGINE);
   lv_style_set_height         (&style_title, LIST_FONT_MEDIUM_HEIGHT);
   lv_style_set_text_font      (&style_title, &CUSTOM_FONT_MEDIUM);
   lv_style_set_text_color     (&style_title, UI_COLOR_BACKGROUND);
 
   lv_style_init               (&style_artist);
-  lv_style_set_width          (&style_artist, lv_obj_get_width (lv_scr_act()) - LIST_LABEL_MARGINE);
+  lv_style_set_width          (&style_artist, lv_obj_get_width (lv_screen_active()) - LIST_LABEL_MARGINE);
   lv_style_set_height         (&style_artist, LIST_FONT_SMALL_HEIGHT);
   lv_style_set_pad_right      (&style_artist, 5); // gap between artist and time
   lv_style_set_text_font      (&style_artist, &CUSTOM_FONT_SMALL);
@@ -493,7 +493,7 @@ void ui_ScreenPlayList_screen_init(void) {
 
   ui_ContainerPlayList = lv_obj_create(ui_ScreenPlayList);
   lv_obj_remove_style_all         (ui_ContainerPlayList);
-  lv_obj_set_height               (ui_ContainerPlayList, lv_obj_get_height(lv_scr_act()) - LIST_BACK_TO_HANDLE_SIZE);
+  lv_obj_set_height               (ui_ContainerPlayList, lv_obj_get_height(lv_screen_active()) - LIST_BACK_TO_HANDLE_SIZE);
   lv_obj_set_width                (ui_ContainerPlayList, lv_pct(100));
   lv_obj_set_align                (ui_ContainerPlayList, LV_ALIGN_BOTTOM_MID); // or LV_ALIGN_TOP_MID
   lv_obj_remove_flag              (ui_ContainerPlayList, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));

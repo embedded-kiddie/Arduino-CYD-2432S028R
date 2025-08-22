@@ -8,7 +8,7 @@
 #include "lvgl.h"
 #include "sdfs.h"
 
-#if LV_MEM_SIZE > (64 * 1024U)
+#ifdef  LV_MEM_POOL_ALLOC // defined in lv_cong.h
 #define MY_MALLOC(size) lv_malloc(size)
 #define MY_FREE(addr)   lv_free(addr)
 #else

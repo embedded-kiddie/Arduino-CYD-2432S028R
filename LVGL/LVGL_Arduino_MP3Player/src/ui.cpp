@@ -592,8 +592,8 @@ bool ui_loop(void) {
  * Redraw the display panel when waking up from sleep
  *--------------------------------------------------------------------------------*/
 void ui_redisplay(void) {
-  lv_disp_trig_activity(NULL);
-  lv_disp_load_scr(lv_scr_act());
+  lv_display_trigger_activity(NULL);
+  lv_screen_load(lv_screen_active());
 }
 
 /*--------------------------------------------------------------------------------
