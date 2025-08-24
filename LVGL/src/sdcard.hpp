@@ -100,6 +100,7 @@
   #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
     #define SD_SPI_BUS sd_spi
     #define SD_CONFIG SS, SD_SPI_BUS, SD_SPI_CLOCK
+    #define DECLARE_SD_SPI_BUS SPIClass SD_SPI_BUS = SPIClass(VSPI)
   #elif defined (ARDUINO_XIAO_ESP32S3) && defined (_TFT_eSPIH_)
     #define SD_CONFIG SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
   #else

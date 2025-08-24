@@ -337,7 +337,7 @@ static void scroll_cb(lv_event_t *e) {
 /*--------------------------------------------------------------------------------
  * Initialize the style of each cell in the playlist
  *--------------------------------------------------------------------------------*/
-static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
+static void ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   static const lv_coord_t grid_cols[] = { LV_GRID_CONTENT, LV_GRID_FR(1), (int32_t)img_heart_off_small.header.w, LV_GRID_TEMPLATE_LAST };
   static const lv_coord_t grid_rows[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
 
@@ -350,55 +350,55 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_layout               (&style_cell, LV_LAYOUT_GRID);
   lv_style_set_pad_right            (&style_cell, 20);
 
-  lv_style_init               (&style_cell_pressed);
-  lv_style_set_bg_opa         (&style_cell_pressed, LV_OPA_COVER);
-  lv_style_set_bg_color       (&style_cell_pressed, UI_COLOR_LIST_DEFAULT);
+  lv_style_init                     (&style_cell_pressed);
+  lv_style_set_bg_opa               (&style_cell_pressed, LV_OPA_COVER);
+  lv_style_set_bg_color             (&style_cell_pressed, UI_COLOR_LIST_DEFAULT);
 
-  lv_style_init               (&style_cell_checked);
-  lv_style_set_bg_opa         (&style_cell_checked, LV_OPA_COVER);
-  lv_style_set_bg_color       (&style_cell_checked, UI_COLOR_LIST_DEFAULT);
+  lv_style_init                     (&style_cell_checked);
+  lv_style_set_bg_opa               (&style_cell_checked, LV_OPA_COVER);
+  lv_style_set_bg_color             (&style_cell_checked, UI_COLOR_LIST_DEFAULT);
 /*
-  lv_style_init               (&style_cell_disable);
-  lv_style_set_text_opa       (&style_cell_disable, LV_OPA_40);
-  lv_style_set_image_opa      (&style_cell_disable, LV_OPA_40);
+  lv_style_init                     (&style_cell_disable);
+  lv_style_set_text_opa             (&style_cell_disable, LV_OPA_40);
+  lv_style_set_image_opa            (&style_cell_disable, LV_OPA_40);
 */
-  lv_style_init               (&style_title);
-  lv_style_set_width          (&style_title, lv_obj_get_width (lv_screen_active()) - LIST_LABEL_MARGINE);
-  lv_style_set_height         (&style_title, LIST_FONT_MEDIUM_HEIGHT);
-  lv_style_set_text_font      (&style_title, &CUSTOM_FONT_MEDIUM);
-  lv_style_set_text_color     (&style_title, UI_COLOR_BACKGROUND);
+  lv_style_init                     (&style_title);
+  lv_style_set_width                (&style_title, lv_obj_get_width (lv_screen_active()) - LIST_LABEL_MARGINE);
+  lv_style_set_height               (&style_title, LIST_FONT_MEDIUM_HEIGHT);
+  lv_style_set_text_font            (&style_title, &CUSTOM_FONT_MEDIUM);
+  lv_style_set_text_color           (&style_title, UI_COLOR_BACKGROUND);
 
-  lv_style_init               (&style_artist);
-  lv_style_set_width          (&style_artist, lv_obj_get_width (lv_screen_active()) - LIST_LABEL_MARGINE);
-  lv_style_set_height         (&style_artist, LIST_FONT_SMALL_HEIGHT);
-  lv_style_set_pad_right      (&style_artist, 5); // gap between artist and time
-  lv_style_set_text_font      (&style_artist, &CUSTOM_FONT_SMALL);
-  lv_style_set_text_color     (&style_artist, UI_COLOR_LIST_ARTIST);
+  lv_style_init                     (&style_artist);
+  lv_style_set_width                (&style_artist, lv_obj_get_width (lv_screen_active()) - LIST_LABEL_MARGINE);
+  lv_style_set_height               (&style_artist, LIST_FONT_SMALL_HEIGHT);
+  lv_style_set_pad_right            (&style_artist, 5); // gap between artist and time
+  lv_style_set_text_font            (&style_artist, &CUSTOM_FONT_SMALL);
+  lv_style_set_text_color           (&style_artist, UI_COLOR_LIST_ARTIST);
 
-  lv_style_init               (&style_time);
-  lv_style_set_text_font      (&style_time, &CUSTOM_FONT_SMALL);
-  lv_style_set_text_color     (&style_time, UI_COLOR_BACKGROUND);
+  lv_style_init                     (&style_time);
+  lv_style_set_text_font            (&style_time, &CUSTOM_FONT_SMALL);
+  lv_style_set_text_color           (&style_time, UI_COLOR_BACKGROUND);
 
-  lv_style_init               (&style_heart);
-  lv_style_set_bg_color       (&style_heart, UI_COLOR_BACKGROUND);
-  lv_style_set_bg_opa         (&style_heart, 0);
-  lv_style_set_border_width   (&style_heart, 0);
-  lv_style_set_pad_left       (&style_heart, -5); // slightly offset to the right
-  lv_style_set_radius         (&style_heart, LV_RADIUS_CIRCLE);
+  lv_style_init                     (&style_heart);
+  lv_style_set_bg_color             (&style_heart, UI_COLOR_BACKGROUND);
+  lv_style_set_bg_opa               (&style_heart, 0);
+  lv_style_set_border_width         (&style_heart, 0);
+  lv_style_set_pad_left             (&style_heart, -5); // slightly offset to the right
+  lv_style_set_radius               (&style_heart, LV_RADIUS_CIRCLE);
 
-  lv_style_init               (&style_menu_back);
-  lv_style_set_bg_color       (&style_menu_back, UI_COLOR_LIST_DEFAULT);
-  lv_style_set_shadow_color   (&style_menu_back, UI_COLOR_LIST_SHADOW);
-  lv_style_set_bg_opa         (&style_menu_back, 255);
-  lv_style_set_border_width   (&style_menu_back,   0);
-  lv_style_set_shadow_opa     (&style_menu_back, 255);
-  lv_style_set_shadow_width   (&style_menu_back,   1);
-  lv_style_set_shadow_spread  (&style_menu_back,   0);
-  lv_style_set_shadow_offset_x(&style_menu_back,   0);
-  lv_style_set_pad_left       (&style_menu_back, 249);
-  lv_style_set_pad_right      (&style_menu_back,   0);
-  lv_style_set_pad_top        (&style_menu_back,   8);
-  lv_style_set_pad_bottom     (&style_menu_back,   0);
+  lv_style_init                     (&style_menu_back);
+  lv_style_set_bg_color             (&style_menu_back, UI_COLOR_LIST_DEFAULT);
+  lv_style_set_shadow_color         (&style_menu_back, UI_COLOR_LIST_SHADOW);
+  lv_style_set_bg_opa               (&style_menu_back, 255);
+  lv_style_set_border_width         (&style_menu_back,   0);
+  lv_style_set_shadow_opa           (&style_menu_back, 255);
+  lv_style_set_shadow_width         (&style_menu_back,   1);
+  lv_style_set_shadow_spread        (&style_menu_back,   0);
+  lv_style_set_shadow_offset_x      (&style_menu_back,   0);
+  lv_style_set_pad_left             (&style_menu_back, 249);
+  lv_style_set_pad_right            (&style_menu_back,   0);
+  lv_style_set_pad_top              (&style_menu_back,   8);
+  lv_style_set_pad_bottom           (&style_menu_back,   0);
 #else
   lv_style_init                     (&style_grid);
   lv_style_set_grid_column_dsc_array(&style_grid, grid_cols);
@@ -407,26 +407,28 @@ static lv_obj_t* ui_ScreenPlayList_list_init(lv_obj_t* parent) {
 #endif // USE_CONST_STYLE
 
   // Create an empty transparent container
-  lv_obj_t* list = lv_obj_create(parent);
-  lv_obj_remove_style_all     (list);
-  lv_obj_set_size             (list, lv_pct(100), lv_pct(100));
-  lv_obj_set_align            (list, LV_ALIGN_CENTER);
-  lv_obj_set_flex_flow        (list, LV_FLEX_FLOW_COLUMN);
-  lv_obj_add_event_cb         (list, scroll_cb, LV_EVENT_SCROLL, NULL);
+  if (play_list == NULL) {
+    play_list = lv_obj_create(parent);
+    lv_obj_remove_style_all         (play_list);
+    lv_obj_set_size                 (play_list, lv_pct(100), lv_pct(100));
+    lv_obj_set_align                (play_list, LV_ALIGN_CENTER);
+    lv_obj_set_flex_flow            (play_list, LV_FLEX_FLOW_COLUMN);
+    lv_obj_add_event_cb             (play_list, scroll_cb, LV_EVENT_SCROLL, NULL);
+  }
 
   // Creating a slider as an alternative to a scrollbar
-  slider = lv_slider_create(parent); // attach to ui_ContainerPlayList
-  lv_obj_align                (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
-  lv_obj_remove_flag          (slider, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_width            (slider, 4);
-  lv_obj_set_height           (slider, LIST_CELL_VIEWS * LIST_CELL_HEIGHT);
-  lv_obj_set_style_radius     (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa     (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_color   (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_slider_set_mode          (slider, LV_SLIDER_MODE_RANGE);
-  lv_slider_set_range         (slider, ui_get_counts() * LIST_CELL_HEIGHT, 0);
-
-  return list;
+  if (slider == NULL) {
+    slider = lv_slider_create(parent); // attach to ui_ContainerPlayList
+    lv_obj_align                    (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
+    lv_obj_remove_flag              (slider, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_width                (slider, 4);
+    lv_obj_set_height               (slider, LIST_CELL_VIEWS * LIST_CELL_HEIGHT);
+    lv_obj_set_style_radius         (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa         (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color       (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_slider_set_mode              (slider, LV_SLIDER_MODE_RANGE);
+    lv_slider_set_range             (slider, ui_get_counts() * LIST_CELL_HEIGHT, 0);
+  }
 }
 
 /*--------------------------------------------------------------------------------
@@ -483,54 +485,70 @@ void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
 }
 
 /*--------------------------------------------------------------------------------
+ * Initialize the object when it is deleted
+ *--------------------------------------------------------------------------------*/
+static void delete_cb(lv_event_t *e) {
+  lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
+  *obj = NULL;
+}
+
+/*--------------------------------------------------------------------------------
  * This initialization is executed once
  *--------------------------------------------------------------------------------*/
 void ui_ScreenPlayList_screen_init(void) {
-  ui_ScreenPlayList = lv_obj_create(NULL);
-  lv_obj_remove_flag              (ui_ScreenPlayList, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_style_bg_color       (ui_ScreenPlayList, UI_COLOR_LIST_PRESSED,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_opa         (ui_ScreenPlayList, 255,                    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  if (ui_ScreenPlayList == NULL) {
+    ui_ScreenPlayList = lv_obj_create(NULL);
+    lv_obj_remove_flag              (ui_ScreenPlayList, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color       (ui_ScreenPlayList, UI_COLOR_LIST_PRESSED,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa         (ui_ScreenPlayList, 255,                    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  }
 
-  ui_ContainerPlayList = lv_obj_create(ui_ScreenPlayList);
-  lv_obj_remove_style_all         (ui_ContainerPlayList);
-  lv_obj_set_height               (ui_ContainerPlayList, lv_obj_get_height(lv_screen_active()) - LIST_BACK_TO_HANDLE_SIZE);
-  lv_obj_set_width                (ui_ContainerPlayList, lv_pct(100));
-  lv_obj_set_align                (ui_ContainerPlayList, LV_ALIGN_BOTTOM_MID); // or LV_ALIGN_TOP_MID
-  lv_obj_remove_flag              (ui_ContainerPlayList, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
+  if (ui_ContainerPlayList == NULL) {
+    ui_ContainerPlayList = lv_obj_create(ui_ScreenPlayList);
+    lv_obj_remove_style_all         (ui_ContainerPlayList);
+    lv_obj_set_height               (ui_ContainerPlayList, lv_obj_get_height(lv_screen_active()) - LIST_BACK_TO_HANDLE_SIZE);
+    lv_obj_set_width                (ui_ContainerPlayList, lv_pct(100));
+    lv_obj_set_align                (ui_ContainerPlayList, LV_ALIGN_BOTTOM_MID); // or LV_ALIGN_TOP_MID
+    lv_obj_remove_flag              (ui_ContainerPlayList, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
+  }
 
-  ui_PlayListToMainUp = lv_checkbox_create(ui_ScreenPlayList);
-  lv_checkbox_set_text            (ui_PlayListToMainUp, "");
-  lv_obj_set_height               (ui_PlayListToMainUp, LIST_BACK_TO_HANDLE_SIZE);
-  lv_obj_set_width                (ui_PlayListToMainUp, lv_pct(110));
-  lv_obj_set_align                (ui_PlayListToMainUp, LV_ALIGN_BOTTOM_MID);
-  lv_obj_add_flag                 (ui_PlayListToMainUp, LV_OBJ_FLAG_HIDDEN);
+  if (ui_PlayListToMainUp == NULL) {
+    ui_PlayListToMainUp = lv_checkbox_create(ui_ScreenPlayList);
+    lv_checkbox_set_text            (ui_PlayListToMainUp, "");
+    lv_obj_set_height               (ui_PlayListToMainUp, LIST_BACK_TO_HANDLE_SIZE);
+    lv_obj_set_width                (ui_PlayListToMainUp, lv_pct(110));
+    lv_obj_set_align                (ui_PlayListToMainUp, LV_ALIGN_BOTTOM_MID);
+    lv_obj_add_flag                 (ui_PlayListToMainUp, LV_OBJ_FLAG_HIDDEN);
 
-  lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  }
 
-  ui_PlayListToMainDown = lv_checkbox_create(ui_ScreenPlayList);
-  lv_checkbox_set_text            (ui_PlayListToMainDown, "");
-  lv_obj_set_height               (ui_PlayListToMainDown, LIST_BACK_TO_HANDLE_SIZE);
-  lv_obj_set_width                (ui_PlayListToMainDown, lv_pct(110));
-  lv_obj_set_align                (ui_PlayListToMainDown, LV_ALIGN_TOP_MID);
-  lv_obj_add_flag                 (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
+  if (ui_PlayListToMainDown == NULL) {
+    ui_PlayListToMainDown = lv_checkbox_create(ui_ScreenPlayList);
+    lv_checkbox_set_text            (ui_PlayListToMainDown, "");
+    lv_obj_set_height               (ui_PlayListToMainDown, LIST_BACK_TO_HANDLE_SIZE);
+    lv_obj_set_width                (ui_PlayListToMainDown, lv_pct(110));
+    lv_obj_set_align                (ui_PlayListToMainDown, LV_ALIGN_TOP_MID);
+    lv_obj_add_flag                 (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
 
-  lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  }
 #if   false
   lv_obj_t *ui_MenuBackToLeft = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text            (ui_MenuBackToLeft, "");
@@ -631,7 +649,15 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_event_cb(ui_PlayListToMainDown,  ui_event_PlayListToMainDown,  LV_EVENT_CLICKED, NULL);
 
   // Initialize play list container
-  play_list = ui_ScreenPlayList_list_init(ui_ContainerPlayList);
+  ui_ScreenPlayList_list_init(ui_ContainerPlayList);
+
+  // Add a callback when an object is deleted
+  lv_obj_add_event_cb(ui_ScreenPlayList,      delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenPlayList);
+  lv_obj_add_event_cb(ui_ContainerPlayList,   delete_cb, LV_EVENT_DELETE, (void*)&ui_ContainerPlayList);
+  lv_obj_add_event_cb(ui_PlayListToMainUp,    delete_cb, LV_EVENT_DELETE, (void*)&ui_PlayListToMainUp);
+  lv_obj_add_event_cb(ui_PlayListToMainDown,  delete_cb, LV_EVENT_DELETE, (void*)&ui_PlayListToMainDown);
+  lv_obj_add_event_cb(play_list,              delete_cb, LV_EVENT_DELETE, (void*)&play_list);
+  lv_obj_add_event_cb(slider,                 delete_cb, LV_EVENT_DELETE, (void*)&slider);
 
   // add new cells according to the specified id
   ui_control.top = ui_control.end = ui_control.playNo;
@@ -642,7 +668,7 @@ void ui_ScreenPlayList_screen_deinit(void) {
   if (ui_ScreenPlayList) {
     ui_list_remove_all();
     lv_style_reset(&style_grid);
-    lv_obj_delete(ui_ScreenPlayList);
-    ui_ScreenPlayList = NULL;
+//  lv_obj_delete(ui_ScreenPlayList);
+    lv_obj_delete_async(ui_ScreenPlayList);
   }
 }

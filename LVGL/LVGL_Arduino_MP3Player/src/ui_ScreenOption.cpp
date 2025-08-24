@@ -8,6 +8,8 @@
 // https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
 #define USE_CONST_STYLE 1
 
+#define DROPDOWN_WIDTH  100
+
 void ui_ScreenOption_screen_init(void) {
   ui_ScreenOption = lv_obj_create(NULL);
   lv_obj_set_style_bg_color     (ui_ScreenOption, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
@@ -82,226 +84,62 @@ void ui_ScreenOption_screen_init(void) {
   lv_obj_add_event_cb (ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_CLICKED, NULL);
 #endif
 
-#if   false
-  lv_obj_t *ui_FavoriteLabel = lv_label_create(ui_ScreenOption);
-  lv_obj_set_width              (ui_FavoriteLabel, LV_SIZE_CONTENT);
-  lv_obj_set_height             (ui_FavoriteLabel, LV_SIZE_CONTENT);
-  lv_obj_set_x                  (ui_FavoriteLabel, lv_pct(-22));
-  lv_obj_set_y                  (ui_FavoriteLabel, lv_pct(-40));
-  lv_obj_set_align              (ui_FavoriteLabel, LV_ALIGN_CENTER);
-  lv_label_set_text_static      (ui_FavoriteLabel, "Favorite Songs");
-
-  lv_obj_t *ui_FavoriteSwitch = lv_switch_create(ui_ScreenOption);
-  lv_obj_set_width              (ui_FavoriteSwitch, 50);
-  lv_obj_set_height             (ui_FavoriteSwitch, 25);
-  lv_obj_set_x                  (ui_FavoriteSwitch, lv_pct(-24));
-  lv_obj_set_y                  (ui_FavoriteSwitch, lv_pct(-30));
-  lv_obj_set_align              (ui_FavoriteSwitch, LV_ALIGN_CENTER);
-  lv_obj_add_event_cb           (ui_FavoriteSwitch, ui_event_FavoriteSwitch, LV_EVENT_ALL, NULL);
-
-  lv_obj_t *ui_FavoriteDropdown = lv_dropdown_create(ui_ScreenOption);
-  lv_dropdown_set_options       (ui_FavoriteDropdown, "List 1\nList 2\nList 3");
-  lv_obj_set_width              (ui_FavoriteDropdown, 80);
-  lv_obj_set_height             (ui_FavoriteDropdown, LV_SIZE_CONTENT);
-  lv_obj_set_x                  (ui_FavoriteDropdown, lv_pct(-24));
-  lv_obj_set_y                  (ui_FavoriteDropdown, lv_pct(-15));
-  lv_obj_set_align              (ui_FavoriteDropdown, LV_ALIGN_CENTER);
-  lv_obj_add_flag               (ui_FavoriteDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-  lv_obj_add_event_cb           (ui_FavoriteDropdown, ui_event_FavoriteDropdown, LV_EVENT_VALUE_CHANGED, NULL);
-
-  ui_FavoriteClearButton = lv_button_create(ui_ScreenOption);
-  lv_obj_set_width              (ui_FavoriteClearButton, 80);
-  lv_obj_set_height             (ui_FavoriteClearButton, 30);
-  lv_obj_set_x                  (ui_FavoriteClearButton, lv_pct(23));
-  lv_obj_set_y                  (ui_FavoriteClearButton, lv_pct(-30));
-  lv_obj_set_align              (ui_FavoriteClearButton, LV_ALIGN_CENTER);
-  lv_obj_add_state              (ui_FavoriteClearButton, LV_STATE_DISABLED);
-  lv_obj_add_flag               (ui_FavoriteClearButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-  lv_obj_remove_flag            (ui_FavoriteClearButton, LV_OBJ_FLAG_SCROLLABLE);
-
-  lv_obj_t *ui_FavoriteClearLabel = lv_label_create(ui_FavoriteClearButton);
-  lv_obj_set_width              (ui_FavoriteClearLabel, LV_SIZE_CONTENT);
-  lv_obj_set_height             (ui_FavoriteClearLabel, LV_SIZE_CONTENT);
-  lv_obj_set_align              (ui_FavoriteClearLabel, LV_ALIGN_CENTER);
-  lv_label_set_text_static      (ui_FavoriteClearLabel, "Clear List");
-  lv_obj_set_style_text_color   (ui_FavoriteClearLabel, UI_COLOR_BACKGROUND,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_text_opa     (ui_FavoriteClearLabel, 255,                  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_text_font    (ui_FavoriteClearLabel, LV_FONT_DEFAULT,      (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-
-  lv_obj_t *ui_FavoriteNewButton = lv_button_create(ui_ScreenOption);
-  lv_obj_set_width              (ui_FavoriteNewButton, 80);
-  lv_obj_set_height             (ui_FavoriteNewButton, 30);
-  lv_obj_set_x                  (ui_FavoriteNewButton, lv_pct(23));
-  lv_obj_set_y                  (ui_FavoriteNewButton, lv_pct(-15));
-  lv_obj_set_align              (ui_FavoriteNewButton, LV_ALIGN_CENTER);
-  lv_obj_add_flag               (ui_FavoriteNewButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-  lv_obj_remove_flag            (ui_FavoriteNewButton, LV_OBJ_FLAG_SCROLLABLE);
-
-  lv_obj_t *ui_FavoriteNewLabel = lv_label_create(ui_FavoriteNewButton);
-  lv_obj_set_width              (ui_FavoriteNewLabel, LV_SIZE_CONTENT);
-  lv_obj_set_height             (ui_FavoriteNewLabel, LV_SIZE_CONTENT);
-  lv_obj_set_align              (ui_FavoriteNewLabel, LV_ALIGN_CENTER);
-  lv_label_set_text_static      (ui_FavoriteNewLabel, "New List");
-  lv_obj_set_style_text_color   (ui_FavoriteNewLabel, UI_COLOR_BACKGROUND,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_text_opa     (ui_FavoriteNewLabel, 255,                  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_text_font    (ui_FavoriteNewLabel, LV_FONT_DEFAULT,      (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-
-  lv_obj_t *ui_BacklightLabel = lv_label_create(ui_ScreenOption);
-  lv_obj_set_width              (ui_BacklightLabel, LV_SIZE_CONTENT);
-  lv_obj_set_height             (ui_BacklightLabel, LV_SIZE_CONTENT);
-  lv_obj_set_x                  (ui_BacklightLabel, lv_pct(-23));
-  lv_obj_set_y                  (ui_BacklightLabel, lv_pct(0));
-  lv_obj_set_align              (ui_BacklightLabel, LV_ALIGN_CENTER);
-  lv_label_set_text_static      (ui_BacklightLabel, "Backlight Off");
-
-  lv_obj_t *ui_BacklightSwitch = lv_switch_create(ui_ScreenOption);
-  lv_obj_set_width              (ui_BacklightSwitch, 50);
-  lv_obj_set_height             (ui_BacklightSwitch, 25);
-  lv_obj_set_x                  (ui_BacklightSwitch, lv_pct(-24));
-  lv_obj_set_y                  (ui_BacklightSwitch, lv_pct(10));
-  lv_obj_set_align              (ui_BacklightSwitch, LV_ALIGN_CENTER);
-  lv_obj_add_event_cb           (ui_BacklightSwitch, ui_event_BacklightSwitch, LV_EVENT_CLICKED, NULL);
-
-  ui_BacklightRoller = lv_roller_create(ui_ScreenOption);
-  lv_roller_set_options         (ui_BacklightRoller, "30 sec\n1 min\n2 min\n5 min", LV_ROLLER_MODE_NORMAL);
-  lv_obj_set_width              (ui_BacklightRoller, 80);
-  lv_obj_set_height             (ui_BacklightRoller, 70);
-  lv_obj_set_x                  (ui_BacklightRoller, lv_pct(-24));
-  lv_obj_set_y                  (ui_BacklightRoller, lv_pct(30));
-  lv_obj_set_align              (ui_BacklightRoller, LV_ALIGN_CENTER);
-  lv_obj_add_state              (ui_BacklightRoller, LV_STATE_DISABLED);
-  lv_obj_set_style_text_font    (ui_BacklightRoller, LV_FONT_DEFAULT, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-
-  lv_obj_t *ui_SleepTimerLabel = lv_label_create(ui_ScreenOption);
-  lv_obj_set_width              (ui_SleepTimerLabel, LV_SIZE_CONTENT);
-  lv_obj_set_height             (ui_SleepTimerLabel, LV_SIZE_CONTENT);
-  lv_obj_set_x                  (ui_SleepTimerLabel, lv_pct(26));
-  lv_obj_set_y                  (ui_SleepTimerLabel, lv_pct(0));
-  lv_obj_set_align              (ui_SleepTimerLabel, LV_ALIGN_CENTER);
-  lv_label_set_text_static      (ui_SleepTimerLabel, "Sleep Timer");
-
-  lv_obj_t *ui_SleepTimerSwitch = lv_switch_create(ui_ScreenOption);
-  lv_obj_set_width              (ui_SleepTimerSwitch, 50);
-  lv_obj_set_height             (ui_SleepTimerSwitch, 25);
-  lv_obj_set_x                  (ui_SleepTimerSwitch, lv_pct(22));
-  lv_obj_set_y                  (ui_SleepTimerSwitch, lv_pct(10));
-  lv_obj_set_align              (ui_SleepTimerSwitch, LV_ALIGN_CENTER);
-  lv_obj_add_event_cb           (ui_SleepTimerSwitch, ui_event_SleepTimerSwitch, LV_EVENT_CLICKED, NULL);
-
-  ui_SleepTimerRoller = lv_roller_create(ui_ScreenOption);
-  lv_roller_set_options         (ui_SleepTimerRoller, "30 min\n60 min\n90 min\n120 min\n180 min", LV_ROLLER_MODE_NORMAL);
-  lv_obj_set_width              (ui_SleepTimerRoller, 80);
-  lv_obj_set_height             (ui_SleepTimerRoller, 70);
-  lv_obj_set_x                  (ui_SleepTimerRoller, lv_pct(23));
-  lv_obj_set_y                  (ui_SleepTimerRoller, lv_pct(30));
-  lv_obj_set_align              (ui_SleepTimerRoller, LV_ALIGN_CENTER);
-  lv_obj_add_state              (ui_SleepTimerRoller, LV_STATE_DISABLED);
-  lv_obj_set_style_text_font    (ui_SleepTimerRoller, LV_FONT_DEFAULT, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-#else
   {
     lv_obj_t *obj = lv_label_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 10, 14);
+    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+//  lv_obj_set_x(obj, LV_PCT_X(5));
+//  lv_obj_set_y(obj, LV_PCT_Y(4));
+//  lv_obj_set_width(obj, LV_SIZE_CONTENT);
+//  lv_obj_set_height(obj, LV_SIZE_CONTENT);
     lv_label_set_text(obj, "Playlist");
   }
   {
     lv_obj_t *obj = lv_dropdown_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 10, 39);
-    lv_obj_set_size(obj, 99, LV_SIZE_CONTENT);
+    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11));
+    lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
+//  lv_obj_set_x(obj, LV_PCT_X(5));
+//  lv_obj_set_y(obj, LV_PCT_Y(11));
+//  lv_obj_set_width(obj, DROPDOWN_WIDTH);
+//  lv_obj_set_height(obj, LV_SIZE_CONTENT);
     lv_dropdown_set_options(obj, "List 1\nList 2\nList 3");
     lv_dropdown_set_selected(obj, 0);
   }
   {
     lv_obj_t *obj = lv_list_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 9, 105);
-    lv_obj_set_size(obj, 221, 125);
-  }
-  {
-    lv_obj_t *obj = lv_obj_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 10, 105);
-    lv_obj_set_size(obj, 220, 121);
-    lv_obj_set_style_pad_left     (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top      (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right    (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom   (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa       (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_radius       (obj, 0, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_size(obj, SCREEN_WIDTH - LV_PCT_X(10), SCREEN_HEIGHT - LV_PCT_Y(50));
+    lv_obj_set_align(obj, LV_ALIGN_CENTER);
   }
   {
     lv_obj_t *obj = lv_label_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 47, 120);
-    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_label_set_text(obj, "Text");
-  }
-  {
-    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 17, 118);
-    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_checkbox_set_text(obj, "");
-  }
-  {
-    lv_obj_t *obj = lv_label_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 9, 84);
-    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_label_set_text(obj, "Album");
-  }
-  {
-    lv_obj_t *obj = lv_label_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 9, 241);
+    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(78));
     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_label_set_text(obj, "Backlight Off");
   }
   {
+    lv_obj_t *obj = lv_dropdown_create(ui_ScreenOption);
+    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(85));
+    lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
+    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_dropdown_set_options(obj, "Disable\n30 sec\n1 min\n2 min\n5 min");
+    lv_dropdown_set_dir(obj, LV_DIR_TOP);
+    lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
+    lv_dropdown_set_selected(obj, 0);
+  }
+  {
     lv_obj_t *obj = lv_label_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 131, 241);
+    lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(78));
     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_label_set_text(obj, "Sleep Timer");
   }
   {
     lv_obj_t *obj = lv_dropdown_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 9, 269);
-    lv_obj_set_size(obj, 104, LV_SIZE_CONTENT);
-    lv_dropdown_set_options(obj, "Disable\n30 sec\n1 min\n2 min\n5 min");
-    lv_dropdown_set_dir(obj, LV_DIR_TOP);
-    lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
-    lv_dropdown_set_selected(obj, 0);
+    lv_obj_set_pos(obj, SCREEN_WIDTH - DROPDOWN_WIDTH - LV_PCT_X(5), LV_PCT_Y(85));
+    lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-  }
-  {
-    lv_obj_t *obj = lv_dropdown_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 123, 269);
-    lv_obj_set_size(obj, 107, LV_SIZE_CONTENT);
     lv_dropdown_set_options(obj, "Disable\n30 min\n60 min\n90 min\n120 min");
     lv_dropdown_set_dir(obj, LV_DIR_TOP);
     lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
     lv_dropdown_set_selected(obj, 0);
-    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   }
-  {
-    lv_obj_t *obj = lv_imgbtn_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 131, 45);
-    lv_obj_set_size(obj, 16, 15);
-    lv_imgbtn_set_src(obj, LV_IMGBTN_STATE_RELEASED, NULL, &img_heart_off_small, NULL);
-    lv_imgbtn_set_src(obj, LV_IMGBTN_STATE_PRESSED,  NULL, &img_heart_on_small,  NULL);
-  }
-  {
-    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 17, 146);
-    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_checkbox_set_text(obj, "");
-  }
-  {
-    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 17, 174);
-    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_checkbox_set_text(obj, "");
-  }
-  {
-    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, 17, 201);
-    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_checkbox_set_text(obj, "");
-  }
-#endif
 }

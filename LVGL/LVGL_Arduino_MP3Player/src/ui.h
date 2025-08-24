@@ -44,16 +44,6 @@ void ui_event_VolumeMin   (lv_event_t *e);
 
 // SCREEN: ui_ScreenOption
 extern lv_obj_t *ui_ScreenOption;
-#if   false
-extern lv_obj_t *ui_BacklightRoller;
-extern lv_obj_t *ui_SleepTimerRoller;
-extern lv_obj_t *ui_FavoriteNewButton;
-extern lv_obj_t *ui_FavoriteClearButton;
-void ui_event_FavoriteDropdown  (lv_event_t *e);
-void ui_event_FavoriteSwitch    (lv_event_t *e);
-void ui_event_BacklightSwitch   (lv_event_t *e);
-void ui_event_SleepTimerSwitch  (lv_event_t *e);
-#endif
 void ui_ScreenOption_screen_init(void);
 void ui_event_ScreenOption      (lv_event_t *e);
 void ui_event_OptionToMainRight (lv_event_t *e);

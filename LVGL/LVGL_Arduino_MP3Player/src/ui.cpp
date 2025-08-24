@@ -41,12 +41,7 @@ lv_obj_t *ui_AlbumImage;
 
 // SCREEN: ui_ScreenOption
 lv_obj_t *ui_ScreenOption;
-#if   false
-lv_obj_t *ui_BacklightRoller;
-lv_obj_t *ui_SleepTimerRoller;
-//lv_obj_t *ui_FavoriteNewButton;
-lv_obj_t *ui_FavoriteClearButton;
-#endif
+
 // SCREEN: ui_ScreenPlayList
 lv_obj_t *ui_ScreenPlayList;
 lv_obj_t *ui_ContainerPlayList;
@@ -218,36 +213,7 @@ void ui_event_OptionToMainRight(lv_event_t *e) {
 
   _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
 }
-#if   false
-void ui_event_FavoriteSwitch(lv_event_t * e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
-  _ui_state_modify(ui_FavoriteClearButton, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-}
-
-void ui_event_FavoriteDropdown(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-  ;
-}
-
-void ui_event_BacklightSwitch(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
-
-  _ui_state_modify(ui_BacklightRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-
-  lv_obj_t *obj = lv_event_get_target_obj(e);
-  ui_option.backlight = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-}
-
-void ui_event_SleepTimerSwitch(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
-
-  _ui_state_modify(ui_SleepTimerRoller, LV_STATE_DISABLED, _UI_MODIFY_STATE_TOGGLE);
-
-  lv_obj_t *obj = lv_event_get_target_obj(e);
-  ui_option.sleepTimer = lv_obj_get_state(obj) & LV_STATE_CHECKED;
-}
-#endif
 /*--------------------------------------------------------------------------------
  * Event handlers for Screen Playlist
  *--------------------------------------------------------------------------------*/
@@ -487,7 +453,7 @@ static bool check_favorite(void) {
 ///////////////////// SCREENS ////////////////////
 void ui_init(void) {
   ui_ScreenMain_screen_init();
-  lv_disp_load_scr(ui_ScreenMain);
+  lv_screen_load(ui_ScreenMain);
 
   ui_control.sleepTimer = 30 * 1000;
   ui_state = UI_STATE_INIT;
