@@ -195,14 +195,21 @@ void ui_event_ElapsedBar(lv_event_t *e) {
  *--------------------------------------------------------------------------------*/
 void ui_event_ScreenOption(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
-  DBG_ASSERT(event_code == LV_EVENT_GESTURE || event_code == LV_EVENT_SCREEN_UNLOADED);
+  DBG_ASSERT(event_code == LV_EVENT_GESTURE || event_code == LV_EVENT_SCREEN_LOADED || event_code == LV_EVENT_SCREEN_UNLOADED);
 
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
     lv_indev_wait_release(lv_indev_active());
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
   }
 
+  else if (event_code == LV_EVENT_SCREEN_LOADED) {
+    ui_state = UI_STATE_STOP;
+    lv_fs_clear_cache();
+  }
+
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
+    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+    ui_state = UI_STATE_PLAY;
     ui_ScreenOption_screen_deinit();
   }
 }

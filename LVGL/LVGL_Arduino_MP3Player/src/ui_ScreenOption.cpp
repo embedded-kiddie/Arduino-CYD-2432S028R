@@ -36,6 +36,7 @@ void ui_ScreenOption_screen_init(void) {
     ui_ScreenOption = lv_obj_create(NULL);
     lv_obj_set_style_bg_color     (ui_ScreenOption, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_GESTURE, NULL);
+    lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_SCREEN_LOADED, NULL);
     lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_SCREEN_UNLOADED, NULL);
     lv_obj_add_event_cb           (ui_ScreenOption, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenOption);
 
