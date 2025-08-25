@@ -4,6 +4,7 @@
 #define DEBUG true
 
 #if     DEBUG
+#include <stdio.h>
 #include <assert.h>
 #define DBG_EXEC(x)   x
 #define DBG_ASSERT(x) assert(x)

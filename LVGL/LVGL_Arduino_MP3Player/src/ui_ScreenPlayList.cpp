@@ -4,7 +4,6 @@
 // Project name: SquareLine_Project
 
 #include "ui.h"
-#include <stdio.h>  // for sprintf(), printf()
 
 // https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
 #define USE_CONST_STYLE 1
@@ -35,7 +34,6 @@ static bool update_scroll_running = false;
 static lv_style_t style_cell;
 static lv_style_t style_cell_pressed;
 static lv_style_t style_cell_checked;
-//static lv_style_t style_cell_disable;
 static lv_style_t style_title;
 static lv_style_t style_artist;
 static lv_style_t style_time;
@@ -96,10 +94,10 @@ static constexpr lv_style_const_prop_t style_menu_back_prop[] = {
   LV_STYLE_CONST_SHADOW_WIDTH(1),
   LV_STYLE_CONST_SHADOW_SPREAD(0),
   LV_STYLE_CONST_SHADOW_OFFSET_X(0),
-  LV_STYLE_CONST_PAD_LEFT(249),
   LV_STYLE_CONST_PAD_TOP(8),
   LV_STYLE_CONST_PAD_RIGHT(0),
   LV_STYLE_CONST_PAD_BOTTOM(0),
+  LV_STYLE_CONST_PAD_LEFT(249),
   LV_STYLE_CONST_PROPS_END
 };
 static LV_STYLE_CONST_INIT(style_cell,          (void*)style_cell_prop);
@@ -224,7 +222,6 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_add_style              (cell, &style_cell, 0);
   lv_obj_add_style              (cell, &style_cell_pressed, LV_STATE_PRESSED);
   lv_obj_add_style              (cell, &style_cell_checked, LV_STATE_CHECKED);
-//lv_obj_add_style              (cell, &style_cell_disable, LV_STATE_DISABLED);
   lv_obj_add_event_cb           (cell, list_click_event_cb, LV_EVENT_CLICKED, (void*)track_id);
 
   lv_obj_t* icon = lv_image_create(cell);
@@ -282,7 +279,7 @@ static void update_scroll(lv_obj_t *obj) {
     ui_control.end += 1;
     add_list_cell(obj, ui_control.end);
     lv_obj_update_layout(obj);
-    //printf("added ui_control.end: %d, pos: %d\n", ui_control.end, pos);
+    //DBG_EXEC(printf("added ui_control.end: %d, pos: %d\n", ui_control.end, pos));
   }
   while (ui_control.top > 0 && (pos = lv_obj_get_scroll_top(obj)) < (LIST_CELL_HEIGHT)) {
     ui_control.top -= 1;
@@ -292,7 +289,7 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
     int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
     lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    //printf("added ui_control.top: %d, pos: %d\n", ui_control.top, pos);
+    //DBG_EXEC(printf("added ui_control.top: %d, pos: %d\n", ui_control.top, pos));
   }
 
   /* delete far-away items */
@@ -301,7 +298,7 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_t *child = lv_obj_get_child(obj, -1);
     lv_obj_delete(child);
     lv_obj_update_layout(obj);
-    //printf("deleted ui_control.end: %d, pos: %d\n", ui_control.end, pos);
+    //DBG_EXEC(printf("deleted ui_control.end: %d, pos: %d\n", ui_control.end, pos));
   }
   while ((pos = lv_obj_get_scroll_top(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && ui_control.end - ui_control.top > (LIST_CELL_VIEWS)) {
     ui_control.top += 1;
@@ -311,7 +308,7 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
     int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
     lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    //printf("deleted ui_control.top: %d, pos: %d\n", ui_control.top, pos);
+    //DBG_EXEC(printf("deleted ui_control.top: %d, pos: %d\n", ui_control.top, pos));
   }
 
   update_scroll_running = false;
@@ -357,11 +354,7 @@ static void ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_init                     (&style_cell_checked);
   lv_style_set_bg_opa               (&style_cell_checked, LV_OPA_COVER);
   lv_style_set_bg_color             (&style_cell_checked, UI_COLOR_LIST_DEFAULT);
-/*
-  lv_style_init                     (&style_cell_disable);
-  lv_style_set_text_opa             (&style_cell_disable, LV_OPA_40);
-  lv_style_set_image_opa            (&style_cell_disable, LV_OPA_40);
-*/
+
   lv_style_init                     (&style_title);
   lv_style_set_width                (&style_title, lv_obj_get_width (lv_screen_active()) - LIST_LABEL_MARGINE);
   lv_style_set_height               (&style_title, LIST_FONT_MEDIUM_HEIGHT);
@@ -395,10 +388,10 @@ static void ui_ScreenPlayList_list_init(lv_obj_t* parent) {
   lv_style_set_shadow_width         (&style_menu_back,   1);
   lv_style_set_shadow_spread        (&style_menu_back,   0);
   lv_style_set_shadow_offset_x      (&style_menu_back,   0);
-  lv_style_set_pad_left             (&style_menu_back, 249);
-  lv_style_set_pad_right            (&style_menu_back,   0);
   lv_style_set_pad_top              (&style_menu_back,   8);
+  lv_style_set_pad_right            (&style_menu_back,   0);
   lv_style_set_pad_bottom           (&style_menu_back,   0);
+  lv_style_set_pad_left             (&style_menu_back, 249);
 #else
   lv_style_init                     (&style_grid);
   lv_style_set_grid_column_dsc_array(&style_grid, grid_cols);
@@ -485,10 +478,28 @@ void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
 }
 
 /*--------------------------------------------------------------------------------
- * Initialize the object when it is deleted
+ * Set the pointer to the widget to NULL when its object is deleted
  *--------------------------------------------------------------------------------*/
 static void delete_cb(lv_event_t *e) {
   lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
+
+#if   false
+  static lv_obj_t ** const adrs[] = {
+    &ui_ScreenPlayList,
+    &ui_ContainerPlayList,
+    &ui_PlayListToMainUp,
+    &ui_PlayListToMainDown,
+    &play_list,
+    &slider,
+  };
+  for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
+    if (obj == adrs[i]) {
+      DBG_EXEC(printf("deleted: %d\n", i));
+      break;
+    }
+  }
+#endif
+
   *obj = NULL;
 }
 
@@ -520,15 +531,15 @@ void ui_ScreenPlayList_screen_init(void) {
     lv_obj_set_align                (ui_PlayListToMainUp, LV_ALIGN_BOTTOM_MID);
     lv_obj_add_flag                 (ui_PlayListToMainUp, LV_OBJ_FLAG_HIDDEN);
 
-    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,               (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,               (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,               (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   }
 
   if (ui_PlayListToMainDown == NULL) {
@@ -539,15 +550,15 @@ void ui_ScreenPlayList_screen_init(void) {
     lv_obj_set_align                (ui_PlayListToMainDown, LV_ALIGN_TOP_MID);
     lv_obj_add_flag                 (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
 
-    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   }
 #if   false
   lv_obj_t *ui_MenuBackToLeft = lv_checkbox_create(ui_ScreenPlayList);
@@ -562,10 +573,10 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_bg_image_src   (ui_MenuBackToLeft, &img_back_left,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_radius         (ui_MenuBackToLeft, LV_RADIUS_CIRCLE,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_border_width   (ui_MenuBackToLeft, 0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left       (ui_MenuBackToLeft, 8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right      (ui_MenuBackToLeft, 0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_top        (ui_MenuBackToLeft, 8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_right      (ui_MenuBackToLeft, 0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_bottom     (ui_MenuBackToLeft, 0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_left       (ui_MenuBackToLeft, 8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
 
   lv_obj_set_style_bg_image_src   (ui_MenuBackToLeft, &img_back_left,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_color       (ui_MenuBackToLeft, UI_COLOR_BACKGROUND,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
@@ -575,10 +586,10 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_bg_image_src   (ui_MenuBackToLeft, &img_back_left,       (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_radius         (ui_MenuBackToLeft, LV_RADIUS_CIRCLE,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_border_width   (ui_MenuBackToLeft,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_left       (ui_MenuBackToLeft, 10,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_right      (ui_MenuBackToLeft,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_top        (ui_MenuBackToLeft, 10,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_right      (ui_MenuBackToLeft,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom     (ui_MenuBackToLeft,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_left       (ui_MenuBackToLeft, 10,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_add_event_cb             (ui_MenuBackToLeft, ui_event_MenuBackToLeft, LV_EVENT_CLICKED, NULL);
 
   lv_obj_t *ui_MenuBluetoothOn = lv_checkbox_create(ui_ScreenPlayList);
@@ -593,10 +604,10 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_bg_image_src   (ui_MenuBluetoothOn, &img_bluetooth_on,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_radius         (ui_MenuBluetoothOn, LV_RADIUS_CIRCLE,    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_border_width   (ui_MenuBluetoothOn, 0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left       (ui_MenuBluetoothOn, 8,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right      (ui_MenuBluetoothOn, 0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_top        (ui_MenuBluetoothOn, 8,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_right      (ui_MenuBluetoothOn, 0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_bottom     (ui_MenuBluetoothOn, 0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_left       (ui_MenuBluetoothOn, 8,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
 
   lv_obj_set_style_bg_image_src   (ui_MenuBluetoothOn, &img_bluetooth_on,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_color       (ui_MenuBluetoothOn, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
@@ -606,10 +617,10 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_bg_image_src   (ui_MenuBluetoothOn, &img_bluetooth_on,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_radius         (ui_MenuBluetoothOn, LV_RADIUS_CIRCLE,    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_border_width   (ui_MenuBluetoothOn,  0,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_left       (ui_MenuBluetoothOn, 10,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_right      (ui_MenuBluetoothOn,  0,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_top        (ui_MenuBluetoothOn, 10,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_right      (ui_MenuBluetoothOn,  0,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom     (ui_MenuBluetoothOn,  0,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_left       (ui_MenuBluetoothOn, 10,                  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   lv_obj_t *ui_MenuBluetoothOff = lv_checkbox_create(ui_ScreenPlayList);
   lv_checkbox_set_text            (ui_MenuBluetoothOff, "");
@@ -623,10 +634,10 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_bg_image_src   (ui_MenuBluetoothOff, &img_bluetooth_off,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_radius         (ui_MenuBluetoothOff, LV_RADIUS_CIRCLE,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_border_width   (ui_MenuBluetoothOff, 0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_left       (ui_MenuBluetoothOff, 8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_pad_right      (ui_MenuBluetoothOff, 0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_top        (ui_MenuBluetoothOff, 8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_right      (ui_MenuBluetoothOff, 0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_pad_bottom     (ui_MenuBluetoothOff, 0,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_pad_left       (ui_MenuBluetoothOff, 8,                    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
 
   lv_obj_set_style_bg_image_src   (ui_MenuBluetoothOff, &img_bluetooth_off,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_color       (ui_MenuBluetoothOff, UI_COLOR_BACKGROUND,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
@@ -636,10 +647,10 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_style_bg_image_src   (ui_MenuBluetoothOff, &img_bluetooth_off,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_radius         (ui_MenuBluetoothOff, LV_RADIUS_CIRCLE,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_border_width   (ui_MenuBluetoothOff,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_left       (ui_MenuBluetoothOff, 10,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_pad_right      (ui_MenuBluetoothOff,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_top        (ui_MenuBluetoothOff,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_right      (ui_MenuBluetoothOff,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_set_style_pad_bottom     (ui_MenuBluetoothOff,  0,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_pad_left       (ui_MenuBluetoothOff, 10,                   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
   lv_obj_add_event_cb             (ui_MenuBluetoothOn,  ui_event_MenuBluetoothOn,   LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb             (ui_MenuBluetoothOff, ui_event_MenuBluetoothOff,  LV_EVENT_CLICKED, NULL);
@@ -666,9 +677,18 @@ void ui_ScreenPlayList_screen_init(void) {
 
 void ui_ScreenPlayList_screen_deinit(void) {
   if (ui_ScreenPlayList) {
-    ui_list_remove_all();
+#if !USE_CONST_STYLE
+  lv_style_reset(&style_cell);
+  lv_style_reset(&style_cell_pressed);
+  lv_style_reset(&style_cell_checked);
+  lv_style_reset(&style_title);
+  lv_style_reset(&style_artist);
+  lv_style_reset(&style_time);
+  lv_style_reset(&style_heart);
+  lv_style_reset(&style_menu_back);
+#else
     lv_style_reset(&style_grid);
-//  lv_obj_delete(ui_ScreenPlayList);
+#endif
     lv_obj_delete_async(ui_ScreenPlayList);
   }
 }

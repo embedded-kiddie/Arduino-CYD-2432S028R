@@ -45,6 +45,7 @@ void ui_event_VolumeMin   (lv_event_t *e);
 // SCREEN: ui_ScreenOption
 extern lv_obj_t *ui_ScreenOption;
 void ui_ScreenOption_screen_init(void);
+void ui_ScreenOption_screen_deinit(void);
 void ui_event_ScreenOption      (lv_event_t *e);
 void ui_event_OptionToMainRight (lv_event_t *e);
 

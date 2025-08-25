@@ -5,7 +5,6 @@
 
 #include "ui.h"
 #include "ui_helpers.h"
-#include <stdio.h>  // for sprintf(), printf()
 #include <string.h> // for strncpy(), strrchr()
 
 #include "../CYD_MP3Player.h"
@@ -204,7 +203,7 @@ void ui_event_ScreenOption(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
-    printf("ui_event_ScreenOption: unloaded.\n");
+    ui_ScreenOption_screen_deinit();
   }
 }
 
