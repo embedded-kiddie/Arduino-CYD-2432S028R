@@ -66,9 +66,7 @@ static LV_STYLE_CONST_INIT(album_style, (void*)style_prop_album);
 #error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
 #endif
 
-///////////////////// ANIMATIONS ////////////////////
-
-///////////////////// FUNCTIONS ////////////////////
+///////////////////// CALLBACK FUNCTIONS ////////////////////
 /*--------------------------------------------------------------------------------
  * Event handlers for Screen Main
  *--------------------------------------------------------------------------------*/
@@ -458,17 +456,6 @@ static bool check_favorite(void) {
   return !ui_option.favorite || player.IsPlaying() || player.IsSelected();
 }
 
-///////////////////// SCREENS ////////////////////
-void ui_init(void) {
-  ui_ScreenMain_screen_init();
-  lv_screen_load(ui_ScreenMain);
-
-  ui_control.sleepTimer = 30 * 1000;
-  ui_state = UI_STATE_INIT;
-
-  audioInit();
-}
-
 ////////////////// GLOBAL FUNCTIONS /////////////////
 /*--------------------------------------------------------------------------------
  * Redraw the display panel when waking up from sleep
@@ -542,6 +529,17 @@ void audio_eof_mp3(const char *info) {
   } else {
     nextState = UI_STATE_STOP;
   }
+}
+
+///////////////////// SCREENS ////////////////////
+void ui_init(void) {
+  ui_ScreenMain_screen_init();
+  lv_screen_load(ui_ScreenMain);
+
+  ui_control.sleepTimer = 30 * 1000;
+  ui_state = UI_STATE_INIT;
+
+  audioInit();
 }
 
 /*--------------------------------------------------------------------------------
