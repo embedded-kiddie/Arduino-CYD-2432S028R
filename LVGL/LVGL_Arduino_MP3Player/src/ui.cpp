@@ -203,7 +203,9 @@ void ui_event_ScreenOption(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
-    ui_state = UI_STATE_STOP;
+    if (ui_state != UI_STATE_IDLE) {
+      ui_state = UI_STATE_STOP;
+    }
     lv_fs_clear_cache();
   }
 
@@ -468,6 +470,85 @@ void ui_init(void) {
 }
 
 ////////////////// GLOBAL FUNCTIONS /////////////////
+/*--------------------------------------------------------------------------------
+ * Redraw the display panel when waking up from sleep
+ *--------------------------------------------------------------------------------*/
+void ui_redisplay(void) {
+  lv_display_trigger_activity(NULL);
+  lv_screen_load(lv_screen_active());
+}
+
+/*--------------------------------------------------------------------------------
+ * Start to play with the specified track
+ *--------------------------------------------------------------------------------*/
+void ui_set_playNo(uint32_t track_id) {
+  // start the specified track to play
+  player.SetPlayNo(track_id);
+
+  // update ui_control
+  ui_control.playNo = ui_control.focusNo = track_id;
+  display_picture(track_id);
+
+  // update the look of the play button
+  if (ui_state != UI_STATE_PLAY) {
+    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+    ui_state = UI_STATE_PLAY;
+  }
+}
+
+/*--------------------------------------------------------------------------------
+ * Get the latest information on MP3Player
+ *--------------------------------------------------------------------------------*/
+uint32_t ui_get_playNo(void) {
+  return player.GetPlayNo();
+}
+
+uint32_t ui_get_counts(void) {
+  return player.GetCounts();
+}
+
+/*--------------------------------------------------------------------------------
+ * Get ID3 tags (title, album, artist) from the file specified by id
+ *--------------------------------------------------------------------------------*/
+void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags) {
+  player.GetID3Tags(track_id, tags);
+}
+
+/*--------------------------------------------------------------------------------
+ * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
+ * Note: These functions will be executed in the context of CORE 1.
+ *--------------------------------------------------------------------------------*/
+void audio_id3data(const char *info) {
+  // Avoid a race condition with ui_state set by audio_eof_mp3()
+  if (ui_state == UI_STATE_PLAY) {
+    char *p;
+    if (p = strstr(info, "Title: ")) {
+      id3tags.title = p + 7;
+    } else
+    if (p = strstr(info, "Artist: ")) {
+      id3tags.artist = p + 8;
+    } else
+    if (p = strstr(info, "Album: ")) {
+      id3tags.album = p + 7;
+      ui_state = UI_STATE_ID3;
+    }
+  }
+}
+
+void audio_eof_mp3(const char *info) {
+  ui_state = UI_STATE_EOF;
+  if (!player.IsLastSong(ui_option.favorite) || ui_option.repeat) {
+    nextState = UI_STATE_NEXT;
+  } else {
+    nextState = UI_STATE_STOP;
+  }
+}
+
+/*--------------------------------------------------------------------------------
+ * A finite state machine that controls the overall operation
+ * The steady state can be either "UI_STATE_PLAY" or "UI_STATE_IDLE", 
+ * anything else is just a transient state that works as a command.
+ *--------------------------------------------------------------------------------*/
 bool ui_loop(void) {
   switch (ui_state) {
     case UI_STATE_INIT:
@@ -557,79 +638,5 @@ bool ui_loop(void) {
     return true;  // keep backlight on
   } else {
     return false; // turn backlight off
-  }
-}
-
-/*--------------------------------------------------------------------------------
- * Redraw the display panel when waking up from sleep
- *--------------------------------------------------------------------------------*/
-void ui_redisplay(void) {
-  lv_display_trigger_activity(NULL);
-  lv_screen_load(lv_screen_active());
-}
-
-/*--------------------------------------------------------------------------------
- * Start to play with the specified track
- *--------------------------------------------------------------------------------*/
-void ui_set_playNo(uint32_t track_id) {
-  // start the specified track to play
-  player.SetPlayNo(track_id);
-
-  // update ui_control
-  ui_control.playNo = ui_control.focusNo = track_id;
-  display_picture(track_id);
-
-  // update the look of the play button
-  if (ui_state != UI_STATE_PLAY) {
-    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
-    ui_state = UI_STATE_PLAY;
-  }
-}
-
-/*--------------------------------------------------------------------------------
- * Get the latest information on MP3Player
- *--------------------------------------------------------------------------------*/
-uint32_t ui_get_playNo(void) {
-  return player.GetPlayNo();
-}
-
-uint32_t ui_get_counts(void) {
-  return player.GetCounts();
-}
-
-/*--------------------------------------------------------------------------------
- * Get ID3 tags (title, album, artist) from the file specified by id
- *--------------------------------------------------------------------------------*/
-void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags) {
-  player.GetID3Tags(track_id, tags);
-}
-
-/*--------------------------------------------------------------------------------
- * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
- * Note: These functions will be executed in the context of CORE 1.
- *--------------------------------------------------------------------------------*/
-void audio_id3data(const char *info) {
-  // Avoid a race condition with ui_state set by audio_eof_mp3()
-  if (ui_state == UI_STATE_PLAY) {
-    char *p;
-    if (p = strstr(info, "Title: ")) {
-      id3tags.title = p + 7;
-    } else
-    if (p = strstr(info, "Artist: ")) {
-      id3tags.artist = p + 8;
-    } else
-    if (p = strstr(info, "Album: ")) {
-      id3tags.album = p + 7;
-      ui_state = UI_STATE_ID3;
-    }
-  }
-}
-
-void audio_eof_mp3(const char *info) {
-  ui_state = UI_STATE_EOF;
-  if (!player.IsLastSong(ui_option.favorite) || ui_option.repeat) {
-    nextState = UI_STATE_NEXT;
-  } else {
-    nextState = UI_STATE_STOP;
   }
 }
