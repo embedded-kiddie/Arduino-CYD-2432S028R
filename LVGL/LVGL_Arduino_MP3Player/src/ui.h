@@ -46,6 +46,7 @@ void ui_event_VolumeMin   (lv_event_t *e);
 extern lv_obj_t *ui_ScreenOption;
 void ui_ScreenOption_screen_init(void);
 void ui_ScreenOption_screen_deinit(void);
+bool ui_ScreenOption_create_list(const char *root);
 void ui_event_ScreenOption      (lv_event_t *e);
 void ui_event_OptionToMainRight (lv_event_t *e);
 
@@ -136,6 +137,7 @@ typedef enum {
   UI_STATE_PREV,
   UI_STATE_SLEEP,
   UI_STATE_WAKEUP,
+  UI_STATE_OPTION,
   UI_STATE_ID3,
   UI_STATE_EOF,
   UI_STATE_ERROR,

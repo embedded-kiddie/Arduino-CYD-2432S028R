@@ -1,7 +1,7 @@
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
-#define DEBUG true
+#define DEBUG false
 
 #if     DEBUG
 #include <stdio.h>

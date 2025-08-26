@@ -78,6 +78,7 @@ class CYD_MP3Player {
 public:
   CYD_MP3Player() {}
   ~CYD_MP3Player() {
+    m_list.clear();
     if (m_tree) {
       delete m_tree;
       m_tree = NULL;
@@ -102,6 +103,7 @@ public:
   uint32_t    GetCounts(void) { return m_list.size(); }
   uint32_t    ScanPlayList(bool shuffle = true);
   uint32_t    SortPlayList(bool shuffle = true);
+  void        ClearPlayList(void);
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
   uint32_t    GetPictureNo(uint32_t playNo);

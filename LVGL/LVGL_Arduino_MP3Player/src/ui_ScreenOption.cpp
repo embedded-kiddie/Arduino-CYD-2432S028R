@@ -4,11 +4,14 @@
 // Project name: SquareLine_Project
 
 #include "ui.h"
+#include "list.h"
 
 // https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
 #define USE_CONST_STYLE 1
 
 #define DROPDOWN_WIDTH  100
+
+static lv_obj_t *play_list;
 
 /*--------------------------------------------------------------------------------
  * Set the pointer to the widget to NULL when its object is deleted
@@ -31,6 +34,33 @@ static void delete_cb(lv_event_t *e) {
   *obj = NULL;
 }
 
+/*--------------------------------------------------------------------------------
+ * Event handlers for UI Options
+ *--------------------------------------------------------------------------------*/
+static void playlist_cb(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_option.selectPlaylist = lv_dropdown_get_selected(obj);
+}
+
+static void backlight_cb(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_option.selectBacklight = lv_dropdown_get_selected(obj);
+}
+
+static void sleeptimer_cb(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_option.selectSleepTimer = lv_dropdown_get_selected(obj);
+}
+
+/*--------------------------------------------------------------------------------
+ * Initialize / Deinitialize widgets
+ *--------------------------------------------------------------------------------*/
 void ui_ScreenOption_screen_init(void) {
   if (ui_ScreenOption == NULL) {
     ui_ScreenOption = lv_obj_create(NULL);
@@ -114,12 +144,13 @@ void ui_ScreenOption_screen_init(void) {
     obj = lv_dropdown_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
+    lv_obj_add_event_cb(obj, playlist_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options(obj, "List 1\nList 2\nList 3");
-    lv_dropdown_set_selected(obj, 0);
+    lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
 
-    obj = lv_list_create(ui_ScreenOption);
-    lv_obj_set_size(obj, SCREEN_WIDTH - LV_PCT_X(10), SCREEN_HEIGHT - LV_PCT_Y(50));
-    lv_obj_set_align(obj, LV_ALIGN_CENTER);
+    play_list = lv_list_create(ui_ScreenOption);
+    lv_obj_set_size(play_list, SCREEN_WIDTH - LV_PCT_X(10), SCREEN_HEIGHT - LV_PCT_Y(50) - 2);
+    lv_obj_center(play_list);
 
     obj = lv_label_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(78));
@@ -128,11 +159,12 @@ void ui_ScreenOption_screen_init(void) {
     obj = lv_dropdown_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(85));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
+    lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_dropdown_set_options(obj, "Disable\n30 sec\n1 min\n2 min\n5 min");
+    lv_dropdown_set_selected(obj, ui_option.selectBacklight);
     lv_dropdown_set_dir(obj, LV_DIR_TOP);
     lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
-    lv_dropdown_set_selected(obj, 0);
 
     obj = lv_label_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(78));
@@ -141,11 +173,12 @@ void ui_ScreenOption_screen_init(void) {
     obj = lv_dropdown_create(ui_ScreenOption);
     lv_obj_set_pos(obj, SCREEN_WIDTH - DROPDOWN_WIDTH - LV_PCT_X(5), LV_PCT_Y(85));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
+    lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_dropdown_set_options(obj, "Disable\n30 min\n60 min\n90 min\n120 min");
+    lv_dropdown_set_selected(obj, ui_option.selectSleepTimer);
     lv_dropdown_set_dir(obj, LV_DIR_TOP);
     lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
-    lv_dropdown_set_selected(obj, 0);
   }
 }
 
@@ -153,4 +186,21 @@ void ui_ScreenOption_screen_deinit(void) {
   if (ui_ScreenOption) {
     lv_obj_delete_async(ui_ScreenOption);
   }
+}
+
+/*--------------------------------------------------------------------------------
+ * Create selectable playlist
+ *--------------------------------------------------------------------------------*/
+bool ui_ScreenOption_create_list(const char *root_dir) {
+  File dir = SD.open(root_dir);
+  if (!dir) {
+    DBG_EXEC(Serial.printf("Can't open %s.\n", root_dir));
+    return false;
+  }
+
+  Node *root_node = new Node(root_dir);
+  root_node->scan_dir(dir);
+  add_list(root_node, play_list, -1);
+
+  return true;
 }

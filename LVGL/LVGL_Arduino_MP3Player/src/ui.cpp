@@ -20,6 +20,7 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 static bool saveID3tags;
 static ID3Tags_t id3tags;
 static UI_State_t nextState;
+static uint32_t deferredExec;
 
 ///////////////////// UI LOOP ////////////////////
 UI_State_t ui_state;
@@ -201,16 +202,26 @@ void ui_event_ScreenOption(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
+    // stop playing
     if (ui_state != UI_STATE_IDLE) {
-      ui_state = UI_STATE_STOP;
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
+      player.PauseResume();
     }
+
+    // increase free memory
+    player.ClearPlayList();
     lv_fs_clear_cache();
+
+    // increase screen responsiveness
+    deferredExec = millis();
+    ui_state = UI_STATE_OPTION;
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
-    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
-    ui_state = UI_STATE_PLAY;
     ui_ScreenOption_screen_deinit();
+
+    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+    ui_state = UI_STATE_START;
   }
 }
 
@@ -559,7 +570,7 @@ bool ui_loop(void) {
       break;
     case UI_STATE_START:
       if (player.ScanPlayList(/* ui_option.shuffle */)) {
-        ui_set_playNo(0);
+        ui_set_playNo(ui_control.playNo);
         ui_state = UI_STATE_PLAY;
       } else {
         ui_state = UI_STATE_ERROR;
@@ -595,6 +606,12 @@ bool ui_loop(void) {
         ui_state = UI_STATE_PLAY;
       } else {
         ui_state = UI_STATE_STOP;
+      }
+      break;
+    case UI_STATE_OPTION:
+      if (millis() - deferredExec > 100) {
+        ui_ScreenOption_create_list(MP3_PATH_ROOT);
+        ui_state = UI_STATE_IDLE;
       }
       break;
     case UI_STATE_ID3:
