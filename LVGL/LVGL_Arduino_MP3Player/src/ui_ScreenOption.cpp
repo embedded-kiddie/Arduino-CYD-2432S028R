@@ -14,20 +14,22 @@
 static lv_obj_t *play_list;
 
 void ui_set_option_backlight(void) {
-  const uint32_t time[] = {
+  static const uint32_t time[] = {
     0,              // Disable
     30 * 1000,      // 30 sec
     60 * 1000,      //  1 min
+    60 * 1000 * 2,  //  2 min
     60 * 1000 * 5,  //  5 min
   };
   ui_control.backlightTimer = time[ui_option.selectBacklight];
 }
 
 void ui_set_option_sleeptime(void) {
-  const uint32_t time[] = {
+  static const uint32_t time[] = {
     0,                // Disable
     60 * 1000 *  30,  //  30 min
     60 * 1000 *  60,  //  60 min
+    60 * 1000 *  90,  //  90 min
     60 * 1000 * 120,  // 120 min
   };
   ui_control.sleepTimer = time[ui_option.selectSleepTimer];
