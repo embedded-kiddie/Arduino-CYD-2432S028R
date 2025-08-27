@@ -5,6 +5,7 @@
 //  DO NOT FORGET TO SET 'LV_USE_TFT_ESPI' TO 0
 //  DO NOT FORGET TO SET 'LV_USE_ILI9341' and/or 'LV_USE_ST7789'
 #include <lvgl.h>
+#include <climits>
 #include "src/ui.h"
 
 /* Set to your screen resolution and rotation */
@@ -121,13 +122,20 @@ static void tft_init(void) {
 //----------------------------------------------------------------------
 static bool is_awake = true;
 
-static void enable_display(bool on_off) {
-  if (on_off == true) {
-    tft.wakeup();
-    is_awake = true;
-  } else {
-    tft.sleep();
-    is_awake = false;
+static void enable_display(UI_State_t state) {
+  switch (state) {
+    case UI_STATE_SLEEP:
+      esp_deep_sleep(ULLONG_MAX);
+      break;
+    case UI_STATE_BLOFF:
+      tft.sleep();
+      is_awake = false;
+      break;
+    case UI_STATE_AWAKE:
+    default:
+      tft.wakeup();
+      is_awake = true;
+      break;
   }
 }
 
@@ -164,7 +172,7 @@ static void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
   }
 
   else if (!is_awake) {
-    enable_display(true);
+    enable_display(UI_STATE_AWAKE);
     ui_redisplay();
     delay(200); // Prevent unintended events from firing
     data->state = LV_INDEV_STATE_RELEASED;
@@ -226,6 +234,11 @@ static uint32_t my_tick(void) {
 #endif
 }
 
+volatile bool touch_flag;
+static void touch_cb(void) {
+  touch_flag = true;
+}
+
 void setup() {
   Serial.begin(115200);
   while (millis() < 500);
@@ -283,9 +296,14 @@ void setup() {
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
 
-  bool state = ui_loop();
-  if (!state && is_awake) {
-    enable_display(false);
+  UI_State_t state = ui_loop();
+  if (state == UI_STATE_SLEEP || (state == UI_STATE_BLOFF && is_awake)) {
+    enable_display(state);
+  }
+
+  if (touch_flag) {
+    touch_flag = false;
+    Serial.println("touched.");
   }
 
 #if SAVE_SEQUENCIAL_BMP

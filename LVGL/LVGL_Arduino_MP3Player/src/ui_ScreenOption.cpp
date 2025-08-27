@@ -13,6 +13,53 @@
 
 static lv_obj_t *play_list;
 
+void ui_set_option_backlight(void) {
+  const uint32_t time[] = {
+    0,              // Disable
+    30 * 1000,      // 30 sec
+    60 * 1000,      //  1 min
+    60 * 1000 * 5,  //  5 min
+  };
+  ui_control.backlightTimer = time[ui_option.selectBacklight];
+}
+
+void ui_set_option_sleeptime(void) {
+  const uint32_t time[] = {
+    0,                // Disable
+    60 * 1000 *  30,  //  30 min
+    60 * 1000 *  60,  //  60 min
+    60 * 1000 * 120,  // 120 min
+  };
+  ui_control.sleepTimer = time[ui_option.selectSleepTimer];
+}
+
+/*--------------------------------------------------------------------------------
+ * Event handlers for UI Options
+ *--------------------------------------------------------------------------------*/
+static void backlight_cb(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_option.selectBacklight = lv_dropdown_get_selected(obj);
+  ui_set_option_backlight();
+}
+
+static void sleeptimer_cb(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_option.selectSleepTimer = lv_dropdown_get_selected(obj);
+  ui_control.sleepStart = millis();
+  ui_set_option_sleeptime();
+}
+
+static void playlist_cb(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_option.selectPlaylist = lv_dropdown_get_selected(obj);
+}
+
 /*--------------------------------------------------------------------------------
  * Set the pointer to the widget to NULL when its object is deleted
  *--------------------------------------------------------------------------------*/
@@ -32,30 +79,6 @@ static void delete_cb(lv_event_t *e) {
 #endif
 
   *obj = NULL;
-}
-
-/*--------------------------------------------------------------------------------
- * Event handlers for UI Options
- *--------------------------------------------------------------------------------*/
-static void playlist_cb(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-
-  lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectPlaylist = lv_dropdown_get_selected(obj);
-}
-
-static void backlight_cb(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-
-  lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectBacklight = lv_dropdown_get_selected(obj);
-}
-
-static void sleeptimer_cb(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-
-  lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectSleepTimer = lv_dropdown_get_selected(obj);
 }
 
 /*--------------------------------------------------------------------------------
@@ -159,12 +182,13 @@ void ui_ScreenOption_screen_init(void) {
     obj = lv_dropdown_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(85));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options(obj, "Disable\n30 sec\n1 min\n2 min\n5 min");
     lv_dropdown_set_selected(obj, ui_option.selectBacklight);
     lv_dropdown_set_dir(obj, LV_DIR_TOP);
     lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
+
 
     obj = lv_label_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(78));
@@ -173,8 +197,8 @@ void ui_ScreenOption_screen_init(void) {
     obj = lv_dropdown_create(ui_ScreenOption);
     lv_obj_set_pos(obj, SCREEN_WIDTH - DROPDOWN_WIDTH - LV_PCT_X(5), LV_PCT_Y(85));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options(obj, "Disable\n30 min\n60 min\n90 min\n120 min");
     lv_dropdown_set_selected(obj, ui_option.selectSleepTimer);
     lv_dropdown_set_dir(obj, LV_DIR_TOP);
@@ -192,15 +216,21 @@ void ui_ScreenOption_screen_deinit(void) {
  * Create selectable playlist
  *--------------------------------------------------------------------------------*/
 bool ui_ScreenOption_create_list(const char *root_dir) {
+  int depth = 1;
+  for (int i = 0; i < strlen(root_dir); i++) {
+    if (root_dir[i] == '/') {
+      --depth;
+    }
+  }
+
   File dir = SD.open(root_dir);
   if (!dir) {
-    DBG_EXEC(Serial.printf("Can't open %s.\n", root_dir));
     return false;
   }
 
   Node *root_node = new Node(root_dir);
   root_node->scan_dir(dir);
-  add_list(root_node, play_list, -1);
+  add_list(root_node, play_list, depth);
 
   return true;
 }

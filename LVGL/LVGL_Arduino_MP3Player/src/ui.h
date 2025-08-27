@@ -44,6 +44,8 @@ void ui_event_VolumeMin   (lv_event_t *e);
 
 // SCREEN: ui_ScreenOption
 extern lv_obj_t *ui_ScreenOption;
+void ui_set_option_backlight(void);
+void ui_set_option_sleeptime(void);
 void ui_ScreenOption_screen_init(void);
 void ui_ScreenOption_screen_deinit(void);
 bool ui_ScreenOption_create_list(const char *root);
@@ -98,11 +100,30 @@ LV_IMAGE_DECLARE(img_list_play);   // assets/list-play.png
 LV_IMAGE_DECLARE(img_list_pause);  // assets/list-pause.png
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 
+typedef enum {
+  UI_STATE_INIT,
+  UI_STATE_START,
+  UI_STATE_IDLE,
+  UI_STATE_PLAY,
+  UI_STATE_STOP,
+  UI_STATE_PAUSE,
+  UI_STATE_RESUME,
+  UI_STATE_NEXT,
+  UI_STATE_PREV,
+  UI_STATE_OPTION,
+  UI_STATE_AWAKE,
+  UI_STATE_SLEEP,
+  UI_STATE_BLOFF,
+  UI_STATE_ID3,
+  UI_STATE_EOF,
+  UI_STATE_ERROR,
+} UI_State_t;
+
 // UI INIT
 void ui_init(void);
 
 // Custom Functions
-bool ui_loop(void);
+UI_State_t ui_loop(void);
 void ui_redisplay(void);
 void ui_set_playNo(uint32_t playNo);
 
@@ -125,30 +146,10 @@ uint32_t ui_get_counts(void);
 LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
 LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 
-typedef enum {
-  UI_STATE_INIT,
-  UI_STATE_START,
-  UI_STATE_IDLE,
-  UI_STATE_PLAY,
-  UI_STATE_STOP,
-  UI_STATE_PAUSE,
-  UI_STATE_RESUME,
-  UI_STATE_NEXT,
-  UI_STATE_PREV,
-  UI_STATE_SLEEP,
-  UI_STATE_WAKEUP,
-  UI_STATE_OPTION,
-  UI_STATE_ID3,
-  UI_STATE_EOF,
-  UI_STATE_ERROR,
-} UI_State_t;
-
 // Variables
 typedef struct {
   bool      shuffle;
   bool      favorite;
-  bool      backlight;
-  bool      sleepTimer;
   uint8_t   repeat;
   uint8_t   selectPlaylist;
   uint8_t   selectBacklight;
@@ -160,6 +161,8 @@ typedef struct {
   uint32_t  end;
   uint32_t  playNo;
   uint32_t  focusNo;
+  uint32_t  backlightTimer;
+  uint32_t  sleepStart;
   uint32_t  sleepTimer;
 } UI_Control_t;
 

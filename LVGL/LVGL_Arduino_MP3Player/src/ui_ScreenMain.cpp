@@ -294,6 +294,7 @@ void ui_ScreenMain_screen_init(void) {
 
   lv_obj_t *ui_Repeat = lv_checkbox_create(ui_ScreenMain);
   lv_checkbox_set_text          (ui_Repeat, "");
+  lv_obj_add_state              (ui_Repeat, ui_option.repeat ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
 #if !USE_CONST_STYLE
   lv_obj_set_width              (ui_Repeat, 25);
   lv_obj_set_height             (ui_Repeat, 25);
@@ -364,6 +365,7 @@ void ui_ScreenMain_screen_init(void) {
 
   lv_obj_t *ui_Shuffle = lv_checkbox_create(ui_ScreenMain);
   lv_checkbox_set_text          (ui_Shuffle, "");
+  lv_obj_add_state              (ui_Shuffle, ui_option.shuffle ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
 #if !USE_CONST_STYLE
   lv_obj_set_width              (ui_Shuffle, 25);
   lv_obj_set_height             (ui_Shuffle, 25);

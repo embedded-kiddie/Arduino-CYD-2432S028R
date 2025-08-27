@@ -20,11 +20,14 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 static bool saveID3tags;
 static ID3Tags_t id3tags;
 static UI_State_t nextState;
-static uint32_t deferredExec;
+
+// deferred execution to improve screen responsiveness
+static uint32_t deferredTime;
+#define DEFERRED_TIME 50
 
 ///////////////////// UI LOOP ////////////////////
 UI_State_t ui_state;
-UI_Option_t ui_option;
+UI_Option_t ui_option = { .shuffle = true, .selectBacklight = 1 };
 UI_Control_t ui_control;
 
 ///////////////////// VARIABLES ////////////////////
@@ -117,14 +120,14 @@ void ui_event_Favorite(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
-  ui_option.favorite = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+  ui_option.favorite = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
 }
 
 void ui_event_Repeat(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
-  ui_option.repeat = (uint8_t)(lv_obj_get_state(obj) & LV_STATE_CHECKED ? 1 : 0);
+  ui_option.repeat = (uint8_t)(lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
 }
 
 void ui_event_Shuffle(lv_event_t *e) {
@@ -212,8 +215,8 @@ void ui_event_ScreenOption(lv_event_t *e) {
     player.ClearPlayList();
     lv_fs_clear_cache();
 
-    // increase screen responsiveness
-    deferredExec = millis();
+    // improve screen responsiveness
+    deferredTime = millis();
     ui_state = UI_STATE_OPTION;
   }
 
@@ -293,7 +296,7 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
 }
 #endif
 /////////////////// LOCAL FUNCTIONS //////////////////
-static void update_epalsed_time(void) {
+static void update_elapsed_time(void) {
   uint32_t duration = audioGetDuration();
   uint32_t elapsed  = audioGetElapsedTime();
 
@@ -308,12 +311,8 @@ static void update_epalsed_time(void) {
   lv_slider_set_range(ui_ElapsedBar, 0, duration);
   lv_slider_set_value(ui_ElapsedBar, elapsed, LV_ANIM_OFF);
 
-  char time[8];
-  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, elapsed  / 60, elapsed  % 60);
-  lv_label_set_text(ui_ElapsedStart, time);
-
-  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
-  lv_label_set_text(ui_ElapsedEnd,   time);
+  lv_label_set_text_fmt(ui_ElapsedStart, "%" LV_PRIu32 ":%02" LV_PRIu32, elapsed  / 60, elapsed  % 60);
+  lv_label_set_text_fmt(ui_ElapsedEnd,   "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
 }
 
 /*--------------------------------------------------------------------------------
@@ -542,15 +541,25 @@ void audio_eof_mp3(const char *info) {
   }
 }
 
+/*--------------------------------------------------------------------------------
+ * Load / Save options in SD
+ *--------------------------------------------------------------------------------*/
+void ui_load_options(void) {
+  ui_set_option_backlight();
+  ui_set_option_sleeptime();
+}
+
+void ui_save_options(void) {
+}
+
 ///////////////////// SCREENS ////////////////////
 void ui_init(void) {
+  ui_load_options();
   ui_ScreenMain_screen_init();
   lv_screen_load(ui_ScreenMain);
 
-  ui_control.sleepTimer = 30 * 1000;
-  ui_state = UI_STATE_INIT;
-
   audioInit();
+  ui_state = UI_STATE_INIT;
 }
 
 /*--------------------------------------------------------------------------------
@@ -558,7 +567,7 @@ void ui_init(void) {
  * The steady state can be either "UI_STATE_PLAY" or "UI_STATE_IDLE", 
  * anything else is just a transient state that works as a command.
  *--------------------------------------------------------------------------------*/
-bool ui_loop(void) {
+UI_State_t ui_loop(void) {
   switch (ui_state) {
     case UI_STATE_INIT:
       if (player.begin(MP3_PATH_ROOT, MP3_VOLUME_INI)) {
@@ -569,7 +578,7 @@ bool ui_loop(void) {
       }
       break;
     case UI_STATE_START:
-      if (player.ScanPlayList(/* ui_option.shuffle */)) {
+      if (player.ScanPlayList(ui_option.shuffle)) {
         ui_set_playNo(ui_control.playNo);
         ui_state = UI_STATE_PLAY;
       } else {
@@ -609,8 +618,10 @@ bool ui_loop(void) {
       }
       break;
     case UI_STATE_OPTION:
-      if (millis() - deferredExec > 100) {
-        ui_ScreenOption_create_list(MP3_PATH_ROOT);
+      if (millis() - deferredTime > DEFERRED_TIME) {
+        if (ui_ScreenOption_create_list(MP3_PATH_ROOT) == false) {
+          lv_label_set_text_fmt(ui_MusicTitle, "%s Can't open %s.", LV_SYMBOL_WARNING, MP3_PATH_ROOT);
+        }
         ui_state = UI_STATE_IDLE;
       }
       break;
@@ -628,30 +639,36 @@ bool ui_loop(void) {
       ui_state = nextState;
       break;
     case UI_STATE_ERROR:
-      lv_label_set_text_fmt(ui_MusicTitle, "%s %s", LV_SYMBOL_WARNING, player.GetError());
+      lv_label_set_text_fmt(ui_MusicTitle, "%s %s.", LV_SYMBOL_WARNING, player.GetError());
       ui_state = UI_STATE_IDLE;
     case UI_STATE_IDLE:
     default:
       break;
   }
 
+  UI_State_t ret = UI_STATE_AWAKE;
+
   // Periodical task
   DO_EVERY(PERIOD_TAKS1, task1Time) {
+    // update elapsed time
     if (player.IsPlaying()) {
-      update_epalsed_time();
+      update_elapsed_time();
+    }
+
+    // deep sleep
+    if (ui_option.selectSleepTimer) {
+      if (millis() - ui_control.sleepStart > ui_control.sleepTimer) {
+        ret = UI_STATE_SLEEP; // enter deep sleep
+      }
+    }
+
+    // Backlight control according to the duration of non-operation
+    if (ui_option.selectBacklight && ret == UI_STATE_AWAKE) {
+      if (lv_disp_get_inactive_time(NULL) > ui_control.backlightTimer) {
+        ret = UI_STATE_BLOFF; // turn backlight off
+      }
     }
   }
 
-  DO_EVERY(PERIOD_TAKS2, task2Time) {
-    if (player.IsPlaying()) {
-      // Serial.printf("%d\n", audioGetRMS() & 0xffff);
-    }
-  }
-
-  // Backlight control according to the duration of non-operation
-  if (ui_control.sleepTimer > lv_disp_get_inactive_time(NULL)) {
-    return true;  // keep backlight on
-  } else {
-    return false; // turn backlight off
-  }
+  return ret;
 }
