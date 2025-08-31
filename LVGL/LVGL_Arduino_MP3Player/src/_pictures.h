@@ -20,6 +20,8 @@ const lv_image_dsc_t *pictures[] = {
   /*  6 */  & SUPER_EUROBEAT,
   /*  7 */  & a_nation_vol2,
   /*  8 */  & Amazing,
+  /*  9 */  & MF_GHOST,
+  /* 10 */  & Avril_Lavigne_Greatest_Hits,
 };
 
 #define N_PICTURES  (sizeof(pictures) / sizeof(lv_image_dsc_t *))

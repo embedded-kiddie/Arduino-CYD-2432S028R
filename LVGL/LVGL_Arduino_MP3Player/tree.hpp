@@ -92,7 +92,7 @@ private:
 #else
       const char *name = entry.name();
 #endif
-      if (name[0] == '@') { continue; }
+      if (name[0] == '@' || name[0] == '.') { continue; }
       if (entry.isDirectory()) {
         scan_node(entry, node->append(name), scan_file);
       }
