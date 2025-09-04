@@ -147,10 +147,12 @@ private:
    * Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
    *--------------------------------------------------------------------------------*/
   bool check_mp3(const char *path) {
-    const char* ext[] = {".mp3", ".m4a", ".wav"};
-    for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
-      if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
-        return true;
+    if (IsValidFile(path)) {
+      const char* ext[] = AUDIO_FILE_EXT;
+      for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
+        if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
+          return true;
+        }
       }
     }
     return false;
@@ -159,7 +161,7 @@ private:
   /*--------------------------------------------------------------------------------
    * Scan audio files and make a play list
    *--------------------------------------------------------------------------------*/
-  void scan_file(Node* tree) {
+  void scan_audio_files(Node* tree) {
     const size_t n = tree->get_n_leafs();
 
     // extract audio files in the parents directory
@@ -179,6 +181,7 @@ private:
           append(file.name(), parent);
         }
 #endif
+        file.close();
       }
       dir.close();
 

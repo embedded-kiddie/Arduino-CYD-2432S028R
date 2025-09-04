@@ -10,7 +10,6 @@
  * SD file system configuration
  *----------------------------------------------------------------------*/
 #include "sdfs.h"
-
 #include <string>
 #include <vector>
 #include <exception>
@@ -18,6 +17,7 @@
 #include <string.h>
 
 #define AUDIO_FILE_EXT  {".mp3", ".m4a", ".wav"}
+#define IsValidFile(f)  ((f)[0] != '@' && (f)[0] != '.')
 
 /*----------------------------------------------------------------------
  * Class definition
@@ -92,12 +92,13 @@ private:
 #else
       const char *name = entry.name();
 #endif
-      if (name[0] == '@' || name[0] == '.') { continue; }
-      if (entry.isDirectory()) {
-        scan_node(entry, node->append(name), scan_file);
-      }
-      else if (scan_file && check_ext(name)) {
-        node->append(name);
+      if (IsValidFile(name)) {
+        if (entry.isDirectory()) {
+          scan_node(entry, node->append(name), scan_file);
+        }
+        else if (scan_file && check_ext(name)) {
+          node->append(name);
+        }
       }
       entry.close();
     }

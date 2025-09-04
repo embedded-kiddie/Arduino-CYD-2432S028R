@@ -13,26 +13,42 @@
 
 static lv_obj_t *play_list;
 
-void ui_set_option_backlight(void) {
-  static const uint32_t time[] = {
+/*--------------------------------------------------------------------------------
+ *
+ *--------------------------------------------------------------------------------*/
+typedef struct {
+  const char      *options;
+  const uint32_t  time[];
+} DropdownOpts_t;
+
+static const DropdownOpts_t opts_backlight = {
+  "Disable\n30 sec\n1 min\n2 min\n5 min",
+  {
     0,              // Disable
     30 * 1000,      // 30 sec
     60 * 1000,      //  1 min
     60 * 1000 * 2,  //  2 min
     60 * 1000 * 5,  //  5 min
-  };
-  ui_control.backlightTimer = time[ui_option.selectBacklight];
-}
+  }
+};
 
-void ui_set_option_sleeptime(void) {
-  static const uint32_t time[] = {
+static const DropdownOpts_t opts_sleeptime = {
+  "Disable\n30 min\n60 min\n90 min\n120 min",
+  {
     0,                // Disable
     60 * 1000 *  30,  //  30 min
     60 * 1000 *  60,  //  60 min
     60 * 1000 *  90,  //  90 min
     60 * 1000 * 120,  // 120 min
-  };
-  ui_control.sleepTimer = time[ui_option.selectSleepTimer];
+  }
+};
+
+void ui_set_option_backlight(void) {
+  ui_control.backlightTimer = opts_backlight.time[ui_option.selectBacklight];
+}
+
+void ui_set_option_sleeptime(void) {
+  ui_control.sleepTimer = opts_sleeptime.time[ui_option.selectSleepTimer];
 }
 
 /*--------------------------------------------------------------------------------
@@ -186,7 +202,7 @@ void ui_ScreenOption_screen_init(void) {
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_dropdown_set_options(obj, "Disable\n30 sec\n1 min\n2 min\n5 min");
+    lv_dropdown_set_options_static(obj, opts_backlight.options);
     lv_dropdown_set_selected(obj, ui_option.selectBacklight);
     lv_dropdown_set_dir(obj, LV_DIR_TOP);
     lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
@@ -201,7 +217,7 @@ void ui_ScreenOption_screen_init(void) {
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_dropdown_set_options(obj, "Disable\n30 min\n60 min\n90 min\n120 min");
+    lv_dropdown_set_options_static(obj, opts_sleeptime.options);
     lv_dropdown_set_selected(obj, ui_option.selectSleepTimer);
     lv_dropdown_set_dir(obj, LV_DIR_TOP);
     lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
@@ -232,7 +248,9 @@ bool ui_ScreenOption_create_list(const char *root_dir) {
 
   Node *root_node = new Node(root_dir);
   root_node->scan_dir(dir);
+  dir.close();
   add_list(root_node, play_list, depth);
 
+  make_subtree(root_node, play_list);
   return true;
 }

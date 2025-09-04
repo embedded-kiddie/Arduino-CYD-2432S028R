@@ -137,12 +137,17 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
  * Scan and create a list of audio m_list in a specified directory.
  *--------------------------------------------------------------------------------*/
 uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
-  m_tree = new Node(m_root.c_str());
-  File dirs = SD.open(m_root.c_str());
-  m_tree->scan_dir(dirs);
-  dirs.close();
+  File dir = SD.open(m_root.c_str());
+  if (!dir) {
+    m_error = "Can't open " + m_root;
+    return 0;
+  }
 
-  scan_file(m_tree);
+  m_tree = new Node(m_root.c_str());
+  m_tree->scan_dir(dir);
+  dir.close();
+
+  scan_audio_files(m_tree);
 
   int i = 0;
   for (auto &file : m_list) {
