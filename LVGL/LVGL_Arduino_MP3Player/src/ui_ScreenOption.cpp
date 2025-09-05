@@ -6,9 +6,6 @@
 #include "ui.h"
 #include "../list.h"
 
-// https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
-#define USE_CONST_STYLE 1
-
 #define DROPDOWN_WIDTH  100
 
 static lv_obj_t *album_list;
@@ -87,6 +84,7 @@ static void delete_cb(lv_event_t *e) {
 #if   false
   static lv_obj_t ** const adrs[] = {
     &ui_ScreenOption,
+    &album_list,
   };
   for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
     if (obj == adrs[i]) {
@@ -111,31 +109,6 @@ void ui_ScreenOption_screen_init(void) {
     lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_SCREEN_UNLOADED, NULL);
     lv_obj_add_event_cb           (ui_ScreenOption, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenOption);
 
-#if !USE_CONST_STYLE
-    lv_obj_t *ui_OptionToMainRight = lv_checkbox_create(ui_ScreenOption);
-    lv_checkbox_set_text          (ui_OptionToMainRight, "");
-    lv_obj_set_width              (ui_OptionToMainRight, 27);
-    lv_obj_set_height             (ui_OptionToMainRight, 27);
-    lv_obj_set_x                  (ui_OptionToMainRight, lv_pct(42));
-    lv_obj_set_y                  (ui_OptionToMainRight, lv_pct(-44));
-    lv_obj_set_align              (ui_OptionToMainRight, LV_ALIGN_CENTER);
-
-    lv_obj_set_style_bg_image_src (ui_OptionToMainRight, &img_back_right,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color     (ui_OptionToMainRight, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_radius       (ui_OptionToMainRight, LV_RADIUS_CIRCLE,    (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top      (ui_OptionToMainRight,   8,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right    (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom   (ui_OptionToMainRight,   0,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left     (ui_OptionToMainRight,   8,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-
-    lv_obj_set_style_pad_top      (ui_OptionToMainRight,  10,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_pad_left     (ui_OptionToMainRight,  10,                 (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-
-    lv_obj_set_style_bg_image_src (ui_OptionToMainRight, &img_back_right,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color     (ui_OptionToMainRight, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_event_cb           (ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_CLICKED, NULL);
-#else
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(27),
       LV_STYLE_CONST_HEIGHT(27),
@@ -170,15 +143,15 @@ void ui_ScreenOption_screen_init(void) {
     static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
     static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
-    lv_obj_t *ui_OptionToMainRight = lv_checkbox_create(ui_ScreenOption);
-    lv_checkbox_set_text(ui_OptionToMainRight, "");
-    lv_obj_add_style    (ui_OptionToMainRight, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style    (ui_OptionToMainRight, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style    (ui_OptionToMainRight, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_add_style    (ui_OptionToMainRight, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_event_cb (ui_OptionToMainRight, ui_event_OptionToMainRight, LV_EVENT_CLICKED, NULL);
-#endif
-    lv_obj_t * obj = lv_label_create(ui_ScreenOption);
+    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
+    lv_checkbox_set_text(obj, "");
+    lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_add_event_cb (obj, ui_event_OptionToMainRight, LV_EVENT_CLICKED, NULL);
+
+    obj = lv_label_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
     lv_label_set_text(obj, "Playlist");
 
@@ -190,6 +163,7 @@ void ui_ScreenOption_screen_init(void) {
     lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
 
     album_list = lv_list_create(ui_ScreenOption);
+    lv_obj_add_event_cb(album_list, delete_cb, LV_EVENT_DELETE, (void*)&album_list);
     lv_obj_set_size(album_list, SCREEN_WIDTH - LV_PCT_X(10), SCREEN_HEIGHT - LV_PCT_Y(50) - 2);
     lv_obj_center(album_list);
 
@@ -251,6 +225,7 @@ bool ui_ScreenOption_create_list(const char *root_dir) {
   dir.close();
   add_list(root_node, album_list, depth);
 
-  make_subtree(root_node, album_list);
+//make_subtree(root_node, album_list);
+  delete root_node;
   return true;
 }

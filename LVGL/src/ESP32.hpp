@@ -119,6 +119,6 @@ void PrintESP32Memory(void) {
   /* LVGL memory usage */
   lv_mem_monitor_t mon;
   lv_mem_monitor(&mon);
-  printf("LVGL memory usage      : Low watermark: %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
+  printf("LVGL memory usage      : Watermark (min): %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
 #endif
 }
