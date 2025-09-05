@@ -194,58 +194,61 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   ID3Tags_t tags;
   ui_get_id3tags(track_id, tags);
 
-  char time[8];
-  uint32_t duration = (uint32_t)tags.meta.duration;
-  lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
-
   lv_obj_t* cell = lv_obj_create(parent);
   lv_obj_remove_style_all       (cell);
   lv_obj_set_size               (cell, lv_pct(100), LIST_CELL_HEIGHT);
 
+  lv_obj_add_style              (cell, &style_grid, 0);
   lv_obj_add_style              (cell, &style_cell, 0);
   lv_obj_add_style              (cell, &style_cell_pressed, LV_STATE_PRESSED);
   lv_obj_add_style              (cell, &style_cell_checked, LV_STATE_CHECKED);
   lv_obj_add_event_cb           (cell, list_click_event_cb, LV_EVENT_CLICKED, (void*)track_id);
 
-  lv_obj_t* icon = lv_image_create(cell);
-  lv_image_set_src              (icon, &img_list_play);
-  lv_obj_set_grid_cell          (icon, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 2);
+  // Play button
+  lv_obj_t* obj = lv_image_create(cell);
+  lv_image_set_src              (obj, &img_list_play);
+  lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 2);
 
-  lv_obj_t* title_label = lv_label_create(cell);
-  lv_label_set_text             (title_label, tags.title.c_str());
-  lv_label_set_long_mode        (title_label, LV_LABEL_LONG_DOT);
-  lv_obj_set_grid_cell          (title_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
-  lv_obj_add_style              (title_label, &style_title, 0);
+  // Title label
+  obj = lv_label_create(cell);
+  lv_label_set_text             (obj, tags.title.c_str());
+  lv_label_set_long_mode        (obj, LV_LABEL_LONG_DOT);
+  lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+  lv_obj_add_style              (obj, &style_title, 0);
 
-  lv_obj_t* artist_label = lv_label_create(cell);
-  lv_label_set_text_fmt         (artist_label, "%s / %s", tags.artist.c_str(), tags.album.c_str());
-  lv_label_set_long_mode        (artist_label, LV_LABEL_LONG_DOT);
-  lv_obj_set_grid_cell          (artist_label, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
-  lv_obj_add_style              (artist_label, &style_artist, 0);
+  // Artist label
+  obj = lv_label_create(cell);
+  lv_label_set_text_fmt         (obj, "%s / %s", tags.artist.c_str(), tags.album.c_str());
+  lv_label_set_long_mode        (obj, LV_LABEL_LONG_DOT);
+  lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+  lv_obj_add_style              (obj, &style_artist, 0);
 
-  lv_obj_t* time_label = lv_label_create(cell);
-  lv_label_set_text             (time_label, time);
-  lv_obj_set_grid_cell          (time_label, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_END, 0, 2);
-  lv_obj_add_style              (time_label, &style_time, 0);
+  // Time label
+  obj = lv_label_create(cell);
+  lv_label_set_text_fmt         (obj, "%" LV_PRIu32 ":%02" LV_PRIu32, tags.meta.duration / 60UL, tags.meta.duration % 60UL);
+  lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_END, 0, 2);
+  lv_obj_add_style              (obj, &style_time, 0);
 
-  lv_obj_t* heart = lv_checkbox_create(cell);
-  lv_checkbox_set_text_static   (heart, "");
-  lv_obj_set_state              (heart, LV_STATE_CHECKED, tags.meta.selected);
-  lv_obj_set_grid_cell          (heart, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
-  lv_obj_add_event_cb           (heart, ui_event_PlayList_Heart, LV_EVENT_CLICKED, (void*)track_id);
-  lv_obj_add_style              (heart, &style_heart,         (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_add_style              (heart, &style_heart,         (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_add_style              (heart, &style_heart,         (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  lv_obj_set_style_bg_image_src (heart, &img_heart_off_small, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_image_src (heart, &img_heart_on_small,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  lv_obj_set_style_bg_image_src (heart, &img_heart_off_small, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  // Heart checkbox
+  obj = lv_checkbox_create(cell);
+  lv_checkbox_set_text_static   (obj, "");
+  lv_obj_set_state              (obj, LV_STATE_CHECKED, tags.meta.selected);
+  lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
+  lv_obj_add_event_cb           (obj, ui_event_PlayList_Heart, LV_EVENT_CLICKED, (void*)track_id);
+  lv_obj_add_style              (obj, &style_heart,         (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_add_style              (obj, &style_heart,         (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_add_style              (obj, &style_heart,         (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_set_style_bg_image_src (obj, &img_heart_off_small, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_image_src (obj, &img_heart_on_small,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_set_style_bg_image_src (obj, &img_heart_off_small, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
-  lv_obj_t* border = lv_image_create(cell);
-  lv_image_set_src              (border, &img_lv_demo_music_list_border);
-  lv_image_set_inner_align      (border, LV_IMAGE_ALIGN_TILE);
-  lv_obj_set_width              (border, lv_pct(120));
-  lv_obj_align                  (border, LV_ALIGN_BOTTOM_MID, 0, 0);
-  lv_obj_add_flag               (border, LV_OBJ_FLAG_IGNORE_LAYOUT);
+  // Border image
+  obj = lv_image_create(cell);
+  lv_image_set_src              (obj, &img_lv_demo_music_list_border);
+  lv_image_set_inner_align      (obj, LV_IMAGE_ALIGN_TILE);
+  lv_obj_set_width              (obj, lv_pct(120));
+  lv_obj_align                  (obj, LV_ALIGN_BOTTOM_MID, 0, 0);
+  lv_obj_add_flag               (obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
 
   return cell;
 }
@@ -407,9 +410,7 @@ void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
  *--------------------------------------------------------------------------------*/
 static void delete_cb(lv_event_t *e) {
   lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
-
-#if   false
-  static lv_obj_t ** const adrs[] = {
+  static constexpr lv_obj_t ** const adrs[] = {
     &ui_ScreenPlayList,
     &ui_ContainerPlayList,
     &ui_PlayListToMainUp,
@@ -417,15 +418,15 @@ static void delete_cb(lv_event_t *e) {
     &play_list,
     &slider,
   };
+
   for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
     if (obj == adrs[i]) {
+      *obj = NULL;
       DBG_EXEC(printf("deleted: %d\n", i));
-      break;
+      return;
     }
   }
-#endif
-
-  *obj = NULL;
+  DBG_EXEC(printf("deleted: 0x%x\n", obj));
 }
 
 /*--------------------------------------------------------------------------------

@@ -8,6 +8,7 @@
 
 #define DROPDOWN_WIDTH  100
 
+static Node     *album_tree;
 static lv_obj_t *album_list;
 
 /*--------------------------------------------------------------------------------
@@ -80,21 +81,19 @@ static void playlist_cb(lv_event_t *e) {
  *--------------------------------------------------------------------------------*/
 static void delete_cb(lv_event_t *e) {
   lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
-
-#if   false
-  static lv_obj_t ** const adrs[] = {
+  static constexpr lv_obj_t ** const adrs[] = {
     &ui_ScreenOption,
     &album_list,
   };
+
   for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
     if (obj == adrs[i]) {
+      *obj = NULL;
       DBG_EXEC(printf("deleted: %d\n", i));
-      break;
+      return;
     }
   }
-#endif
-
-  *obj = NULL;
+  DBG_EXEC(printf("deleted: 0x%x\n", obj));
 }
 
 /*--------------------------------------------------------------------------------
@@ -220,12 +219,12 @@ bool ui_ScreenOption_create_list(const char *root_dir) {
     return false;
   }
 
-  Node *root_node = new Node(root_dir);
-  root_node->scan_dir(dir);
+  album_tree = new Node(root_dir);
+  album_tree->scan_dir(dir);
   dir.close();
-  add_list(root_node, album_list, depth);
+  add_list(album_tree, album_list, depth);
 
-//make_subtree(root_node, album_list);
-  delete root_node;
+//make_subtree(album_tree, album_list);
+  delete album_tree;
   return true;
 }
