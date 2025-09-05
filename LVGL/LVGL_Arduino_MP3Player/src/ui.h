@@ -10,7 +10,7 @@
 #include "ui_helpers.h"
 #include "ui_events.h"
 
-#include "debug.h"
+#include "../debug.h"
 
 // Screen size
 #define SCREEN_WIDTH  240

@@ -1,6 +1,8 @@
 #include "Esp.h"
-#include "chip-debug-report.h"
-#include "freertos_stats.h"
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+#include "chip-debug-report.h"  // void printBeforeSetupInfo(void); void printAfterSetupInfo(void);
+#include "freertos_stats.h"     // void printRunningTasks(Print &printer);
+#endif
 
 void PrintESP32Memory(void) {
   /*
@@ -117,6 +119,6 @@ void PrintESP32Memory(void) {
   /* LVGL memory usage */
   lv_mem_monitor_t mon;
   lv_mem_monitor(&mon);
-  printf("LVGL memory usage      : Remaining (min): %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
+  printf("LVGL memory usage      : Low watermark: %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
 #endif
 }

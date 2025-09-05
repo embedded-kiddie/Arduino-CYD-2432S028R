@@ -4,14 +4,14 @@
 // Project name: SquareLine_Project
 
 #include "ui.h"
-#include "list.h"
+#include "../list.h"
 
 // https://github.com/lvgl/lvgl/issues/5047#issuecomment-1874591247
 #define USE_CONST_STYLE 1
 
 #define DROPDOWN_WIDTH  100
 
-static lv_obj_t *play_list;
+static lv_obj_t *album_list;
 
 /*--------------------------------------------------------------------------------
  *
@@ -189,9 +189,9 @@ void ui_ScreenOption_screen_init(void) {
     lv_dropdown_set_options(obj, "List 1\nList 2\nList 3");
     lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
 
-    play_list = lv_list_create(ui_ScreenOption);
-    lv_obj_set_size(play_list, SCREEN_WIDTH - LV_PCT_X(10), SCREEN_HEIGHT - LV_PCT_Y(50) - 2);
-    lv_obj_center(play_list);
+    album_list = lv_list_create(ui_ScreenOption);
+    lv_obj_set_size(album_list, SCREEN_WIDTH - LV_PCT_X(10), SCREEN_HEIGHT - LV_PCT_Y(50) - 2);
+    lv_obj_center(album_list);
 
     obj = lv_label_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(78));
@@ -249,8 +249,8 @@ bool ui_ScreenOption_create_list(const char *root_dir) {
   Node *root_node = new Node(root_dir);
   root_node->scan_dir(dir);
   dir.close();
-  add_list(root_node, play_list, depth);
+  add_list(root_node, album_list, depth);
 
-  make_subtree(root_node, play_list);
+  make_subtree(root_node, album_list);
   return true;
 }

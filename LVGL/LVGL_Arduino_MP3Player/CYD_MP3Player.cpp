@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------------
  * CYD_MP3Player class definition
  *--------------------------------------------------------------------------------*/
-#include <ctype.h>
-#include <string.h>
-#include <exception>
+#include <ctype.h>  // isdigit(), isprint()
+#include <stdlib.h> // atoi()
+#include <string.h> // strcpy(), strtok_r(), strrchr()
 #include <random>
 
 #include "CYD_MP3Player.h"
