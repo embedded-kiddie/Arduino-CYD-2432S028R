@@ -229,7 +229,7 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_add_style              (time_label, &style_time, 0);
 
   lv_obj_t* heart = lv_checkbox_create(cell);
-  lv_checkbox_set_text          (heart, "");
+  lv_checkbox_set_text_static   (heart, "");
   lv_obj_set_state              (heart, LV_STATE_CHECKED, tags.meta.selected);
   lv_obj_set_grid_cell          (heart, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_START, 0, 2);
   lv_obj_add_event_cb           (heart, ui_event_PlayList_Heart, LV_EVENT_CLICKED, (void*)track_id);
@@ -397,9 +397,7 @@ void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* time_label = lv_obj_get_child(cell, 3);
-      char time[8];
-      lv_snprintf(time, sizeof(time), "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
-      lv_label_set_text(time_label, time);
+      lv_label_set_text_fmt(time_label, "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
     }
   }
 }
@@ -452,7 +450,7 @@ void ui_ScreenPlayList_screen_init(void) {
 
   if (ui_PlayListToMainUp == NULL) {
     ui_PlayListToMainUp = lv_checkbox_create(ui_ScreenPlayList);
-    lv_checkbox_set_text            (ui_PlayListToMainUp, "");
+    lv_checkbox_set_text_static     (ui_PlayListToMainUp, "");
     lv_obj_set_height               (ui_PlayListToMainUp, LIST_BACK_TO_HANDLE_SIZE);
     lv_obj_set_width                (ui_PlayListToMainUp, lv_pct(110));
     lv_obj_set_align                (ui_PlayListToMainUp, LV_ALIGN_BOTTOM_MID);
@@ -471,7 +469,7 @@ void ui_ScreenPlayList_screen_init(void) {
 
   if (ui_PlayListToMainDown == NULL) {
     ui_PlayListToMainDown = lv_checkbox_create(ui_ScreenPlayList);
-    lv_checkbox_set_text            (ui_PlayListToMainDown, "");
+    lv_checkbox_set_text_static     (ui_PlayListToMainDown, "");
     lv_obj_set_height               (ui_PlayListToMainDown, LIST_BACK_TO_HANDLE_SIZE);
     lv_obj_set_width                (ui_PlayListToMainDown, lv_pct(110));
     lv_obj_set_align                (ui_PlayListToMainDown, LV_ALIGN_TOP_MID);

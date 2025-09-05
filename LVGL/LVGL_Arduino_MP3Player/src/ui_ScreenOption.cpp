@@ -144,7 +144,7 @@ void ui_ScreenOption_screen_init(void) {
     static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
     lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
-    lv_checkbox_set_text(obj, "");
+    lv_checkbox_set_text_static (obj, "");
     lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
@@ -153,7 +153,7 @@ void ui_ScreenOption_screen_init(void) {
 
     obj = lv_label_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
-    lv_label_set_text(obj, "Playlist");
+    lv_label_set_text_static(obj, "Playlist");
 
     obj = lv_dropdown_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11));
@@ -169,7 +169,7 @@ void ui_ScreenOption_screen_init(void) {
 
     obj = lv_label_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(78));
-    lv_label_set_text(obj, "Backlight Off");
+    lv_label_set_text_static(obj, "Backlight Off");
 
     obj = lv_dropdown_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(85));
@@ -184,7 +184,7 @@ void ui_ScreenOption_screen_init(void) {
 
     obj = lv_label_create(ui_ScreenOption);
     lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(78));
-    lv_label_set_text(obj, "Sleep Timer");
+    lv_label_set_text_static(obj, "Sleep Timer");
 
     obj = lv_dropdown_create(ui_ScreenOption);
     lv_obj_set_pos(obj, SCREEN_WIDTH - DROPDOWN_WIDTH - LV_PCT_X(5), LV_PCT_Y(85));

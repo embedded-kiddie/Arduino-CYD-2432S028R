@@ -453,7 +453,7 @@ void ui_ScreenMain_screen_init(void) {
   }
 
   lv_obj_t *ui_VolumeMin = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text(ui_VolumeMin, "");
+  lv_checkbox_set_text_static(ui_VolumeMin, "");
   {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(40),
