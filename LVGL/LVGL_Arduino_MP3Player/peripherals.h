@@ -4,10 +4,6 @@
 #ifndef _PERIPHERALS_H
 #define _PERIPHERALS_H
 
-#include "esp_bt.h"       // esp_bt_controller_disable(), esp_bt_controller_deinit()
-#include "esp_bt_main.h"  // esp_bluedroid_disable(), esp_bluedroid_deinit()
-#include "esp_wifi.h"     // esp_wifi_stop()
-
 // https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h
 #ifndef CYD_LED_RGB_OFF
 
@@ -25,9 +21,9 @@
   CYD_LED_RED_OFF();      \
   CYD_LED_GREEN_OFF();    \
   CYD_LED_BLUE_OFF()
-#define CYD_LED_RGB_ON() \
-  CYD_LED_RED_ON();      \
-  CYD_LED_GREEN_ON();    \
+#define CYD_LED_RGB_ON()  \
+  CYD_LED_RED_ON();       \
+  CYD_LED_GREEN_ON();     \
   CYD_LED_BLUE_ON()
 #define CYD_LED_WHITE_OFF() CYD_LED_RGB_OFF()
 #define CYD_LED_WHITE_ON()  CYD_LED_RGB_ON()
@@ -41,13 +37,17 @@
   CYD_LED_RGB_OFF();              \
 }
 
+//#include "esp_bt.h"       // esp_bt_controller_disable(), esp_bt_controller_deinit()
+//#include "esp_bt_main.h"  // esp_bluedroid_disable(), esp_bluedroid_deinit()
+//#include "esp_wifi.h"     // esp_wifi_stop()
+
 #define shutdown_peripherals() {  \
 /*esp_bluedroid_disable();        \
   esp_bluedroid_deinit();         \
   esp_bt_controller_disable();    \
   esp_bt_controller_deinit();     \
-  esp_wifi_stop();                \
-*/RGB_LED_OFF();                  \
+  esp_wifi_stop();*/              \
+  RGB_LED_OFF();                  \
 }
 
 #endif // _PERIPHERALS_H

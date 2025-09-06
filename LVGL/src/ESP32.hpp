@@ -113,7 +113,7 @@ void PrintESP32Memory(void) {
   printf("Reset reason (overall): %2d (%s)\n", X, reset_reason_all [X]);
   printf("Reset reason (core 0) : %2d (%s)\n", Y, reset_reason_core[Y]);
   printf("Reset reason (core 1) : %2d (%s)\n", Z, reset_reason_core[Z]);
-  printf("Reset wakeup cause    : %2d (%s)\n", W, wakeup_cause     [W]);
+  printf("Sleep wakeup cause    : %2d (%s)\n", W, wakeup_cause     [W]);
 
   printf("============ Memory Usage =============\n");
   printf("Sketch space:%7d\n", ESP.getFreeSketchSpace());
@@ -129,6 +129,7 @@ void PrintESP32Memory(void) {
     printf("PSRAM total :%7d\n", ESP.getPsramSize());
     printf("PSRAM lowest:%7d\n", ESP.getMinFreePsram());
   }
+
   printf("Min MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL));
   printf("Min MALLOC_CAP_DMA     :%7d\n", heap_caps_get_minimum_free_size(MALLOC_CAP_DMA));
   printf("Max MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
@@ -138,6 +139,6 @@ void PrintESP32Memory(void) {
   /* LVGL memory usage */
   lv_mem_monitor_t mon;
   lv_mem_monitor(&mon);
-  printf("LVGL memory usage      : Watermark (min): %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
+  printf("LVGL memory usage      : Watermark (max): %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
 #endif
 }

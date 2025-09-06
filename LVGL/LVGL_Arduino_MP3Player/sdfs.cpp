@@ -13,7 +13,7 @@
 #define MY_FREE(addr)   lv_free(addr)
 #else
 #define MY_MALLOC(size) heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
-#define MY_FREE(addr)   free(addr)
+#define MY_FREE(addr)   heap_caps_free(addr)
 #endif
 
 #if MY_USE_FS_ARDUINO_SD == 1
