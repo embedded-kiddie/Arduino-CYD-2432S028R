@@ -5,7 +5,6 @@
 //  DO NOT FORGET TO SET 'LV_USE_TFT_ESPI' TO 0
 //  DO NOT FORGET TO SET 'LV_USE_ILI9341' and/or 'LV_USE_ST7789'
 #include <lvgl.h>
-#include <climits>
 #include "src/ui.h"
 
 /* Set to your screen resolution and rotation */
@@ -120,12 +119,16 @@ static void tft_init(void) {
 //----------------------------------------------------------------------
 // Display sleep/wakeup
 //----------------------------------------------------------------------
+#include "peripherals.h"
+
 static bool is_awake = true;
 
 static void update_display_state(UI_State_t state) {
   switch (state) {
     case UI_STATE_SLEEP:
-      esp_deep_sleep(ULLONG_MAX);
+      shutdown_peripherals();
+      esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+      esp_deep_sleep_start();
       break;
     case UI_STATE_BLOFF:
       tft.sleep();

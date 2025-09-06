@@ -87,14 +87,33 @@ void PrintESP32Memory(void) {
     "Reset when the VDD voltage is not stable",
     "RTC watch dog resets digital core and RTC module",
   };
-
+  // https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32/api-reference/system/sleep_modes.html
+  static const char* wakeup_cause[] = {
+    "ESP_SLEEP_WAKEUP_UNDEFINED",
+    "ESP_SLEEP_WAKEUP_ALL",
+    "ESP_SLEEP_WAKEUP_EXT0",
+    "ESP_SLEEP_WAKEUP_EXT1",
+    "ESP_SLEEP_WAKEUP_TIMER",
+    "ESP_SLEEP_WAKEUP_TOUCHPAD",
+    "ESP_SLEEP_WAKEUP_ULP",
+    "ESP_SLEEP_WAKEUP_GPIO",
+    "ESP_SLEEP_WAKEUP_UART",
+    "ESP_SLEEP_WAKEUP_WIFI",
+    "ESP_SLEEP_WAKEUP_COCPU",
+    "ESP_SLEEP_WAKEUP_COCPU_TRAP_TRIG",
+    "ESP_SLEEP_WAKEUP_BT",
+    "ESP_SLEEP_WAKEUP_VAD",
+    "ESP_SLEEP_WAKEUP_VBAT_UNDER_VOLT",
+  };
   uint32_t X = esp_reset_reason();          // overall
   uint32_t Y = esp_rom_get_reset_reason(0); // core0
   uint32_t Z = esp_rom_get_reset_reason(1); // core1
+  uint32_t W = esp_sleep_get_wakeup_cause();
   printf("============ Reset Reason =============\n");
   printf("Reset reason (overall): %2d (%s)\n", X, reset_reason_all [X]);
   printf("Reset reason (core 0) : %2d (%s)\n", Y, reset_reason_core[Y]);
   printf("Reset reason (core 1) : %2d (%s)\n", Z, reset_reason_core[Z]);
+  printf("Reset wakeup cause    : %2d (%s)\n", W, wakeup_cause     [W]);
 
   printf("============ Memory Usage =============\n");
   printf("Sketch space:%7d\n", ESP.getFreeSketchSpace());

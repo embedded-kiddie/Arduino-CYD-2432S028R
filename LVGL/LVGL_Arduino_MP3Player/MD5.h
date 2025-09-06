@@ -1,8 +1,3 @@
-#ifndef _MD5_H_
-#define _MD5_H_
-
-#include "Arduino.h"
-
 /*
  * This is an OpenSSL-compatible implementation of the RSA Data Security,
  * Inc. MD5 Message-Digest Algorithm (RFC 1321).
@@ -24,7 +19,10 @@
  * Updated by Scott MacVicar for arduino
  * <scott@macvicar.net>
  */
+#ifndef _MD5_H_
+#define _MD5_H_
 
+#include "Arduino.h"
 #include <string.h>
 
 typedef unsigned long MD5_u32plus;
