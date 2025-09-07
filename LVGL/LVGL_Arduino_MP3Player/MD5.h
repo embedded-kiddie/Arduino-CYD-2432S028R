@@ -14,7 +14,6 @@
  * Some known optimizations are not included to reduce source code size
  * and avoid compile-time configuration.
  */
-
 /*
  * Updated by Scott MacVicar for arduino
  * <scott@macvicar.net>
@@ -22,7 +21,6 @@
 #ifndef _MD5_H_
 #define _MD5_H_
 
-#include "Arduino.h"
 #include <string.h>
 
 typedef unsigned long MD5_u32plus;

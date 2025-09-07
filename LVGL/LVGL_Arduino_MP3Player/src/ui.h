@@ -6,7 +6,7 @@
 #ifndef _SQUARELINE_PROJECT_UI_H
 #define _SQUARELINE_PROJECT_UI_H
 
-#include "lvgl.h"
+#include <lvgl.h>
 #include "ui_helpers.h"
 #include "ui_events.h"
 

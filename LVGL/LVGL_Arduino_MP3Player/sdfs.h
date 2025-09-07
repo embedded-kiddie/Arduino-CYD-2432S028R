@@ -18,7 +18,7 @@
  *  2: Load jpg/bmp on SD w   cache (LV_USE_[TJPGD|BMP] in lv_conf.h must be 1)
  * Refer To: https://github.com/lvgl/lvgl/tree/master/src/libs/tjpgd
  *--------------------------------------------------------------------------------*/
-#include "lvgl.h"
+#include <lvgl.h>
 
 // Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
 #if (LV_USE_FS_ARDUINO_SD == 0)

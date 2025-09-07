@@ -5,7 +5,7 @@
  *  "#define SDFATFS_USED" in CYD_Audio.h
  *  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
  *--------------------------------------------------------------------------------*/
-#include "lvgl.h"
+#include <lvgl.h>
 #include "sdfs.h"
 
 #ifdef  LV_MEM_POOL_ALLOC // defined in lv_cong.h

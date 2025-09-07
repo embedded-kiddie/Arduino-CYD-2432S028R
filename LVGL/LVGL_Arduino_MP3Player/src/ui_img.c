@@ -2,8 +2,7 @@
 // SquareLine Studio version: SquareLine Studio 1.5.1
 // LVGL version: 9.1.0
 // Project name: SquareLine_Project
-
-#include "ui.h"
+#include <lvgl.h>
 
 #ifndef LV_ATTRIBUTE_MEM_ALIGN
 #define LV_ATTRIBUTE_MEM_ALIGN

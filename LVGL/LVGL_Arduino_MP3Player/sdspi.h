@@ -14,7 +14,7 @@
 // SdFat library
 // https://github.com/greiman/SdFat
 //--------------------------------------------------------------------
-#include "SdFat.h"
+#include <SdFat.h>
 
 // extern SdFat SD;
 
@@ -39,7 +39,7 @@
 // Standard SD library
 // https://github.com/espressif/arduino-esp32/tree/master/libraries/SD
 //--------------------------------------------------------------------
-#include "SD.h"
+#include <SD.h>
 
 // SPI bus configuration
 #if   1

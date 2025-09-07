@@ -14,7 +14,6 @@
  * Some known optimizations are not included to reduce source code size
  * and avoid compile-time configuration.
  */
-
 /*
  * Updated by Scott MacVicar for arduino
  * <scott@macvicar.net>

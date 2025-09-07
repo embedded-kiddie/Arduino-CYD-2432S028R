@@ -77,14 +77,7 @@
 卵嵐欄濫藍蘭覧利吏履李梨理璃類令伶例冷励嶺怜玲礼苓鈴隷零霊麗齢暦歴列劣烈裂廉恋憐
 漣煉簾練聯 --range 12352-12543,65280-65439 --format lvgl -o noto_sans_jp_4bit_jis1_14.c
  ******************************************************************************/
-/*
-#ifdef LV_LVGL_H_INCLUDE_SIMPLE
-#include "lvgl.h"
-#else
-#include "lvgl/lvgl.h"
-#endif
-*/
-#include "ui.h"
+#include <lvgl.h>
 
 #ifndef NOTO_SANS_JP_4BIT_JIS1_14
 #define NOTO_SANS_JP_4BIT_JIS1_14 1
