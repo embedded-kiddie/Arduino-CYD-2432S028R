@@ -6,10 +6,12 @@
 #include "ui.h"
 #include "../list.h"
 
-#define DROPDOWN_WIDTH  100
+#include "../CYD_MP3Player.h"
+extern CYD_MP3Player *ui_get_player(void);  // defined in ui.cpp
 
-static Node     *album_tree;
 static lv_obj_t *album_list;
+
+#define DROPDOWN_WIDTH  100
 
 /*--------------------------------------------------------------------------------
  *
@@ -90,9 +92,6 @@ static void delete_cb(lv_event_t *e) {
     if (obj == adrs[i]) {
       *obj = NULL;
       DBG_EXEC(printf("deleted: %d\n", i));
-      if (i == 1) {
-        delete album_tree;
-      }
       return;
     }
   }
@@ -217,16 +216,8 @@ bool ui_ScreenOption_create_list(const char *root_dir) {
     }
   }
 
-  File dir = SD.open(root_dir);
-  if (!dir) {
-    return false;
-  }
-
-  album_tree = new Node(root_dir);
-  album_tree->scan_dir(dir);
-  dir.close();
-  add_list(album_tree, album_list, depth);
-
-//make_subtree(album_tree, album_list);
+  CYD_MP3Player *player = ui_get_player();
+  add_list(player->m_tree, album_list, depth);
+//make_subtree(player->m_tree, album_list);
   return true;
 }

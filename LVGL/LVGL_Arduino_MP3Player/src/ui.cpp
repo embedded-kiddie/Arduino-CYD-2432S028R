@@ -10,25 +10,21 @@
 #include "../CYD_MP3Player.h"
 static CYD_MP3Player player;
 
-#define PERIOD_TAKS1 1000 // [msec]
-#define PERIOD_TAKS2 100  // [msec]
-
-// https://embedded-kiddie.github.io/2024/07/22/
-#define DO_EVERY(period, prev) \
-static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; prev = now)
-
 static bool saveID3tags;
 static ID3Tags_t id3tags;
 static UI_State_t nextState;
-
-// deferred execution to improve screen responsiveness
-static uint32_t deferredTime;
-#define DEFERRED_TIME 50
 
 ///////////////////// UI LOOP ////////////////////
 UI_State_t ui_state;
 UI_Option_t ui_option = { .shuffle = true, .selectBacklight = 1 };
 UI_Control_t ui_control;
+
+// https://embedded-kiddie.github.io/2024/07/22/
+#define DO_EVERY(period, prev) \
+static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; prev = now)
+
+#define PERIOD_TAKS1 1000 // [msec]
+#define PERIOD_TAKS2 100  // [msec]
 
 ///////////////////// VARIABLES ////////////////////
 // SCREEN: ui_ScreenMain
@@ -51,7 +47,7 @@ lv_obj_t *ui_ContainerPlayList;
 lv_obj_t *ui_PlayListToMainUp;
 lv_obj_t *ui_PlayListToMainDown;
 
-// STYLES
+/////////////////////////// STYLES //////////////////////////
 static constexpr lv_style_const_prop_t style_prop_album[] = {
   LV_STYLE_CONST_SHADOW_WIDTH(10),
   LV_STYLE_CONST_SHADOW_OFFSET_Y(5),
@@ -60,7 +56,7 @@ static constexpr lv_style_const_prop_t style_prop_album[] = {
 };
 static LV_STYLE_CONST_INIT(album_style, (void*)style_prop_album);
 
-// IMAGES AND IMAGE SETS
+/////////////////////////// IMAGES //////////////////////////
 #if (LV_USE_FS_ARDUINO_SD == 0) && (MY_USE_FS_ARDUINO_SD == 0)
 #include "_pictures.h"
 #endif
@@ -215,9 +211,9 @@ void ui_event_ScreenOption(lv_event_t *e) {
     player.ClearPlayList();
     lv_fs_clear_cache(); // sdfs.{h|cpp}
 
-    // improve screen responsiveness
-    deferredTime = millis();
-    ui_state = UI_STATE_OPTION;
+    // render the option screen
+    ui_ScreenOption_create_list(MP3_PATH_ROOT);
+    ui_state = UI_STATE_IDLE;
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
@@ -467,6 +463,10 @@ static bool check_favorite(void) {
 }
 
 ////////////////// GLOBAL FUNCTIONS /////////////////
+CYD_MP3Player *ui_get_player(void) {
+  return &player;
+}
+
 /*--------------------------------------------------------------------------------
  * Redraw the display panel when waking up from sleep
  *--------------------------------------------------------------------------------*/
@@ -615,14 +615,6 @@ UI_State_t ui_loop(void) {
         ui_state = UI_STATE_PLAY;
       } else {
         ui_state = UI_STATE_STOP;
-      }
-      break;
-    case UI_STATE_OPTION:
-      if (millis() - deferredTime > DEFERRED_TIME) {
-        if (ui_ScreenOption_create_list(MP3_PATH_ROOT) == false) {
-          lv_label_set_text_fmt(ui_MusicTitle, "%s Can't open %s.", LV_SYMBOL_WARNING, MP3_PATH_ROOT);
-        }
-        ui_state = UI_STATE_IDLE;
       }
       break;
     case UI_STATE_ID3:

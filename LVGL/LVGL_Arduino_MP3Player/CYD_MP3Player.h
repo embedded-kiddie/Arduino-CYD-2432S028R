@@ -86,11 +86,8 @@ public:
   }
 
 private:
-  uint32_t m_playNo = 0;
   std::string m_error = "";
   std::string m_root = "/";
-  Node *m_tree = NULL;
-  PlayList m_list = {};
 
   MP3File_t*  GetPlayList (uint32_t playNo);
   std::string GetMetaPath (uint32_t playNo);
@@ -98,6 +95,10 @@ private:
   bool        SaveMetaData(uint32_t playNo, MetaData_t *meta);
 
 public:
+  Node *m_tree = NULL;
+  PlayList m_list = {};
+  uint32_t m_playNo = 0;
+
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_list.size(); }

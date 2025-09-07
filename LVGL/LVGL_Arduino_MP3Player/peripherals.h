@@ -4,9 +4,20 @@
 #ifndef _PERIPHERALS_H
 #define _PERIPHERALS_H
 
-// https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h
-#ifndef CYD_LED_RGB_OFF
+// https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/GPIO/BlinkRGB/BlinkRGB.ino
+#ifdef RGB_BUILTIN
+#define RGB_LED_OFF() {           \
+  pinMode(RGB_BUILTIN, OUTPUT);   \
+  digitalWrite(RGB_BUILTIN, LOW); \
+}
 
+// "ESP32-2432S028R CYD" on 3.x
+#elif defined(CYD_LED_RGB_OFF)
+#define RGB_LED_OFF() CYD_LED_RGB_OFF()
+
+// "ESP32 Dev Module" on 2.0.17
+// https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h
+#else
 #define CYD_LED_RED   4
 #define CYD_LED_GREEN 16
 #define CYD_LED_BLUE  17
@@ -28,14 +39,14 @@
 #define CYD_LED_WHITE_OFF() CYD_LED_RGB_OFF()
 #define CYD_LED_WHITE_ON()  CYD_LED_RGB_ON()
 
-#endif // CYD_LED_RGB_OFF
-
 #define RGB_LED_OFF() {           \
   pinMode(CYD_LED_RED,   OUTPUT); \
   pinMode(CYD_LED_GREEN, OUTPUT); \
   pinMode(CYD_LED_BLUE,  OUTPUT); \
   CYD_LED_RGB_OFF();              \
 }
+
+#endif // RGB_BUILTIN or CYD_LED_RGB_OFF
 
 //#include "esp_bt.h"       // esp_bt_controller_disable(), esp_bt_controller_deinit()
 //#include "esp_bt_main.h"  // esp_bluedroid_disable(), esp_bluedroid_deinit()
