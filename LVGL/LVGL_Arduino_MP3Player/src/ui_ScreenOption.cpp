@@ -90,6 +90,9 @@ static void delete_cb(lv_event_t *e) {
     if (obj == adrs[i]) {
       *obj = NULL;
       DBG_EXEC(printf("deleted: %d\n", i));
+      if (i == 1) {
+        delete album_tree;
+      }
       return;
     }
   }
@@ -143,7 +146,7 @@ void ui_ScreenOption_screen_init(void) {
     static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
     lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
-    lv_checkbox_set_text_static (obj, "");
+    lv_checkbox_set_text_static(obj, "");
     lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
@@ -225,6 +228,5 @@ bool ui_ScreenOption_create_list(const char *root_dir) {
   add_list(album_tree, album_list, depth);
 
 //make_subtree(album_tree, album_list);
-  delete album_tree;
   return true;
 }

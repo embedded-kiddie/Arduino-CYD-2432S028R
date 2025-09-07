@@ -19,9 +19,9 @@
 
 #define USE_HEAP_MALLOC true
 #if USE_HEAP_MALLOC
-static uint8_t* draw_buf[DRAW_BUF_N_BUFS] = {};
+static uint8_t* draw_buf;
 #else
-static uint8_t draw_buf[DRAW_BUF_N_BUFS][DRAW_BUF_SIZE];
+static uint8_t draw_buf[DRAW_BUF_SIZE];
 #endif
 
 //----------------------------------------------------------------------
@@ -258,16 +258,9 @@ void setup() {
   lv_display_set_flush_cb(disp, my_disp_flush);
 
 #if USE_HEAP_MALLOC
-  for (int i = 0; i < DRAW_BUF_N_BUFS; i++) {
-    draw_buf[i] = (uint8_t*)heap_caps_malloc(DRAW_BUF_SIZE, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
-  }
+  draw_buf = (uint8_t*)heap_caps_malloc(DRAW_BUF_SIZE, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
 #endif
-
-#if DRAW_BUF_N_BUFS == 1
-  lv_display_set_buffers(disp, draw_buf[0], NULL, DRAW_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
-#else
-  lv_display_set_buffers(disp, draw_buf[0], draw_buf[1], DRAW_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
-#endif
+  lv_display_set_buffers(disp, draw_buf, NULL, DRAW_BUF_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
 
   /* Initialize the input device driver */
   lv_indev_t *indev = lv_indev_create();

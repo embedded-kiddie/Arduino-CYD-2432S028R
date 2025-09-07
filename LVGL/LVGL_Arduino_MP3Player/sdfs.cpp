@@ -12,8 +12,9 @@
 #define MY_MALLOC(size) lv_malloc(size)
 #define MY_FREE(addr)   lv_free(addr)
 #else
+// https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32/api-reference/system/mem_alloc.html
 #define MY_MALLOC(size) heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
-#define MY_FREE(addr)   heap_caps_free(addr)
+#define MY_FREE(addr)   heap_caps_free(addr) // In IDF, free(p) is equivalent to heap_caps_free(p)
 #endif
 
 #if MY_USE_FS_ARDUINO_SD == 1
