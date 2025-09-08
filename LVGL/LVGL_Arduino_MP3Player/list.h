@@ -25,9 +25,10 @@ LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 #define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }  // lv_color_hex(0xe4e0e4)
 #define CELL_HEIGHT_SMALL   31  // for CUSTOM_FONT_SMALL
 #define CELL_HEIGHT_MEDIUM  34  // for CUSTOM_FONT_MEDIUM
-#define CELL_OFFSET_NODE    14  // offset for icon image
-#define CELL_OFFSET_LEAF    19  // offset for icon image
-#define CELL_PADDING_SIZE   8   // top/left/bottom/right in pixels
+#define CELL_OFFSET_NODE    12  // offset for node text
+#define CELL_OFFSET_LEAF    16  // offset for leaf text
+#define CELL_PADDING_LEFT   6   // padding left in pixels
+#define CELL_PADDING_BORDER 8   // padding top/bottom in pixels
 #define FOLDING_DURATION    250 // folding animation duration
 
 // Icon images
@@ -58,7 +59,6 @@ typedef union {
 #define MAX_CELLS   100 // LV_MEM_SIZE = (64 * 1024U)
 
 size_t get_cell_count(void);
-void add_list(File &dir, lv_obj_t *list, int max_depth = 255, int depth = 0);
 void add_list(Node *node, lv_obj_t *list, int depth = 0);
 void make_subtree(Node *node, lv_obj_t *list);
 

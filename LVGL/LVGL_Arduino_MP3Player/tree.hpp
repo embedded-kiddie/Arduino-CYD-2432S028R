@@ -10,6 +10,7 @@
  * SD file system configuration
  *----------------------------------------------------------------------*/
 #include "sdfs.h"
+#include "debug.h"
 #include <string>
 #include <vector>
 #include <exception>
@@ -24,13 +25,15 @@
  *----------------------------------------------------------------------*/
 class Node {
 private:
-  static bool found;            // node search flag
-  static std::string path;      // file path search result
+  static bool m_found;          // node search flag
+  static Node *m_found_node;    // node search result
+  static std::string m_path;    // file path search result
   static uint32_t n_nodes;      // number of nodes
   static uint32_t n_leafs;      // number of leaf nodes
   static uint32_t n_depth;      // depth of tree
 public:
-  uint16_t key;                 // a key assigned to each node
+  bool selected;                // selection for playlist
+  uint8_t key;                  // a key assigned to each node
   std::string name;             // folder name or file name
   std::vector<Node*> children;  // a set of child nodes
 
@@ -57,11 +60,15 @@ public:
   const uint32_t get_n_depth(void) {
     return n_depth;
   }
+  const Node * get_found_node(void) {
+    return m_found_node;
+  }
 
   // creates a new node and adds it to the set of children
   Node* append(const char * name) {
     Node *node = new Node(name);
     assert(node);
+    node->selected = true;
     try {
       this->children.push_back(node);
     } catch (const std::exception &e) {
@@ -141,37 +148,55 @@ public:
 
 private:
   // find the leaf node with the specified key
-  bool find_node(Node * node, int key) {
+  bool find_node(Node * node, int key, bool find_path) {
     for (auto &n : node->children) {
       // within the range ?
       if (n->key >= key) {
         // are there any subtrees?
         if (n->children.size()) {
-          path.append(n->name).append("/");
-          if (find_node(n, key)) {
-            return found;
+          if (find_path) {
+            m_path.append(n->name).append("/");
+          }
+          if (find_node(n, key, find_path)) {
+            return m_found;
           }
         }
         // found the leaf node
         else {
-          assert(n->key == key);
-          path.append(n->name);
-          found = true;
-          return found;
+          DBG_ASSERT(n->key == key);
+          if (find_path) {
+            m_path.append(n->name);
+          }
+          m_found = true;
+          m_found_node = n;
+          return m_found;
         }
       }
     }
-    return found;
+    return m_found;
   }
 
 public:
-  // find the leaf node with the specified key and returns the file path.
-  std::string find_path(int key) {
-    found = false;
-    path = this->name;
+  // find the leaf node with the specified key and returns node / path.
+  Node *find_node(int key) {
+    m_found = false;
+    m_found_node = NULL;
+    m_path = "";
 
-    if (find_node(this, key)) {
-      return path;
+    if (find_node(this, key, false)) {
+      return m_found_node;
+    } else {
+      return NULL;
+    }
+  }
+
+  std::string find_path(int key) {
+    m_found = false;
+    m_found_node = NULL;
+    m_path = this->name;
+
+    if (find_node(this, key, true)) {
+      return m_path;
     } else {
       return "";
     }

@@ -201,6 +201,24 @@ void ui_ScreenOption_screen_init(void) {
 
 void ui_ScreenOption_screen_deinit(void) {
   if (ui_ScreenOption) {
+    // clear playlist before creating a new list
+    CYD_MP3Player *player = ui_get_player();
+    player->ClearPlayList();
+
+    Node *root = player->m_tree;
+    const int n = lv_obj_get_child_count(album_list);
+
+    for(int i = 0; i < n; i++) {
+      CellData_t data;
+      lv_obj_t *cell = lv_obj_get_child(album_list, i);
+      data.user_data = lv_obj_get_user_data(cell);
+
+      if (data.type == TYPE_LEAF) {
+        Node *node = root->find_node(data.key);
+        node->selected = data.status;
+      }
+    }
+
     lv_obj_delete_async(ui_ScreenOption);
   }
 }
@@ -216,7 +234,7 @@ void ui_ScreenOption_create_list(const char *root_dir) {
     }
   }
 
+  // create album list
   CYD_MP3Player *player = ui_get_player();
   add_list(player->m_tree, album_list, depth);
-//make_subtree(player->m_tree, album_list);
 }

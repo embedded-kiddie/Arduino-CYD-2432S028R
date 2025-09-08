@@ -72,7 +72,7 @@ static void draw_image_cb(lv_event_t *e) {
     area.y2 = img->header.h - 1;
     lv_area_t draw_task_area;
     lv_draw_task_get_area(draw_task, &draw_task_area);
-    lv_area_align(&draw_task_area, &area, LV_ALIGN_LEFT_MID, (data.depth + 1) * CELL_PADDING_SIZE, 0);
+    lv_area_align(&draw_task_area, &area, LV_ALIGN_LEFT_MID, (data.depth + 1) * CELL_PADDING_LEFT, 0);
 
 #if 1
     lv_draw_rect_dsc_t rect_dsc;
@@ -158,13 +158,13 @@ static void event_handler(lv_event_t *e) {
 //--------------------------------------------------------------------
 //
 //--------------------------------------------------------------------
-static void set_properties(lv_obj_t *cell, int key, int depth, int type) {
+static void set_styles(lv_obj_t *cell, Node *node, int depth, int type) {
   static constexpr lv_style_const_prop_t style_prop_common[] = {
     LV_STYLE_CONST_ALIGN(LV_ALIGN_LEFT_MID),
     LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
     LV_STYLE_CONST_HEIGHT(CELL_HEIGHT_SMALL),
-    LV_STYLE_CONST_PAD_TOP(CELL_PADDING_SIZE),
-    LV_STYLE_CONST_PAD_BOTTOM(CELL_PADDING_SIZE),
+    LV_STYLE_CONST_PAD_TOP(CELL_PADDING_BORDER),
+    LV_STYLE_CONST_PAD_BOTTOM(CELL_PADDING_BORDER),
     LV_STYLE_CONST_OUTLINE_COLOR(CELL_COLOR_OUTLINE),
     LV_STYLE_CONST_OUTLINE_WIDTH(1),
     LV_STYLE_CONST_PROPS_END
@@ -172,22 +172,22 @@ static void set_properties(lv_obj_t *cell, int key, int depth, int type) {
   static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
   lv_obj_add_style(cell, &style_common, (uint32_t)LV_PART_MAIN);
   lv_obj_set_style_bg_color(cell, type ? CELL_COLOR_LEAF : CELL_COLOR_NODE, LV_PART_MAIN);
-  lv_obj_set_style_pad_left(cell, CELL_PADDING_SIZE * depth + (type ? CELL_OFFSET_LEAF : CELL_OFFSET_NODE), LV_PART_MAIN);
+  lv_obj_set_style_pad_left(cell, CELL_PADDING_LEFT * depth + (type ? CELL_OFFSET_LEAF : CELL_OFFSET_NODE), LV_PART_MAIN);
   lv_label_set_long_mode(cell, LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_DOT, LV_LABEL_LONG_SCROLL_CIRCULAR
 
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
   CellData_t data = {
-    .key    = (uint8_t)key,
+    .key    = (uint8_t)node->key,
     .depth  = (uint8_t)depth,
     .type   = (uint8_t)type,
-    .status = false
+    .status = type == TYPE_NODE ? false : (bool)node->selected
   };
 #else
   CellData_t data;
-  data.key    = (uint8_t)key;
+  data.key    = (uint8_t)node->key;
   data.depth  = (uint8_t)depth;
   data.type   = (uint8_t)type;
-  data.status = false;
+  data.status = type == TYPE_NODE ? false : (bool)node->selected;
 #endif
 
   lv_obj_set_user_data(cell, data.user_data);
@@ -195,43 +195,6 @@ static void set_properties(lv_obj_t *cell, int key, int depth, int type) {
   lv_obj_add_flag(cell, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
   lv_obj_add_event_cb(cell, draw_image_cb, LV_EVENT_DRAW_TASK_ADDED, NULL);
   lv_obj_add_event_cb(cell, event_handler, LV_EVENT_CLICKED, NULL);
-}
-
-//--------------------------------------------------------------------
-//
-//--------------------------------------------------------------------
-void add_list(File &dir, lv_obj_t *list, int max_depth, int depth) {
-  ++depth;
-  for (File entry = dir.openNextFile(); entry; entry = dir.openNextFile()) {
-    if (cell_count >= MAX_CELLS) {
-      entry.close();
-      return;
-    }
-
-#ifdef USE_SDFAT
-    char buf[BUF_SIZE];
-    entry.getName(buf, sizeof(buf));
-    const char *name = buf;
-#else
-    const char *name = entry.name();
-#endif
-
-    if (IsValidFile(name)) {
-      ++cell_count;
-      // Serial.printf("count: %d\n", cell_count);
-
-      if (entry.isDirectory() && depth < max_depth) {
-        lv_obj_t *cell = lv_list_add_text(list, name);
-        set_properties(cell, cell_count, depth, TYPE_NODE);
-        add_list(entry, list, max_depth, depth);
-      } else {
-        lv_obj_t *cell = lv_list_add_text(list, name);
-        set_properties(cell, cell_count, depth, TYPE_LEAF);
-      }
-    }
-
-    entry.close();
-  }
 }
 
 //--------------------------------------------------------------------
@@ -245,10 +208,10 @@ void add_list(Node *node, lv_obj_t *list, int depth) {
     }
 
     ++cell_count;
-    // Serial.printf("count: %d\n", cell_count);
+    // printf("count: %d\n", cell_count);
 
-    lv_obj_t *cell = lv_list_add_text(list, n->name.c_str());
-    set_properties(cell, n->key, depth, n->children.size() ? TYPE_NODE : TYPE_LEAF);
+    lv_obj_t * cell = lv_list_add_text(list, n->name.c_str());
+    set_styles(cell, n, depth, n->children.size() ? TYPE_NODE : TYPE_LEAF);
 
     if (n->children.size()) {
       add_list(n, list, depth);

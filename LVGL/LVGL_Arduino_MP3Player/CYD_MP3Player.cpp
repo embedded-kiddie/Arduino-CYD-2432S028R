@@ -149,14 +149,18 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
     dir.close();
   }
 
-  scan_audio_files(m_tree);
+  if (m_list.size() == 0) {
+    scan_audio_files(m_tree);
 
-  int i = 0;
-  for (auto &file : m_list) {
-    LoadMetaData(i++, &file.meta);
+    int i = 0;
+    for (auto &list : m_list) {
+      LoadMetaData(i++, &list.meta);
+    }
+
+    SortPlayList(shuffle);
   }
 
-  return SortPlayList(shuffle);
+  return m_list.size();
 }
 
 /*--------------------------------------------------------------------------------
@@ -169,7 +173,7 @@ void CYD_MP3Player::ClearPlayList(void) {
 /*--------------------------------------------------------------------------------
  * Sort file list
  *--------------------------------------------------------------------------------*/
-uint32_t CYD_MP3Player::SortPlayList(bool shuffle) {
+void CYD_MP3Player::SortPlayList(bool shuffle) {
   if (shuffle) {
     std::mt19937 engine(esp_random());
     std::shuffle(m_list.begin(), m_list.end(), engine);
@@ -180,8 +184,6 @@ uint32_t CYD_MP3Player::SortPlayList(bool shuffle) {
     print_files(m_tree);
     printf("Total: %d\n", m_list.size());
   });
-
-  return m_list.size();
 }
 
 /*--------------------------------------------------------------------------------

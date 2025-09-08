@@ -197,7 +197,6 @@ void ui_event_ScreenOption(lv_event_t *e) {
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
     // increase free memory
-    player.ClearPlayList();
     lv_fs_clear_cache(); // sdfs.{h|cpp}
 
     // render the option screen

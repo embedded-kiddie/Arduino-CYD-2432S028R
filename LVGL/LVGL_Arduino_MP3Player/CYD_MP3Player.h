@@ -103,7 +103,7 @@ public:
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_list.size(); }
   uint32_t    ScanPlayList(bool shuffle = true);
-  uint32_t    SortPlayList(bool shuffle = true);
+  void        SortPlayList(bool shuffle = true);
   void        ClearPlayList(void);
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
@@ -168,6 +168,11 @@ private:
     // extract audio files in the parents directory
     for (int i = 0, parent = 0; parent < n; parent++) {
       std::string path = tree->find_path(parent);
+      const Node *node = tree->get_found_node();
+      if (node == NULL || node->selected == false) {
+        continue;
+      }
+
       File file, dir = SD.open(path.c_str());
 
       while (file = dir.openNextFile()) {
