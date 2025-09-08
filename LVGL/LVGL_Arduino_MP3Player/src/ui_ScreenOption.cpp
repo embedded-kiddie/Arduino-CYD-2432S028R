@@ -208,7 +208,7 @@ void ui_ScreenOption_screen_deinit(void) {
 /*--------------------------------------------------------------------------------
  * Create selectable playlist
  *--------------------------------------------------------------------------------*/
-bool ui_ScreenOption_create_list(const char *root_dir) {
+void ui_ScreenOption_create_list(const char *root_dir) {
   int depth = 1;
   for (int i = 0; i < strlen(root_dir); i++) {
     if (root_dir[i] == '/') {
@@ -219,5 +219,4 @@ bool ui_ScreenOption_create_list(const char *root_dir) {
   CYD_MP3Player *player = ui_get_player();
   add_list(player->m_tree, album_list, depth);
 //make_subtree(player->m_tree, album_list);
-  return true;
 }

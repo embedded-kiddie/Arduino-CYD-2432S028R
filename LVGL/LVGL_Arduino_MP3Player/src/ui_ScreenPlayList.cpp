@@ -375,7 +375,7 @@ static void ui_list_create_all(void) {
 
   add_list_cell(play_list, ui_control.top);
   update_scroll(play_list);
-  ui_list_update_play(ui_control.focusNo, true);
+  ui_list_update_cell(ui_control.focusNo, true);
 }
 
 /*--------------------------------------------------------------------------------

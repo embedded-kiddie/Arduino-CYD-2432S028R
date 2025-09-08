@@ -99,11 +99,6 @@ void ui_event_ScreenMain(lv_event_t *e) {
 
     ui_list_focus_playing(player.GetPlayNo());
   }
-#if false
-  else if (dir == LV_DIR_LEFT) {
-    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
-  }
-#endif
 }
 
 void ui_event_MenuDotMain(lv_event_t *e) {
@@ -201,19 +196,18 @@ void ui_event_ScreenOption(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
-    // stop playing
-    if (ui_state != UI_STATE_IDLE) {
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
-      player.PauseResume();
-    }
-
     // increase free memory
     player.ClearPlayList();
     lv_fs_clear_cache(); // sdfs.{h|cpp}
 
     // render the option screen
     ui_ScreenOption_create_list(MP3_PATH_ROOT);
-    ui_state = UI_STATE_IDLE;
+
+    // stop playing to avoid conflict with image loading
+    if (ui_state != UI_STATE_IDLE) {
+      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
+      ui_state = UI_STATE_PAUSE;
+    }
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
