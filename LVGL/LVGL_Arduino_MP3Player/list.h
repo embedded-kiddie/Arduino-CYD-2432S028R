@@ -59,6 +59,7 @@ typedef union {
 #define MAX_CELLS   100 // LV_MEM_SIZE = (64 * 1024U)
 
 size_t get_cell_count(void);
+void reset_cell_count(void);
 void add_list(Node *node, lv_obj_t *list, int depth = 0);
 void make_subtree(Node *node, lv_obj_t *list);
 

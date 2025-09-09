@@ -206,11 +206,10 @@ void ui_ScreenOption_screen_deinit(void) {
     player->ClearPlayList();
 
     Node *root = player->m_tree;
-    const int n = lv_obj_get_child_count(album_list);
+    lv_obj_t *cell = lv_obj_get_child(album_list, 0);
 
-    for(int i = 0; i < n; i++) {
+    while (cell = lv_obj_get_sibling(cell, 1)) {
       CellData_t data;
-      lv_obj_t *cell = lv_obj_get_child(album_list, i);
       data.user_data = lv_obj_get_user_data(cell);
 
       if (data.type == TYPE_LEAF) {
@@ -235,6 +234,7 @@ void ui_ScreenOption_create_list(const char *root_dir) {
   }
 
   // create album list
+  reset_cell_count();
   CYD_MP3Player *player = ui_get_player();
   add_list(player->m_tree, album_list, depth);
 }

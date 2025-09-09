@@ -13,7 +13,11 @@ size_t get_cell_count(void) {
   return cell_count;
 }
 
-//--------------------------------------------------------------------
+void reset_cell_count(void) {
+  cell_count = 0;
+}
+
+ //--------------------------------------------------------------------
 //
 //--------------------------------------------------------------------
 static lv_obj_t *get_parent(lv_obj_t *cell) {
@@ -135,8 +139,6 @@ static void event_handler(lv_event_t *e) {
           if (parent != folding) {
             continue;
           } else {
-            data.status = !data.status;
-            lv_obj_set_user_data(cell, data.user_data);
             lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
           }
         }
@@ -204,6 +206,7 @@ void add_list(Node *node, lv_obj_t *list, int depth) {
   ++depth;
   for (auto &n : node->children) {
     if (cell_count >= MAX_CELLS) {
+       printf("count: %d\n", cell_count);
       return;
     }
 
