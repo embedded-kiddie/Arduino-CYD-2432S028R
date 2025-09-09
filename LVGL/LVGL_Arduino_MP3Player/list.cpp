@@ -206,7 +206,7 @@ void add_list(Node *node, lv_obj_t *list, int depth) {
   ++depth;
   for (auto &n : node->children) {
     if (cell_count >= MAX_CELLS) {
-       printf("count: %d\n", cell_count);
+      // printf("count: %d\n", cell_count);
       return;
     }
 
