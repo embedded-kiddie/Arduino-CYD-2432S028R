@@ -41,12 +41,12 @@ static LGFX tft;
 
 #define SCREENSHORT true
 #if SCREENSHORT
-  #include "../src/sdcard.hpp"
-#else
-  #include "../src/ESP32.hpp"
   #ifdef  USE_SDFAT
     FS_TYPE FS_DEV;
   #endif
+  #include "../src/sdcard.hpp"
+#else
+  #include "../src/ESP32.hpp"
 #endif
 
 //----------------------------------------------------------------------
@@ -223,10 +223,10 @@ void setup() {
   lv_obj_t *label = lv_label_create(lv_screen_active());
 
 #if LV_USE_TJPGD
-  lv_image_set_src(image, "S:/MP3Player/@picture.jpg"); // LV_USE_TJPGD
+  lv_image_set_src(image, "S:/MP3/@picture.jpg"); // LV_USE_TJPGD
   lv_label_set_text(label, "Hello Arduino, I got jpg!");
 #elif LV_USE_BMP
-  lv_image_set_src(image, "S:/MP3Player/@picture.bmp"); // LV_USE_BMP
+  lv_image_set_src(image, "S:/MP3/@picture.bmp"); // LV_USE_BMP
   lv_label_set_text(label, "Hello Arduino, I got bmp!");
 #else
   LV_IMG_DECLARE(picture);
