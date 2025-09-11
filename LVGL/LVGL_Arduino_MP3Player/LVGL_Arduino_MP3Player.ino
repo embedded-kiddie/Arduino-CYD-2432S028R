@@ -50,7 +50,7 @@ static LGFX tft;
 #include "sdfs.h"
 #include "../src/sdcard.hpp"
 #else
-#include "ESP32.hpp"
+#include "../src/ESP32.hpp"
 #endif
 
 #define SAVE_SEQUENCIAL_BMP false

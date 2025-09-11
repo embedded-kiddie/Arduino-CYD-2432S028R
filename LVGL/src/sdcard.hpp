@@ -59,25 +59,22 @@
 #define SD_SPI_CLOCK 25000000
 
 #ifndef SDFATFS_USED
-  // Instance of SdFat
+  SdFat SD; // Instance of SdFat
+  #undef  SD_CONFIG
   #define FS_TYPE SdFat
-  extern SdFat SD;
-  #ifndef SD_SPI_BUS
-    #undef SD_CONFIG
-    #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-      #define SD_SPI_BUS sd_spi
-      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &SD_SPI_BUS) // OK
-      #define DECLARE_SD_SPI_BUS SPIClass SD_SPI_BUS = SPIClass(VSPI)
-    #elif 1
-      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SHARED_SPI, SD_SPI_CLOCK) // OK
-    #elif 0
-      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_CLOCK) // NG
-    #elif 0
-      #define SD_CONFIG (SdCsPin_t)SS // NG
-    #else
-      #define SD_CONFIG // NG
-    #endif
-  #endif
+  #define USE_DEDICATED_SPI 1
+  #if USE_DEDICATED_SPI
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &sd_spi) // OK
+    SPIClass sd_spi = SPIClass(VSPI);
+  #elif 1
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SHARED_SPI, SD_SPI_CLOCK, &SPI) // OK
+  #elif 0
+    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_CLOCK) // NG
+  #elif 0
+    #define SD_CONFIG (SdCsPin_t)SS // NG
+  #else
+    #define SD_CONFIG // NG
+  #endif // USE_DEDICATED_SPI
 #else
   #define FS_TYPE fs::FS
   #define SD_CONFIG SS, SD_SPI_CLOCK
@@ -525,14 +522,10 @@ bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
  * https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
  *--------------------------------------------------------------------------------*/
 void sdcard_setup(void) {
-#ifdef SD_SPI_BUS
-  static DECLARE_SD_SPI_BUS;
-#endif
-
 #ifdef  USE_SDFAT
 
-#ifdef SD_SPI_BUS
-  SD_SPI_BUS.begin(SCK, MISO, MOSI, SS);
+#if USE_DEDICATED_SPI
+  sd_spi.begin(SCK, MISO, MOSI, SS);
 #endif
 
   if (!SD.begin(SD_CONFIG)) {
@@ -554,10 +547,6 @@ void sdcard_setup(void) {
   }
 
 #else
-
-#ifdef SD_SPI_BUS
-  SD_SPI_BUS.begin(SCK, MISO, MOSI, SS);
-#endif
 
   if (!SD.begin(SD_CONFIG)) {
     Serial.println("SD: Card Mount Failed");

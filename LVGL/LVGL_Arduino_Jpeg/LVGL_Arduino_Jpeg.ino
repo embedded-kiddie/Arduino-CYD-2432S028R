@@ -41,9 +41,6 @@ static LGFX tft;
 
 #define SCREENSHORT true
 #if SCREENSHORT
-  #ifdef  USE_SDFAT
-    FS_TYPE FS_DEV;
-  #endif
   #include "../src/sdcard.hpp"
 #else
   #include "../src/ESP32.hpp"
