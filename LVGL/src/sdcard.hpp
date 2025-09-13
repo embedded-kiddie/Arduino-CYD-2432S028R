@@ -60,24 +60,27 @@
 
 #ifndef SDFATFS_USED
   SdFat SD; // Instance of SdFat
-  #undef  SD_CONFIG
   #define FS_TYPE SdFat
-  #define USE_DEDICATED_SPI 1
-  #if USE_DEDICATED_SPI
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &sd_spi) // OK
-    SPIClass sd_spi = SPIClass(VSPI);
-  #elif 1
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SHARED_SPI, SD_SPI_CLOCK, &SPI) // OK
-  #elif 0
-    #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_CLOCK) // NG
-  #elif 0
-    #define SD_CONFIG (SdCsPin_t)SS // NG
-  #else
-    #define SD_CONFIG // NG
-  #endif // USE_DEDICATED_SPI
+  #ifndef SD_CONFIG
+    #define USE_DEDICATED_SPI 1
+    #if USE_DEDICATED_SPI
+      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &sd_spi) // OK
+      SPIClass sd_spi = SPIClass(VSPI);
+    #elif 1
+      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SHARED_SPI, SD_SPI_CLOCK, &SPI) // OK
+    #elif 0
+      #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, SD_SPI_CLOCK) // NG
+    #elif 0
+      #define SD_CONFIG (SdCsPin_t)SS // NG
+    #else
+      #define SD_CONFIG // NG
+    #endif // USE_DEDICATED_SPI
+  #endif
 #else
   #define FS_TYPE fs::FS
-  #define SD_CONFIG SS, SD_SPI_CLOCK
+  #ifndef SD_CONFIG
+    #define SD_CONFIG SS, SD_SPI_CLOCK
+  #endif
 #endif
 
 #ifndef BUF_SIZE
@@ -94,14 +97,18 @@
 #define SD_SPI_CLOCK 25000000
 
 #ifndef SD_CONFIG
-  #if defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
-    #define SD_SPI_BUS sd_spi
-    #define SD_CONFIG SS, SD_SPI_BUS, SD_SPI_CLOCK
-    #define DECLARE_SD_SPI_BUS SPIClass SD_SPI_BUS = SPIClass(VSPI)
-  #elif defined (ARDUINO_XIAO_ESP32S3) && defined (_TFT_eSPIH_)
+  #ifdef _TFT_eSPIH_
     #define SD_CONFIG SS, GFX_EXEC(getSPIinstance()), SD_SPI_CLOCK
+  #elif defined (ARDUINO_ESP32_2432S028R) || defined (ARDUINO_ESP32_DEV)
+    #define USE_DEDICATED_SPI 1
+    #if USE_DEDICATED_SPI
+      SPIClass sd_spi = SPIClass(VSPI);
+      #define SD_CONFIG SS, sd_spi, SD_SPI_CLOCK
+    #else
+      #define SD_CONFIG SS, SPI, SD_SPI_CLOCK
+    #endif
   #else
-    #define SD_CONFIG SS, SPI, SD_SPI_CLOCK
+    #define SD_CONFIG SS
   #endif
 #endif // SD_CONFIG
 
@@ -421,7 +428,6 @@ bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
 #endif // LovyanGFX or TFT_eSPI
 
   File file = fs.open(path, FILE_WRITE);
-
   if (!file) {
 #ifdef  USE_SDFAT
     Serial.printf("SdFat: open %s failed.\n", path);
@@ -518,7 +524,7 @@ bool SaveBMP24(FS_TYPE &fs, const char *path, GFX_TYPE &tft) {
 
 /*--------------------------------------------------------------------------------
  * Setup SD card (Mounting fails if card is not inserted)
- * Note the global variable 'SPI' is assigned to 'VSPI' same as 'CYD_SD_SPI_BUS'.
+ * Note the global variable 'SPI' is assigned to 'VSPI' same as 'sd_spi'.
  * https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/src/SPI.cpp#L333-L337
  *--------------------------------------------------------------------------------*/
 void sdcard_setup(void) {

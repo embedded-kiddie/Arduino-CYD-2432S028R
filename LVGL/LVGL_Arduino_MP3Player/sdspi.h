@@ -29,10 +29,17 @@
 #endif
 
 // alternatives to FS.h definitions
+#define FS_MODE int
 #undef  FILE_APPEND
 #define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
 #undef  FILE_WRITE
 #define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
+
+enum SeekMode {
+  SeekSet = 0,
+  SeekCur = 1,
+  SeekEnd = 2
+};
 
 #else
 //--------------------------------------------------------------------
@@ -47,6 +54,9 @@
 #else
 #define SD_CONFIG
 #endif
+
+// FILE_READ, FILE_WRITE, ...
+#define FS_MODE const char *
 
 #endif // SdFat or SD
 

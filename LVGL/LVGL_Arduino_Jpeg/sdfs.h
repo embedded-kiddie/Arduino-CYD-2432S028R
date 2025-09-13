@@ -8,14 +8,11 @@
 #ifndef _SDFS_H_
 #define _SDFS_H_
 
-#if (LV_USE_FS_ARDUINO_SD == 0) && true
+#if   true
 
-#include "SdFat.h"
+#include <SdFat.h>
 
 #define USE_SDFAT
-#define FS_DEV    SD
-#define FS_TYPE   SdFat
-#define FS_FILE   File
 #define FS_MODE   int
 #define FS_CONFIG SD_CS, SD_CLOCK
 
@@ -31,14 +28,13 @@ enum SeekMode {
   SeekEnd = 2
 };
 
+extern SdFat SD;
+
 #else
 
-#include "FS.h"
-#include "SD.h"
+#include <FS.h>
+#include <SD.h>
 
-#define FS_DEV    SD
-#define FS_TYPE   SDFS
-#define FS_FILE   File
 #define FS_MODE   const char *
 #define FS_CONFIG SD_CS //, SPI, SD_CLOCK
 
@@ -47,8 +43,6 @@ enum SeekMode {
 #define SD_CLOCK  25000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 #define SD_CS     SS
 
-extern FS_TYPE FS_DEV;
-
 /*--------------------------------------------------------------------------------
  * MY_USE_FS_ARDUINO_SD:
  *  0: Load binary  on flash rom    (LV_USE_[TJPGD|BMP] in lv_conf.h must be 0)
@@ -56,7 +50,7 @@ extern FS_TYPE FS_DEV;
  *  2: Load jpg/bmp on SD w   cache (LV_USE_[TJPGD|BMP] in lv_conf.h must be 1)
  * Refer To: https://github.com/lvgl/lvgl/tree/master/src/libs/tjpgd
  *--------------------------------------------------------------------------------*/
-#include "lvgl.h"
+#include <lvgl.h>
 
 // Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
 #if (LV_USE_FS_ARDUINO_SD == 0)

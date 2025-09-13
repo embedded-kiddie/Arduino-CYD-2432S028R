@@ -39,22 +39,13 @@ static lv_fs_res_t fs_tell (lv_fs_drv_t *drv, void *file_p, uint32_t *pos_p);
 
 #ifdef USE_SDFAT
 
-#define FS_MODE int
 static File my_file;
 
 #else
 
-#define FS_MODE const char *
 typedef struct MyFile {
   File file;
 } MyFile;
-
-// alternative to FS.h definition
-enum SeekMode {
-  SeekSet = 0,
-  SeekCur = 1,
-  SeekEnd = 2
-};
 
 #endif
 
@@ -85,7 +76,6 @@ void lv_fs_arduino_sd_init(void) {
 /**********************
  *   STATIC FUNCTIONS
  **********************/
-
 /**
  * Open a file
  * @param drv       pointer to a driver where this function belongs
@@ -250,6 +240,7 @@ static lv_fs_res_t fs_tell(lv_fs_drv_t *drv, void *file_p, uint32_t *pos_p) {
 /*--------------------------------------------------------------------------------
  * With cache
  *--------------------------------------------------------------------------------*/
+#include "debug.h"
 #include <string>
 #include <functional>
 
@@ -270,10 +261,11 @@ typedef struct {
 } FsCache_t;
 
 static FsCache_t fs_cache = {};
-static lv_fs_drv_t fs_drv;
 
 void lv_fs_clear_cache(void) {
   fs_cache.id = 0;
+  fs_cache.size = 0;
+  fs_cache.position = 0;
 
   if (fs_cache.buffer) {
     MY_FREE(fs_cache.buffer);
@@ -285,6 +277,7 @@ void lv_fs_clear_cache(void) {
  * Register a driver for the SD File System interface
  */
 void lv_fs_arduino_sd_init(void) {
+  static lv_fs_drv_t fs_drv;
   lv_fs_drv_init(&fs_drv);
 
   fs_drv.letter   = MY_FS_ARDUINO_SD_LETTER;
@@ -305,7 +298,6 @@ void lv_fs_arduino_sd_init(void) {
 /**********************
  *   STATIC FUNCTIONS
  **********************/
-
 /**
  * Open a file
  * @param drv       pointer to a driver where this function belongs
@@ -330,10 +322,10 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode) {
     size_t size = file.size();
 #endif
     fs_cache.buffer = (char *)MY_MALLOC(size);
-    assert(fs_cache.buffer);
+    DBG_ASSERT(fs_cache.buffer);
 
     fs_cache.size = file.read((uint8_t *)fs_cache.buffer, size);
-    assert(fs_cache.size == size);
+    DBG_ASSERT(fs_cache.size == size);
 
     file.close();
   }
@@ -352,7 +344,7 @@ static lv_fs_res_t fs_close(lv_fs_drv_t *drv, void *file_p) {
   LV_UNUSED(drv);
   LV_UNUSED(file_p);
 
-  return LV_FS_RES_OK;
+  return LV_FS_RES_OK; // Keep the cache
 }
 
 /**
@@ -368,14 +360,23 @@ static lv_fs_res_t fs_read(lv_fs_drv_t *drv, void *file_p, void *buf, uint32_t b
   LV_UNUSED(drv);
   LV_UNUSED(file_p);
 
-  if (fs_cache.position + btr > fs_cache.size) {
-    btr = fs_cache.size - fs_cache.position;
+  if (0 <= fs_cache.position && fs_cache.position <= fs_cache.size) {
+    /* Do not allow reading beyond the actual memory block (it can be happend with 'LV_USE_TJPGD' */
+    uint32_t remaining = fs_cache.size - fs_cache.position;
+    if (btr > remaining) {
+      btr = remaining;
+    }
+
+    memcpy(buf, fs_cache.buffer + fs_cache.position, btr);
+    fs_cache.position += (*br = btr);
+    return LV_FS_RES_OK;
   }
 
-  memcpy(buf, &fs_cache.buffer[fs_cache.position], btr);
-  fs_cache.position += (*br = btr);
-
-  return LV_FS_RES_OK;
+  else {
+    DBG_ASSERT(false);
+    *br = 0;
+    return LV_FS_RES_INV_PARAM;
+  }
 }
 
 /**
@@ -391,24 +392,18 @@ static lv_fs_res_t fs_seek(lv_fs_drv_t *drv, void *file_p, uint32_t pos, lv_fs_w
   LV_UNUSED(file_p);
 
   switch (whence) {
+    case LV_FS_SEEK_SET:
+      fs_cache.position = pos;
+      break;
     case LV_FS_SEEK_CUR:
       fs_cache.position += pos;
       break;
     case LV_FS_SEEK_END:
       fs_cache.position = (fs_cache.size - 1) - pos;
       break;
-    case LV_FS_SEEK_SET:
-    default:
-      fs_cache.position = pos;
-      break;
   }
 
-  if (fs_cache.position < 0) {
-    fs_cache.position = 0;
-  } else if (fs_cache.position >= fs_cache.size) {
-    fs_cache.position = fs_cache.size - 1;
-  }
-
+  DBG_ASSERT(fs_cache.position < fs_cache.size);
   return LV_FS_RES_OK;
 }
 
@@ -426,5 +421,4 @@ static lv_fs_res_t fs_tell(lv_fs_drv_t *drv, void *file_p, uint32_t *pos_p) {
   *pos_p = fs_cache.position;
   return LV_FS_RES_OK;
 }
-
 #endif  // MY_USE_FS_ARDUINO_SD

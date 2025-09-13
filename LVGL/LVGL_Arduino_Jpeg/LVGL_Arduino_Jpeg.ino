@@ -185,7 +185,7 @@ void setup() {
   while (millis() < 1000);
 
   // initialize before activating LV_USE_FS_ARDUINO_SD
-  if (!FS_DEV.begin(FS_CONFIG)) {
+  if (!SD.begin(FS_CONFIG)) {
     Serial.println("SD Card Mount Failed");
     return;
   }
@@ -243,7 +243,7 @@ void loop() {
   if (Serial.available()) {
     Serial.readStringUntil('\n');
 #if SCREENSHORT
-    SaveBMP24(FS_DEV, "/demo.bmp", tft);
+    SaveBMP24(SD, "/demo.bmp", tft);
 #else
     PrintESP32Memory();
 #endif

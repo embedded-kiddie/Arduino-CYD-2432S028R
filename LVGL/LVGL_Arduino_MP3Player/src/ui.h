@@ -89,15 +89,19 @@ LV_IMAGE_DECLARE(img_skip_prev);   // assets/icons/img_skip_prev.png
 LV_IMAGE_DECLARE(img_vol_max);     // assets/icons/img_vol_max.png
 LV_IMAGE_DECLARE(img_vol_min);     // assets/icons/img_vol_min.png
 LV_IMAGE_DECLARE(img_back_right);  // assets/icons/img_back_right.png
-//LV_IMAGE_DECLARE(img_back_left);   // assets/icons/img_back_left.png
-//LV_IMAGE_DECLARE(img_bluetooth_on);  // assets/icons/img_bluetooth_on.png
-//LV_IMAGE_DECLARE(img_bluetooth_off);  // assets/icons/img_bluetooth_off.png
-LV_IMAGE_DECLARE(img_heart_off_small);  // assets/icons/img_heart_off_small.png
-LV_IMAGE_DECLARE(img_heart_on_small);   // assets/icons/img_heart_on_small.png
-LV_IMAGE_DECLARE(img_back_up);     // assets/icons/img_back_up.png
-LV_IMAGE_DECLARE(img_back_down);   // assets/icons/img_back_down.png
-LV_IMAGE_DECLARE(img_list_play);   // assets/icons/list-play.png
-LV_IMAGE_DECLARE(img_list_pause);  // assets/icons/list-pause.png
+//LV_IMAGE_DECLARE(img_back_left);    // assets/icons/img_back_left.png
+//LV_IMAGE_DECLARE(img_bluetooth_on); // assets/icons/img_bluetooth_on.png
+//LV_IMAGE_DECLARE(img_bluetooth_off);// assets/icons/img_bluetooth_off.png
+LV_IMAGE_DECLARE(img_heart_off_small);// assets/icons/img_heart_off_small.png
+LV_IMAGE_DECLARE(img_heart_on_small); // assets/icons/img_heart_on_small.png
+LV_IMAGE_DECLARE(img_back_up);      // assets/icons/img_back_up.png
+LV_IMAGE_DECLARE(img_back_down);    // assets/icons/img_back_down.png
+LV_IMAGE_DECLARE(img_list_play);    // assets/icons/img_list_play.png
+LV_IMAGE_DECLARE(img_list_pause);   // assets/icons/img_list_pause.png
+LV_IMAGE_DECLARE(img_backlight);    // assets/icons/img_backlight.png
+LV_IMAGE_DECLARE(img_sleep);        // assets/icons/img_sleep.png
+LV_IMAGE_DECLARE(img_rotate_folder);// assets/icons/img_rotate_folder.png
+LV_IMAGE_DECLARE(img_rotate_check); // assets/icons/img_rotate_check.png
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 
 typedef enum {
