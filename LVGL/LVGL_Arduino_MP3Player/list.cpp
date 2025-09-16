@@ -124,11 +124,11 @@ static void event_handler(lv_event_t *e) {
           break;
         }
 
-        // child inherits the state of parent
+        // RULE 1: child inherits the state of parent
         lv_obj_t *obj = get_parent(cell);
         NodeMeta_t *m = get_node_meta(obj);
 
-        // child follows the state of parent
+        // RULE 2: child follows the state of parents
         bool hidden = checked | m->checked;
         if (meta->hidden == hidden) {
           continue;

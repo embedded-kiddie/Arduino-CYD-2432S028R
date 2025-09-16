@@ -160,6 +160,10 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
     SortPlayList(shuffle);
   }
 
+  if (m_list.size() == 0) {
+    m_error = "No music to play";
+  }
+
   return m_list.size();
 }
 
@@ -407,7 +411,7 @@ bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
 }
 
 bool CYD_MP3Player::AutoPlay(void) {
-  if (!audioIsPlaying() && m_list.size()) {
+  if (!audioIsPlaying()) {
     std::string path = GetFilePath(m_playNo);
     if (!audioConnecttoSD(path.c_str())) {
       m_error = "Failed to play " + path;
