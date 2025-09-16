@@ -197,16 +197,16 @@ void ui_event_ScreenOption(lv_event_t *e) {
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
     // increase free memory
-    lv_fs_clear_cache(); // sdfs.{h|cpp}
-
-    // render the option screen
-    ui_ScreenOption_create_list(MP3_PATH_ROOT);
+//  lv_fs_clear_cache(); // sdfs.{h|cpp}
 
     // stop playing to avoid conflict with image loading
     if (ui_state != UI_STATE_IDLE) {
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
       ui_state = UI_STATE_PAUSE;
     }
+
+    // render the option screen
+    ui_ScreenOption_create_list(MP3_PATH_ROOT);
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {

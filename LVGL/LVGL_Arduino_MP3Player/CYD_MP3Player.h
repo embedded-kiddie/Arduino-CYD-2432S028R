@@ -168,8 +168,8 @@ private:
     // extract audio files in the parents directory
     for (int i = 0, parent = 0; parent < n; parent++) {
       std::string path = tree->find_path(parent);
-      const Node *node = tree->get_found_node();
-      if (node == NULL || node->selected == false) {
+      const Node *node = tree->get_node();
+      if (node == NULL || node->meta.checked == false) {
         continue;
       }
 

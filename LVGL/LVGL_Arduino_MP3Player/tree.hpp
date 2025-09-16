@@ -20,6 +20,20 @@
 #define AUDIO_FILE_EXT  {".mp3", ".m4a", ".wav"}
 #define IsValidFile(f)  ((f)[0] != '@' && (f)[0] != '.')
 
+//--------------------------------------------------------------------
+// Meta information for album list
+//--------------------------------------------------------------------
+#define TYPE_NODE   0 // typically "folder"
+#define TYPE_LEAF   1 // typically "file"
+
+typedef struct {
+  uint8_t depth    : 4;         // hierarchy depth in N-ary tree
+  uint8_t type     : 1;         // 0: folder node, 1: leaf node
+  bool    hidden   : 1;         // true: hidden, false: displayed
+  bool    checked  : 1;         // true: folded (folder node) / selected (leaf node)
+  bool    spare    : 1;         // spare
+} NodeMeta_t;
+
 /*----------------------------------------------------------------------
  * Class definition
  *----------------------------------------------------------------------*/
@@ -32,8 +46,8 @@ private:
   static uint32_t n_leafs;      // number of leaf nodes
   static uint32_t n_depth;      // depth of tree
 public:
-  bool selected;                // selection for playlist
   uint8_t key;                  // a key assigned to each node
+  NodeMeta_t meta;              // information for album list
   std::string name;             // folder name or file name
   std::vector<Node*> children;  // a set of child nodes
 
@@ -60,7 +74,7 @@ public:
   const uint32_t get_n_depth(void) {
     return n_depth;
   }
-  const Node * get_found_node(void) {
+  const Node * get_node(void) {
     return m_found_node;
   }
 
@@ -68,7 +82,6 @@ public:
   Node* append(const char * name) {
     Node *node = new Node(name);
     assert(node);
-    node->selected = true;
     try {
       this->children.push_back(node);
     } catch (const std::exception &e) {
@@ -117,33 +130,48 @@ private:
   }
 
   // traverse by preorder
-  uint32_t traverse_node(Node *node) {
-    uint32_t depth = 0;
+  uint32_t traverse_node(Node *node, uint32_t depth = 1) {
     for (auto &n : node->children) {
+      n->meta.depth   = depth;
+      n->meta.hidden  = true;
+      n->meta.checked = true;
+
       if (n->children.size()) {
-        uint32_t d = traverse_node(n);
-        depth = max(depth, d);
+        uint32_t d = traverse_node(n, depth + 1);
+        n_depth = max(n_depth, d);
+        n->meta.type = TYPE_NODE;
       } else {
         n->key = n_leafs++;
+        n->meta.type = TYPE_LEAF;
       }
     }
+
+    // set the leaf node number to the parent
     node->key = n_leafs - 1;
-    return depth + 1;
+    return depth;
   }
 
 public:
   // create a file tree
   void scan_file(File &dir) {
-    n_nodes = n_leafs = 0;
+    n_nodes = n_leafs = n_depth = 0;
+
     scan_node(dir, this, true);
-    n_depth = traverse_node(this);
+    traverse_node(this);
+
+    this->key = n_leafs;
+    this->meta = { 0, TYPE_NODE, false, true }; // key, type, hidden, checked
   }
 
   // create a directory tree
   void scan_dir(File &dir) {
-    n_nodes = n_leafs = 0;
+    n_nodes = n_leafs = n_depth = 0;
+
     scan_node(dir, this, false);
-    n_depth = traverse_node(this);
+    traverse_node(this);
+
+    this->key = n_leafs;
+    this->meta = { 0, TYPE_NODE, false, true }; // key, type, hidden, checked
   }
 
 private:
@@ -203,13 +231,19 @@ public:
   }
 
 private:
-  void print_node(Node * node, int indent) {
+  void print_node(Node *node) {
+    Serial.printf("key:%3d size:%d, depth:%d, type:%d, hidden:%d, checked:%d %s\n",
+                  node->key, node->children.size(), node->meta.depth, node->meta.type,
+                  node->meta.hidden, node->meta.checked, node->name.c_str());
+  }
+
+  void print_nodes(Node * node, int indent = 0) {
     ++indent;
     for (auto &n : node->children) {
       for (int j = 0; j < indent; j++) { Serial.print("  "); }
-      Serial.printf("%3d %s (%d)\n", n->key, n->name.c_str(), n->children.size());
+      print_node(n);
       if (n->children.size()) {
-        print_node(n, indent);
+        print_nodes(n, indent);
       }
     }
   }
@@ -217,8 +251,9 @@ private:
 public:
   // traverse the tree and print node information
   void print_tree(void) {
-    Serial.printf("%3d %s (%d)\n", this->key, this->name.c_str(), this->children.size());
-    print_node(this, 0);
+    print_node(this);
+    print_nodes(this);
+    Serial.printf("n_nodes: %d, n_leaf: %d, n_depth: %d\n", n_nodes, n_leafs, n_depth);
   }
 };
 

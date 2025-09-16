@@ -205,19 +205,6 @@ void ui_ScreenOption_screen_deinit(void) {
     CYD_MP3Player *player = ui_get_player();
     player->ClearPlayList();
 
-    Node *root = player->m_tree;
-    lv_obj_t *cell = lv_obj_get_child(album_list, 0);
-
-    while (cell = lv_obj_get_sibling(cell, 1)) {
-      CellData_t data;
-      data.user_data = lv_obj_get_user_data(cell);
-
-      if (data.type == TYPE_LEAF) {
-        Node *node = root->find_node(data.key);
-        node->selected = data.status;
-      }
-    }
-
     lv_obj_delete_async(ui_ScreenOption);
   }
 }
@@ -226,15 +213,8 @@ void ui_ScreenOption_screen_deinit(void) {
  * Create selectable playlist
  *--------------------------------------------------------------------------------*/
 void ui_ScreenOption_create_list(const char *root_dir) {
-  int depth = 1;
-  for (int i = 0; i < strlen(root_dir); i++) {
-    if (root_dir[i] == '/') {
-      --depth;
-    }
-  }
-
   // create album list
   reset_cell_count();
   CYD_MP3Player *player = ui_get_player();
-  add_list(player->m_tree, album_list, depth);
+  add_node_to_list(player->m_tree, album_list);
 }
