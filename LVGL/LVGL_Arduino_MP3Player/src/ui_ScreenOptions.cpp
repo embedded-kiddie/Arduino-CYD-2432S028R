@@ -7,7 +7,7 @@
 #include "ui.h"
 
 /*--------------------------------------------------------------------------------
- *
+ * Contents of dropdown list
  *--------------------------------------------------------------------------------*/
 typedef struct {
   const char      *options;
@@ -65,6 +65,25 @@ static void sleeptimer_cb(lv_event_t *e) {
 }
 
 /*--------------------------------------------------------------------------------
+ * Set the pointer to the widget to NULL when its object is deleted
+ *--------------------------------------------------------------------------------*/
+static void delete_cb(lv_event_t *e) {
+  lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
+  static constexpr lv_obj_t ** const adrs[] = {
+    &ui_ScreenOptions,
+  };
+
+  for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
+    if (obj == adrs[i]) {
+      *obj = NULL;
+      DBG_EXEC(printf("deleted: %d\n", i));
+      return;
+    }
+  }
+  DBG_EXEC(printf("deleted: 0x%x\n", obj));
+}
+
+/*--------------------------------------------------------------------------------
  * Initialize / Deinitialize widgets
  *--------------------------------------------------------------------------------*/
 void ui_ScreenOptions_screen_init(void) {
@@ -73,6 +92,7 @@ void ui_ScreenOptions_screen_init(void) {
     lv_obj_set_style_bg_color (ui_ScreenOptions, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_OptionsToMain, LV_EVENT_GESTURE, NULL);
     lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_ScreenOptions, LV_EVENT_SCREEN_UNLOADED, NULL);
+    lv_obj_add_event_cb       (ui_ScreenOptions, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenOptions);
 
     //////////////////// Styles For Back Icon ////////////////////
     static constexpr lv_style_const_prop_t style_prop_common[] = {
