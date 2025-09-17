@@ -40,7 +40,7 @@
     #error "LV_USE_BMP or LV_USE_TJPGD should be enabled."
   #endif
 #else
-  #define PICTURE_EXT "txt" // image in flash
+  #define PICTURE_EXT "txt" // A text file containing the id on the flash
 #endif
 
 /*--------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ private:
       dir.close();
 
       std::sort(m_list.begin() + i, m_list.end(), [](MP3File_t &a, MP3File_t &b) {
-        return a.name.compare(b.name) < 0 ? true : false; // ascending order
+        return a.name.compare(b.name) < 0 ? true : false; // Ascending order
       });
       i = m_list.size();
     }

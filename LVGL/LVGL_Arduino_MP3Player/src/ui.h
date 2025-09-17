@@ -12,15 +12,17 @@
 
 #include "../debug.h"
 
-// Screen size
-#define SCREEN_WIDTH  240
-#define SCREEN_HEIGHT 320
-#define LV_PCT_X(a)   (SCREEN_WIDTH  * (a) / 100)
-#define LV_PCT_Y(a)   (SCREEN_HEIGHT * (a) / 100)
+// Screen size / coordinate
+#define SCREEN_WIDTH    240
+#define SCREEN_HEIGHT   320
+#define LV_PCT_X(a)     (SCREEN_WIDTH  * (a) / 100) // for LV_STYLE_CONST_X
+#define LV_PCT_Y(a)     (SCREEN_HEIGHT * (a) / 100) // for LV_STYLE_CONST_Y
+#define ICON_OFFSET_R   (SCREEN_WIDTH / 2 - 24)
+#define ICON_OFFSET_L   (24 - SCREEN_WIDTH / 2)
+#define DROPDOWN_WIDTH  100
 
 // SCREEN: ui_ScreenMain
 extern lv_obj_t *ui_ScreenMain;
-extern lv_obj_t *ui_WaveImage;
 extern lv_obj_t *ui_MusicTitle;
 extern lv_obj_t *ui_ElapsedStart;
 extern lv_obj_t *ui_ElapsedEnd;
@@ -33,7 +35,9 @@ void ui_event_ScreenMain  (lv_event_t *e);
 void ui_event_ButtonPlay  (lv_event_t *e);
 void ui_event_Volume      (lv_event_t *e);
 void ui_event_ElapsedBar  (lv_event_t *e);
-void ui_event_MenuDotMain (lv_event_t *e);
+void ui_event_GoAlbumList (lv_event_t *e);
+void ui_event_GoPlayList  (lv_event_t *e);
+void ui_event_GoOptions   (lv_event_t *e);
 void ui_event_Favorite    (lv_event_t *e);
 void ui_event_Repeat      (lv_event_t *e);
 void ui_event_Shuffle     (lv_event_t *e);
@@ -42,66 +46,64 @@ void ui_event_ButtonPrev  (lv_event_t *e);
 void ui_event_VolumeMax   (lv_event_t *e);
 void ui_event_VolumeMin   (lv_event_t *e);
 
-// SCREEN: ui_ScreenOption
-extern lv_obj_t *ui_ScreenOption;
-void ui_set_option_backlight(void);
-void ui_set_option_sleeptime(void);
-void ui_ScreenOption_screen_init(void);
-void ui_ScreenOption_screen_deinit(void);
-void ui_ScreenOption_create_list(const char *root);
-void ui_event_ScreenOption      (lv_event_t *e);
-void ui_event_OptionToMainRight (lv_event_t *e);
+// SCREEN: ui_ScreenAlbumList
+extern lv_obj_t *ui_ScreenAlbumList;
+void ui_event_ScreenAlbumList(lv_event_t *e);
+void ui_ScreenAlbumList_screen_init(void);
+void ui_ScreenAlbumList_screen_deinit(void);
+void ui_ScreenAlbumList_create_list(const char *root);
+void ui_event_AlbumToMainRight(lv_event_t *e);
 
 // SCREEN: ui_ScreenPlayList
 extern lv_obj_t *ui_ScreenPlayList;
-extern lv_obj_t *ui_ContainerPlayList;
-extern lv_obj_t *ui_PlayListToMainUp;
-extern lv_obj_t *ui_PlayListToMainDown;
 void ui_ScreenPlayList_screen_init(void);
 void ui_ScreenPlayList_screen_deinit(void);
-void ui_event_ScreenPlayList    (lv_event_t *e);
-void ui_event_PlayList_Heart    (lv_event_t *e);
-void ui_event_PlayListToMainUp  (lv_event_t *e);
-void ui_event_PlayListToMainDown(lv_event_t *e);
+void ui_event_ScreenPlayList(lv_event_t *e);
+void ui_event_PlayList_Heart(lv_event_t *e);
+void ui_event_PlayListToMain(lv_event_t *e);
 void ui_list_update_icon(uint32_t track_id, bool state);
 void ui_list_update_cell(uint32_t track_id, bool state);
 void ui_list_update_play(uint32_t track_id, bool state);
 void ui_list_focus_playing(uint32_t track_id);
 void ui_list_update_duration(uint32_t track_id, uint32_t duration);
 #if false
-void ui_event_MenuBackToLeft    (lv_event_t *e);
-void ui_event_MenuBluetoothOn   (lv_event_t *e);
-void ui_event_MenuBluetoothOff  (lv_event_t *e);
+void ui_event_MenuBluetoothOn (lv_event_t *e);
+void ui_event_MenuBluetoothOff(lv_event_t *e);
 #endif
 
-// IMAGES AND IMAGE SETS
-LV_IMAGE_DECLARE(img_album);       // assets/icons/img_album.png
-LV_IMAGE_DECLARE(img_wave);        // assets/icons/img_wave.png
-LV_IMAGE_DECLARE(img_menu);        // assets/icons/img_menu.png
-LV_IMAGE_DECLARE(img_heart_off);   // assets/icons/img_heart_off.png
-LV_IMAGE_DECLARE(img_heart_on);    // assets/icons/img_heart_on.png
-LV_IMAGE_DECLARE(img_repeat);      // assets/icons/img_repeat.png
-LV_IMAGE_DECLARE(img_shuffle);     // assets/icons/img_shuffle.png
-LV_IMAGE_DECLARE(img_play);        // assets/icons/img_play.png
-LV_IMAGE_DECLARE(img_pause);       // assets/icons/img_pause.png
-LV_IMAGE_DECLARE(img_skip_next);   // assets/icons/img_skip_next.png
-LV_IMAGE_DECLARE(img_skip_prev);   // assets/icons/img_skip_prev.png
-LV_IMAGE_DECLARE(img_vol_max);     // assets/icons/img_vol_max.png
-LV_IMAGE_DECLARE(img_vol_min);     // assets/icons/img_vol_min.png
-LV_IMAGE_DECLARE(img_back_right);  // assets/icons/img_back_right.png
-//LV_IMAGE_DECLARE(img_back_left);    // assets/icons/img_back_left.png
-//LV_IMAGE_DECLARE(img_bluetooth_on); // assets/icons/img_bluetooth_on.png
-//LV_IMAGE_DECLARE(img_bluetooth_off);// assets/icons/img_bluetooth_off.png
-LV_IMAGE_DECLARE(img_heart_off_small);// assets/icons/img_heart_off_small.png
-LV_IMAGE_DECLARE(img_heart_on_small); // assets/icons/img_heart_on_small.png
-LV_IMAGE_DECLARE(img_back_up);      // assets/icons/img_back_up.png
-LV_IMAGE_DECLARE(img_back_down);    // assets/icons/img_back_down.png
-LV_IMAGE_DECLARE(img_list_play);    // assets/icons/img_list_play.png
-LV_IMAGE_DECLARE(img_list_pause);   // assets/icons/img_list_pause.png
-LV_IMAGE_DECLARE(img_backlight);    // assets/icons/img_backlight.png
-LV_IMAGE_DECLARE(img_sleep);        // assets/icons/img_sleep.png
-LV_IMAGE_DECLARE(img_rotate_folder);// assets/icons/img_rotate_folder.png
-LV_IMAGE_DECLARE(img_rotate_check); // assets/icons/img_rotate_check.png
+// SCREEN: ui_ScreenOptions
+extern lv_obj_t *ui_ScreenOptions;
+void ui_event_ScreenOptions(lv_event_t *e);
+void ui_event_OptionsToMain(lv_event_t *e);
+void ui_ScreenOptions_screen_init(void);
+void ui_ScreenOptions_screen_deinit(void);
+void ui_set_option_backlight(void);
+void ui_set_option_sleeptime(void);
+
+// IMAGES
+LV_IMAGE_DECLARE(img_album);            // assets/icons/img_album.png
+LV_IMAGE_DECLARE(img_heart_off);        // assets/icons/img_heart_off.png
+LV_IMAGE_DECLARE(img_heart_on);         // assets/icons/img_heart_on.png
+LV_IMAGE_DECLARE(img_repeat);           // assets/icons/img_repeat.png
+LV_IMAGE_DECLARE(img_shuffle);          // assets/icons/img_shuffle.png
+LV_IMAGE_DECLARE(img_play);             // assets/icons/img_play.png
+LV_IMAGE_DECLARE(img_pause);            // assets/icons/img_pause.png
+LV_IMAGE_DECLARE(img_skip_next);        // assets/icons/img_skip_next.png
+LV_IMAGE_DECLARE(img_skip_prev);        // assets/icons/img_skip_prev.png
+LV_IMAGE_DECLARE(img_vol_max);          // assets/icons/img_vol_max.png
+LV_IMAGE_DECLARE(img_vol_min);          // assets/icons/img_vol_min.png
+LV_IMAGE_DECLARE(img_menu_up);          // assets/icons/img_menu_up.png
+LV_IMAGE_DECLARE(img_menu_down);        // assets/icons/img_menu_down.png
+LV_IMAGE_DECLARE(img_menu_right);       // assets/icons/img_menu_right.png
+LV_IMAGE_DECLARE(img_menu_left);        // assets/icons/img_menu_left.png
+LV_IMAGE_DECLARE(img_menu_dot);         // assets/icons/img_menu_dot.png
+LV_IMAGE_DECLARE(img_bluetooth_on);     // assets/icons/img_bluetooth_on.png
+LV_IMAGE_DECLARE(img_heart_off_small);  // assets/icons/img_heart_off_small.png
+LV_IMAGE_DECLARE(img_heart_on_small);   // assets/icons/img_heart_on_small.png
+LV_IMAGE_DECLARE(img_list_play);        // assets/icons/img_list_play.png
+LV_IMAGE_DECLARE(img_list_pause);       // assets/icons/img_list_pause.png
+LV_IMAGE_DECLARE(img_rotate_folder);    // assets/icons/img_rotate_folder.png
+LV_IMAGE_DECLARE(img_rotate_check);     // assets/icons/img_rotate_check.png
 LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
 
 typedef enum {

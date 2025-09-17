@@ -13,20 +13,20 @@
  * Begin with SD or SdFat
  *--------------------------------------------------------------------------------*/
 bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
-  // set root path
+  // Set root path
   m_root = root;
   if (m_root.back() != '/') {
     m_root.append("/");
   }
 
-  // initialize SD card
+  // Initialize SD card
   if (!SD.begin(SD_CONFIG)) {
     m_error = "failed to mount: " + m_root;
     DBG_EXEC(printf("%s\n", m_error.c_str()));
     return false;
   }
 
-  // create directories for metadata
+  // Create directories for metadata
   std::string path = m_root + META_DATA_DIR;
   if (!SD.exists(path.c_str())) {
     if (!SD.mkdir(path.c_str())) {
@@ -98,7 +98,7 @@ std::string CYD_MP3Player::GetMetaPath(uint32_t playNo) {
   std::string path = GetFilePath(playNo);
 
   MD5Hex_t hex;
-  MD5::make_hash(&path.c_str()[m_root.size()], hex); // skip root folder
+  MD5::make_hash(&path.c_str()[m_root.size()], hex); // Skip root folder
   MD5::make_digest(hex, 5); // e.g. "0123456789" (get 5 x 2 characters of string)
   hex.digest[1] = '/';      // e.g. "0/23456789"
 
@@ -196,7 +196,7 @@ void CYD_MP3Player::SortPlayList(bool shuffle) {
 uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
   uint32_t pictNo = 0;
 
-  // gets the picture number recorded in PICTURE_FILE.
+  // Gets the picture number recorded in PICTURE_FILE.
   std::string path = GetDirPath(playNo);
   path.append(PICTURE_BASE "txt");
 
@@ -273,7 +273,7 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
       }
     }
   } else {
-    tags = {}; // never reach this line
+    tags = {}; // Never get here
   }
 }
 
@@ -285,7 +285,7 @@ void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
   if (file) {
     *meta = file->meta;
   } else {
-    *meta = {}; // never reach this line
+    *meta = {}; // Never get here
   }
 }
 
@@ -295,7 +295,7 @@ bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
     file->meta = *meta;
     return SaveMetaData(playNo, meta);
   }
-  return false; // never reach this line
+  return false; // Never get here
 }
 
 bool CYD_MP3Player::UpdateMetaData(void) {
@@ -430,11 +430,11 @@ void audio_info(const char *info) {
   Serial.print("info        ");
   Serial.println(info);
 }
-void audio_id3data(const char *info) {  //id3 metadata
+void audio_id3data(const char *info) {  // id3 metadata
   Serial.print("id3tags     ");
   Serial.println(info);
 }
-void audio_eof_mp3(const char *info) {  //end of file
+void audio_eof_mp3(const char *info) {  // end of file
   Serial.print("eof_mp3     ");
   Serial.println(info);
 }
@@ -450,15 +450,15 @@ void audio_bitrate(const char *info) {
   Serial.print("bitrate     ");
   Serial.println(info);
 }
-void audio_commercial(const char *info) {  //duration in sec
+void audio_commercial(const char *info) {  // duration in sec
   Serial.print("commercial  ");
   Serial.println(info);
 }
-void audio_icyurl(const char *info) {  //homepage
+void audio_icyurl(const char *info) {  // homepage
   Serial.print("icyurl      ");
   Serial.println(info);
 }
-void audio_lasthost(const char *info) {  //stream URL played
+void audio_lasthost(const char *info) {  // stream URL played
   Serial.print("lasthost    ");
   Serial.println(info);
 }

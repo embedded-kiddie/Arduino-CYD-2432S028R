@@ -29,7 +29,6 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 ///////////////////// VARIABLES ////////////////////
 // SCREEN: ui_ScreenMain
 lv_obj_t *ui_ScreenMain;
-lv_obj_t *ui_WaveImage;
 lv_obj_t *ui_MusicTitle;
 lv_obj_t *ui_ElapsedStart;
 lv_obj_t *ui_ElapsedEnd;
@@ -38,14 +37,14 @@ lv_obj_t *ui_ElapsedBar;
 lv_obj_t *ui_Volume;
 lv_obj_t *ui_AlbumImage;
 
-// SCREEN: ui_ScreenOption
-lv_obj_t *ui_ScreenOption;
+// SCREEN: ui_ScreenAlbumList
+lv_obj_t *ui_ScreenAlbumList;
 
 // SCREEN: ui_ScreenPlayList
 lv_obj_t *ui_ScreenPlayList;
-lv_obj_t *ui_ContainerPlayList;
-lv_obj_t *ui_PlayListToMainUp;
-lv_obj_t *ui_PlayListToMainDown;
+
+// SCREEN: ui_ScreenOptions
+lv_obj_t *ui_ScreenOptions;
 
 /////////////////////////// STYLES //////////////////////////
 static constexpr lv_style_const_prop_t style_prop_album[] = {
@@ -77,34 +76,36 @@ void ui_event_ScreenMain(lv_event_t *e) {
   lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
 
   if (dir == LV_DIR_RIGHT) {
-    _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
+    _ui_screen_change(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenAlbumList_screen_init);
   }
 
-  else if (dir == LV_DIR_TOP) {
-    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenPlayList_screen_init);
-
-    lv_obj_set_align  (ui_ContainerPlayList,  LV_ALIGN_BOTTOM_MID);
-    lv_obj_add_flag   (ui_PlayListToMainUp,   LV_OBJ_FLAG_HIDDEN);
-    lv_obj_remove_flag(ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
+  else if (dir == LV_DIR_LEFT) {
+    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
 
     ui_list_focus_playing(player.GetPlayNo());
   }
 
-  else if (dir == LV_DIR_BOTTOM) {
-    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenPlayList_screen_init);
-
-    lv_obj_set_align  (ui_ContainerPlayList,  LV_ALIGN_TOP_MID);
-    lv_obj_remove_flag(ui_PlayListToMainUp,   LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag   (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
-
-    ui_list_focus_playing(player.GetPlayNo());
+  else if (dir == LV_DIR_TOP || dir == LV_DIR_BOTTOM) {
+    _ui_screen_change(&ui_ScreenOptions, (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM), 500, 0, &ui_ScreenOptions_screen_init);
   }
 }
 
-void ui_event_MenuDotMain(lv_event_t *e) {
+void ui_event_GoAlbumList(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenOption_screen_init);
+  _ui_screen_change(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenAlbumList_screen_init);
+}
+
+void ui_event_GoPlayList(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
+
+  _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
+}
+
+void ui_event_GoOptions(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
+
+  _ui_screen_change(&ui_ScreenOptions, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenOptions_screen_init);
 }
 
 void ui_event_Favorite(lv_event_t *e) {
@@ -186,7 +187,7 @@ void ui_event_ElapsedBar(lv_event_t *e) {
 /*--------------------------------------------------------------------------------
  * Event handlers for Screen Option
  *--------------------------------------------------------------------------------*/
-void ui_event_ScreenOption(lv_event_t *e) {
+void ui_event_ScreenAlbumList(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(event_code == LV_EVENT_GESTURE || event_code == LV_EVENT_SCREEN_LOADED || event_code == LV_EVENT_SCREEN_UNLOADED);
 
@@ -206,18 +207,18 @@ void ui_event_ScreenOption(lv_event_t *e) {
     }
 
     // render the option screen
-    ui_ScreenOption_create_list(MP3_PATH_ROOT);
+    ui_ScreenAlbumList_create_list(MP3_PATH_ROOT);
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
-    ui_ScreenOption_screen_deinit();
+    ui_ScreenAlbumList_screen_deinit();
 
     lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
     ui_state = UI_STATE_START;
   }
 }
 
-void ui_event_OptionToMainRight(lv_event_t *e) {
+void ui_event_AlbumToMainRight(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
@@ -229,7 +230,6 @@ void ui_event_OptionToMainRight(lv_event_t *e) {
 void ui_event_ScreenPlayList(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_SCREEN_UNLOADED);
 
-  lv_indev_wait_release(lv_indev_active());
   ui_ScreenPlayList_screen_deinit();
 }
 
@@ -254,36 +254,51 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
   }
 }
 
-void ui_event_PlayListToMainUp(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
+void ui_event_PlayListToMain(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_GESTURE);
 
-  _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
-}
-
-void ui_event_PlayListToMainDown(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
-
-  _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenMain_screen_init);
+  lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
+  lv_screen_load_anim_t anim = dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT;
+  _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
 }
 #if false
-void ui_event_MenuBackToLeft(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
-
-  _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenMain_screen_init);
-}
-
 void ui_event_MenuBluetoothOn(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
+  _ui_screen_change(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenAlbumList_screen_init);
 }
 
 void ui_event_MenuBluetoothOff(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  _ui_screen_change(&ui_ScreenOption, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenOption_screen_init);
+  _ui_screen_change(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenAlbumList_screen_init);
 }
 #endif
+
+/*--------------------------------------------------------------------------------
+ * Event handlers for Screen Options
+ *--------------------------------------------------------------------------------*/
+void ui_event_ScreenOptions(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_SCREEN_UNLOADED);
+
+  ui_ScreenOptions_screen_deinit();
+}
+
+void ui_event_OptionsToMain(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(event_code == LV_EVENT_CLICKED || event_code == LV_EVENT_GESTURE);
+
+  if (event_code == LV_EVENT_CLICKED) {
+    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
+  }
+
+  else {
+    lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
+    lv_screen_load_anim_t anim = dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM;
+    _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
+  }
+}
+
 /////////////////// LOCAL FUNCTIONS //////////////////
 static void update_elapsed_time(void) {
   uint32_t duration = audioGetDuration();

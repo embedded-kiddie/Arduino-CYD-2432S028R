@@ -8,8 +8,8 @@
 #include "src/ui.h"
 
 /* Set to your screen resolution and rotation */
-#define TFT_HOR_RES   240 // Portrait orientation default width
-#define TFT_VER_RES   320 // Portrait orientation default height
+#define TFT_HOR_RES   SCREEN_WIDTH  // Portrait orientation default width  (defined in ui.h)
+#define TFT_VER_RES   SCREEN_HEIGHT // Portrait orientation default height (defined in ui.h)
 #define TFT_ROTATION  LV_DISPLAY_ROTATION_0 // LV_DISPLAY_ROTATION_{0|90|180|270}
 
 /* LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes */
@@ -211,7 +211,7 @@ static void resolution_changed_event_cb(lv_event_t *e) {
   lv_display_t *disp = (lv_display_t *)lv_event_get_target(e);
   lv_display_rotation_t rot = lv_display_get_rotation(disp);
 
-  /* handle rotation */
+  /* Handle rotation */
   switch (rot) {
     case LV_DISPLAY_ROTATION_0:
       tft.setRotation(0); /* Portrait orientation */
@@ -228,7 +228,7 @@ static void resolution_changed_event_cb(lv_event_t *e) {
   }
 }
 
-/* use Arduinos millis() as tick source */
+/* Use Arduino millis() as tick source */
 static uint32_t my_tick(void) {
 #if SAVE_SEQUENCIAL_BMP
   return millis() - _skip;
@@ -247,7 +247,7 @@ void setup() {
   /* Set a tick source so that LVGL will know how much time elapsed. */
   lv_tick_set_cb(my_tick);
 
-  /* register print function for debugging */
+  /* Register print function for debugging */
 #if LV_USE_LOG != 0
   lv_log_register_print_cb(my_print);
 #endif
@@ -271,7 +271,7 @@ void setup() {
 }
 
 void loop() {
-  lv_timer_handler(); /* let the GUI do its work */
+  lv_timer_handler(); /* Let the GUI do its work */
 
   UI_State_t state = ui_loop();
   if (state == UI_STATE_SLEEP || (state == UI_STATE_BLOFF && is_awake == true)) {

@@ -3,15 +3,8 @@
 // LVGL version: 9.1.0
 // Project name: SquareLine_Project
 
+#include <Arduino.h>
 #include "ui.h"
-#include "../list.h"
-
-#include "../CYD_MP3Player.h"
-extern CYD_MP3Player *ui_get_player(void);  // defined in ui.cpp
-
-static lv_obj_t *album_list;
-
-#define DROPDOWN_WIDTH  100
 
 /*--------------------------------------------------------------------------------
  *
@@ -71,55 +64,27 @@ static void sleeptimer_cb(lv_event_t *e) {
   ui_set_option_sleeptime();
 }
 
-static void playlist_cb(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-
-  lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectPlaylist = lv_dropdown_get_selected(obj);
-}
-
-/*--------------------------------------------------------------------------------
- * Set the pointer to the widget to NULL when its object is deleted
- *--------------------------------------------------------------------------------*/
-static void delete_cb(lv_event_t *e) {
-  lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
-  static constexpr lv_obj_t ** const adrs[] = {
-    &ui_ScreenOption,
-    &album_list,
-  };
-
-  for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
-    if (obj == adrs[i]) {
-      *obj = NULL;
-      DBG_EXEC(printf("deleted: %d\n", i));
-      return;
-    }
-  }
-  DBG_EXEC(printf("deleted: 0x%x\n", obj));
-}
-
 /*--------------------------------------------------------------------------------
  * Initialize / Deinitialize widgets
  *--------------------------------------------------------------------------------*/
-void ui_ScreenOption_screen_init(void) {
-  if (ui_ScreenOption == NULL) {
-    ui_ScreenOption = lv_obj_create(NULL);
-    lv_obj_set_style_bg_color     (ui_ScreenOption, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_GESTURE, NULL);
-    lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_SCREEN_LOADED, NULL);
-    lv_obj_add_event_cb           (ui_ScreenOption, ui_event_ScreenOption, LV_EVENT_SCREEN_UNLOADED, NULL);
-    lv_obj_add_event_cb           (ui_ScreenOption, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenOption);
+void ui_ScreenOptions_screen_init(void) {
+  if (ui_ScreenOptions == NULL) {
+    ui_ScreenOptions = lv_obj_create(NULL);
+    lv_obj_set_style_bg_color (ui_ScreenOptions, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_OptionsToMain, LV_EVENT_GESTURE, NULL);
+    lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_ScreenOptions, LV_EVENT_SCREEN_UNLOADED, NULL);
 
+    //////////////////// Styles For Back Icon ////////////////////
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(27),
       LV_STYLE_CONST_HEIGHT(27),
-      LV_STYLE_CONST_X(LV_PCT_X(42)),
-      LV_STYLE_CONST_Y(LV_PCT_Y(-44)),
+      LV_STYLE_CONST_X(LV_PCT_X(0)),
+      LV_STYLE_CONST_Y(LV_PCT_Y(44)),
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
     static constexpr lv_style_const_prop_t style_prop_default[] = {
-      LV_STYLE_CONST_BG_IMAGE_SRC(&img_back_right),
+      LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_down),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -135,7 +100,7 @@ void ui_ScreenOption_screen_init(void) {
       LV_STYLE_CONST_PROPS_END
     };
     static constexpr lv_style_const_prop_t style_prop_checked[] = {
-      LV_STYLE_CONST_BG_IMAGE_SRC(&img_back_right),
+      LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_down),
       LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
       LV_STYLE_CONST_PROPS_END
     };
@@ -144,77 +109,47 @@ void ui_ScreenOption_screen_init(void) {
     static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
     static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
-    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOption);
+    //////////////////// Back Icon ////////////////////
+    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOptions);
     lv_checkbox_set_text_static(obj, "");
     lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
     lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_event_cb (obj, ui_event_OptionToMainRight, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb (obj, ui_event_OptionsToMain, LV_EVENT_CLICKED, NULL);
 
-    obj = lv_label_create(ui_ScreenOption);
+    //////////////////// Backlight Label ////////////////////
+    obj = lv_label_create(ui_ScreenOptions);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
-    lv_label_set_text_static(obj, "Playlist");
-
-    obj = lv_dropdown_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11));
-    lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_add_event_cb(obj, playlist_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_dropdown_set_options(obj, "List 1\nList 2\nList 3");
-    lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
-
-    album_list = lv_list_create(ui_ScreenOption);
-    lv_obj_add_event_cb(album_list, delete_cb, LV_EVENT_DELETE, (void*)&album_list);
-    lv_obj_set_size(album_list, SCREEN_WIDTH - LV_PCT_X(10), SCREEN_HEIGHT - LV_PCT_Y(50) - 2);
-    lv_obj_center(album_list);
-
-    obj = lv_label_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(78));
     lv_label_set_text_static(obj, "Backlight Off");
 
-    obj = lv_dropdown_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(85));
+    //////////////////// Backlight Dropdown ////////////////////
+    obj = lv_dropdown_create(ui_ScreenOptions);
+    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options_static(obj, opts_backlight.options);
     lv_dropdown_set_selected(obj, ui_option.selectBacklight);
-    lv_dropdown_set_dir(obj, LV_DIR_TOP);
-    lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
 
-
-    obj = lv_label_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(78));
+    //////////////////// Sleep Timer Label ////////////////////
+    obj = lv_label_create(ui_ScreenOptions);
+    lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(4));
     lv_label_set_text_static(obj, "Sleep Timer");
 
-    obj = lv_dropdown_create(ui_ScreenOption);
-    lv_obj_set_pos(obj, SCREEN_WIDTH - DROPDOWN_WIDTH - LV_PCT_X(5), LV_PCT_Y(85));
+    //////////////////// Sleep Timer Dropdown ////////////////////
+    obj = lv_dropdown_create(ui_ScreenOptions);
+    lv_obj_set_pos(obj, SCREEN_WIDTH - DROPDOWN_WIDTH - LV_PCT_X(5), LV_PCT_Y(11));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
     lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options_static(obj, opts_sleeptime.options);
     lv_dropdown_set_selected(obj, ui_option.selectSleepTimer);
-    lv_dropdown_set_dir(obj, LV_DIR_TOP);
-    lv_dropdown_set_symbol(obj, LV_SYMBOL_UP);
   }
 }
 
-void ui_ScreenOption_screen_deinit(void) {
-  if (ui_ScreenOption) {
-    // clear playlist before creating a new list
-    CYD_MP3Player *player = ui_get_player();
-    player->ClearPlayList();
-
-    lv_obj_delete_async(ui_ScreenOption);
+void ui_ScreenOptions_screen_deinit(void) {
+  if (ui_ScreenOptions) {
+    lv_obj_delete_async(ui_ScreenOptions);
   }
-}
-
-/*--------------------------------------------------------------------------------
- * Create selectable playlist
- *--------------------------------------------------------------------------------*/
-void ui_ScreenOption_create_list(const char *root_dir) {
-  // create album list
-  reset_cell_count();
-  CYD_MP3Player *player = ui_get_player();
-  add_node_to_list(player->m_tree, album_list);
 }

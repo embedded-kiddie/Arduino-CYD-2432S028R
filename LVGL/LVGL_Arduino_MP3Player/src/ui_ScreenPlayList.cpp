@@ -5,19 +5,17 @@
 
 #include "ui.h"
 
-// defined in ui.cpp
 #include "../CYD_MP3Player.h"
-extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags);
+extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui.cpp
 
 /**********************
  *      MACROS
  **********************/
-#define LIST_BACK_TO_HANDLE_SIZE  25  // back-up.png/back-down.png: 20x20
-#define LIST_FONT_SMALL_HEIGHT    17  // for font size: 12px
-#define LIST_FONT_MEDIUM_HEIGHT   22  // for font size: 14px
+#define LIST_FONT_SMALL_HEIGHT    17  // For font size: 12px
+#define LIST_FONT_MEDIUM_HEIGHT   22  // For font size: 14px
 #define LIST_LABEL_MARGINE        100 // left(50) + right(50)
-#define LIST_CELL_HEIGHT          60  // column(3) x rol(2)
-#define LIST_CELL_VIEWS           5   // LIST_CELL_HEIGHT * LIST_CELL_VIEWS + LIST_BACK_TO_HANDLE_SIZE
+#define LIST_CELL_HEIGHT          54  // Inside a cell = column(3) x rol(2)
+#define LIST_CELL_VIEWS           6   // LIST_CELL_HEIGHT * LIST_CELL_VIEWS >= SCREEN_HEIGHT
 #define LIST_CELL_SPARE           2   // 1 <= LIST_CELL_SPARE <= 2
 
 /**********************
@@ -166,15 +164,15 @@ static void list_click_event_cb(lv_event_t* e) {
   lv_point_t p;
   lv_indev_get_point(lv_indev_get_act(), &p);
 
-  // if the clicked coordinates within the icon area...
+  // If the clicked coordinates within the icon area...
   if (p.x <= img_list_play.header.w) {
-    // if currently playing...
+    // If currently playing...
     if (ui_control.playNo == track_id) {
-      // execute pause/resume
+      // Execute pause/resume
       ui_state = (ui_state == UI_STATE_PLAY ? UI_STATE_PAUSE : UI_STATE_RESUME);
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, ui_state == UI_STATE_PAUSE ? false : true);
     }
-    // else select the new track to play
+    // Else select the new track to play
     else {
       ui_list_update_play(ui_control.playNo,  false);
       ui_list_update_cell(ui_control.focusNo, false);
@@ -182,7 +180,7 @@ static void list_click_event_cb(lv_event_t* e) {
       ui_set_playNo(track_id);
     }
   }
-  // else just change the focused cell
+  // Else just change the focused cell
   else {
     ui_list_update_cell(ui_control.focusNo, false);
     ui_control.focusNo = track_id;
@@ -203,33 +201,34 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_add_style              (cell, &style_cell_pressed, LV_STATE_PRESSED);
   lv_obj_add_style              (cell, &style_cell_checked, LV_STATE_CHECKED);
   lv_obj_add_event_cb           (cell, list_click_event_cb, LV_EVENT_CLICKED, (void*)track_id);
+  lv_obj_remove_flag            (cell, LV_OBJ_FLAG_SCROLLABLE); // Stop sliding horizontally
 
-  // Play button
+  //////////////////// Play Button ////////////////////
   lv_obj_t* obj = lv_image_create(cell);
   lv_image_set_src              (obj, &img_list_play);
   lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 2);
 
-  // Title label
+  //////////////////// Title Label ////////////////////
   obj = lv_label_create(cell);
   lv_label_set_text             (obj, tags.title.c_str());
   lv_label_set_long_mode        (obj, LV_LABEL_LONG_DOT);
   lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
   lv_obj_add_style              (obj, &style_title, 0);
 
-  // Artist label
+  //////////////////// Artist Label ////////////////////
   obj = lv_label_create(cell);
   lv_label_set_text_fmt         (obj, "%s / %s", tags.artist.c_str(), tags.album.c_str());
   lv_label_set_long_mode        (obj, LV_LABEL_LONG_DOT);
   lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
   lv_obj_add_style              (obj, &style_artist, 0);
 
-  // Time label
+  //////////////////// Time Label ////////////////////
   obj = lv_label_create(cell);
   lv_label_set_text_fmt         (obj, "%" LV_PRIu32 ":%02" LV_PRIu32, tags.meta.duration / 60UL, tags.meta.duration % 60UL);
   lv_obj_set_grid_cell          (obj, LV_GRID_ALIGN_END, 2, 1, LV_GRID_ALIGN_END, 0, 2);
   lv_obj_add_style              (obj, &style_time, 0);
 
-  // Heart checkbox
+  //////////////////// Heart Checkbox ////////////////////
   obj = lv_checkbox_create(cell);
   lv_checkbox_set_text_static   (obj, "");
   lv_obj_set_state              (obj, LV_STATE_CHECKED, tags.meta.selected);
@@ -242,7 +241,7 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_set_style_bg_image_src (obj, &img_heart_on_small,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_image_src (obj, &img_heart_off_small, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
 
-  // Border image
+  //////////////////// Border Image ////////////////////
   obj = lv_image_create(cell);
   lv_image_set_src              (obj, &img_lv_demo_music_list_border);
   lv_image_set_inner_align      (obj, LV_IMAGE_ALIGN_TILE);
@@ -254,13 +253,13 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
 }
 
 static void update_scroll(lv_obj_t *obj) {
-  // do not re-enter this function when `lv_obj_scroll_by` triggers this callback again.
+  // Do not re-enter this function when `lv_obj_scroll_by` triggers this callback again.
   if (update_scroll_running) return;
   update_scroll_running = true;
 
   int32_t pos;
 
-  /* load items we're getting close to */
+  /* Load items we're getting close to */
   while (ui_control.end < ui_get_counts() - 1 && (pos = lv_obj_get_scroll_bottom(obj)) < (LIST_CELL_HEIGHT)) {
     ui_control.end += 1;
     add_list_cell(obj, ui_control.end);
@@ -278,7 +277,7 @@ static void update_scroll(lv_obj_t *obj) {
     //DBG_EXEC(printf("added ui_control.top: %d, pos: %d\n", ui_control.top, pos));
   }
 
-  /* delete far-away items */
+  /* Delete far-away items */
   while ((pos = lv_obj_get_scroll_bottom(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && ui_control.end - ui_control.top > (LIST_CELL_VIEWS)) {
     ui_control.end -= 1;
     lv_obj_t *child = lv_obj_get_child(obj, -1);
@@ -341,11 +340,10 @@ static void ui_ScreenPlayList_list_init(lv_obj_t* parent) {
 
   // Creating a slider as an alternative to a scrollbar
   if (slider == NULL) {
-    slider = lv_slider_create(parent); // attach to ui_ContainerPlayList
+    slider = lv_slider_create(parent);
     lv_obj_align                    (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
     lv_obj_remove_flag              (slider, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_width                (slider, 4);
-    lv_obj_set_height               (slider, LIST_CELL_VIEWS * LIST_CELL_HEIGHT);
+    lv_obj_set_size                 (slider, 4, LIST_CELL_VIEWS * LIST_CELL_HEIGHT);
     lv_obj_set_style_radius         (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa         (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color       (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
@@ -367,7 +365,7 @@ static void ui_list_remove_all(void) {
  * Create cells from top to end in the list
  *--------------------------------------------------------------------------------*/
 static void ui_list_create_all(void) {
-  // update layout before add new cells
+  // Update layout before add new cells
   lv_slider_set_value     (slider, 0, LV_ANIM_OFF);
   lv_slider_set_left_value(slider, 0, LV_ANIM_OFF);
   lv_obj_update_layout    (slider);
@@ -383,10 +381,10 @@ static void ui_list_create_all(void) {
  *--------------------------------------------------------------------------------*/
 void ui_list_focus_playing(uint32_t track_id) {
   if (play_list && (track_id < ui_control.top || ui_control.end < track_id)) {
-    // delete all cells in playlist
+    // Delete all cells in playlist
     ui_list_remove_all();
 
-    // add new cells according to the specified id
+    // Add new cells according to the specified id
     ui_control.focusNo = ui_control.top = ui_control.end = track_id;
     ui_list_create_all();
   }
@@ -412,9 +410,6 @@ static void delete_cb(lv_event_t *e) {
   lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
   static constexpr lv_obj_t ** const adrs[] = {
     &ui_ScreenPlayList,
-    &ui_ContainerPlayList,
-    &ui_PlayListToMainUp,
-    &ui_PlayListToMainDown,
     &play_list,
     &slider,
   };
@@ -435,74 +430,29 @@ static void delete_cb(lv_event_t *e) {
 void ui_ScreenPlayList_screen_init(void) {
   if (ui_ScreenPlayList == NULL) {
     ui_ScreenPlayList = lv_obj_create(NULL);
-    lv_obj_remove_flag              (ui_ScreenPlayList, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color       (ui_ScreenPlayList, UI_COLOR_LIST_PRESSED,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa         (ui_ScreenPlayList, 255,                    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_remove_flag        (ui_ScreenPlayList, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color (ui_ScreenPlayList, UI_COLOR_LIST_PRESSED,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa   (ui_ScreenPlayList, 255,                    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
   }
 
-  if (ui_ContainerPlayList == NULL) {
-    ui_ContainerPlayList = lv_obj_create(ui_ScreenPlayList);
-    lv_obj_remove_style_all         (ui_ContainerPlayList);
-    lv_obj_set_height               (ui_ContainerPlayList, lv_obj_get_height(lv_screen_active()) - LIST_BACK_TO_HANDLE_SIZE);
-    lv_obj_set_width                (ui_ContainerPlayList, lv_pct(100));
-    lv_obj_set_align                (ui_ContainerPlayList, LV_ALIGN_BOTTOM_MID); // or LV_ALIGN_TOP_MID
-    lv_obj_remove_flag              (ui_ContainerPlayList, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
-  }
+  lv_obj_t *container = lv_obj_create(ui_ScreenPlayList);
+  lv_obj_remove_style_all (container);
+  lv_obj_set_size         (container, lv_pct(100), lv_pct(100));
+  lv_obj_set_align        (container, LV_ALIGN_TOP_MID);
+  lv_obj_remove_flag      (container, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
 
-  if (ui_PlayListToMainUp == NULL) {
-    ui_PlayListToMainUp = lv_checkbox_create(ui_ScreenPlayList);
-    lv_checkbox_set_text_static     (ui_PlayListToMainUp, "");
-    lv_obj_set_height               (ui_PlayListToMainUp, LIST_BACK_TO_HANDLE_SIZE);
-    lv_obj_set_width                (ui_PlayListToMainUp, lv_pct(110));
-    lv_obj_set_align                (ui_PlayListToMainUp, LV_ALIGN_BOTTOM_MID);
-    lv_obj_add_flag                 (ui_PlayListToMainUp, LV_OBJ_FLAG_HIDDEN);
-
-    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_style                (ui_PlayListToMainUp, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainUp, &img_back_up,     (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,               (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,               (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainUp, -1,               (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  }
-
-  if (ui_PlayListToMainDown == NULL) {
-    ui_PlayListToMainDown = lv_checkbox_create(ui_ScreenPlayList);
-    lv_checkbox_set_text_static     (ui_PlayListToMainDown, "");
-    lv_obj_set_height               (ui_PlayListToMainDown, LIST_BACK_TO_HANDLE_SIZE);
-    lv_obj_set_width                (ui_PlayListToMainDown, lv_pct(110));
-    lv_obj_set_align                (ui_PlayListToMainDown, LV_ALIGN_TOP_MID);
-    lv_obj_add_flag                 (ui_PlayListToMainDown, LV_OBJ_FLAG_HIDDEN);
-
-    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_style                (ui_PlayListToMainDown, &style_menu_back, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_bg_image_src   (ui_PlayListToMainDown, &img_back_down,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_set_style_shadow_offset_y(ui_PlayListToMainDown, 1,                (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-  }
-
-  lv_obj_add_event_cb(ui_ScreenPlayList,      ui_event_ScreenPlayList,      LV_EVENT_SCREEN_UNLOADED, NULL);
-  lv_obj_add_event_cb(ui_PlayListToMainUp,    ui_event_PlayListToMainUp,    LV_EVENT_CLICKED, NULL);
-  lv_obj_add_event_cb(ui_PlayListToMainDown,  ui_event_PlayListToMainDown,  LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_PlayListToMain, LV_EVENT_GESTURE, NULL);
+  lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_SCREEN_UNLOADED, NULL);
 
   // Initialize play list container
-  ui_ScreenPlayList_list_init(ui_ContainerPlayList);
+  ui_ScreenPlayList_list_init(container);
 
   // Add a callback when an object is deleted
-  lv_obj_add_event_cb(ui_ScreenPlayList,      delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenPlayList);
-  lv_obj_add_event_cb(ui_ContainerPlayList,   delete_cb, LV_EVENT_DELETE, (void*)&ui_ContainerPlayList);
-  lv_obj_add_event_cb(ui_PlayListToMainUp,    delete_cb, LV_EVENT_DELETE, (void*)&ui_PlayListToMainUp);
-  lv_obj_add_event_cb(ui_PlayListToMainDown,  delete_cb, LV_EVENT_DELETE, (void*)&ui_PlayListToMainDown);
-  lv_obj_add_event_cb(play_list,              delete_cb, LV_EVENT_DELETE, (void*)&play_list);
-  lv_obj_add_event_cb(slider,                 delete_cb, LV_EVENT_DELETE, (void*)&slider);
+  lv_obj_add_event_cb(ui_ScreenPlayList,  delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenPlayList);
+  lv_obj_add_event_cb(play_list,          delete_cb, LV_EVENT_DELETE, (void*)&play_list);
+  lv_obj_add_event_cb(slider,             delete_cb, LV_EVENT_DELETE, (void*)&slider);
 
-  // add new cells according to the specified id
+  // Add new cells according to the specified id
   ui_control.top = ui_control.end = ui_control.playNo;
   ui_list_create_all();
 }
