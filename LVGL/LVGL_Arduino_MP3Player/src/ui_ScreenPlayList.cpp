@@ -431,8 +431,8 @@ void ui_ScreenPlayList_screen_init(void) {
   if (ui_ScreenPlayList == NULL) {
     ui_ScreenPlayList = lv_obj_create(NULL);
     lv_obj_remove_flag        (ui_ScreenPlayList, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color (ui_ScreenPlayList, UI_COLOR_LIST_PRESSED,  (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa   (ui_ScreenPlayList, 255,                    (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color (ui_ScreenPlayList, UI_COLOR_LIST_PRESSED, 0);
+    lv_obj_set_style_bg_opa   (ui_ScreenPlayList, 255,                   0);
   }
 
   lv_obj_t *container = lv_obj_create(ui_ScreenPlayList);

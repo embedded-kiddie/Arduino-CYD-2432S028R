@@ -89,7 +89,7 @@ static void delete_cb(lv_event_t *e) {
 void ui_ScreenOptions_screen_init(void) {
   if (ui_ScreenOptions == NULL) {
     ui_ScreenOptions = lv_obj_create(NULL);
-    lv_obj_set_style_bg_color (ui_ScreenOptions, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color (ui_ScreenOptions, UI_COLOR_BACKGROUND, 0);
     lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_OptionsToMain, LV_EVENT_GESTURE, NULL);
     lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_ScreenOptions, LV_EVENT_SCREEN_UNLOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenOptions, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenOptions);
@@ -147,7 +147,7 @@ void ui_ScreenOptions_screen_init(void) {
     obj = lv_dropdown_create(ui_ScreenOptions);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options_static(obj, opts_backlight.options);
     lv_dropdown_set_selected(obj, ui_option.selectBacklight);
@@ -161,7 +161,7 @@ void ui_ScreenOptions_screen_init(void) {
     obj = lv_dropdown_create(ui_ScreenOptions);
     lv_obj_set_pos(obj, SCREEN_WIDTH - DROPDOWN_WIDTH - LV_PCT_X(5), LV_PCT_Y(11));
     lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options_static(obj, opts_sleeptime.options);
     lv_dropdown_set_selected(obj, ui_option.selectSleepTimer);

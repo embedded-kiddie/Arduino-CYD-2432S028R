@@ -45,7 +45,7 @@ static LGFX tft;
 //----------------------------------------------------------------------
 // Signle or Sequentcial screenshot
 //----------------------------------------------------------------------
-#define SCREENSHORT false
+#define SCREENSHORT true
 #if SCREENSHORT
 #include "sdfs.h"
 #include "../src/sdcard.hpp"

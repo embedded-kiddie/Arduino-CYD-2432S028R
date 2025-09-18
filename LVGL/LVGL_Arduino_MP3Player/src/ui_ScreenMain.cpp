@@ -7,7 +7,7 @@
 
 void ui_ScreenMain_screen_init(void) {
   ui_ScreenMain = lv_obj_create(NULL);
-  lv_obj_set_style_bg_color(ui_ScreenMain, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_bg_color(ui_ScreenMain, UI_COLOR_BACKGROUND, 0);
 
   //////////////////// Album Image ////////////////////
   ui_AlbumImage = lv_image_create(ui_ScreenMain);
@@ -20,7 +20,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PROPS_END
     };
     static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
-    lv_obj_add_style(ui_AlbumImage, &style_common, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style(ui_AlbumImage, &style_common, 0);
   }
 
   //////////////////// Music Title ////////////////////
@@ -39,7 +39,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PROPS_END
     };
     static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
-    lv_obj_add_style(ui_MusicTitle, &style_common, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style(ui_MusicTitle, &style_common, 0);
   }
 
   //////////////////// Start Time ////////////////////
@@ -55,7 +55,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PROPS_END
     };
     static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
-    lv_obj_add_style(ui_ElapsedStart, &style_common, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style(ui_ElapsedStart, &style_common, 0);
   }
 
   //////////////////// Finish Time ////////////////////
@@ -71,7 +71,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PROPS_END
     };
     static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
-    lv_obj_add_style(ui_ElapsedEnd, &style_common, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style(ui_ElapsedEnd, &style_common, 0);
   }
 
   //////////////////// Elapsed Time ////////////////////
@@ -184,7 +184,7 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_t *obj = lv_checkbox_create(ui_ScreenMain);
     lv_checkbox_set_text_static(obj, "");
     lv_obj_set_style_x  (obj, ICON_OFFSET_R+1,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_y  (obj, LV_PCT_Y(-44),    (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_y  (obj, LV_PCT_Y(-27),    (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_common,    (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_default_R, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_checked_R, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
@@ -195,7 +195,7 @@ void ui_ScreenMain_screen_init(void) {
     obj = lv_checkbox_create(ui_ScreenMain);
     lv_checkbox_set_text_static(obj, "");
     lv_obj_set_style_x  (obj, ICON_OFFSET_L-1,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_y  (obj, LV_PCT_Y(-44),    (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_y  (obj, LV_PCT_Y(-27),    (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_common,    (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_default_L, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_checked_L, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
@@ -214,6 +214,22 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_event_cb (obj, ui_event_GoOptions, LV_EVENT_CLICKED, NULL);
   }
 
+  //////////////////// Bluetooth Icon ////////////////////
+  {
+    lv_obj_t *obj = lv_image_create(ui_ScreenMain);
+    lv_image_set_src(obj, &img_bluetooth_off);
+
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
+      LV_STYLE_CONST_X(ICON_OFFSET_L),
+      LV_STYLE_CONST_Y(LV_PCT_Y(-44)),
+      LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
+      LV_STYLE_CONST_IMAGE_OPA(64),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
+    lv_obj_add_style(obj, &style_common, 0);
+  }
+
   //////////////////// Heart Icon ////////////////////
   lv_obj_t *ui_Favorite = lv_checkbox_create(ui_ScreenMain);
   lv_checkbox_set_text_static(ui_Favorite, "");
@@ -222,7 +238,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_WIDTH(25),
       LV_STYLE_CONST_HEIGHT(25),
       LV_STYLE_CONST_X(ICON_OFFSET_R),
-      LV_STYLE_CONST_Y(LV_PCT_Y(-27)),
+      LV_STYLE_CONST_Y(LV_PCT_Y(-44)),
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };

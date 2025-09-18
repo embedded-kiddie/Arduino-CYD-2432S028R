@@ -49,11 +49,11 @@ static void delete_cb(lv_event_t *e) {
 void ui_ScreenAlbumList_screen_init(void) {
   if (ui_ScreenAlbumList == NULL) {
     ui_ScreenAlbumList = lv_obj_create(NULL);
-    lv_obj_set_style_bg_color     (ui_ScreenAlbumList, UI_COLOR_BACKGROUND, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_event_cb           (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_GESTURE, NULL);
-    lv_obj_add_event_cb           (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_LOADED, NULL);
-    lv_obj_add_event_cb           (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_UNLOADED, NULL);
-    lv_obj_add_event_cb           (ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenAlbumList);
+    lv_obj_set_style_bg_color (ui_ScreenAlbumList, UI_COLOR_BACKGROUND, 0);
+    lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_GESTURE, NULL);
+    lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_LOADED, NULL);
+    lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_UNLOADED, NULL);
+    lv_obj_add_event_cb       (ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenAlbumList);
 
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(27),
