@@ -264,19 +264,6 @@ void ui_event_PlayListToMain(lv_event_t *e) {
   lv_screen_load_anim_t anim = dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT;
   _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
 }
-#if false
-void ui_event_MenuBluetoothOn(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
-
-  _ui_screen_change(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenAlbumList_screen_init);
-}
-
-void ui_event_MenuBluetoothOff(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
-
-  _ui_screen_change(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenAlbumList_screen_init);
-}
-#endif
 
 /*--------------------------------------------------------------------------------
  * Event handlers for Screen Options

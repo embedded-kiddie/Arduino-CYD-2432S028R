@@ -12,7 +12,7 @@
 #include "../debug.h"
 
 // Arrow button
-#define SHOW_ARROW_BUTTON true
+#define SHOW_ARROW_BUTTON false
 
 // Screen size / coordinate
 #define SCREEN_WIDTH      240
@@ -53,31 +53,27 @@ void ui_event_VolumeMin   (lv_event_t *e);
 // SCREEN: ui_ScreenAlbumList
 extern lv_obj_t *ui_ScreenAlbumList;
 void ui_event_ScreenAlbumList(lv_event_t *e);
-void ui_ScreenAlbumList_screen_init(void);
+void ui_ScreenAlbumList_screen_init  (void);
 void ui_ScreenAlbumList_screen_deinit(void);
 void ui_ScreenAlbumList_create_list(const char *root);
 
 // SCREEN: ui_ScreenPlayList
 extern lv_obj_t *ui_ScreenPlayList;
-void ui_ScreenPlayList_screen_init(void);
+void ui_ScreenPlayList_screen_init  (void);
 void ui_ScreenPlayList_screen_deinit(void);
 void ui_event_ScreenPlayList(lv_event_t *e);
 void ui_event_PlayList_Heart(lv_event_t *e);
 void ui_event_PlayListToMain(lv_event_t *e);
-void ui_list_update_icon(uint32_t track_id, bool state);
-void ui_list_update_cell(uint32_t track_id, bool state);
-void ui_list_update_play(uint32_t track_id, bool state);
-void ui_list_focus_playing(uint32_t track_id);
+void ui_list_update_icon    (uint32_t track_id, bool state);
+void ui_list_update_cell    (uint32_t track_id, bool state);
+void ui_list_update_play    (uint32_t track_id, bool state);
+void ui_list_focus_playing  (uint32_t track_id);
 void ui_list_update_duration(uint32_t track_id, uint32_t duration);
-#if false
-void ui_event_MenuBluetoothOn (lv_event_t *e);
-void ui_event_MenuBluetoothOff(lv_event_t *e);
-#endif
 
 // SCREEN: ui_ScreenOptions
 extern lv_obj_t *ui_ScreenOptions;
 void ui_event_ScreenOptions(lv_event_t *e);
-void ui_ScreenOptions_screen_init(void);
+void ui_ScreenOptions_screen_init  (void);
 void ui_ScreenOptions_screen_deinit(void);
 void ui_set_option_backlight(void);
 void ui_set_option_sleeptime(void);
