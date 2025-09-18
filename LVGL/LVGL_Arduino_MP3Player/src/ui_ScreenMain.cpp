@@ -110,6 +110,7 @@ void ui_ScreenMain_screen_init(void) {
   if (lv_slider_get_mode      (ui_ElapsedBar) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_ElapsedBar, 0, LV_ANIM_OFF);
   if (lv_obj_get_style_pad_top(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_ElapsedBar, lv_obj_get_style_pad_right(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) + 1, (uint32_t)LV_PART_MAIN);
 
+#if SHOW_ARROW_BUTTON
   //////////////////// Menu Icon ////////////////////
   {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
@@ -213,6 +214,7 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style    (obj, &style_pressed,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
     lv_obj_add_event_cb (obj, ui_event_GoOptions, LV_EVENT_CLICKED, NULL);
   }
+#endif // SHOW_ARROW_BUTTON
 
   //////////////////// Bluetooth Icon ////////////////////
   {

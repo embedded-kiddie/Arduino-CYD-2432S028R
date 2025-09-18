@@ -90,56 +90,59 @@ void ui_ScreenOptions_screen_init(void) {
   if (ui_ScreenOptions == NULL) {
     ui_ScreenOptions = lv_obj_create(NULL);
     lv_obj_set_style_bg_color (ui_ScreenOptions, UI_COLOR_BACKGROUND, 0);
-    lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_OptionsToMain, LV_EVENT_GESTURE, NULL);
+    lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_ScreenOptions, LV_EVENT_GESTURE, NULL);
     lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_ScreenOptions, LV_EVENT_SCREEN_UNLOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenOptions, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenOptions);
 
-    //////////////////// Styles For Back Icon ////////////////////
-    static constexpr lv_style_const_prop_t style_prop_common[] = {
-      LV_STYLE_CONST_WIDTH(27),
-      LV_STYLE_CONST_HEIGHT(27),
-      LV_STYLE_CONST_X(LV_PCT_X(0)),
-      LV_STYLE_CONST_Y(LV_PCT_Y(44)),
-      LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_default[] = {
-      LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_down),
-      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
-      LV_STYLE_CONST_BORDER_WIDTH(0),
-      LV_STYLE_CONST_PAD_TOP(8),
-      LV_STYLE_CONST_PAD_RIGHT(0),
-      LV_STYLE_CONST_PAD_BOTTOM(0),
-      LV_STYLE_CONST_PAD_LEFT(8),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
-      LV_STYLE_CONST_PAD_TOP(10),
-      LV_STYLE_CONST_PAD_LEFT(10),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_checked[] = {
-      LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_down),
-      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
-    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
-
+#if SHOW_ARROW_BUTTON
     //////////////////// Back Icon ////////////////////
-    lv_obj_t *obj = lv_checkbox_create(ui_ScreenOptions);
-    lv_checkbox_set_text_static(obj, "");
-    lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_event_cb (obj, ui_event_OptionsToMain, LV_EVENT_CLICKED, NULL);
+    {
+      static constexpr lv_style_const_prop_t style_prop_common[] = {
+        LV_STYLE_CONST_WIDTH(27),
+        LV_STYLE_CONST_HEIGHT(27),
+        LV_STYLE_CONST_X(LV_PCT_X(0)),
+        LV_STYLE_CONST_Y(LV_PCT_Y(44)),
+        LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_default[] = {
+        LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_down),
+        LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+        LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+        LV_STYLE_CONST_BORDER_WIDTH(0),
+        LV_STYLE_CONST_PAD_TOP(8),
+        LV_STYLE_CONST_PAD_RIGHT(0),
+        LV_STYLE_CONST_PAD_BOTTOM(0),
+        LV_STYLE_CONST_PAD_LEFT(8),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_pressed[] = {
+        LV_STYLE_CONST_PAD_TOP(10),
+        LV_STYLE_CONST_PAD_LEFT(10),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_checked[] = {
+        LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_down),
+        LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+      static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+      static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
+      static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+
+      lv_obj_t *obj = lv_checkbox_create(ui_ScreenOptions);
+      lv_checkbox_set_text_static(obj, "");
+      lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+      lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+      lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+      lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+      lv_obj_add_event_cb (obj, ui_event_ScreenOptions, LV_EVENT_CLICKED, NULL);
+    }
+#endif
 
     //////////////////// Backlight Label ////////////////////
-    obj = lv_label_create(ui_ScreenOptions);
+    lv_obj_t *obj = lv_label_create(ui_ScreenOptions);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
     lv_label_set_text_static(obj, "Backlight Off");
 

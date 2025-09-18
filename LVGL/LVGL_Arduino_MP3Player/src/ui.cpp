@@ -72,7 +72,6 @@ static LV_STYLE_CONST_INIT(album_style, (void*)style_prop_album);
 void ui_event_ScreenMain(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_GESTURE);
 
-  lv_indev_wait_release(lv_indev_active());
   lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
 
   if (dir == LV_DIR_RIGHT) {
@@ -189,11 +188,21 @@ void ui_event_ElapsedBar(lv_event_t *e) {
  *--------------------------------------------------------------------------------*/
 void ui_event_ScreenAlbumList(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
-  DBG_ASSERT(event_code == LV_EVENT_GESTURE || event_code == LV_EVENT_SCREEN_LOADED || event_code == LV_EVENT_SCREEN_UNLOADED);
+  DBG_ASSERT(
+    event_code == LV_EVENT_CLICKED ||
+    event_code == LV_EVENT_GESTURE ||
+    event_code == LV_EVENT_SCREEN_LOADED ||
+    event_code == LV_EVENT_SCREEN_UNLOADED
+  );
 
-  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
-    lv_indev_wait_release(lv_indev_active());
+  if (event_code == LV_EVENT_CLICKED) {
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
+  }
+
+  else if (event_code == LV_EVENT_GESTURE) {
+    lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
+    lv_screen_load_anim_t anim = dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT;
+    _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
   }
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
@@ -216,12 +225,6 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
     lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
     ui_state = UI_STATE_START;
   }
-}
-
-void ui_event_AlbumToMainRight(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
-
-  _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
 }
 
 /*--------------------------------------------------------------------------------
@@ -279,23 +282,25 @@ void ui_event_MenuBluetoothOff(lv_event_t *e) {
  * Event handlers for Screen Options
  *--------------------------------------------------------------------------------*/
 void ui_event_ScreenOptions(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_SCREEN_UNLOADED);
-
-  ui_ScreenOptions_screen_deinit();
-}
-
-void ui_event_OptionsToMain(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
-  DBG_ASSERT(event_code == LV_EVENT_CLICKED || event_code == LV_EVENT_GESTURE);
+  DBG_ASSERT(
+    event_code == LV_EVENT_CLICKED ||
+    event_code == LV_EVENT_GESTURE ||
+    event_code == LV_EVENT_SCREEN_UNLOADED
+  );
 
   if (event_code == LV_EVENT_CLICKED) {
     _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
   }
 
-  else {
+  else if (event_code == LV_EVENT_GESTURE) {
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
     lv_screen_load_anim_t anim = dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM;
     _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
+  }
+
+  else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
+    ui_ScreenOptions_screen_deinit();
   }
 }
 

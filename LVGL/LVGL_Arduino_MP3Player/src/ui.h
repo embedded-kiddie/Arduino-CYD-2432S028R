@@ -9,17 +9,21 @@
 #include <lvgl.h>
 #include "ui_helpers.h"
 #include "ui_events.h"
-
 #include "../debug.h"
 
+// Arrow button
+#define SHOW_ARROW_BUTTON true
+
 // Screen size / coordinate
-#define SCREEN_WIDTH    240
-#define SCREEN_HEIGHT   320
-#define LV_PCT_X(a)     (SCREEN_WIDTH  * (a) / 100) // for LV_STYLE_CONST_X
-#define LV_PCT_Y(a)     (SCREEN_HEIGHT * (a) / 100) // for LV_STYLE_CONST_Y
-#define ICON_OFFSET_R   (SCREEN_WIDTH / 2 - 24)
-#define ICON_OFFSET_L   (24 - SCREEN_WIDTH / 2)
-#define DROPDOWN_WIDTH  100
+#define SCREEN_WIDTH      240
+#define SCREEN_HEIGHT     320
+#define LV_PCT_X(a)       (SCREEN_WIDTH  * (a) / 100) // for LV_STYLE_CONST_X
+#define LV_PCT_Y(a)       (SCREEN_HEIGHT * (a) / 100) // for LV_STYLE_CONST_Y
+#define ICON_OFFSET_R     (SCREEN_WIDTH / 2 - 24) // need LV_ALIGN_CENTER
+#define ICON_OFFSET_L     (24 - SCREEN_WIDTH / 2) // need LV_ALIGN_CENTER
+#define DROPDOWN_WIDTH    100
+#define ALBUM_CELL_HEIGHT 32
+
 
 // SCREEN: ui_ScreenMain
 extern lv_obj_t *ui_ScreenMain;
@@ -52,7 +56,6 @@ void ui_event_ScreenAlbumList(lv_event_t *e);
 void ui_ScreenAlbumList_screen_init(void);
 void ui_ScreenAlbumList_screen_deinit(void);
 void ui_ScreenAlbumList_create_list(const char *root);
-void ui_event_AlbumToMainRight(lv_event_t *e);
 
 // SCREEN: ui_ScreenPlayList
 extern lv_obj_t *ui_ScreenPlayList;
@@ -74,7 +77,6 @@ void ui_event_MenuBluetoothOff(lv_event_t *e);
 // SCREEN: ui_ScreenOptions
 extern lv_obj_t *ui_ScreenOptions;
 void ui_event_ScreenOptions(lv_event_t *e);
-void ui_event_OptionsToMain(lv_event_t *e);
 void ui_ScreenOptions_screen_init(void);
 void ui_ScreenOptions_screen_deinit(void);
 void ui_set_option_backlight(void);
