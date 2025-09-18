@@ -92,14 +92,14 @@ std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
 }
 
 /*--------------------------------------------------------------------------------
- * Generate a path to the metadata file (extract "/directory/filename.ext")
+ * Generate a path to the metadata file (extract "/album-title/music-title.mp3")
  *--------------------------------------------------------------------------------*/
 std::string CYD_MP3Player::GetMetaPath(uint32_t playNo) {
   std::string path = GetFilePath(playNo);
-  size_t pos = path.find_last_of('/');
-  const char *p = &path.c_str()[pos];
-  if (pos) {
-    for (--p; *p != '/'; --p);
+  const char *q = path.c_str();
+  const char *p = strrchr(q, '/'); // 'p' cannot be NULL
+  if (p != q) {
+    for (--p; *p != '/'; --p); // find another '/'
   }
 
   MD5Hex_t hex;

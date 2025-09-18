@@ -50,7 +50,7 @@ lv_obj_t *ui_ScreenOptions;
 static constexpr lv_style_const_prop_t style_prop_album[] = {
   LV_STYLE_CONST_SHADOW_WIDTH(10),
   LV_STYLE_CONST_SHADOW_OFFSET_Y(5),
-  LV_STYLE_CONST_SHADOW_OPA(LV_OPA_50),
+  LV_STYLE_CONST_SHADOW_OPA(LV_OPA_40),
   LV_STYLE_CONST_PROPS_END
 };
 static LV_STYLE_CONST_INIT(album_style, (void*)style_prop_album);

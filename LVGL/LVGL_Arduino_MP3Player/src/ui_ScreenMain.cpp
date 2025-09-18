@@ -15,7 +15,7 @@ void ui_ScreenMain_screen_init(void) {
   {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_X(0),
-      LV_STYLE_CONST_Y(LV_PCT_Y(-23)),
+      LV_STYLE_CONST_Y(LV_PCT_Y(-25)),
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };
@@ -32,7 +32,7 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_HEIGHT(LV_SIZE_CONTENT),
       LV_STYLE_CONST_WIDTH(LV_PCT_X(90)),
       LV_STYLE_CONST_X(0),
-      LV_STYLE_CONST_Y(LV_PCT_Y(4)),
+      LV_STYLE_CONST_Y(LV_PCT_Y(2)),
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_MEDIUM),
       LV_STYLE_CONST_TEXT_ALIGN(LV_TEXT_ALIGN_CENTER),
@@ -377,7 +377,7 @@ void ui_ScreenMain_screen_init(void) {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(50),
       LV_STYLE_CONST_HEIGHT(50),
-      LV_STYLE_CONST_X(LV_PCT_X(2)),
+      LV_STYLE_CONST_X(LV_PCT_X(0)),
       LV_STYLE_CONST_Y(LV_PCT_Y(27)),
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
@@ -414,7 +414,7 @@ void ui_ScreenMain_screen_init(void) {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(45),
       LV_STYLE_CONST_HEIGHT(45),
-      LV_STYLE_CONST_X(LV_PCT_X(26)),
+      LV_STYLE_CONST_X(LV_PCT_X(27)),
       LV_STYLE_CONST_Y(LV_PCT_Y(28)),
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
@@ -458,7 +458,7 @@ void ui_ScreenMain_screen_init(void) {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(45),
       LV_STYLE_CONST_HEIGHT(45),
-      LV_STYLE_CONST_X(LV_PCT_X(-22)),
+      LV_STYLE_CONST_X(LV_PCT_X(-26)),
       LV_STYLE_CONST_Y(LV_PCT_Y(28)),
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
