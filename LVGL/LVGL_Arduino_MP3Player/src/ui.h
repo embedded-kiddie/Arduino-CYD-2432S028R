@@ -9,6 +9,7 @@
 #include <lvgl.h>
 #include "ui_helpers.h"
 #include "ui_events.h"
+
 #include "../debug.h"
 
 // Arrow button
@@ -21,9 +22,8 @@
 #define LV_PCT_Y(a)       (SCREEN_HEIGHT * (a) / 100) // for LV_STYLE_CONST_Y
 #define ICON_OFFSET_R     (SCREEN_WIDTH / 2 - 24) // need LV_ALIGN_CENTER
 #define ICON_OFFSET_L     (24 - SCREEN_WIDTH / 2) // need LV_ALIGN_CENTER
-#define DROPDOWN_WIDTH    100
+#define OPTIONS_WIDTH     100
 #define ALBUM_CELL_HEIGHT 32
-
 
 // SCREEN: ui_ScreenMain
 extern lv_obj_t *ui_ScreenMain;

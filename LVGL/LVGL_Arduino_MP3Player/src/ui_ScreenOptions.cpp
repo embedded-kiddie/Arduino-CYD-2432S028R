@@ -51,7 +51,7 @@ static void backlight_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectBacklight = lv_dropdown_get_selected(obj);
+  ui_option.selectBacklight = lv_roller_get_selected(obj);
   ui_set_option_backlight();
 }
 
@@ -59,7 +59,7 @@ static void sleeptimer_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectSleepTimer = lv_dropdown_get_selected(obj);
+  ui_option.selectSleepTimer = lv_roller_get_selected(obj);
   ui_control.sleepStart = millis();
   ui_set_option_sleeptime();
 }
@@ -147,13 +147,13 @@ void ui_ScreenOptions_screen_init(void) {
     lv_label_set_text_static(obj, "Backlight Off");
 
     //////////////////// Backlight Dropdown ////////////////////
-    obj = lv_dropdown_create(ui_ScreenOptions);
+    obj = lv_roller_create(ui_ScreenOptions);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11));
-    lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_width(obj, OPTIONS_WIDTH, 0);
     lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_dropdown_set_options_static(obj, opts_backlight.options);
-    lv_dropdown_set_selected(obj, ui_option.selectBacklight);
+    lv_roller_set_options(obj, opts_backlight.options, LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_selected(obj, ui_option.selectBacklight, LV_ANIM_ON);
+    lv_roller_set_visible_row_count(obj, 3);
 
     //////////////////// Sleep Timer Label ////////////////////
     obj = lv_label_create(ui_ScreenOptions);
@@ -161,13 +161,13 @@ void ui_ScreenOptions_screen_init(void) {
     lv_label_set_text_static(obj, "Sleep Timer");
 
     //////////////////// Sleep Timer Dropdown ////////////////////
-    obj = lv_dropdown_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, SCREEN_WIDTH - DROPDOWN_WIDTH - LV_PCT_X(5), LV_PCT_Y(11));
-    lv_obj_set_size(obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, 0);
+    obj = lv_roller_create(ui_ScreenOptions);
+    lv_obj_set_pos(obj, SCREEN_WIDTH - OPTIONS_WIDTH - LV_PCT_X(5), LV_PCT_Y(11));
+    lv_obj_set_style_width(obj, OPTIONS_WIDTH, 0);
     lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_dropdown_set_options_static(obj, opts_sleeptime.options);
-    lv_dropdown_set_selected(obj, ui_option.selectSleepTimer);
+    lv_roller_set_options(obj, opts_sleeptime.options, LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_selected(obj, ui_option.selectSleepTimer, LV_ANIM_ON);
+    lv_roller_set_visible_row_count(obj, 3);
   }
 }
 

@@ -15,7 +15,11 @@ void ui_ScreenMain_screen_init(void) {
   {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_X(0),
-      LV_STYLE_CONST_Y(LV_PCT_Y(-25)),
+#if SHOW_ARROW_BUTTON
+      LV_STYLE_CONST_Y(LV_PCT_Y(-24)),
+#else
+      LV_STYLE_CONST_Y(LV_PCT_Y(-26)),
+#endif
       LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
       LV_STYLE_CONST_PROPS_END
     };

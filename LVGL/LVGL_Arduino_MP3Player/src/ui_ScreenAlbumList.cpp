@@ -108,7 +108,7 @@ void ui_ScreenAlbumList_screen_init(void) {
     //////////////////// Dropdown List ////////////////////
     obj = lv_dropdown_create(ui_ScreenAlbumList);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(11));
-    lv_obj_set_size         (obj, DROPDOWN_WIDTH, LV_SIZE_CONTENT);
+    lv_obj_set_size         (obj, OPTIONS_WIDTH, LV_SIZE_CONTENT);
     lv_obj_add_event_cb     (obj, playlist_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options (obj, "All");
     lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
