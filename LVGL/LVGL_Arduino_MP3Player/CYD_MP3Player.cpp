@@ -5,9 +5,13 @@
 #include <stdlib.h> // atoi()
 #include <string.h> // strcpy(), strtok_r(), strrchr()
 #include <random>
+#include <filesystem>
 
 #include "CYD_MP3Player.h"
+
+#if ! defined (SDFATFS_USED)
 #include "MD5.h"
+#endif
 
 /*--------------------------------------------------------------------------------
  * Begin with SD or SdFat
@@ -26,34 +30,21 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
     return false;
   }
 
+#if   0
   // Create directories for metadata
   std::string path = m_root + META_DATA_DIR;
-  if (!SD.exists(path.c_str())) {
-    if (!SD.mkdir(path.c_str())) {
-      m_error = "mkdir failed: " + path;
-      DBG_EXEC(printf("%s\n", m_error.c_str()));
-      return false;
-    }
+  if (!SD.exists(path.c_str()) && !SD.mkdir(path.c_str())) {
+    m_error = "mkdir failed: " + path;
+    DBG_EXEC(printf("%s\n", m_error.c_str()));
+    return false;
   }
-
-  const char* dirs[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
-  for (int i = 0; i < sizeof(dirs) / sizeof(char*); i++) {
-    path = m_root + META_DATA_DIR + dirs[i];
-    if (!SD.exists(path.c_str())) {
-      if (!SD.mkdir(path.c_str())) {
-        m_error = "mkdir failed: " + path;
-        DBG_EXEC(printf("%s\n", m_error.c_str()));
-        return false;
-      }
-    }
-  }
+#endif
 
 #if MY_USE_FS_ARDUINO_SD != 0
   lv_fs_arduino_sd_init(); // Arduino SD File System for image
 #endif
 
   SetVolume(volume);
-
   return true;
 }
 
@@ -95,19 +86,17 @@ std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
  * Generate a path to the metadata file (extract "/album-title/music-title.mp3")
  *--------------------------------------------------------------------------------*/
 std::string CYD_MP3Player::GetMetaPath(uint32_t playNo) {
-  std::string path = GetFilePath(playNo);
-  const char *q = path.c_str();
-  const char *p = strrchr(q, '/'); // 'p' cannot be NULL
-  if (p != q) {
-    for (--p; *p != '/'; --p); // find another '/'
-  }
+  std::filesystem::path p = GetFilePath(playNo);
+  std::string metadir = p.parent_path().string() + "/" META_DATA_DIR;
 
+#ifdef _MD5_H_
   MD5Hex_t hex;
-  MD5::make_hash(p+1, hex); // Skip leading '/'
-  MD5::make_digest(hex, 5); // e.g. "0123456789" (get 5 x 2 characters of string)
-  hex.digest[1] = '/';      // e.g. "0/23456789"
-
-  return path.assign(m_root + META_DATA_DIR + hex.digest + META_DATA_EXT);
+  MD5::make_hash(p.stem().c_str(), hex);
+  MD5::make_digest(hex, 4);                 // e.g. "12345678" (get 4 x 2 characters of string)
+  return metadir + hex.digest + META_DATA_EXT; // e.g. parent_path/@meta/12345678.dat
+#else
+  return metadir + p.stem().string() + META_DATA_EXT;
+#endif
 }
 
 /*--------------------------------------------------------------------------------
@@ -127,6 +116,16 @@ void CYD_MP3Player::LoadMetaData(uint32_t playNo, MetaData_t *meta) {
 bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
   if (!audioIsPlaying()) {
     std::string file = GetMetaPath(playNo);
+
+    // check if meta directory exists
+    std::filesystem::path p = file;
+    const char *dir = p.parent_path().c_str();
+    if (!SD.exists(dir) && !SD.mkdir(dir)) {
+      m_error = "mkdir failed: " + std::string(dir);
+      DBG_EXEC(printf("%s\n", m_error.c_str()));
+      return false;
+    }
+
     File fd = SD.open(file.c_str(), FILE_WRITE);
     if (fd) {
       meta->saved = meta->selected;
@@ -136,6 +135,39 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
     }
   }
   return false;
+}
+
+/*--------------------------------------------------------------------------------
+ * Get metadata from play list and save it to a dedicated file
+ *--------------------------------------------------------------------------------*/
+void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
+  MP3File_t *file = GetPlayList(playNo);
+  if (file) {
+    *meta = file->meta;
+  } else {
+    *meta = {}; // Never get here
+  }
+}
+
+bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
+  MP3File_t *file = GetPlayList(playNo);
+  if (file) {
+    file->meta = *meta;
+    return SaveMetaData(playNo, meta);
+  }
+  return false; // Never get here
+}
+
+bool CYD_MP3Player::UpdateMetaData(void) {
+  bool ret = true;
+  int i = 0;
+  for (auto& file : m_list) {
+    if (file.meta.saved != file.meta.selected) {
+      ret &= SaveMetaData(i, &file.meta);
+    }
+    i++;
+  }
+  return ret;
 }
 
 /*--------------------------------------------------------------------------------
@@ -156,7 +188,6 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
 
   if (m_list.size() == 0) {
     scan_audio_files(m_tree);
-
     int i = 0;
     for (auto &list : m_list) {
       LoadMetaData(i++, &list.meta);
@@ -280,39 +311,6 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
   } else {
     tags = {}; // Never get here
   }
-}
-
-/*--------------------------------------------------------------------------------
- * Get metadata from play list and save it to a dedicated file
- *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
-  MP3File_t *file = GetPlayList(playNo);
-  if (file) {
-    *meta = file->meta;
-  } else {
-    *meta = {}; // Never get here
-  }
-}
-
-bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
-  MP3File_t *file = GetPlayList(playNo);
-  if (file) {
-    file->meta = *meta;
-    return SaveMetaData(playNo, meta);
-  }
-  return false; // Never get here
-}
-
-bool CYD_MP3Player::UpdateMetaData(void) {
-  bool ret = true;
-  int i = 0;
-  for (auto& file : m_list) {
-    if (file.meta.saved != file.meta.selected) {
-      ret &= SaveMetaData(i, &file.meta);
-    }
-    i++;
-  }
-  return ret;
 }
 
 /*--------------------------------------------------------------------------------

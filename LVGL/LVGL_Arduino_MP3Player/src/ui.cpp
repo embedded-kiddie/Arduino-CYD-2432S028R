@@ -26,7 +26,7 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 #define PERIOD_TAKS1 1000 // [msec]
 #define PERIOD_TAKS2 100  // [msec]
 
-///////////////////// VARIABLES ////////////////////
+///////////////////// SCREENS ////////////////////
 // SCREEN: ui_ScreenMain
 lv_obj_t *ui_ScreenMain;
 lv_obj_t *ui_MusicTitle;
@@ -85,7 +85,8 @@ void ui_event_ScreenMain(lv_event_t *e) {
   }
 
   else if (dir == LV_DIR_TOP || dir == LV_DIR_BOTTOM) {
-    _ui_screen_change(&ui_ScreenOptions, (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM), 500, 0, &ui_ScreenOptions_screen_init);
+    lv_screen_load_anim_t anim = (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM);
+    _ui_screen_change(&ui_ScreenOptions, anim, 500, 0, &ui_ScreenOptions_screen_init);
   }
 }
 
@@ -132,7 +133,7 @@ void ui_event_ButtonPlay(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   lv_state_t state = lv_obj_get_state(ui_ButtonPlay);
-  ui_state = state & LV_STATE_CHECKED ? UI_STATE_RESUME : UI_STATE_PAUSE;
+  ui_state = (state & LV_STATE_CHECKED ? UI_STATE_RESUME : UI_STATE_PAUSE);
 }
 
 void ui_event_ButtonNext(lv_event_t *e) {
@@ -201,7 +202,7 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
 
   else if (event_code == LV_EVENT_GESTURE) {
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
-    lv_screen_load_anim_t anim = dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT;
+    lv_screen_load_anim_t anim = (dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT);
     _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
   }
 
@@ -215,7 +216,6 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
       ui_state = UI_STATE_PAUSE;
     }
 
-    // render the option screen
     ui_ScreenAlbumList_create_list(MP3_PATH_ROOT);
   }
 
@@ -282,7 +282,7 @@ void ui_event_ScreenOptions(lv_event_t *e) {
 
   else if (event_code == LV_EVENT_GESTURE) {
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
-    lv_screen_load_anim_t anim = dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM;
+    lv_screen_load_anim_t anim = (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM);
     _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
   }
 

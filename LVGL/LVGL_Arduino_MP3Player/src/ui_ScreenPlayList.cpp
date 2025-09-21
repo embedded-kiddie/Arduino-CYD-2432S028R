@@ -343,7 +343,7 @@ static void ui_ScreenPlayList_list_init(lv_obj_t* parent) {
     slider = lv_slider_create(parent);
     lv_obj_align                    (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
     lv_obj_remove_flag              (slider, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size                 (slider, 4, LIST_CELL_VIEWS * LIST_CELL_HEIGHT);
+    lv_obj_set_size                 (slider, 4, SCREEN_HEIGHT);
     lv_obj_set_style_radius         (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa         (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color       (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
