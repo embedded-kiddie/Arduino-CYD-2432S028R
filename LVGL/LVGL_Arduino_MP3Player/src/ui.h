@@ -25,6 +25,22 @@
 #define OPTIONS_WIDTH     100
 #define ALBUM_CELL_HEIGHT 32
 
+#define UI_COLOR_BACKGROUND   { .blue = 0xf5, .green = 0xf5, .red = 0xf5 }  // lv_color_hex(0xf5f5f5)
+#define UI_COLOR_SLIDER       { .blue = 0x00, .green = 0x00, .red = 0x00 }  // lv_color_hex(0x000000)
+#define UI_COLOR_CHECKBOX     { .blue = 0xff, .green = 0x40, .red = 0x40 }  // lv_color_hex(0x4040ff)
+#define UI_COLOR_LIST_DEFAULT { .blue = 0x7f, .green = 0x5a, .red = 0x5a }  // lv_color_hex(0x5a5a7f)
+#define UI_COLOR_LIST_PRESSED { .blue = 0x65, .green = 0x49, .red = 0x4c }  // lv_color_hex(0x4c4965)
+#define UI_COLOR_LIST_SHADOW  { .blue = 0x4b, .green = 0x2d, .red = 0x2d }  // lv_color_hex(0x2d2d4b)
+#define UI_COLOR_LIST_ARTIST  { .blue = 0xbe, .green = 0xb0, .red = 0xb1 }  // lv_color_hex(0xb1b0be)
+#define UI_COLOR_LIST_SLIDER  { .blue = 0xee, .green = 0xee, .red = 0xee }  // lv_color_hex(0xeeeeee)
+
+// Custom font
+#define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
+#define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
+
+LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
+LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
+
 // SCREEN: ui_ScreenMain
 extern lv_obj_t *ui_ScreenMain;
 extern lv_obj_t *ui_MusicTitle;
@@ -134,22 +150,6 @@ void ui_set_playNo(uint32_t playNo);
 
 uint32_t ui_get_playNo(void);
 uint32_t ui_get_counts(void);
-
-#define UI_COLOR_BACKGROUND   { .blue = 0xf5, .green = 0xf5, .red = 0xf5 }  // lv_color_hex(0xf5f5f5)
-#define UI_COLOR_SLIDER       { .blue = 0x00, .green = 0x00, .red = 0x00 }  // lv_color_hex(0x000000)
-#define UI_COLOR_CHECKBOX     { .blue = 0xff, .green = 0x40, .red = 0x40 }  // lv_color_hex(0x4040ff)
-#define UI_COLOR_LIST_DEFAULT { .blue = 0x7f, .green = 0x5a, .red = 0x5a }  // lv_color_hex(0x5a5a7f)
-#define UI_COLOR_LIST_PRESSED { .blue = 0x65, .green = 0x49, .red = 0x4c }  // lv_color_hex(0x4c4965)
-#define UI_COLOR_LIST_SHADOW  { .blue = 0x4b, .green = 0x2d, .red = 0x2d }  // lv_color_hex(0x2d2d4b)
-#define UI_COLOR_LIST_ARTIST  { .blue = 0xbe, .green = 0xb0, .red = 0xb1 }  // lv_color_hex(0xb1b0be)
-#define UI_COLOR_LIST_SLIDER  { .blue = 0xee, .green = 0xee, .red = 0xee }  // lv_color_hex(0xeeeeee)
-
-#define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
-#define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
-
-// Custom font
-LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
-LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 
 // Variables
 typedef struct {

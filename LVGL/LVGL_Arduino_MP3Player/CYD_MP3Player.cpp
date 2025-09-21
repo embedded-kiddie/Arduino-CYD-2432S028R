@@ -4,14 +4,11 @@
 #include <ctype.h>  // isdigit(), isprint()
 #include <stdlib.h> // atoi()
 #include <string.h> // strcpy(), strtok_r(), strrchr()
+#include <string>
 #include <random>
-#include <filesystem>
 
 #include "CYD_MP3Player.h"
-
-#if ! defined (SDFATFS_USED)
 #include "MD5.h"
-#endif
 
 /*--------------------------------------------------------------------------------
  * Begin with SD or SdFat
@@ -83,20 +80,18 @@ std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
 }
 
 /*--------------------------------------------------------------------------------
- * Generate a path to the metadata file (extract "/album-title/music-title.mp3")
+ * Generate a path to the metadata file
  *--------------------------------------------------------------------------------*/
 std::string CYD_MP3Player::GetMetaPath(uint32_t playNo) {
-  std::filesystem::path p = GetFilePath(playNo);
-  std::string metadir = p.parent_path().string() + "/" META_DATA_DIR;
+  std::string path = GetFilePath(playNo);
+  size_t pos = path.find_last_of('/') + 1;
 
-#ifdef _MD5_H_
   MD5Hex_t hex;
-  MD5::make_hash(p.stem().c_str(), hex);
-  MD5::make_digest(hex, 4);                 // e.g. "12345678" (get 4 x 2 characters of string)
-  return metadir + hex.digest + META_DATA_EXT; // e.g. parent_path/@meta/12345678.dat
-#else
-  return metadir + p.stem().string() + META_DATA_EXT;
-#endif
+  MD5::make_hash(&path[pos], hex);  // Skip leading '/'
+  MD5::make_digest(hex, 4);         // e.g. "12345678" (get 4 x 2 characters of string)
+
+  // parent_path/@meta/12345678.dat
+  return path.substr(0, pos) + META_DATA_DIR + hex.digest + META_DATA_EXT;
 }
 
 /*--------------------------------------------------------------------------------
@@ -118,10 +113,11 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
     std::string file = GetMetaPath(playNo);
 
     // check if meta directory exists
-    std::filesystem::path p = file;
-    const char *dir = p.parent_path().c_str();
-    if (!SD.exists(dir) && !SD.mkdir(dir)) {
-      m_error = "mkdir failed: " + std::string(dir);
+    size_t pos = file.find_last_of('/') + 1;
+    std::string dir = file.substr(0, pos);
+
+    if (!SD.exists(dir.c_str()) && !SD.mkdir(dir.c_str())) {
+      m_error = "mkdir failed: " + dir;
       DBG_EXEC(printf("%s\n", m_error.c_str()));
       return false;
     }
