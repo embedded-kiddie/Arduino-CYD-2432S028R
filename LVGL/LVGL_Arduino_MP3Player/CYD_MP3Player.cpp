@@ -167,6 +167,13 @@ bool CYD_MP3Player::UpdateMetaData(void) {
 }
 
 /*--------------------------------------------------------------------------------
+ * Clear all the nodes in tree
+ *--------------------------------------------------------------------------------*/
+void CYD_MP3Player::ClearAudioFiles(void) {
+  m_list.clear();
+}
+
+/*--------------------------------------------------------------------------------
  * Scan and create a list of audio m_list in a specified directory.
  *--------------------------------------------------------------------------------*/
 uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
@@ -183,43 +190,76 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
   }
 
   if (m_list.size() == 0) {
-    scan_audio_files(m_tree);
+    ScanAudioFiles();
+
     int i = 0;
     for (auto &list : m_list) {
       LoadMetaData(i++, &list.meta);
     }
 
-    SortPlayList(shuffle);
+    if (shuffle) {
+      ShuffleAudioFiles();
+    }
   }
 
   if (m_list.size() == 0) {
     m_error = "No music to play";
   }
 
+  DBG_EXEC({
+    m_tree->print_tree();
+    print_files();
+    printf("Total: %d\n", m_list.size());
+  });
+
   return m_list.size();
 }
 
 /*--------------------------------------------------------------------------------
- * Clear all the nodes in tree
+ * Scan audio files and make a play list
  *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::ClearPlayList(void) {
-  m_list.clear();
+void CYD_MP3Player::ScanAudioFiles(void) {
+  const size_t n = m_tree->get_n_leafs();
+
+  // extract audio files in the parents directory
+  for (int i = 0, parent = 0; parent < n; parent++) {
+    std::string path = m_tree->find_path(parent);
+    const Node *node = m_tree->get_node();
+    if (node == NULL || node->meta.checked == false) {
+      continue;
+    }
+
+    File file, dir = SD.open(path.c_str());
+
+    while (file = dir.openNextFile()) {
+#ifdef USE_SDFAT
+      char buf[BUF_SIZE];
+      file.getName(buf, sizeof(buf));
+      if (check_mp3(buf)) {
+        append(buf, parent);
+      }
+#else
+      if (check_mp3(file.name())) {
+        append(file.name(), parent);
+      }
+#endif
+      file.close();
+    }
+    dir.close();
+
+    std::sort(m_list.begin() + i, m_list.end(), [](MP3File_t &a, MP3File_t &b) {
+      return a.name.compare(b.name) < 0 ? true : false; // Ascending order
+    });
+    i = m_list.size();
+  }
 }
 
 /*--------------------------------------------------------------------------------
  * Sort file list
  *--------------------------------------------------------------------------------*/
-void CYD_MP3Player::SortPlayList(bool shuffle) {
-  if (shuffle) {
-    std::mt19937 engine(esp_random());
-    std::shuffle(m_list.begin(), m_list.end(), engine);
-  }
-
-  DBG_EXEC({
-    m_tree->print_tree();
-    print_files(m_tree);
-    printf("Total: %d\n", m_list.size());
-  });
+void CYD_MP3Player::ShuffleAudioFiles(void) {
+  std::mt19937 engine(esp_random());
+  std::shuffle(m_list.begin(), m_list.end(), engine);
 }
 
 /*--------------------------------------------------------------------------------

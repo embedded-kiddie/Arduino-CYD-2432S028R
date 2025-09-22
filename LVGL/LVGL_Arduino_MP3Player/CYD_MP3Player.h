@@ -103,8 +103,9 @@ public:
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_list.size(); }
   uint32_t    ScanPlayList(bool shuffle = true);
-  void        SortPlayList(bool shuffle = true);
-  void        ClearPlayList(void);
+  void        ClearAudioFiles(void);
+  void        ScanAudioFiles(void);
+  void        ShuffleAudioFiles(void);
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
   uint32_t    GetPictureNo(uint32_t playNo);
@@ -159,49 +160,10 @@ private:
     return false;
   }
 
-  /*--------------------------------------------------------------------------------
-   * Scan audio files and make a play list
-   *--------------------------------------------------------------------------------*/
-  void scan_audio_files(Node* tree) {
-    const size_t n = tree->get_n_leafs();
-
-    // extract audio files in the parents directory
-    for (int i = 0, parent = 0; parent < n; parent++) {
-      std::string path = tree->find_path(parent);
-      const Node *node = tree->get_node();
-      if (node == NULL || node->meta.checked == false) {
-        continue;
-      }
-
-      File file, dir = SD.open(path.c_str());
-
-      while (file = dir.openNextFile()) {
-#ifdef USE_SDFAT
-        char buf[BUF_SIZE];
-        file.getName(buf, sizeof(buf));
-        if (check_mp3(buf)) {
-          append(buf, parent);
-        }
-#else
-        if (check_mp3(file.name())) {
-          append(file.name(), parent);
-        }
-#endif
-        file.close();
-      }
-      dir.close();
-
-      std::sort(m_list.begin() + i, m_list.end(), [](MP3File_t &a, MP3File_t &b) {
-        return a.name.compare(b.name) < 0 ? true : false; // Ascending order
-      });
-      i = m_list.size();
-    }
-  }
-
-  void print_files(Node* tree) {
+  void print_files(void) {
     int i = 0; 
     for (auto &f : m_list) {
-      std::string path = tree->find_path(f.parent);
+      std::string path = m_tree->find_path(f.parent);
       printf("No %3d: %d/%d, %2d, %3d, %s/%s\n", i++, f.meta.saved, f.meta.selected, f.meta.pictureNo, f.meta.duration, path.c_str(), f.name.c_str());
     }
   }

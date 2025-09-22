@@ -133,7 +133,7 @@ void ui_ScreenAlbumList_screen_deinit(void) {
   if (ui_ScreenAlbumList) {
     // Clear playlist before creating a new list
     CYD_MP3Player *player = ui_get_player();
-    player->ClearPlayList();
+    player->ClearAudioFiles();
 
     lv_obj_delete_async(ui_ScreenAlbumList);
   }
