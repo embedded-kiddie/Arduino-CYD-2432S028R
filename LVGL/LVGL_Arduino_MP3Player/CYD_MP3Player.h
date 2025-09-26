@@ -24,8 +24,8 @@
 /*--------------------------------------------------------------------------------
  * Metadata file
  *--------------------------------------------------------------------------------*/
-#define META_DATA_DIR "@meta/"
-#define META_DATA_EXT ".dat"
+#define META_DATA_PREFIX  "@meta"
+#define META_DATA_SUFFIX  ".dat"
 
 /*--------------------------------------------------------------------------------
  * Thumnail of album picure
@@ -49,12 +49,19 @@
 #include <string>
 #include <vector>
 
+/*----------------------------------------------------------------------
+ * Meta data for MP3 audio file
+ *----------------------------------------------------------------------*/
 typedef struct {
-  bool saved    : 4;
-  bool selected : 4;
-  uint8_t pictureNo;
-  uint16_t duration;
+  uint16_t saved    : 1;
+  uint16_t selected : 1;
+  uint16_t duration : 14;
 } MetaData_t;
+
+typedef struct {
+  size_t      hash;
+  MetaData_t  meta;
+} MetaAlbum_t;
 
 typedef struct {
   MetaData_t meta;
@@ -70,9 +77,9 @@ typedef struct {
   MetaData_t meta;
   uint16_t parent;
   std::string name;
-} MP3File_t;
+} MP3List_t;
 
-typedef std::vector<MP3File_t> PlayList;
+typedef std::vector<MP3List_t> PlayList_t;
 
 class CYD_MP3Player {
 public:
@@ -89,23 +96,21 @@ private:
   std::string m_error = "";
   std::string m_root = "/";
 
-  MP3File_t*  GetPlayList (uint32_t playNo);
-  std::string GetMetaPath (uint32_t playNo);
-  void        LoadMetaData(uint32_t playNo, MetaData_t *meta);
+  MP3List_t*  GetPlayList (uint32_t playNo);
   bool        SaveMetaData(uint32_t playNo, MetaData_t *meta);
 
 public:
-  Node *m_tree = NULL;
-  PlayList m_list = {};
-  uint32_t m_playNo = 0;
+  Node *      m_tree = NULL;
+  PlayList_t  m_list = {};
+  uint32_t    m_playNo = 0;
 
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_list.size(); }
   uint32_t    ScanPlayList(bool shuffle = true);
-  void        ClearAudioFiles(void);
   void        ScanAudioFiles(void);
   void        ShuffleAudioFiles(void);
+  void        ClearAudioFiles(void);
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
   uint32_t    GetPictureNo(uint32_t playNo);
@@ -164,7 +169,7 @@ private:
     int i = 0; 
     for (auto &f : m_list) {
       std::string path = m_tree->find_path(f.parent);
-      printf("No %3d: %d/%d, %2d, %3d, %s/%s\n", i++, f.meta.saved, f.meta.selected, f.meta.pictureNo, f.meta.duration, path.c_str(), f.name.c_str());
+      printf("No %3d: %d/%d, %3d, %s/%s\n", i++, f.meta.saved, f.meta.selected, f.meta.duration, path.c_str(), f.name.c_str());
     }
   }
 };

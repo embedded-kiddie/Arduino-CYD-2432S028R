@@ -319,7 +319,7 @@ static void update_metadata(void) {
   uint32_t playNo = player.GetPlayNo();
   player.GetMetaData(playNo, &meta);
 
-  if (meta.duration < id3tags.meta.duration || meta.pictureNo == 0 || saveID3tags == true) {
+  if (meta.duration < id3tags.meta.duration || saveID3tags == true) {
 
     // prevent input while saving metadata to SD card
     lv_indev_enable(NULL, false);
@@ -336,10 +336,6 @@ static void update_metadata(void) {
     }
 
     bool update = false;
-    if (meta.pictureNo == 0) {
-      meta.pictureNo = player.GetPictureNo(playNo);
-      update = true;
-    }
 
     // update the playback duration at the end of file
     if (meta.duration < id3tags.meta.duration) {
@@ -402,12 +398,7 @@ static void display_picture(uint32_t playNo) {
 #else // MY_USE_FS_ARDUINO_SD == 0
 
   // displaying an image file on flash ROM
-  MetaData_t meta;
-  player.GetMetaData(playNo, &meta);
-  int pictNo = meta.pictureNo;
-  if (pictNo == 0) {
-    pictNo = player.GetPictureNo(playNo);
-  }
+  int pictNo = player.GetPictureNo(playNo);
 
   if (0 < pictNo && pictNo < N_PICTURES) {
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
@@ -631,7 +622,7 @@ UI_State_t ui_loop(void) {
       ui_state = nextState;
       break;
     case UI_STATE_ERROR:
-      lv_label_set_text_fmt(ui_MusicTitle, "%s %s.", LV_SYMBOL_WARNING, player.GetError());
+      lv_label_set_text_fmt(ui_MusicTitle, "%s %s", LV_SYMBOL_WARNING, player.GetError());
       ui_state = UI_STATE_IDLE;
     case UI_STATE_IDLE:
     default:

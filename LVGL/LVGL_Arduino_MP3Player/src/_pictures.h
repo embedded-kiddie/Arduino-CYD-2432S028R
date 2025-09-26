@@ -20,6 +20,9 @@ LV_IMAGE_DECLARE(Mrs10);
 LV_IMAGE_DECLARE(Winter_Into_Spring);
 LV_IMAGE_DECLARE(BEST_OF_SOUL);
 LV_IMAGE_DECLARE(Twilight);
+LV_IMAGE_DECLARE(Autumn);
+LV_IMAGE_DECLARE(Eastern_Montana);
+LV_IMAGE_DECLARE(First_Message);
 
 const lv_image_dsc_t *pictures[] = {
   /*  0 */  & img_album,
@@ -42,6 +45,9 @@ const lv_image_dsc_t *pictures[] = {
   /* 17 */  & Winter_Into_Spring,
   /* 18 */  & BEST_OF_SOUL,
   /* 19 */  & Twilight,
+  /* 20 */  & Autumn,
+  /* 21 */  & Eastern_Montana,
+  /* 22 */  & First_Message,
 };
 
 #define N_PICTURES  (sizeof(pictures) / sizeof(lv_image_dsc_t *))

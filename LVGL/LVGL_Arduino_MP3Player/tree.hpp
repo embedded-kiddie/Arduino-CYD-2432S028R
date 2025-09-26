@@ -176,25 +176,21 @@ public:
 
 private:
   // find the leaf node with the specified key
-  bool find_node(Node * node, int key, bool find_path) {
+  bool find_node(Node * node, int key) {
     for (auto &n : node->children) {
       // within the range ?
       if (n->key >= key) {
         // are there any subtrees?
         if (n->children.size()) {
-          if (find_path) {
-            m_path.append(n->name).append("/");
-          }
-          if (find_node(n, key, find_path)) {
+          m_path.append(n->name).append("/");
+          if (find_node(n, key)) {
             return m_found;
           }
         }
         // found the leaf node
         else {
           DBG_ASSERT(n->key == key);
-          if (find_path) {
-            m_path.append(n->name);
-          }
+          m_path.append(n->name);
           m_found = true;
           m_found_node = n;
           return m_found;
@@ -209,13 +205,10 @@ public:
   Node *find_node(int key) {
     m_found = false;
     m_found_node = NULL;
-    m_path = "";
+    m_path = this->name;
 
-    if (find_node(this, key, false)) {
-      return m_found_node;
-    } else {
-      return NULL;
-    }
+    find_node(this, key);
+    return m_found_node;
   }
 
   std::string find_path(int key) {
@@ -223,11 +216,8 @@ public:
     m_found_node = NULL;
     m_path = this->name;
 
-    if (find_node(this, key, true)) {
-      return m_path;
-    } else {
-      return "";
-    }
+    find_node(this, key);
+    return m_path; // without trailing slash
   }
 
 private:
