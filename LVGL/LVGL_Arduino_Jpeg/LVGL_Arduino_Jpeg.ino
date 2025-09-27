@@ -39,7 +39,11 @@ static LGFX tft;
 //----------------------------------------------------------------------
 #include "sdfs.h"
 
-#define SCREENSHORT true
+#ifdef USE_SDFAT
+SdFat SD;
+#endif
+
+#define SCREENSHORT false
 #if SCREENSHORT
   #include "../src/sdcard.hpp"
 #else
@@ -150,7 +154,7 @@ static void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
         break;
     }
 
-    Serial.printf("x: %d (%d), y: %d (%d)\n", data->point.x, x, data->point.y, y);
+    // Serial.printf("x: %d (%d), y: %d (%d)\n", data->point.x, x, data->point.y, y);
   }
 }
 
@@ -180,22 +184,62 @@ static uint32_t my_tick(void) {
   return millis();
 }
 
+#if LV_USE_FS_ARDUINO_ESP_LITTLEFS
+void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
+  Serial.printf("Listing directory: %s\r\n", dirname);
+
+  File root = fs.open(dirname);
+  if (!root) {
+    Serial.println("- failed to open directory");
+    return;
+  }
+  if (!root.isDirectory()) {
+    Serial.println(" - not a directory");
+    return;
+  }
+
+  File file = root.openNextFile();
+  while (file) {
+    if (file.isDirectory()) {
+      Serial.print("  DIR : ");
+      Serial.println(file.name());
+      if (levels) {
+        listDir(fs, file.path(), levels - 1);
+      }
+    } else {
+      Serial.print("  FILE: ");
+      Serial.print(file.name());
+      Serial.print("\tSIZE: ");
+      Serial.println(file.size());
+    }
+    file = root.openNextFile();
+  }
+}
+#endif // LV_USE_FS_ARDUINO_ESP_LITTLEFS
+
 void setup() {
   Serial.begin(115200);
   while (millis() < 1000);
 
-  // initialize before activating LV_USE_FS_ARDUINO_SD
+  // initialize before activating LV_USE_FS_ARDUINO_...
+#if	defined (_SD_H_) || defined (SD_FAT_VERSION)
   if (!SD.begin(FS_CONFIG)) {
     Serial.println("SD Card Mount Failed");
     return;
   }
+#endif
+
+#if LV_USE_FS_ARDUINO_ESP_LITTLEFS
+  if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
+    Serial.println("LittleFS Mount Failed");
+    return;
+  }
+#endif
 
   tft_init();
   lv_init();
 
-#if MY_USE_FS_ARDUINO_SD
-  lv_fs_arduino_sd_init();
-#endif
+  MY_FS_ARDUINO_INIT();
 
   /* Set a tick source so that LVGL will know how much time elapsed. */
   lv_tick_set_cb(my_tick);
@@ -219,16 +263,18 @@ void setup() {
   lv_obj_t *image = lv_image_create(lv_screen_active());
   lv_obj_t *label = lv_label_create(lv_screen_active());
 
+#define MESSAGE "Hello Arduino, I got "
+
 #if LV_USE_TJPGD
-  lv_image_set_src(image, "S:/MP3/@picture.jpg"); // LV_USE_TJPGD
-  lv_label_set_text(label, "Hello Arduino, I got jpg!");
+  lv_image_set_src (image,         MY_FS_ARDUINO_PREFIX "@picture.jpg");
+  lv_label_set_text(label, MESSAGE MY_FS_ARDUINO_PREFIX "@picture.jpg");
 #elif LV_USE_BMP
-  lv_image_set_src(image, "S:/MP3/@picture.bmp"); // LV_USE_BMP
-  lv_label_set_text(label, "Hello Arduino, I got bmp!");
+  lv_image_set_src (image,         MY_FS_ARDUINO_PREFIX "@picture.bmp");
+  lv_label_set_text(label, MESSAGE MY_FS_ARDUINO_PREFIX "@picture.bmp");
 #else
   LV_IMG_DECLARE(picture);
   lv_image_set_src(image, &picture);
-  lv_label_set_text(label, "Hello Arduino, I got bin!");
+  lv_label_set_text(label, MESSAGE "bin!");
 #endif
 
   lv_obj_center(image);
@@ -246,6 +292,9 @@ void loop() {
     SaveBMP24(SD, "/demo.bmp", tft);
 #else
     PrintESP32Memory();
+#if LV_USE_FS_ARDUINO_ESP_LITTLEFS
+    listDir(LittleFS, "/", 3);
+#endif
 #endif
   }
 }

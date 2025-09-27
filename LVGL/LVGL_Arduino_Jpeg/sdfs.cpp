@@ -25,14 +25,13 @@ static lv_fs_res_t fs_tell (lv_fs_drv_t *drv, void *file_p, uint32_t *pos_p);
 
 #ifdef USE_SDFAT
 
-SDFat SD;
-static File my_file;
+static MyFile my_file;
 
 #else
 
-typedef struct MyFile {
-  File file;
-} MyFile;
+typedef struct {
+  MyFile file;
+} MyWrap_t;
 
 #endif
 
@@ -75,11 +74,11 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode) {
 
   FS_MODE flags;
   if (mode == LV_FS_MODE_WR)
-    flags = FILE_WRITE;
+    flags = MY_FILE_WRITE;
   else if (mode == LV_FS_MODE_RD)
-    flags = FILE_READ;
+    flags = MY_FILE_READ;
   else if (mode == (LV_FS_MODE_WR | LV_FS_MODE_RD))
-    flags = FILE_WRITE;
+    flags = MY_FILE_WRITE;
 
 #ifdef USE_SDFAT
   my_file = SD.open(path, flags);
@@ -89,12 +88,12 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode) {
 
   return (void *)&my_file;
 #else
-  File my_file = SD.open(path, flags);
+  MyFile my_file = SD.open(path, flags);
   if (!my_file) {
     return NULL;
   }
 
-  MyFile *lf = new MyFile{ my_file };
+  MyWrap_t *lf = new MyWrap_t{ my_file };
   return (void *)lf;
 #endif
 }
@@ -111,7 +110,7 @@ static lv_fs_res_t fs_close(lv_fs_drv_t *drv, void *file_p) {
 #ifdef USE_SDFAT
   my_file.close();
 #else
-  MyFile *lf = (MyFile *)file_p;
+  MyWrap_t *lf = (MyWrap_t *)file_p;
   lf->file.close();
   delete lf;
 #endif
@@ -134,7 +133,7 @@ static lv_fs_res_t fs_read(lv_fs_drv_t *drv, void *file_p, void *buf, uint32_t b
 #ifdef USE_SDFAT
   *br = my_file.read((uint8_t *)buf, btr);
 #else
-  MyFile *lf = (MyFile *)file_p;
+  MyWrap_t *lf = (MyWrap_t *)file_p;
   *br = lf->file.read((uint8_t *)buf, btr);
 #endif
 
@@ -156,7 +155,7 @@ static lv_fs_res_t fs_write(lv_fs_drv_t *drv, void *file_p, const void *buf, uin
 #ifdef USE_SDFAT
   *bw = my_file.write((uint8_t *)buf, btw);
 #else
-  MyFile *lf = (MyFile *)file_p;
+  MyWrap_t *lf = (MyWrap_t *)file_p;
   *bw = lf->file.write((uint8_t *)buf, btw);
 #endif
 
@@ -196,7 +195,7 @@ static lv_fs_res_t fs_seek(lv_fs_drv_t *drv, void *file_p, uint32_t pos, lv_fs_w
       break;
   }
 #else
-  MyFile *lf = (MyFile *)file_p;
+  MyWrap_t *lf = (MyWrap_t *)file_p;
   int rc = lf->file.seek(pos, mode);
 #endif
 
@@ -216,7 +215,7 @@ static lv_fs_res_t fs_tell(lv_fs_drv_t *drv, void *file_p, uint32_t *pos_p) {
 #ifdef USE_SDFAT
   *pos_p = my_file.curPosition();
 #else
-  MyFile *lf = (MyFile *)file_p;
+  MyWrap_t *lf = (MyWrap_t *)file_p;
   *pos_p = lf->file.position();
 #endif
 
@@ -301,7 +300,7 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode) {
     lv_fs_clear_cache();
     fs_cache.id = id;
 
-    File file = SD.open(path, FILE_READ);
+    MyFile file = SD.open(path, MY_FILE_READ);
 #ifdef USE_SDFAT
     size_t size = file.fileSize();
 #else

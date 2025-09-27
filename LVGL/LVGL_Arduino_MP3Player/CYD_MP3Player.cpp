@@ -103,16 +103,15 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
       return false;
     }
 
-    fd.seek(0);
     fd.read((void*)album, size);
     fd.close();
 
+    // Search for meta data with matching hash
     size_t hash = MakeHash(list->name);
     for (int i = 0; i < n; i++) {
       if (hash == album[i].hash) {
-        meta->saved = meta->selected;
+        meta->saved = meta->selected; // Mark 'selected' as saved
         album[i].meta = *meta;
-        printf("hash: 0x%x\n", hash);
         break;
       }
     }

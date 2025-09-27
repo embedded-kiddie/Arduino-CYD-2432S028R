@@ -10,6 +10,8 @@
 
 #if   true
 
+#define DISABLE_FS_H_WARNING
+#include <FS.h>
 #include <SdFat.h>
 
 #define USE_SDFAT
@@ -17,16 +19,11 @@
 #define FS_CONFIG SD_CS, SD_CLOCK
 
 // alternatives to FS.h definitions
-#undef  FILE_APPEND
-#define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
-#undef  FILE_WRITE
-#define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
+#define MY_FILE_READ    (O_RDONLY)
+#define MY_FILE_WRITE   (O_RDWR | O_CREAT | O_TRUNC)
+#define MY_FILE_APPEND  (O_RDWR | O_CREAT | O_AT_END)
 
-enum SeekMode {
-  SeekSet = 0,
-  SeekCur = 1,
-  SeekEnd = 2
-};
+typedef FsFile MyFile;
 
 extern SdFat SD;
 
@@ -37,6 +34,12 @@ extern SdFat SD;
 
 #define FS_MODE   const char *
 #define FS_CONFIG SD_CS //, SPI, SD_CLOCK
+
+#define MY_FILE_APPEND  FILE_APPEND
+#define MY_FILE_WRITE   FILE_WRITE
+#define MY_FILE_READ    FILE_READ
+
+typedef File MyFile;
 
 #endif // SdFat or SD
 
@@ -53,12 +56,21 @@ extern SdFat SD;
 #include <lvgl.h>
 
 // Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
-#if (LV_USE_FS_ARDUINO_SD == 0)
+#if (LV_USE_FS_ARDUINO_ESP_LITTLEFS == 1)
+  #include <LittleFS.h>
+  #define MY_FS_ARDUINO_INIT()
+  #define MY_FS_ARDUINO_PREFIX  "L:/"
+  #define MY_FS_ARDUINO_ESP_LITTLEFS_LETTER 'L'
+  #define FORMAT_LITTLEFS_IF_FAILED true
+#elif (LV_USE_FS_ARDUINO_SD == 0)
   #if (LV_USE_TJPGD == 0) && (LV_USE_BMP == 0)
-    #define MY_USE_FS_ARDUINO_SD 0
+    #define MY_USE_FS_ARDUINO_SD 0  // variable in '.c'
+    #define MY_FS_ARDUINO_INIT()
   #else
-    #define MY_USE_FS_ARDUINO_SD 2
+    #define MY_USE_FS_ARDUINO_SD 2  // 1: without cache, 2: with cache
+    #define MY_FS_ARDUINO_PREFIX  "S:/MP3/"
     #define MY_FS_ARDUINO_SD_LETTER 'S'
+    #define MY_FS_ARDUINO_INIT()  lv_fs_arduino_sd_init()
     void lv_fs_arduino_sd_init(void);
   #endif
 #endif
