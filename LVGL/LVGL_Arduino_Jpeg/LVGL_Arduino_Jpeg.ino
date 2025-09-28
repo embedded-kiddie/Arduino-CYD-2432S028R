@@ -153,7 +153,6 @@ static void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
         data->point.y = x;
         break;
     }
-
     // Serial.printf("x: %d (%d), y: %d (%d)\n", data->point.x, x, data->point.y, y);
   }
 }
@@ -294,6 +293,7 @@ void loop() {
     PrintESP32Memory();
 #if LV_USE_FS_ARDUINO_ESP_LITTLEFS
     listDir(LittleFS, "/", 3);
+    Serial.printf("Total: %d, Used: %d\n", LittleFS.totalBytes(), LittleFS.usedBytes());
 #endif
 #endif
   }

@@ -119,7 +119,7 @@ LV_IMAGE_DECLARE(img_list_play);        // assets/icons/img_list_play.png
 LV_IMAGE_DECLARE(img_list_pause);       // assets/icons/img_list_pause.png
 LV_IMAGE_DECLARE(img_rotate_folder);    // assets/icons/img_rotate_folder.png
 LV_IMAGE_DECLARE(img_rotate_check);     // assets/icons/img_rotate_check.png
-LV_IMAGE_DECLARE(img_lv_demo_music_list_border);
+LV_IMAGE_DECLARE(img_list_border);      // assets/icons/img_list_border.png
 
 // UI STATE
 typedef enum {

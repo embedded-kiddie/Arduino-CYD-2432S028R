@@ -31,10 +31,10 @@ LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 #define FOLDING_DURATION    250 // folding animation duration
 
 // Icon images
-LV_IMAGE_DECLARE(img_checkbox);
-LV_IMAGE_DECLARE(img_checked);
-LV_IMAGE_DECLARE(img_symbol_down);
-LV_IMAGE_DECLARE(img_symbol_right);
+LV_IMAGE_DECLARE(img_checkbox);         // assets/icons/img_checkbox.png
+LV_IMAGE_DECLARE(img_checked);          // assets/icons/img_checked.png
+LV_IMAGE_DECLARE(img_symbol_down);      // assets/icons/img_symbol_down.png
+LV_IMAGE_DECLARE(img_symbol_right);     // assets/icons/img_symbol_right.png
 
 //--------------------------------------------------------------------
 //

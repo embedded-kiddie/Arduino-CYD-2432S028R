@@ -243,7 +243,7 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
 
   //////////////////// Border Image ////////////////////
   obj = lv_image_create(cell);
-  lv_image_set_src              (obj, &img_lv_demo_music_list_border);
+  lv_image_set_src              (obj, &img_list_border);
   lv_image_set_inner_align      (obj, LV_IMAGE_ALIGN_TILE);
   lv_obj_set_width              (obj, lv_pct(120));
   lv_obj_align                  (obj, LV_ALIGN_BOTTOM_MID, 0, 0);
