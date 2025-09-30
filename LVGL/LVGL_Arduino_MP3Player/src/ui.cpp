@@ -208,7 +208,7 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
     // increase free memory
-//  lv_fs_clear_cache(); // sdfs.{h|cpp}
+    // lv_fs_clear_cache(); // sdfs.{h|cpp}
 
     // stop playing to avoid conflict with image loading
     if (ui_state != UI_STATE_IDLE) {
@@ -231,9 +231,21 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
  * Event handlers for Screen Playlist
  *--------------------------------------------------------------------------------*/
 void ui_event_ScreenPlayList(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_SCREEN_UNLOADED);
+  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(
+    event_code == LV_EVENT_GESTURE ||
+    event_code == LV_EVENT_SCREEN_UNLOADED
+  );
 
-  ui_ScreenPlayList_screen_deinit();
+  if (event_code == LV_EVENT_GESTURE) {
+    lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
+    lv_screen_load_anim_t anim = dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT;
+    _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
+  }
+
+  else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
+    ui_ScreenPlayList_screen_deinit();
+  }
 }
 
 void ui_event_PlayList_Heart(lv_event_t *e) {
@@ -255,14 +267,6 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
   if (!saved) {
     saveID3tags = true;
   }
-}
-
-void ui_event_PlayListToMain(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_GESTURE);
-
-  lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
-  lv_screen_load_anim_t anim = dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT;
-  _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
 }
 
 /*--------------------------------------------------------------------------------
@@ -487,11 +491,11 @@ void ui_set_playNo(uint32_t track_id) {
 /*--------------------------------------------------------------------------------
  * Get the latest information on MP3Player
  *--------------------------------------------------------------------------------*/
-uint32_t ui_get_playNo(void) {
+const uint32_t ui_get_playNo(void) {
   return player.GetPlayNo();
 }
 
-uint32_t ui_get_counts(void) {
+const uint32_t ui_get_counts(void) {
   return player.GetCounts();
 }
 

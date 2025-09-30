@@ -13,23 +13,21 @@
 
 /*--------------------------------------------------------------------------------
  * MY_USE_FS_ARDUINO_SD:
- *  0: Load binary  on flash rom    (LV_USE_[TJPGD|BMP] in lv_conf.h must be 0)
- *  1: Load jpg/bmp on SD w/o cache (LV_USE_[TJPGD|BMP] in lv_conf.h must be 1)
- *  2: Load jpg/bmp on SD w   cache (LV_USE_[TJPGD|BMP] in lv_conf.h must be 1)
+ *  0: Load jpg/bmp on SD using LVGL library
+ *  1: Load jpg/bmp on SD without cache
+ *  2: Load jpg/bmp on SD with cache
  * Refer To: https://github.com/lvgl/lvgl/tree/master/src/libs/tjpgd
  *--------------------------------------------------------------------------------*/
 #include <lvgl.h>
 
 // Avoid conflicts with 'LV_USE_FS_...' defined in lvgl.h
 #if (LV_USE_FS_ARDUINO_SD == 0)
-  #if (LV_USE_TJPGD == 0) && (LV_USE_BMP == 0)
-    #define MY_USE_FS_ARDUINO_SD 0
-  #else
-    #define MY_USE_FS_ARDUINO_SD 2  // 1:without cache, 2: with cache
-    #define MY_FS_ARDUINO_SD_LETTER 'S'
-    void lv_fs_arduino_sd_init(void);
-    void lv_fs_clear_cache(void);
-  #endif
+  #define MY_USE_TJPGD ((LV_USE_TJPGD == 0) && (LV_USE_BMP == 0))
+  #define MY_USE_FS_ARDUINO_SD 2  // 1:without cache, 2: with cache
+  #define MY_FS_ARDUINO_SD_LETTER 'S'
+  void lv_fs_arduino_sd_init(void);
+  void lv_fs_clear_cache(void);
+  void lv_tjpgd_init(void);
 #else
   #define MY_USE_FS_ARDUINO_SD 0
   #define MY_FS_ARDUINO_SD_LETTER 'S'

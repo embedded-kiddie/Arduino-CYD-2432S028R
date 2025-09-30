@@ -6,7 +6,7 @@
 #include "ui.h"
 
 #include "../CYD_MP3Player.h"
-extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui.cpp
+extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui.cpp (it needs CYD_MP3Player.h)
 
 /**********************
  *      MACROS
@@ -16,7 +16,6 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_LABEL_MARGINE        100 // left(50) + right(50)
 #define LIST_CELL_HEIGHT          54  // Inside a cell = column(3) x rol(2)
 #define LIST_CELL_VIEWS           6   // LIST_CELL_HEIGHT * LIST_CELL_VIEWS >= SCREEN_HEIGHT
-#define LIST_CELL_SPARE           2   // 1 <= LIST_CELL_SPARE <= 2
 
 /**********************
  *  STATIC VARIABLES
@@ -259,14 +258,16 @@ static void update_scroll(lv_obj_t *obj) {
 
   int32_t pos;
 
-  /* Load items we're getting close to */
-  while (ui_control.end < ui_get_counts() - 1 && (pos = lv_obj_get_scroll_bottom(obj)) < (LIST_CELL_HEIGHT)) {
+  // Scroll DOWN: while the pos from the bottom of the scroll range (negative) is smaller than the cell size
+  while (ui_control.end < ui_get_counts() - 1 && (pos = lv_obj_get_scroll_bottom(obj)) < LIST_CELL_HEIGHT) {
     ui_control.end += 1;
     add_list_cell(obj, ui_control.end);
     lv_obj_update_layout(obj);
-    //DBG_EXEC(printf("added ui_control.end: %d, pos: %d\n", ui_control.end, pos));
+    // printf("added ui_control.end: %d, pos: %d\n", ui_control.end, pos);
   }
-  while (ui_control.top > 0 && (pos = lv_obj_get_scroll_top(obj)) < (LIST_CELL_HEIGHT)) {
+
+  // Scroll UP: while the pos from the top of the scroll range (positive) is smaller than the cell size
+  while (ui_control.top > 0 && (pos = lv_obj_get_scroll_top(obj)) < LIST_CELL_HEIGHT) {
     ui_control.top -= 1;
     int32_t bottom_before = lv_obj_get_scroll_bottom(obj);
     lv_obj_t *new_item = add_list_cell(obj, ui_control.top);
@@ -274,18 +275,20 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
     int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
     lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    //DBG_EXEC(printf("added ui_control.top: %d, pos: %d\n", ui_control.top, pos));
+    // printf("added ui_control.top: %d, pos: %d\n", ui_control.top, pos);
   }
 
-  /* Delete far-away items */
-  while ((pos = lv_obj_get_scroll_bottom(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && ui_control.end - ui_control.top > (LIST_CELL_VIEWS)) {
+  // Scroll UP: delete cells outside the range
+  while ((pos = lv_obj_get_scroll_bottom(obj)) > LIST_CELL_HEIGHT && ui_control.end - ui_control.top > LIST_CELL_VIEWS) {
     ui_control.end -= 1;
     lv_obj_t *child = lv_obj_get_child(obj, -1);
     lv_obj_delete(child);
     lv_obj_update_layout(obj);
-    //DBG_EXEC(printf("deleted ui_control.end: %d, pos: %d\n", ui_control.end, pos));
+    // printf("deleted ui_control.end: %d, pos: %d\n", ui_control.end + 1, pos);
   }
-  while ((pos = lv_obj_get_scroll_top(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && ui_control.end - ui_control.top > (LIST_CELL_VIEWS)) {
+
+  // Scroll DOWN: delete cells outside the range
+  while ((pos = lv_obj_get_scroll_top(obj)) > LIST_CELL_HEIGHT && ui_control.end - ui_control.top > LIST_CELL_VIEWS) {
     ui_control.top += 1;
     int32_t bottom_before = lv_obj_get_scroll_bottom(obj);
     lv_obj_t *child = lv_obj_get_child(obj, 0);
@@ -293,12 +296,20 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
     int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
     lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    //DBG_EXEC(printf("deleted ui_control.top: %d, pos: %d\n", ui_control.top, pos));
+    // printf("deleted ui_control.top: %d, pos: %d\n", ui_control.top - 1, pos);
   }
+
+  // Always LIST_CELL_VIEWS + 1 cells are allocated
+  DBG_ASSERT(
+    (ui_get_counts() < LIST_CELL_VIEWS ?
+     ui_control.end - ui_control.top == ui_get_counts() :
+     ui_control.end - ui_control.top == LIST_CELL_VIEWS) &&
+    (ui_get_playNo() == ui_control.playNo)
+  );
 
   update_scroll_running = false;
   ui_list_update_cell(ui_control.focusNo, true);
-  ui_list_update_icon(ui_get_playNo(),    true);
+  ui_list_update_icon(ui_control.playNo,  true);
 
   // Update slider
   int32_t top = lv_obj_get_scroll_top(obj) + ui_control.top * LIST_CELL_HEIGHT;
@@ -441,7 +452,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_set_align        (container, LV_ALIGN_TOP_MID);
   lv_obj_remove_flag      (container, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
 
-  lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_PlayListToMain, LV_EVENT_GESTURE, NULL);
+  lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_GESTURE, NULL);
   lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_SCREEN_UNLOADED, NULL);
 
   // Initialize play list container

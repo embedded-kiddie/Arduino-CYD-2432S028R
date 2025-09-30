@@ -1,5 +1,5 @@
-/*Using LVGL with Arduino requires some extra steps:
- *Be sure to read the docs here: https://docs.lvgl.io/master/integration/framework/arduino.html  */
+/* Using LVGL with Arduino requires some extra steps:
+ * Be sure to read the docs here: https://docs.lvgl.io/master/integration/framework/arduino.html */
 
 // IN lv_conf.h
 //  DO NOT FORGET TO SET 'LV_USE_TFT_ESPI' TO 0
@@ -288,11 +288,11 @@ void loop() {
 #else
   if (Serial.available()) {
     Serial.readStringUntil('\n');
-#if SCREENSHORT
+  #if SCREENSHORT
     SaveBMP24(SD, "/demo.bmp", tft);
-#else
+  #else
     PrintESP32Memory();
-#endif
+  #endif
   }
 #endif
 }

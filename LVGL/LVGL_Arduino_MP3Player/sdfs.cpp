@@ -293,6 +293,10 @@ void lv_fs_arduino_sd_init(void) {
   fs_drv.dir_read_cb  = NULL;
 
   lv_fs_drv_register(&fs_drv);
+
+#if MY_USE_TJPGD
+  lv_tjpgd_init();
+#endif
 }
 
 /**********************

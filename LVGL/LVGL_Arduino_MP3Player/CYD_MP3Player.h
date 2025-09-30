@@ -34,7 +34,7 @@
 #if MY_USE_FS_ARDUINO_SD
   #if LV_USE_BMP
     #define PICTURE_EXT "bmp" // 96x96 (must be RGB565)
-  #elif LV_USE_TJPGD
+  #elif LV_USE_TJPGD || MY_USE_TJPGD
     #define PICTURE_EXT "jpg" // 96x96
   #else
     #error "LV_USE_BMP or LV_USE_TJPGD should be enabled."

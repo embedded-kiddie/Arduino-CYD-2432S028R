@@ -1,15 +1,13 @@
 /*--------------------------------------------------------------------------------
  * CYD_MP3Player class definition
  *--------------------------------------------------------------------------------*/
-#include <ctype.h>  // isdigit(), isprint()
-#include <stdlib.h> // atoi()
-#include <string.h> // strcpy(), strtok_r(), strrchr()
-#include <string>
-#include <random>
-
-// Functional object to make a hash for the music title
-#include <functional>
-static std::hash<std::string> MakeHash;
+#include <ctype.h>    // isdigit(), isprint()
+#include <stdlib.h>   // atoi()
+#include <string.h>   // strcpy(), strtok_r(), strrchr()
+#include <string>     // std::string
+#include <random>     // std::mt19937
+#include <algorithm>  // std::shuffle
+#include <functional> // std::hash
 
 #include "CYD_MP3Player.h"
 
@@ -107,6 +105,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
     fd.close();
 
     // Search for meta data with matching hash
+    std::hash<std::string> MakeHash;
     size_t hash = MakeHash(list->name);
     for (int i = 0; i < n; i++) {
       if (hash == album[i].hash) {
@@ -166,6 +165,8 @@ bool CYD_MP3Player::UpdateMetaData(void) {
  * Scan and create a list of audio m_list in a specified directory.
  *--------------------------------------------------------------------------------*/
 uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
+//uint32_t t = millis();
+
   if (m_tree == NULL) {
     File dir = SD.open(m_root.c_str());
     if (!dir) {
@@ -185,6 +186,8 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
       ShuffleAudioFiles();
     }
   }
+
+//printf("%d [msec]\n", millis() - t);
 
   if (m_list.size() == 0) {
     m_error = "No music to play";
@@ -242,6 +245,8 @@ void CYD_MP3Player::ScanAudioFiles(void) {
       size_t dst = 0;
       size_t src = sizeof(MetaAlbum_t) * n;
       memset((void*)album, 0, src);
+
+      std::hash<std::string> MakeHash; // Functional object to make a hash for the music title
 
       std::string meta = path + "/" META_DATA_PREFIX META_DATA_SUFFIX;
       fd = SD.open(meta.c_str(), FILE_READ);

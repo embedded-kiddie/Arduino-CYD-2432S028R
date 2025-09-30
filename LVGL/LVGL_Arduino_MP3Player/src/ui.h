@@ -9,7 +9,6 @@
 #include <lvgl.h>
 #include "ui_helpers.h"
 #include "ui_events.h"
-
 #include "../debug.h"
 
 // Arrow button
@@ -79,7 +78,6 @@ void ui_ScreenPlayList_screen_init  (void);
 void ui_ScreenPlayList_screen_deinit(void);
 void ui_event_ScreenPlayList(lv_event_t *e);
 void ui_event_PlayList_Heart(lv_event_t *e);
-void ui_event_PlayListToMain(lv_event_t *e);
 void ui_list_update_icon    (uint32_t track_id, bool state);
 void ui_list_update_cell    (uint32_t track_id, bool state);
 void ui_list_update_play    (uint32_t track_id, bool state);
@@ -148,8 +146,8 @@ UI_State_t ui_loop(void);
 void ui_redisplay(void);
 void ui_set_playNo(uint32_t playNo);
 
-uint32_t ui_get_playNo(void);
-uint32_t ui_get_counts(void);
+const uint32_t ui_get_playNo(void);
+const uint32_t ui_get_counts(void);
 
 // Variables
 typedef struct {

@@ -30,9 +30,12 @@
 
 // alternatives to FS.h definitions
 #define FS_MODE int
-#undef  FILE_APPEND
-#define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
+
+#undef  FILE_READ
 #undef  FILE_WRITE
+#undef  FILE_APPEND
+#define FILE_READ   (O_RDONLY)
+#define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
 #define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
 
 enum SeekMode {
