@@ -6,12 +6,14 @@
 /*********************
  *      INCLUDES
  *********************/
+#include "../../sdfs.h"
+
+#if MY_USE_TJPGD
 
 #include "draw/lv_image_decoder_private.h"
-#include "lvgl.h"
+#include "misc/lv_fs_private.h"
 #include "tjpgd.h"
 #include "lv_tjpgd.h"
-#include "misc/lv_fs_private.h"
 
 /*********************
  *      DEFINES
@@ -40,6 +42,7 @@ static int is_jpg(const uint8_t * raw_data, size_t len);
 /**********************
  *  STATIC VARIABLES
  **********************/
+static uint8_t *workb;
 
 /**********************
  *      MACROS
@@ -58,6 +61,8 @@ void lv_tjpgd_init(void)
     lv_image_decoder_set_close_cb(dec, decoder_close);
 
     dec->name = DECODER_NAME;
+
+    workb = (uint8_t *)lv_malloc(TJPGD_WORKBUFF_SIZE);
 }
 
 void lv_tjpgd_deinit(void)
@@ -69,6 +74,8 @@ void lv_tjpgd_deinit(void)
             break;
         }
     }
+
+    lv_free(workb);
 }
 
 /**********************
@@ -82,43 +89,23 @@ static lv_result_t decoder_info(lv_image_decoder_t * decoder, lv_image_decoder_d
     const void * src = dsc->src;
     lv_image_src_t src_type = dsc->src_type;
 
-    if(src_type == LV_IMAGE_SRC_VARIABLE) {
-        const lv_image_dsc_t * img_dsc = (const lv_image_dsc_t *)src;
-        uint8_t * raw_data = (uint8_t *)img_dsc->data;
-        const uint32_t raw_data_size = img_dsc->data_size;
-
-        if(is_jpg(raw_data, raw_data_size) == true) {
-#if LV_USE_FS_MEMFS
-            header->cf = LV_COLOR_FORMAT_RAW;
-            header->w = img_dsc->header.w;
-            header->h = img_dsc->header.h;
-            header->stride = img_dsc->header.w * 3;
-            return LV_RESULT_OK;
-#else
-            LV_LOG_WARN("LV_USE_FS_MEMFS needs to enabled to decode from data");
+    const char * fn = (const char *)src;
+    const char * ext = lv_fs_get_ext(fn);
+    if((lv_strcmp(ext, "jpg") == 0) || (lv_strcmp(ext, "jpeg") == 0)) {
+        JDEC jd;
+        JRESULT rc = jd_prepare(&jd, input_func, workb, TJPGD_WORKBUFF_SIZE, &dsc->file);
+        if(rc) {
+            LV_LOG_WARN("jd_prepare error: %d", rc);
             return LV_RESULT_INVALID;
-#endif
         }
-    }
-    else if(src_type == LV_IMAGE_SRC_FILE) {
-        const char * fn = (const char *)src;
-        const char * ext = lv_fs_get_ext(fn);
-        if((lv_strcmp(ext, "jpg") == 0) || (lv_strcmp(ext, "jpeg") == 0)) {
-            static uint8_t workb[TJPGD_WORKBUFF_SIZE];
-            JDEC jd;
-            JRESULT rc = jd_prepare(&jd, input_func, workb, TJPGD_WORKBUFF_SIZE, &dsc->file);
-            if(rc) {
-                LV_LOG_WARN("jd_prepare error: %d", rc);
-                return LV_RESULT_INVALID;
-            }
-            header->cf = LV_COLOR_FORMAT_RAW;
-            header->w = jd.width;
-            header->h = jd.height;
-            header->stride = jd.width * 3;
+        header->cf = LV_COLOR_FORMAT_RAW;
+        header->w = jd.width;
+        header->h = jd.height;
+        header->stride = jd.width * 3;
 
-            return LV_RESULT_OK;
-        }
+        return LV_RESULT_OK;
     }
+
     return LV_RESULT_INVALID;
 }
 
@@ -151,38 +138,19 @@ static lv_result_t decoder_open(lv_image_decoder_t * decoder, lv_image_decoder_d
 {
     LV_UNUSED(decoder);
     lv_fs_file_t * f = NULL;
-    if(dsc->src_type == LV_IMAGE_SRC_VARIABLE) {
-#if LV_USE_FS_MEMFS
-        const lv_image_dsc_t * img_dsc = dsc->src;
-        if(is_jpg(img_dsc->data, img_dsc->data_size) == true) {
-            f = lv_malloc(sizeof(lv_fs_file_t));
-            if(f == NULL) return LV_RESULT_INVALID;
-            lv_fs_path_ex_t path;
-            lv_fs_make_path_from_buffer(&path, LV_FS_MEMFS_LETTER, img_dsc->data, img_dsc->data_size, "bin");
-            lv_fs_res_t res;
-            res = lv_fs_open(f, (const char *)&path, LV_FS_MODE_RD);
-            if(res != LV_FS_RES_OK) {
-                lv_free(f);
-                return LV_RESULT_INVALID;
-            }
-        }
-#else
-        LV_LOG_WARN("LV_USE_FS_MEMFS needs to enabled to decode from data");
-#endif
-    }
-    else if(dsc->src_type == LV_IMAGE_SRC_FILE) {
-        const char * fn = (const char *)dsc->src;
-        if((lv_strcmp(lv_fs_get_ext(fn), "jpg") == 0) || (lv_strcmp(lv_fs_get_ext(fn), "jpeg") == 0)) {
-            f = (lv_fs_file_t *)lv_malloc(sizeof(lv_fs_file_t));
-            if(f == NULL) return LV_RESULT_INVALID;
-            lv_fs_res_t res;
-            res = lv_fs_open(f, fn, LV_FS_MODE_RD);
-            if(res != LV_FS_RES_OK) {
-                lv_free(f);
-                return LV_RESULT_INVALID;
-            }
+
+    const char * fn = (const char *)dsc->src;
+    if((lv_strcmp(lv_fs_get_ext(fn), "jpg") == 0) || (lv_strcmp(lv_fs_get_ext(fn), "jpeg") == 0)) {
+        f = (lv_fs_file_t *)lv_malloc(sizeof(lv_fs_file_t));
+        if(f == NULL) return LV_RESULT_INVALID;
+        lv_fs_res_t res;
+        res = lv_fs_open(f, fn, LV_FS_MODE_RD);
+        if(res != LV_FS_RES_OK) {
+            lv_free(f);
+            return LV_RESULT_INVALID;
         }
     }
+
     if(f == NULL) return LV_RESULT_INVALID;
 
     uint8_t * workb_temp = (uint8_t *)lv_malloc(TJPGD_WORKBUFF_SIZE);
@@ -302,3 +270,4 @@ static int is_jpg(const uint8_t * raw_data, size_t len)
     if(len < sizeof(jpg_signature)) return false;
     return memcmp(jpg_signature, raw_data, sizeof(jpg_signature)) == 0;
 }
+#endif // MY_USE_TJPGD

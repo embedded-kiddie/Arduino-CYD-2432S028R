@@ -23,6 +23,10 @@ LV_IMAGE_DECLARE(Twilight);
 LV_IMAGE_DECLARE(Autumn);
 LV_IMAGE_DECLARE(Eastern_Montana);
 LV_IMAGE_DECLARE(First_Message);
+LV_IMAGE_DECLARE(Summer);
+LV_IMAGE_DECLARE(December);
+LV_IMAGE_DECLARE(_35xxxv);
+LV_IMAGE_DECLARE(Luxury_Disease);
 
 const lv_image_dsc_t *pictures[] = {
   /*  0 */  & img_album,
@@ -48,6 +52,10 @@ const lv_image_dsc_t *pictures[] = {
   /* 20 */  & Autumn,
   /* 21 */  & Eastern_Montana,
   /* 22 */  & First_Message,
+  /* 23 */  & Summer,
+  /* 24 */  & December,
+  /* 25 */  & _35xxxv,
+  /* 26 */  & Luxury_Disease,
 };
 
 #define N_PICTURES  (sizeof(pictures) / sizeof(lv_image_dsc_t *))

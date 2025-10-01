@@ -23,6 +23,10 @@
 / Jul 01, 2021 R0.03  Added JD_FASTDECODE option.
 /                     Some performance improvement.
 /----------------------------------------------------------------------------*/
+#include "../../sdfs.h"
+
+#if MY_USE_TJPGD
+
 #include "tjpgd.h"
 
 #if JD_FASTDECODE == 2
@@ -1133,3 +1137,4 @@ JRESULT jd_decomp(
 
     return rc;
 }
+#endif // MY_USE_TJPGD
