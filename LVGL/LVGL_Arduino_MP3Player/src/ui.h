@@ -11,9 +11,6 @@
 #include "ui_events.h"
 #include "../debug.h"
 
-// Arrow button
-#define SHOW_ARROW_BUTTON false
-
 // Screen size / coordinate
 #define SCREEN_WIDTH      240
 #define SCREEN_HEIGHT     320
