@@ -5,6 +5,9 @@
 
 #include "ui.h"
 
+//--------------------------------------------------------------------------------
+// Initialize screen
+//--------------------------------------------------------------------------------
 void ui_ScreenMain_screen_init(void) {
   ui_ScreenMain = lv_obj_create(NULL);
   lv_obj_set_style_bg_color(ui_ScreenMain, UI_COLOR_BACKGROUND, 0);

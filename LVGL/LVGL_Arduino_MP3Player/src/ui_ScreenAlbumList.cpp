@@ -11,9 +11,6 @@
 extern CYD_MP3Player *ui_get_player(void);  // Defined in ui.cpp
 
 // List Components
-#define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
-#define CELL_COLOR_LEAF     lv_color_hex(0xffffff)
-#define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }  // lv_color_hex(0xe4e0e4)
 #define CELL_HEIGHT_SMALL   31  // for CUSTOM_FONT_SMALL
 #define CELL_HEIGHT_MEDIUM  34  // for CUSTOM_FONT_MEDIUM
 #define CELL_OFFSET_NODE    6   // offset for node text
@@ -23,12 +20,17 @@ extern CYD_MP3Player *ui_get_player(void);  // Defined in ui.cpp
 #define FOLDING_DURATION    250 // folding animation duration
 #define MAX_CELLS           100 // LV_MEM_SIZE = (64 * 1024U)
 
+#define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
+#define CELL_COLOR_LEAF     lv_color_hex(0xffffff)
+#define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }  // lv_color_hex(0xe4e0e4)
+
+
 static lv_obj_t *album_list;
 static int cell_count;
 
-/*--------------------------------------------------------------------------------
- *
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------
 static size_t get_cell_count(void) {
   return cell_count;
 }
@@ -37,9 +39,9 @@ static void reset_cell_count(void) {
   cell_count = 0;
 }
 
-/*--------------------------------------------------------------------------------
- *
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------
 static lv_obj_t *get_parent(lv_obj_t *cell) {
   Node *node = (Node*)lv_obj_get_user_data(cell);
 
@@ -53,17 +55,17 @@ static lv_obj_t *get_parent(lv_obj_t *cell) {
   return NULL; // never reached
 }
 
-/*--------------------------------------------------------------------------------
- *
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------
 static NodeMeta_t *get_node_meta(lv_obj_t *cell) {
   Node *node = (Node*)lv_obj_get_user_data(cell);
   return &node->meta;
 }
 
-/*--------------------------------------------------------------------------------
- * https://docs.lvgl.io/master/details/widgets/table.html
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// https://docs.lvgl.io/master/details/widgets/table.html
+//--------------------------------------------------------------------------------
 static void draw_image_cb(lv_event_t *e) {
   // If the cells are drawn...
   lv_draw_task_t *draw_task = lv_event_get_draw_task(e);
@@ -111,9 +113,9 @@ static void draw_image_cb(lv_event_t *e) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- *
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------
 static void event_handler(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
 
@@ -170,9 +172,9 @@ static void event_handler(lv_event_t *e) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- *
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------
 static void set_styles(lv_obj_t *cell, Node *node) {
   static constexpr lv_style_const_prop_t style_prop_common[] = {
     LV_STYLE_CONST_ALIGN(LV_ALIGN_LEFT_MID),
@@ -200,9 +202,9 @@ static void set_styles(lv_obj_t *cell, Node *node) {
   lv_obj_add_event_cb(cell, event_handler, LV_EVENT_CLICKED, NULL);
 }
 
-/*--------------------------------------------------------------------------------
- *
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------
 static void add_node_to_list(Node *node, lv_obj_t *list) {
   for (auto &n : node->children) {
     if (cell_count++ >= MAX_CELLS) {
@@ -219,9 +221,9 @@ static void add_node_to_list(Node *node, lv_obj_t *list) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- *
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+//
+//--------------------------------------------------------------------------------
 static void playlist_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
@@ -229,9 +231,9 @@ static void playlist_cb(lv_event_t *e) {
   ui_option.selectPlaylist = lv_dropdown_get_selected(obj);
 }
 
-/*--------------------------------------------------------------------------------
- * Set the pointer to the widget to NULL when its object is deleted
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Set the pointer to the widget to NULL when its object is deleted
+//--------------------------------------------------------------------------------
 static void delete_cb(lv_event_t *e) {
   lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
   static constexpr lv_obj_t ** const adrs[] = {
@@ -249,9 +251,9 @@ static void delete_cb(lv_event_t *e) {
   DBG_EXEC(printf("deleted: 0x%x\n", obj));
 }
 
-/*--------------------------------------------------------------------------------
- * Initialize / Deinitialize widgets
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Initialize / Deinitialize widgets
+//--------------------------------------------------------------------------------
 void ui_ScreenAlbumList_screen_init(void) {
   if (ui_ScreenAlbumList == NULL) {
     ui_ScreenAlbumList = lv_obj_create(NULL);
@@ -300,9 +302,9 @@ void ui_ScreenAlbumList_screen_deinit(void) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- * Create selectable playlist
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Create selectable playlist
+//--------------------------------------------------------------------------------
 void ui_ScreenAlbumList_create_list(const char *root_dir) {
   // Clear album list before creating a new list
   reset_cell_count(); // Defined in list.cpp

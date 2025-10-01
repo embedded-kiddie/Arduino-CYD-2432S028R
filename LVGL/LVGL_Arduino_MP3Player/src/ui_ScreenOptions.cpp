@@ -3,11 +3,17 @@
 // LVGL version: 9.1.0
 // Project name: SquareLine_Project
 
+#include <Arduino.h> // for millis()
 #include "ui.h"
 
-/*--------------------------------------------------------------------------------
- * Contents of dropdown list
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Offset from the top
+//--------------------------------------------------------------------------------
+#define OFFSET_TOP  40
+
+//--------------------------------------------------------------------------------
+// Contents of dropdown list
+//--------------------------------------------------------------------------------
 typedef struct {
   const char      *options;
   const uint32_t  time[];
@@ -43,9 +49,9 @@ void ui_set_option_sleeptime(void) {
   ui_control.sleepTimer = opts_sleeptime.time[ui_option.selectSleepTimer];
 }
 
-/*--------------------------------------------------------------------------------
- * Event handlers for UI Options
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Event handlers for UI Options
+//--------------------------------------------------------------------------------
 static void backlight_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
@@ -63,9 +69,9 @@ static void sleeptimer_cb(lv_event_t *e) {
   ui_set_option_sleeptime();
 }
 
-/*--------------------------------------------------------------------------------
- * Set the pointer to the widget to NULL when its object is deleted
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Set the pointer to the widget to NULL when its object is deleted
+//--------------------------------------------------------------------------------
 static void delete_cb(lv_event_t *e) {
   lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
   static constexpr lv_obj_t ** const adrs[] = {
@@ -82,9 +88,9 @@ static void delete_cb(lv_event_t *e) {
   DBG_EXEC(printf("deleted: 0x%x\n", obj));
 }
 
-/*--------------------------------------------------------------------------------
- * Initialize / Deinitialize widgets
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Initialize / Deinitialize widgets
+//--------------------------------------------------------------------------------
 void ui_ScreenOptions_screen_init(void) {
   if (ui_ScreenOptions == NULL) {
     ui_ScreenOptions = lv_obj_create(NULL);
@@ -95,12 +101,12 @@ void ui_ScreenOptions_screen_init(void) {
 
     //////////////////// Backlight Label ////////////////////
     lv_obj_t *obj = lv_label_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
+    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4) + OFFSET_TOP);
     lv_label_set_text_static(obj, "Backlight Off");
 
     //////////////////// Backlight Dropdown ////////////////////
     obj = lv_roller_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11));
+    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11) + OFFSET_TOP);
     lv_obj_set_style_width(obj, OPTIONS_WIDTH, 0);
     lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_roller_set_options(obj, opts_backlight.options, LV_ROLLER_MODE_NORMAL);
@@ -109,12 +115,12 @@ void ui_ScreenOptions_screen_init(void) {
 
     //////////////////// Sleep Timer Label ////////////////////
     obj = lv_label_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(4));
+    lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(4) + OFFSET_TOP);
     lv_label_set_text_static(obj, "Sleep Timer");
 
     //////////////////// Sleep Timer Dropdown ////////////////////
     obj = lv_roller_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, SCREEN_WIDTH - OPTIONS_WIDTH - LV_PCT_X(5), LV_PCT_Y(11));
+    lv_obj_set_pos(obj, SCREEN_WIDTH - OPTIONS_WIDTH - LV_PCT_X(5), LV_PCT_Y(11) + OFFSET_TOP);
     lv_obj_set_style_width(obj, OPTIONS_WIDTH, 0);
     lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_roller_set_options(obj, opts_sleeptime.options, LV_ROLLER_MODE_NORMAL);

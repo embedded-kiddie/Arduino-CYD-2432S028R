@@ -1,14 +1,14 @@
-/*----------------------------------------------------------------------
- * N-ary Tree for directory tree
- * https://www.geeksforgeeks.org/dsa/tree-data-structure/
- * https://www.geeksforgeeks.org/dsa/generic-treesn-array-trees/
- *----------------------------------------------------------------------*/
+//================================================================================
+// N-ary Tree for directory tree
+// https://www.geeksforgeeks.org/dsa/tree-data-structure/
+// https://www.geeksforgeeks.org/dsa/generic-treesn-array-trees/
+//================================================================================
 #ifndef _TREE_HPP_
 #define _TREE_HPP_
 
-/*----------------------------------------------------------------------
- * SD file system configuration
- *----------------------------------------------------------------------*/
+//----------------------------------------------------------------------
+// SD file system configuration
+//----------------------------------------------------------------------
 #include "sdfs.h"
 #include "debug.h"
 #include <string>
@@ -20,9 +20,9 @@
 #define AUDIO_FILE_EXT  {".mp3", ".m4a", ".wav"}
 #define IsValidFile(f)  ((f)[0] != '@' && (f)[0] != '.')
 
-/*----------------------------------------------------------------------
- * Meta information for album list
- *----------------------------------------------------------------------*/
+//----------------------------------------------------------------------
+// Meta information for album list
+//----------------------------------------------------------------------
 #define TYPE_NODE   0 // typically "folder"
 #define TYPE_LEAF   1 // typically "file"
 
@@ -34,9 +34,9 @@ typedef struct {
   bool    spare    : 1;         // spare
 } NodeMeta_t;
 
-/*----------------------------------------------------------------------
- * Class definition
- *----------------------------------------------------------------------*/
+//----------------------------------------------------------------------
+// Class definition
+//----------------------------------------------------------------------
 class Node {
 private:
   static bool m_found;          // node search flag

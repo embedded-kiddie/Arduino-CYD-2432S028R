@@ -66,9 +66,9 @@ static LV_STYLE_CONST_INIT(album_style, (void*)style_prop_album);
 #endif
 
 ///////////////////// CALLBACK FUNCTIONS ////////////////////
-/*--------------------------------------------------------------------------------
- * Event handlers for Screen Main
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Event handlers for Screen Main
+//--------------------------------------------------------------------------------
 void ui_event_ScreenMain(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_GESTURE);
 
@@ -184,9 +184,9 @@ void ui_event_ElapsedBar(lv_event_t *e) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- * Event handlers for Screen Option
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Event handlers for Screen Option
+//--------------------------------------------------------------------------------
 void ui_event_ScreenAlbumList(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(
@@ -227,9 +227,9 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- * Event handlers for Screen Playlist
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Event handlers for Screen Playlist
+//--------------------------------------------------------------------------------
 void ui_event_ScreenPlayList(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(
@@ -269,9 +269,9 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- * Event handlers for Screen Options
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Event handlers for Screen Options
+//--------------------------------------------------------------------------------
 void ui_event_ScreenOptions(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(
@@ -315,9 +315,9 @@ static void update_elapsed_time(void) {
   lv_label_set_text_fmt(ui_ElapsedEnd,   "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
 }
 
-/*--------------------------------------------------------------------------------
- * Check and update the metadata when playback finishes
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Check and update the metadata when playback finishes
+//--------------------------------------------------------------------------------
 static void update_metadata(void) {
   MetaData_t meta;
   uint32_t playNo = player.GetPlayNo();
@@ -360,9 +360,9 @@ static void update_metadata(void) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- * Display a covoer picture on SD or flash
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Display a covoer picture on SD or flash
+//--------------------------------------------------------------------------------
 static void display_picture(uint32_t playNo) {
 #if (LV_USE_FS_ARDUINO_SD != 0) || (MY_USE_FS_ARDUINO_SD != 0)
 
@@ -415,9 +415,9 @@ static void display_picture(uint32_t playNo) {
 #endif
 }
 
-/*--------------------------------------------------------------------------------
- * Control next/previous play or stop/continuous play
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Control next/previous play or stop/continuous play
+//--------------------------------------------------------------------------------
 static bool play_next(bool next) {
   if (ui_ScreenPlayList) {
     ui_list_update_cell(ui_control.focusNo, false);
@@ -450,9 +450,9 @@ static bool play_next(bool next) {
   return ret;
 }
 
-/*--------------------------------------------------------------------------------
- * Check out the favorite playlists
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Check out the favorite playlists
+//--------------------------------------------------------------------------------
 static bool check_favorite(void) {
   return !ui_option.favorite || player.IsPlaying() || player.IsSelected();
 }
@@ -462,17 +462,17 @@ CYD_MP3Player *ui_get_player(void) {
   return &player;
 }
 
-/*--------------------------------------------------------------------------------
- * Redraw the display panel when waking up from sleep
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Redraw the display panel when waking up from sleep
+//--------------------------------------------------------------------------------
 void ui_redisplay(void) {
   lv_display_trigger_activity(NULL);
   lv_screen_load(lv_screen_active());
 }
 
-/*--------------------------------------------------------------------------------
- * Start to play with the specified track
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Start to play with the specified track
+//--------------------------------------------------------------------------------
 void ui_set_playNo(uint32_t track_id) {
   // start the specified track to play
   player.SetPlayNo(track_id);
@@ -488,9 +488,9 @@ void ui_set_playNo(uint32_t track_id) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- * Get the latest information on MP3Player
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Get the latest information on MP3Player
+//--------------------------------------------------------------------------------
 const uint32_t ui_get_playNo(void) {
   return player.GetPlayNo();
 }
@@ -499,17 +499,17 @@ const uint32_t ui_get_counts(void) {
   return player.GetCounts();
 }
 
-/*--------------------------------------------------------------------------------
- * Get ID3 tags (title, album, artist) from the file specified by id
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Get ID3 tags (title, album, artist) from the file specified by id
+//--------------------------------------------------------------------------------
 void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags) {
   player.GetID3Tags(track_id, tags);
 }
 
-/*--------------------------------------------------------------------------------
- * Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
- * Note: These functions will be executed in the context of CORE 1.
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
+// Note: These functions will be executed in the context of CORE 1.
+//--------------------------------------------------------------------------------
 void audio_id3data(const char *info) {
   // Avoid a race condition with ui_state set by audio_eof_mp3()
   if (ui_state == UI_STATE_PLAY) {
@@ -536,9 +536,9 @@ void audio_eof_mp3(const char *info) {
   }
 }
 
-/*--------------------------------------------------------------------------------
- * Load / Save options in SD
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// Load / Save options in SD
+//--------------------------------------------------------------------------------
 void ui_load_options(void) {
   ui_set_option_backlight();
   ui_set_option_sleeptime();
@@ -557,11 +557,11 @@ void ui_init(void) {
   ui_state = UI_STATE_INIT;
 }
 
-/*--------------------------------------------------------------------------------
- * A finite state machine that controls the overall operation
- * The steady state can be either "UI_STATE_PLAY" or "UI_STATE_IDLE", 
- * anything else is just a transient state that works as a command.
- *--------------------------------------------------------------------------------*/
+//--------------------------------------------------------------------------------
+// A finite state machine that controls the overall operation
+// The steady state can be either "UI_STATE_PLAY" or "UI_STATE_IDLE", 
+// anything else is just a transient state that works as a command.
+//--------------------------------------------------------------------------------
 UI_State_t ui_loop(void) {
   switch (ui_state) {
     case UI_STATE_INIT:
