@@ -118,6 +118,10 @@ LV_IMAGE_DECLARE(img_list_pause);       // assets/icons/img_list_pause.png
 LV_IMAGE_DECLARE(img_rotate_folder);    // assets/icons/img_rotate_folder.png
 LV_IMAGE_DECLARE(img_rotate_check);     // assets/icons/img_rotate_check.png
 LV_IMAGE_DECLARE(img_list_border);      // assets/icons/img_list_border.png
+LV_IMAGE_DECLARE(img_checkbox);         // assets/icons/img_checkbox.png
+LV_IMAGE_DECLARE(img_checked);          // assets/icons/img_checked.png
+LV_IMAGE_DECLARE(img_symbol_down);      // assets/icons/img_symbol_down.png
+LV_IMAGE_DECLARE(img_symbol_right);     // assets/icons/img_symbol_right.png
 
 // UI STATE
 typedef enum {
