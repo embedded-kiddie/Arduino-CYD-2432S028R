@@ -97,7 +97,7 @@ static LV_STYLE_CONST_INIT(style_menu_back,     (void*)style_menu_back_prop);
  *  GLOBAL FUNCTIONS
  **********************/
 void ui_list_update_icon(uint32_t track_id, bool state) {
-  if ((ui_control.top <= track_id && track_id <= ui_control.end)) {
+  if (ui_control.top <= track_id && track_id <= ui_control.end) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* icon = lv_obj_get_child(cell, 0);
@@ -111,7 +111,7 @@ void ui_list_update_icon(uint32_t track_id, bool state) {
 }
 
 void ui_list_update_cell(uint32_t track_id, bool state) {
-  if ((ui_control.top <= track_id && track_id <= ui_control.end)) {
+  if (ui_control.top <= track_id && track_id <= ui_control.end) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* title  = lv_obj_get_child(cell, 1);
@@ -131,7 +131,7 @@ void ui_list_update_cell(uint32_t track_id, bool state) {
 }
 
 void ui_list_update_play(uint32_t track_id, bool state) {
-  if ((ui_control.top <= track_id && track_id <= ui_control.end)) {
+  if (ui_control.top <= track_id && track_id <= ui_control.end) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* icon   = lv_obj_get_child(cell, 0);
@@ -398,7 +398,7 @@ static void ui_list_create_all(void) {
 // Focus the specified cell when it is out of range
 //--------------------------------------------------------------------------------
 void ui_list_focus_playing(uint32_t track_id) {
-  if ((track_id < ui_control.top || ui_control.end < track_id)) {
+  if (track_id < ui_control.top || ui_control.end < track_id) {
     // Delete all cells in playlist
     ui_list_remove_all();
 
@@ -412,7 +412,7 @@ void ui_list_focus_playing(uint32_t track_id) {
 // Updates the duration to the specified cell
 //--------------------------------------------------------------------------------
 void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
-  if ((ui_control.top <= track_id && track_id <= ui_control.end)) {
+  if (ui_control.top <= track_id && track_id <= ui_control.end) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* time_label = lv_obj_get_child(cell, 3);
@@ -467,6 +467,7 @@ void ui_ScreenPlayList_screen_init(void) {
 
   // Add a callback when an object is deleted
   lv_obj_add_event_cb(ui_ScreenPlayList,  delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenPlayList);
+  lv_obj_add_event_cb(container,          delete_cb, LV_EVENT_DELETE, (void*)&container);
   lv_obj_add_event_cb(play_list,          delete_cb, LV_EVENT_DELETE, (void*)&play_list);
   lv_obj_add_event_cb(slider,             delete_cb, LV_EVENT_DELETE, (void*)&slider);
 

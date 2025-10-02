@@ -11,6 +11,9 @@
 
 #include "CYD_MP3Player.h"
 
+// Functional object to make a hash from the music title
+std::hash<std::string> MakeHash;
+
 //--------------------------------------------------------------------------------
 // Begin with SD or SdFat
 //--------------------------------------------------------------------------------
@@ -105,7 +108,6 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
     fd.close();
 
     // Search for meta data with matching hash
-    std::hash<std::string> MakeHash;
     size_t hash = MakeHash(list->name);
     for (int i = 0; i < n; i++) {
       if (hash == album[i].hash) {
@@ -122,9 +124,12 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
       fd.close();
     }
 
+    DBG_EXEC(printf("SaveMetaData: %s\n", list->name.c_str()));
+
     delete[] album;
     return true;
   }
+
   return false;
 }
 
@@ -208,7 +213,7 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
 void CYD_MP3Player::ScanAudioFiles(void) {
   const size_t n = m_tree->get_n_leafs();
 
-  // extract audio files in the parents directory
+  // Extract audio files in the parents directory
   for (int p = 0, parent = 0; parent < n; parent++) {
     std::string path = m_tree->find_path(parent);
     const Node *node = m_tree->get_node();
@@ -238,55 +243,62 @@ void CYD_MP3Player::ScanAudioFiles(void) {
     });
 
     const int n = m_list.size() - p;
-    MetaAlbum_t *album = new MetaAlbum_t[n];
-  
-    if (album) {
-      int m = 0;
-      size_t dst = 0;
+    MetaAlbum_t *album_src = new MetaAlbum_t[n];
+    DBG_ASSERT(album_src); // Out of memory?
+
+    if (album_src) {
       size_t src = sizeof(MetaAlbum_t) * n;
-      memset((void*)album, 0, src);
+      memset((void*)album_src, 0, src);
+      for (int i = 0; i < n; i++) {
+        album_src[i].hash = MakeHash(m_list[p + i].name);
+      }
 
-      std::hash<std::string> MakeHash; // Functional object to make a hash for the music title
-
+      // Read an existing meta data file
+      int counts = 0;
+      size_t dst = 0;
       std::string meta = path + "/" META_DATA_PREFIX META_DATA_SUFFIX;
       fd = SD.open(meta.c_str(), FILE_READ);
 
-      // Read an existing meta data file
       if (fd) {
-        dst = fd.read((void*)album, src);
+#ifdef USE_SDFAT
+        dst = fd.fileSize();
+#else
+        dst = fd.size();
+#endif
+        const int m = dst / sizeof(MetaAlbum_t);
+        MetaAlbum_t *album_dst = new MetaAlbum_t[m];
+        DBG_ASSERT(album_dst); // Out of memory?
 
-        // Find a matching hash and update meta data
-        for (int i = 0; i < n; i++) {
-          size_t hash = MakeHash(m_list[p + i].name);
-          for (int j = 0, k = dst / sizeof(MetaAlbum_t); j < k; j++) {
-            if (hash == album[j].hash) {
-              m_list[p + i].meta = album[j].meta;
-              m++;
-              break;
+        if (album_dst) {
+          dst = fd.read((void*)album_dst, dst);
+
+          // Find a matching hash and update meta data
+          for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+              if (album_src[i].hash == album_dst[j].hash) {
+                m_list[p + i].meta = album_src[i].meta = album_dst[j].meta;
+                counts++;
+                break;
+              }
             }
           }
+
+          delete[] album_dst;
         }
 
         fd.close();
       }
 
-      // Initialize hash data
-      else {
-        for (int i = 0; i < n; i++) {
-          album[i].hash = MakeHash(m_list[p + i].name);
-        }
-      }
-
-      if (src != dst || n != m) {
-        fd = SD.open(meta.c_str(), FILE_WRITE);
-        if (fd) {
+      // Update if mismatched
+      if (src != dst || n != counts) {
+        if (fd = SD.open(meta.c_str(), FILE_WRITE)) {
           fd.seek(0);
-          fd.write((void*)album, src);
+          fd.write((void*)album_src, src);
           fd.close();
         }
       }
 
-      delete[] album;
+      delete[] album_src;
     }
 
     p = m_list.size();
