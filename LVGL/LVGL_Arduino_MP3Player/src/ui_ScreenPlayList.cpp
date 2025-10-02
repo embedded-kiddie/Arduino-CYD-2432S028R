@@ -14,8 +14,8 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_FONT_SMALL_HEIGHT    17  // For font size: 12px
 #define LIST_FONT_MEDIUM_HEIGHT   22  // For font size: 14px
 #define LIST_LABEL_MARGINE        100 // left(50) + right(50)
-#define LIST_CELL_HEIGHT          54  // Inside a cell = column(3) x rol(2)
-#define LIST_CELL_VIEWS           6   // LIST_CELL_HEIGHT * LIST_CELL_VIEWS >= SCREEN_HEIGHT
+#define LIST_CELL_HEIGHT          54  // SCREEN_HEIGHT / LIST_CELL_VIEWS
+#define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT = LIST_CELL_VIEWS * LIST_CELL_HEIGHT
 
 /**********************
  *  STATIC VARIABLES
@@ -97,7 +97,7 @@ static LV_STYLE_CONST_INIT(style_menu_back,     (void*)style_menu_back_prop);
  *  GLOBAL FUNCTIONS
  **********************/
 void ui_list_update_icon(uint32_t track_id, bool state) {
-  if (play_list && (ui_control.top <= track_id && track_id <= ui_control.end)) {
+  if ((ui_control.top <= track_id && track_id <= ui_control.end)) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* icon = lv_obj_get_child(cell, 0);
@@ -111,7 +111,7 @@ void ui_list_update_icon(uint32_t track_id, bool state) {
 }
 
 void ui_list_update_cell(uint32_t track_id, bool state) {
-  if (play_list && (ui_control.top <= track_id && track_id <= ui_control.end)) {
+  if ((ui_control.top <= track_id && track_id <= ui_control.end)) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* title  = lv_obj_get_child(cell, 1);
@@ -131,7 +131,7 @@ void ui_list_update_cell(uint32_t track_id, bool state) {
 }
 
 void ui_list_update_play(uint32_t track_id, bool state) {
-  if (play_list && (ui_control.top <= track_id && track_id <= ui_control.end)) {
+  if ((ui_control.top <= track_id && track_id <= ui_control.end)) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* icon   = lv_obj_get_child(cell, 0);
@@ -253,6 +253,8 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
 
 //--------------------------------------------------------------------------------
 // Adjust the number of cells according to the scroll
+// https://docs.lvgl.io/master/details/common-widget-features/scrolling.html
+// https://github.com/lvgl/lvgl/blob/master/examples/scroll/lv_example_scroll_7.c
 //--------------------------------------------------------------------------------
 static void update_scroll(lv_obj_t *obj) {
   // Do not re-enter this function when `lv_obj_scroll_by` triggers this callback again.
@@ -327,8 +329,7 @@ static void update_scroll(lv_obj_t *obj) {
 static void scroll_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   if (event_code == LV_EVENT_SCROLL) {
-    // lv_obj_t *obj = lv_event_get_target_obj(e);
-    // assert(obj == play_list);
+    DBG_ASSERT(play_list == lv_event_get_target_obj(e));
     update_scroll(play_list);
   }
 }
@@ -397,7 +398,7 @@ static void ui_list_create_all(void) {
 // Focus the specified cell when it is out of range
 //--------------------------------------------------------------------------------
 void ui_list_focus_playing(uint32_t track_id) {
-  if (play_list && (track_id < ui_control.top || ui_control.end < track_id)) {
+  if ((track_id < ui_control.top || ui_control.end < track_id)) {
     // Delete all cells in playlist
     ui_list_remove_all();
 
@@ -411,7 +412,7 @@ void ui_list_focus_playing(uint32_t track_id) {
 // Updates the duration to the specified cell
 //--------------------------------------------------------------------------------
 void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
-  if (play_list && (ui_control.top <= track_id && track_id <= ui_control.end)) {
+  if ((ui_control.top <= track_id && track_id <= ui_control.end)) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* time_label = lv_obj_get_child(cell, 3);

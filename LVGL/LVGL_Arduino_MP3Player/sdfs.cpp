@@ -13,18 +13,16 @@
 
 #if MY_USE_FS_ARDUINO_SD
 
-#ifdef LV_MEM_POOL_ALLOC  // defined in lv_cong.h
-#define MY_MALLOC(size) lv_malloc(size)
-#define MY_FREE(addr)   lv_free(addr)
-
-#elif ESP_ARDUINO_VERSION_MAJOR >= 3
-// https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32/api-reference/system/mem_alloc.html
-#define MY_MALLOC(size) heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
-#define MY_FREE(addr)   heap_caps_free(addr)  // free() is equivalent to heap_caps_free() in IDF
-
+#ifdef LV_MEM_POOL_ALLOC
+  #define MY_MALLOC(size) lv_malloc(size)
+  #define MY_FREE(addr)   lv_free(addr)
+#elif (ESP_ARDUINO_VERSION_MAJOR >= 3)
+  // https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32/api-reference/system/mem_alloc.html
+  #define MY_MALLOC(size) heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
+  #define MY_FREE(addr)   heap_caps_free(addr)  // free() is equivalent to heap_caps_free() in IDF
 #else
-#define MY_MALLOC(size) heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
-#define MY_FREE(addr)   free(addr)
+  #define MY_MALLOC(size) heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
+  #define MY_FREE(addr)   free(addr)
 #endif
 
 /**********************

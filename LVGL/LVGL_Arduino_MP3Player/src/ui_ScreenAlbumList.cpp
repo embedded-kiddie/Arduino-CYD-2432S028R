@@ -24,7 +24,6 @@ extern CYD_MP3Player *ui_get_player(void);  // Defined in ui.cpp
 #define CELL_COLOR_LEAF     lv_color_hex(0xffffff)
 #define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }  // lv_color_hex(0xe4e0e4)
 
-
 static lv_obj_t *album_list;
 static int cell_count;
 
@@ -311,5 +310,7 @@ void ui_ScreenAlbumList_create_list(const char *root_dir) {
 
   // Create the album list from playlist
   CYD_MP3Player *player = ui_get_player();
-  add_node_to_list(player->m_tree, album_list);
+  if (player->m_tree) {
+    add_node_to_list(player->m_tree, album_list);
+  }
 }
