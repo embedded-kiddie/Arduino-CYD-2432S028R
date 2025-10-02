@@ -191,7 +191,7 @@ static void set_styles(lv_obj_t *cell, Node *node) {
   NodeMeta_t *meta = &node->meta;
   lv_obj_set_style_height   (cell, (meta->depth > 1 && meta->hidden ? 0 : CELL_HEIGHT_SMALL), LV_PART_MAIN);
   lv_obj_set_style_bg_color (cell, (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF), LV_PART_MAIN);
-  lv_obj_set_style_pad_left (cell, (meta->depth * CELL_PADDING_LEFT + (meta->type == TYPE_NODE ? CELL_OFFSET_NODE: CELL_OFFSET_LEAF)), LV_PART_MAIN);
+  lv_obj_set_style_pad_left (cell, (meta->type == TYPE_NODE ? CELL_OFFSET_NODE: CELL_OFFSET_LEAF) + meta->depth * CELL_PADDING_LEFT, LV_PART_MAIN);
   lv_label_set_long_mode    (cell, LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_DOT, LV_LABEL_LONG_SCROLL_CIRCULAR
 
   lv_obj_set_user_data(cell, (void*)node);
@@ -261,6 +261,53 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_LOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_UNLOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenAlbumList);
+
+#if SHOW_ARROW_BUTTON
+    //////////////////// Arrow Icon ////////////////////
+    {
+      static constexpr lv_style_const_prop_t style_prop_common[] = {
+        LV_STYLE_CONST_WIDTH(27),
+        LV_STYLE_CONST_HEIGHT(27),
+        LV_STYLE_CONST_X(LV_PCT_X(42)),
+        LV_STYLE_CONST_Y(LV_PCT_Y(-44)),
+        LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_default[] = {
+        LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
+        LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+        LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+        LV_STYLE_CONST_BORDER_WIDTH(0),
+        LV_STYLE_CONST_PAD_TOP(8),
+        LV_STYLE_CONST_PAD_RIGHT(0),
+        LV_STYLE_CONST_PAD_BOTTOM(0),
+        LV_STYLE_CONST_PAD_LEFT(8),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_pressed[] = {
+        LV_STYLE_CONST_PAD_TOP(10),
+        LV_STYLE_CONST_PAD_LEFT(10),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_checked[] = {
+        LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
+        LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+      static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+      static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
+      static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+
+      lv_obj_t *obj = lv_checkbox_create(ui_ScreenAlbumList);
+      lv_checkbox_set_text_static(obj, "");
+      lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+      lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+      lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+      lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+      lv_obj_add_event_cb (obj, ui_event_ScreenAlbumList, LV_EVENT_CLICKED, NULL);
+    }
+#endif
 
     //////////////////// Title Label ////////////////////
     lv_obj_t *obj = lv_label_create(ui_ScreenAlbumList);
