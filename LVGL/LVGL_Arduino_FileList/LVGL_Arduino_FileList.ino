@@ -254,7 +254,7 @@ void setup() {
   size_t mem_used = mon1.free_size - mon2.free_size;
   lv_obj_t *label = lv_label_create(lv_screen_active());
   lv_obj_align(label, LV_ALIGN_BOTTOM_MID, 0, -10);
-  lv_label_set_text_fmt(label, "%" LV_PRIu32 " items were created in %" LV_PRIu32 "ms\n"
+  lv_label_set_text_fmt(label, "Created %" LV_PRIu32 " items in %" LV_PRIu32 "ms\n"
                                "using %zu bytes of memory", get_cell_count(), elaps, mem_used);
 
   dir.close();

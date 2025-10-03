@@ -1,23 +1,25 @@
-//====================================================================
-// SD file system configuration
-//====================================================================
+//================================================================================
+// LVGL file system interfaces for handling an image file on SD card
+// NOTE: uncomment the followings to use SdFat
+//  "#define USE_UTF8_LONG_NAMES 1" in SdFatConfig.h
+//================================================================================
 #ifndef _SDSPI_H_
 #define _SDSPI_H_
 
 // #define USE_SDFAT
 
-#ifdef  USE_SDFAT
-//--------------------------------------------------------------------
+#ifdef USE_SDFAT
+//--------------------------------------------------------------------------------
 // SdFat library
 // https://github.com/greiman/SdFat
-//--------------------------------------------------------------------
-#include "SdFat.h"
+//--------------------------------------------------------------------------------
+#include <SdFat.h>
 
 extern SdFat SD;
 
 // SPI bus configuration
 // Note: It assumes that the LCD is assigned to HSPI.
-#if   1
+#if   0
 #define SD_SPI_BUS sd_spi
 #define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &SD_SPI_BUS)
 #define DECLARE_SD_SPI_BUS SPIClass SD_SPI_BUS = SPIClass(VSPI)
@@ -26,17 +28,27 @@ extern SdFat SD;
 #endif
 
 // alternatives to FS.h definitions
-#undef  FILE_APPEND
-#define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
+#define FS_MODE int
+
+#undef  FILE_READ
 #undef  FILE_WRITE
+#undef  FILE_APPEND
+#define FILE_READ   (O_RDONLY)
+#define FILE_APPEND (O_RDWR | O_CREAT | O_AT_END)
 #define FILE_WRITE  (O_RDWR | O_CREAT | O_TRUNC)
 
+enum SeekMode {
+  SeekSet = 0,
+  SeekCur = 1,
+  SeekEnd = 2
+};
+
 #else
-//--------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // Standard SD library
 // https://github.com/espressif/arduino-esp32/tree/master/libraries/SD
-//--------------------------------------------------------------------
-#include "SD.h"
+//--------------------------------------------------------------------------------
+#include <SD.h>
 
 // SPI bus configuration
 #if   1
@@ -45,18 +57,21 @@ extern SdFat SD;
 #define SD_CONFIG
 #endif
 
+// FILE_READ, FILE_WRITE, ...
+#define FS_MODE const char *
+
 #endif // SdFat or SD
 
-//--------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // Chip select pin and SPI clock frequency
-//--------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 #define SD_CS         SS
 #define SD_SPI_CLOCK  25000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 
-//--------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // Temporary buffer size for file path
 // title(30) + "/" + artist(30) + "/" + album(30) + ".mp3" + '\0'
-//--------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 #define BUF_SIZE 128
 
 #endif // _SDSPI_H_

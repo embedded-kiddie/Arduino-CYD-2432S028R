@@ -11,10 +11,10 @@ A sample UI for collapsing folders like Explorer on Windows or Finder on Mac
 | LovyanGFX                  | [1.2.7][8]                                        |
 | SD card library            | [SD][9] or [SdFat 2.3.0][10]                      |
 
-## Select folders
+## Select folders (depth: 2)
 https://github.com/user-attachments/assets/14c2be08-08fe-46d2-bf45-b9ceb655dc18
 
-## Select files
+## Select files (depth: 3)
 https://github.com/user-attachments/assets/cf39f05f-3295-4dac-8861-08638c7880bc
 
 [1]: https://github.com/arduino/arduino-ide/releases/tag/2.3.4 "Release 2.3.4 · arduino/arduino-ide"

@@ -43,8 +43,9 @@ static void draw_image_cb(lv_event_t *e) {
   // Serial.printf("task type: %d\n", type);
 
   if (type == LV_DRAW_TASK_TYPE_FILL) {
-    CellData_t data;
     lv_obj_t *cell = lv_event_get_target_obj(e);
+
+    CellData_t data;
     data.user_data = lv_obj_get_user_data(cell);
 
     // Do not draw if parent cell is folded
