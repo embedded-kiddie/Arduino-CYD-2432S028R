@@ -4,7 +4,7 @@
 // Project name: SquareLine_Project
 
 #include "ui.h"
-#include "tree.hpp"
+#include "../tree.hpp"
 #include <string.h>
 
 #include "../CYD_MP3Player.h"
@@ -19,6 +19,8 @@ extern CYD_MP3Player *ui_get_player(void);  // Defined in ui.cpp
 #define CELL_PADDING_BORDER 8   // padding top/bottom in pixels
 #define FOLDING_DURATION    250 // folding animation duration
 #define MAX_CELLS           100 // LV_MEM_SIZE = (64 * 1024U)
+#define ALBUM_CELL_HEIGHT   32  // height of cell in album list
+#define ALBUM_CELL_COUNTS   7   // number of cell views
 
 #define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
 #define CELL_COLOR_LEAF     lv_color_hex(0xffffff)
@@ -327,7 +329,7 @@ void ui_ScreenAlbumList_screen_init(void) {
       LV_STYLE_CONST_X(LV_PCT_X(5)),
       LV_STYLE_CONST_Y(LV_PCT_Y(26)),
       LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LV_PCT_X(10)),
-      LV_STYLE_CONST_HEIGHT(ALBUM_CELL_HEIGHT * 7 - 4),
+      LV_STYLE_CONST_HEIGHT(ALBUM_CELL_HEIGHT * ALBUM_CELL_COUNTS - 4),
       LV_STYLE_CONST_PROPS_END
     };
     static LV_STYLE_CONST_INIT(style_album, (void*)style_prop_album);

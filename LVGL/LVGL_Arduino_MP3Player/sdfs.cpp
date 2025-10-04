@@ -13,7 +13,7 @@
 
 #if MY_USE_FS_ARDUINO_SD
 
-#ifdef LV_MEM_POOL_ALLOC
+#if LV_MEM_ADR
   #define MY_MALLOC(size) lv_malloc(size)
   #define MY_FREE(addr)   lv_free(addr)
 #elif (ESP_ARDUINO_VERSION_MAJOR >= 3)
