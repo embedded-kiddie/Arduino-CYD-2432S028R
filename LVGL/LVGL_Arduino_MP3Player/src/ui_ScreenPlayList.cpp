@@ -16,6 +16,7 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_LABEL_MARGINE        100 // left(50) + right(50)
 #define LIST_CELL_HEIGHT          54  // SCREEN_HEIGHT / LIST_CELL_VIEWS
 #define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT = LIST_CELL_VIEWS * LIST_CELL_HEIGHT
+#define LIST_CELL_SPARE           2   // 1 <= LIST_CELL_SPARE <= 2 (1: disable auto-scroll, 2: enable auto-scroll)
 
 /**********************
  *  STATIC VARIABLES
@@ -284,7 +285,7 @@ static void update_scroll(lv_obj_t *obj) {
   }
 
   // Scroll UP: delete cells outside the range
-  while ((pos = lv_obj_get_scroll_bottom(obj)) > LIST_CELL_HEIGHT && ui_control.end - ui_control.top > LIST_CELL_VIEWS) {
+  while ((pos = lv_obj_get_scroll_bottom(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && ui_control.end - ui_control.top > LIST_CELL_VIEWS) {
     ui_control.end -= 1;
     lv_obj_t *child = lv_obj_get_child(obj, -1);
     lv_obj_delete(child);
@@ -293,7 +294,7 @@ static void update_scroll(lv_obj_t *obj) {
   }
 
   // Scroll DOWN: delete cells outside the range
-  while ((pos = lv_obj_get_scroll_top(obj)) > LIST_CELL_HEIGHT && ui_control.end - ui_control.top > LIST_CELL_VIEWS) {
+  while ((pos = lv_obj_get_scroll_top(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && ui_control.end - ui_control.top > LIST_CELL_VIEWS) {
     ui_control.top += 1;
     int32_t bottom_before = lv_obj_get_scroll_bottom(obj);
     lv_obj_t *child = lv_obj_get_child(obj, 0);

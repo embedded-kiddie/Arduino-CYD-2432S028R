@@ -117,8 +117,7 @@ public:
 #if DISPLAY_CYD_2USB
       cfg.freq_write = 80000000;    // SPI clock for transmit (Maximum 80MHz, rounded to an integer value of 80MHz)
 #else
-//    cfg.freq_write = 40000000;    // SPI clock for transmit (Maximum 40MHz, rounded to an integer value of 40MHz)
-      cfg.freq_write = 80000000;    // LVGL simply transfers buffers, so 80MHz is possible
+      cfg.freq_write = 40000000;    // SPI clock for transmit (Maximum 80MHz, rounded to an integer value of 80MHz)
 #endif
       cfg.freq_read  = 16000000;    // SPI clock for receive
       cfg.spi_3wire  = false;       // Set to true if receive on the MOSI pin
