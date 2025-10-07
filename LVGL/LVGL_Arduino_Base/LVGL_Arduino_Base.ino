@@ -54,25 +54,30 @@ static LGFX tft;
 // Calibrate touch panel for LovyanGFX (optional)
 //----------------------------------------------------------------------
 static void calibrate_touch(uint16_t cal[8]) {
+  tft.clear(TFT_BLACK);                   // Clear screen with background color
+  tft.setTextColor(TFT_WHITE, TFT_BLACK); // Set foreground color, background color
+  tft.setFont(&fonts::Font2);             // https://lang-ship.com/blog/files/LovyanGFX/font/
+
   // Draw guide text on the screen.
   tft.setTextDatum(textdatum_t::middle_center);
-  tft.drawString("touch the arrow marker.", tft.width() >> 1, tft.height() >> 1);
+  tft.drawString  ("Touch the arrow tips in order", tft.width() >> 1, tft.height() >> 1);
   tft.setTextDatum(textdatum_t::top_left);
 
-  // You will need to calibrate by touching the four corners of the screen.
   uint16_t fg = TFT_WHITE;
   uint16_t bg = TFT_BLACK;
-  if (tft.isEPD()) {  // Electronic Paper Display
+
+  // Electronic Paper Display
+  if (tft.isEPD()) {
     std::swap(fg, bg);
   }
 
+  // You will need to calibrate by touching the four corners of the screen.
   tft.calibrateTouch(cal, fg, bg, std::max(tft.width(), tft.height()) >> 3);
 
   Serial.print("\nconst uint16_t cal[8] = { ");
   for (int i = 0; i < 8; i++) {
     Serial.printf("%d%s", cal[i], (i < 7 ? ", " : " };\n"));
   }
-  Serial.print("tft.setTouchCalibrate(cal);\n");
 }
 
 static void tft_init(void) {
@@ -82,6 +87,8 @@ static void tft_init(void) {
 
   if (tft.touch()) {
     if (USE_LGFX_CALIBRATED) {
+      // The following is equivalent to the `_touch_instance` setting in `LGFX_ESP32_2432S028R_CYD.hpp`.
+      // The `cal[8]` can be replaced with the result displayed on the serial monitor after calibration.
       const uint16_t cal[8] = {
         240,   // x_min
         3700,  // y_min
@@ -92,12 +99,11 @@ static void tft_init(void) {
         3800,  // x_max
         200    // y_max
       };
-      tft.setTouchCalibrate((uint16_t*)cal);
     } else {
       uint16_t cal[8];
       calibrate_touch(cal);
-      tft.setTouchCalibrate(cal);
     }
+    tft.setTouchCalibrate((uint16_t*)cal);
   } else {
     Serial.println("Touch device not found.");
   }

@@ -268,7 +268,7 @@ static void update_scroll(lv_obj_t *obj) {
     ui_control.end += 1;
     add_list_cell(obj, ui_control.end);
     lv_obj_update_layout(obj);
-    // printf("added ui_control.end: %d, pos: %d\n", ui_control.end, pos);
+    // printf("added end --> top: %d, end: %d, pos: %d\n", ui_control.top, ui_control.end, pos);
   }
 
   // Scroll UP: while the pos from the top of the scroll range (positive) is smaller than the cell size
@@ -280,7 +280,7 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
     int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
     lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    // printf("added ui_control.top: %d, pos: %d\n", ui_control.top, pos);
+    // printf("added top --> top: %d, end: %d, pos: %d\n", ui_control.top, ui_control.end, pos);
   }
 
   // Scroll UP: delete cells outside the range
@@ -289,7 +289,7 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_t *child = lv_obj_get_child(obj, -1);
     lv_obj_delete(child);
     lv_obj_update_layout(obj);
-    // printf("deleted ui_control.end: %d, pos: %d\n", ui_control.end + 1, pos);
+    // printf("deleted end --> top: %d, end: %d, pos: %d\n", ui_control.top, ui_control.end, pos);
   }
 
   // Scroll DOWN: delete cells outside the range
@@ -301,7 +301,7 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
     int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
     lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    // printf("deleted ui_control.top: %d, pos: %d\n", ui_control.top - 1, pos);
+    // printf("deleted top --> top: %d, end: %d, pos: %d\n", ui_control.top, ui_control.end, pos);
   }
 
   // Always LIST_CELL_VIEWS + 1 cells are allocated
