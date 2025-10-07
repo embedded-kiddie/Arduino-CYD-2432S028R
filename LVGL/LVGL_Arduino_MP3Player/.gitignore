@@ -2,6 +2,7 @@
 *
 
 # target list
+!*.[ch]*
 !src/*
 !font/*
 !assets/*
