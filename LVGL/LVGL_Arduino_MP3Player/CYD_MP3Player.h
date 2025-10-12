@@ -55,10 +55,11 @@ typedef struct {
   uint16_t duration : 14;
 } MetaData_t;
 
+// Metadata about the file stored in an album folder
 typedef struct {
-  size_t      hash;
-  MetaData_t  meta;
-} MetaAlbum_t;
+  size_t      hash; // A hash representing the file name
+  MetaData_t  meta; // A data set that may change dynamically
+} MetaHash_t;
 
 typedef struct {
   MetaData_t meta;

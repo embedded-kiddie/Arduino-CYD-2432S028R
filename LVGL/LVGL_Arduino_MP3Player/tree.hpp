@@ -240,7 +240,7 @@ private:
 
 public:
   // traverse the tree and print node information
-  void print_tree(void) {
+  void dump_tree(void) {
     print_node(this);
     print_nodes(this);
     Serial.printf("n_nodes: %d, n_leaf: %d, n_depth: %d\n", n_nodes, n_leafs, n_depth);

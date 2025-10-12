@@ -27,7 +27,7 @@ static uint8_t draw_buf[DRAW_BUF_SIZE];
 //----------------------------------------------------------------------
 // LovyanGFX configuration
 //----------------------------------------------------------------------
-#define USE_LGFX_AUTODETECT false
+#define USE_LGFX_AUTODETECT true
 #define USE_LGFX_CALIBRATED true
 
 #if USE_LGFX_AUTODETECT
@@ -50,7 +50,7 @@ static LGFX tft;
 #include "sdfs.h"
 #include "../src/sdcard.hpp"
 #else
-#include "../src/ESP32.hpp"
+#include "ESP32.hpp"
 #endif
 
 #define SAVE_SEQUENCIAL_BMP false

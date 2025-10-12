@@ -97,8 +97,8 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
 #else
     const size_t size = fd.size();
 #endif
-    const size_t n = size / sizeof(MetaAlbum_t);
-    MetaAlbum_t *album = new MetaAlbum_t[n];
+    const size_t n = size / sizeof(MetaHash_t);
+    MetaHash_t *album = new MetaHash_t[n];
     if (!album) {
       fd.close();
       return false;
@@ -199,7 +199,7 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
   }
 
   DBG_EXEC({
-    m_tree->print_tree();
+    m_tree->dump_tree();
     print_files();
     printf("Total: %d\n", m_list.size());
   });
@@ -243,11 +243,11 @@ void CYD_MP3Player::ScanAudioFiles(void) {
     });
 
     const int n = m_list.size() - p;
-    MetaAlbum_t *album_src = new MetaAlbum_t[n];
+    MetaHash_t *album_src = new MetaHash_t[n];
     DBG_ASSERT(album_src); // Out of memory?
 
     if (album_src) {
-      size_t src = sizeof(MetaAlbum_t) * n;
+      size_t src = sizeof(MetaHash_t) * n;
       memset((void*)album_src, 0, src);
       for (int i = 0; i < n; i++) {
         album_src[i].hash = MakeHash(m_list[p + i].name);
@@ -265,8 +265,8 @@ void CYD_MP3Player::ScanAudioFiles(void) {
 #else
         dst = fd.size();
 #endif
-        const int m = dst / sizeof(MetaAlbum_t);
-        MetaAlbum_t *album_dst = new MetaAlbum_t[m];
+        const int m = dst / sizeof(MetaHash_t);
+        MetaHash_t *album_dst = new MetaHash_t[m];
         DBG_ASSERT(album_dst); // Out of memory?
 
         if (album_dst) {
