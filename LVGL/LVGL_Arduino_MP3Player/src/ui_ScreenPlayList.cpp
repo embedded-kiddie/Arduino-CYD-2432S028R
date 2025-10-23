@@ -413,7 +413,7 @@ void ui_list_focus_playing(uint32_t track_id) {
 // Updates the duration to the specified cell
 //--------------------------------------------------------------------------------
 void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
+  if (play_list && ui_control.top <= track_id && track_id <= ui_control.end) {
     lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
     if (cell) {
       lv_obj_t* time_label = lv_obj_get_child(cell, 3);

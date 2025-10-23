@@ -17,7 +17,7 @@
 #include <assert.h>
 #include <string.h>
 
-#define AUDIO_FILE_EXT  {".mp3", ".m4a", ".wav"}
+#define AUDIO_FILE_EXT  {".m4a", ".mp3", ".wav"}
 #define IsValidFile(f)  ((f)[0] != '@' && (f)[0] != '.')
 
 //----------------------------------------------------------------------
@@ -53,6 +53,7 @@ public:
 
   Node(const char * name) {
     n_nodes++;
+    this->meta = {0,};
     this->name = name;
   }
 
@@ -129,12 +130,21 @@ private:
     });
   }
 
-  // traverse by preorder
+  // traverse and assign keys similar to post-order
+  // e.g.      root
+  //    ┌───────┼─────────┐
+  //    1       3         8
+  //  ┌─┴─┐   ┌─┴─┐   ┌───┴───┐
+  //  0   1   2   3   5       8
+  //                ┌─┴─┐  ┌──┼──┐
+  //                4   5  6  7  8
   uint32_t traverse_node(Node *node, uint32_t depth = 1) {
     for (auto &n : node->children) {
-      n->meta.depth   = depth;
-      n->meta.hidden  = true;
-      n->meta.checked = true;
+      if (n->meta.depth == 0) {
+        n->meta.depth   = depth;
+        n->meta.hidden  = true;
+        n->meta.checked = true;
+      }
 
       if (n->children.size()) {
         uint32_t d = traverse_node(n, depth + 1);
@@ -151,7 +161,34 @@ private:
     return depth;
   }
 
+  // traverse and assign keys by pre-order
+  // e.g.      root
+  //    ┌───────┼─────────┐
+  //    0       3         6
+  //  ┌─┴─┐   ┌─┴─┐   ┌───┴───┐
+  //  1   2   4   5   7       10
+  //                ┌─┴─┐  ┌──┼──┐
+  //                8   9  11 12 13
+  void traverse_preorder(Node *node, uint32_t depth) {
+    for (auto &n : node->children) {
+      n->key = n_nodes++;
+      traverse_preorder(n, depth + 1);
+    }
+  }
+
 public:
+  uint32_t traverse_node(void) {
+    n_leafs = n_depth = 0;
+    traverse_node(this);
+    return n_nodes;
+  }
+
+  uint32_t traverse_preorder(void) {
+    n_nodes = 0;
+    traverse_preorder(this, 1);
+    return n_nodes;
+  }
+
   // create a file tree
   void scan_file(File &dir) {
     n_nodes = n_leafs = n_depth = 0;
@@ -160,7 +197,7 @@ public:
     traverse_node(this);
 
     this->key = n_leafs;
-    this->meta = { 0, TYPE_NODE, false, true }; // key, type, hidden, checked
+    this->meta = { 0, TYPE_NODE, false, false, false }; // depth, type, hidden, checked, spare
   }
 
   // create a directory tree
@@ -171,7 +208,7 @@ public:
     traverse_node(this);
 
     this->key = n_leafs;
-    this->meta = { 0, TYPE_NODE, false, true }; // key, type, hidden, checked
+    this->meta = { 0, TYPE_NODE, false, false, false }; // depth, type, hidden, checked, spare
   }
 
 private:
@@ -200,6 +237,24 @@ private:
     return m_found;
   }
 
+  // find the node/leaf with the specified key
+  Node *find_preorder(Node * node, int key) {
+    const int N = node->children.size();
+    for (int i = N - 1; i >= 0; i--) {
+      Node *n = node->children[i];
+      if (n->key == key) {
+        m_found_node = node;  // parent node
+        return n;             // found node
+      }
+      else if (n->key < key) {
+        if (n = find_preorder(n, key)) {
+          return n;
+        }
+      }
+    }
+    return NULL;
+  }
+
 public:
   // find the leaf node with the specified key and returns node / path.
   Node *find_node(int key) {
@@ -220,9 +275,14 @@ public:
     return m_path; // without trailing slash
   }
 
+  // find the node/leaf with the specified key
+  Node *find_preorder(int key) {
+    return find_preorder(this, key);
+  }
+
 private:
   void print_node(Node *node) {
-    Serial.printf("key:%3d size:%d, depth:%d, type:%d, hidden:%d, checked:%d %s\n",
+    Serial.printf("key:%3d, size:%2d, depth:%d, type:%d, hidden:%d, checked:%d %s\n",
                   node->key, node->children.size(), node->meta.depth, node->meta.type,
                   node->meta.hidden, node->meta.checked, node->name.c_str());
   }
@@ -244,6 +304,28 @@ public:
     print_node(this);
     print_nodes(this);
     Serial.printf("n_nodes: %d, n_leaf: %d, n_depth: %d\n", n_nodes, n_leafs, n_depth);
+  }
+
+  void dump_path(void) {
+    for (int i = 0; i < n_leafs; i++) {
+      if (find_node(i)) {
+        Serial.printf("key: %d, path: %s\n", i, m_path.c_str());
+      }
+    }
+  }
+
+  void dump_preorder(bool all = false) {
+    traverse_preorder();
+    //dump_tree();
+    //print_node(this);
+    for (int i = 0; i < n_nodes; i++) {
+      Node *n = find_preorder(i);
+      Node *p = m_found_node; // parent node
+      DBG_ASSERT(n);
+      if (all || p->meta.checked == false) {
+        print_node(n);
+      }
+    }
   }
 };
 

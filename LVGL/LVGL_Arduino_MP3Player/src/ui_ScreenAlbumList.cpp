@@ -11,61 +11,154 @@
 extern CYD_MP3Player *ui_get_player(void);  // Defined in ui.cpp
 
 // List Components
+#define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
+#define CELL_COLOR_LEAF     lv_color_hex(0xffffff)
+#define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }  // lv_color_hex(0xe4e0e4)
 #define CELL_HEIGHT_SMALL   31  // for CUSTOM_FONT_SMALL
 #define CELL_HEIGHT_MEDIUM  34  // for CUSTOM_FONT_MEDIUM
 #define CELL_OFFSET_NODE    6   // offset for node text
 #define CELL_OFFSET_LEAF    10  // offset for leaf text
 #define CELL_PADDING_LEFT   6   // padding left in pixels
 #define CELL_PADDING_BORDER 8   // padding top/bottom in pixels
+#define CELL_MAX_VISIBLE    7   // number of cells visible in the list
+#define ALBUM_LIST_HEIGHT   220 // height of the album list (CELL_HEIGHT_SMALL * CELL_MAX_VISIBLE + alpha)
 #define FOLDING_DURATION    250 // folding animation duration
-#define MAX_CELLS           100 // LV_MEM_SIZE = (64 * 1024U)
-#define ALBUM_CELL_HEIGHT   32  // height of cell in album list
-#define ALBUM_CELL_COUNTS   7   // number of cell views
 
-#define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
-#define CELL_COLOR_LEAF     lv_color_hex(0xffffff)
-#define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }  // lv_color_hex(0xe4e0e4)
+// Settings for controlling cells in the list
+#define NODE_OPEN   false
+#define NODE_CLOSE  true
 
+typedef struct {
+  int   top;      // node key at the top of the list
+  int   end;      // node key at the end of the list
+  int   count;    // number of the cells in the list
+  int   n_nodes;  // total number of the nodes in tree
+  Node  *root;
+} ListControl_t;
+
+//--------------------------------------------------------------------------------
+// Global variables and prototype
+//--------------------------------------------------------------------------------
 static lv_obj_t *album_list;
-static int cell_count;
+static ListControl_t list_control;
+static bool update_scroll_running = false;
+
+static void event_handler(lv_event_t *e);
+static void draw_image_cb(lv_event_t *e);
 
 //--------------------------------------------------------------------------------
-//
+// Setup cell styles and properties
 //--------------------------------------------------------------------------------
-static size_t get_cell_count(void) {
-  return cell_count;
+static void set_properties(lv_obj_t *cell, Node *node) {
+  static constexpr lv_style_const_prop_t style_prop_common[] = {
+    LV_STYLE_CONST_ALIGN(LV_ALIGN_LEFT_MID),
+    LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
+    LV_STYLE_CONST_PAD_TOP(CELL_PADDING_BORDER),
+    LV_STYLE_CONST_PAD_BOTTOM(CELL_PADDING_BORDER),
+    LV_STYLE_CONST_OUTLINE_COLOR(CELL_COLOR_OUTLINE),
+    LV_STYLE_CONST_OUTLINE_WIDTH(1),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
+  lv_obj_add_style(cell, &style_common, (uint32_t)LV_PART_MAIN);
+
+  NodeMeta_t *meta = &node->meta;
+  lv_obj_set_style_height   (cell, (meta->depth > 1 && meta->hidden ? 0 : CELL_HEIGHT_SMALL), LV_PART_MAIN);
+  lv_obj_set_style_bg_color (cell, (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF), LV_PART_MAIN);
+  lv_obj_set_style_pad_left (cell, (meta->depth * CELL_PADDING_LEFT + (meta->type == TYPE_NODE ? CELL_OFFSET_NODE: CELL_OFFSET_LEAF)), LV_PART_MAIN);
+  lv_label_set_long_mode    (cell, LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_DOT, LV_LABEL_LONG_SCROLL_CIRCULAR
+  lv_obj_add_flag           (cell, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_flag           (cell, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+  lv_obj_add_event_cb       (cell, draw_image_cb, LV_EVENT_DRAW_TASK_ADDED, NULL);
+  lv_obj_add_event_cb       (cell, event_handler, LV_EVENT_CLICKED, NULL);
+  lv_obj_set_user_data      (cell, (void*)node);
 }
 
-static void reset_cell_count(void) {
-  cell_count = 0;
+//--------------------------------------------------------------------------------
+// Get the node pointer from the cell's userdata
+//--------------------------------------------------------------------------------
+inline static Node *get_node(lv_obj_t *cell) {
+  return (Node*)lv_obj_get_user_data(cell);
 }
 
 //--------------------------------------------------------------------------------
-//
+// Update cells' position in the list
 //--------------------------------------------------------------------------------
-static lv_obj_t *get_parent(lv_obj_t *cell) {
-  Node *node = (Node*)lv_obj_get_user_data(cell);
+inline static void update_list(lv_obj_t *list) {
+  lv_obj_update_layout(list);
+  list_control.top = get_node(lv_obj_get_child(list,  0))->key;
+  list_control.end = get_node(lv_obj_get_child(list, -1))->key;
+  list_control.count = lv_obj_get_child_count(list);
+}
 
-  while (cell = lv_obj_get_sibling(cell, -1)) {
-    Node *n = (Node*)lv_obj_get_user_data(cell);
-    if (n->meta.depth < node->meta.depth) {
-      return cell;
-    }
+//--------------------------------------------------------------------------------
+// Append / Delete the specified node to the list
+//--------------------------------------------------------------------------------
+inline static lv_obj_t *append_cell(lv_obj_t *list, Node *node) {
+//printf("count:%3d added   %3d \"%s\"\n", list_control.count, node->key, node->name.c_str());
+  lv_obj_t * cell = lv_list_add_text(list, node->name.c_str());
+  set_properties(cell, node);
+  return cell;
+}
+
+inline static void delete_cell(lv_obj_t *list, lv_obj_t *cell) {
+//Node *node = get_node(cell);
+//printf("count:%3d deleted %3d \"%s\"\n", list_control.count, node->key, node->name.c_str());
+  lv_obj_delete(cell);
+}
+
+static void delete_cell_async(void *cell) {
+  lv_obj_t *list = lv_obj_get_parent((lv_obj_t *)cell);
+  delete_cell(list, (lv_obj_t *)cell);
+  update_list(list);
+}
+
+//--------------------------------------------------------------------------------
+// A function to reduce the impact of a bug related to LVGL lv_list animation
+// Note: This bug occurs if a blank space is created at the bottom of the list 
+// after deleting a cell.
+//--------------------------------------------------------------------------------
+inline static void adjust_bottom(lv_obj_t *list) {
+//printf("bottom: %d --> ", lv_obj_get_scroll_bottom(list));
+
+  // If the bottom position is negative, reposition it to a positive
+  if (lv_obj_get_scroll_bottom(list) <= 0) {
+    lv_obj_scroll_to_y(list, CELL_HEIGHT_SMALL, LV_ANIM_OFF); // 1. Move to positive position
+    lv_obj_scroll_to_y(list, 0, LV_ANIM_OFF);                 // 2. Snap to the bottom position
   }
 
-  return NULL; // never reached
+  // Update cells' position in the list
+  update_list(list);
+
+//printf("%d\n", lv_obj_get_scroll_bottom(list));
 }
 
 //--------------------------------------------------------------------------------
-//
+// Get the open node after/before the specified key
 //--------------------------------------------------------------------------------
-static NodeMeta_t *get_node_meta(lv_obj_t *cell) {
-  Node *node = (Node*)lv_obj_get_user_data(cell);
-  return &node->meta;
+static Node *find_after(int key) {
+  while (++key < list_control.n_nodes) {
+    Node *node = list_control.root->find_preorder(key);
+    if (node && (node->meta.depth == 1 || node->meta.hidden == false)) {
+      return node;
+    }
+  }
+  return NULL;
+}
+
+static Node *find_before(int key) {
+  while (--key >= 0) {
+    Node *node = list_control.root->find_preorder(key);
+    if (node && (node->meta.depth == 1 || node->meta.hidden == false)) {
+      return node;
+    }
+  }
+  return NULL;
 }
 
 //--------------------------------------------------------------------------------
-// https://docs.lvgl.io/master/details/widgets/table.html
+// Draw a graphic icon for the cell
+// Reference: https://docs.lvgl.io/master/details/widgets/table.html
 //--------------------------------------------------------------------------------
 static void draw_image_cb(lv_event_t *e) {
   // If the cells are drawn...
@@ -74,7 +167,7 @@ static void draw_image_cb(lv_event_t *e) {
 
   if (type == LV_DRAW_TASK_TYPE_FILL) {
     lv_obj_t *cell = lv_event_get_target_obj(e);
-    NodeMeta_t *meta = get_node_meta(cell);
+    NodeMeta_t *meta = &(get_node(cell)->meta);
     if (meta->depth > 1 && meta->hidden) {
       return;
     }
@@ -115,58 +208,146 @@ static void draw_image_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-//
+// Callbacks when a cell is opened or closed
+//--------------------------------------------------------------------------------
+static void update_open_cb(lv_anim_t* a) {
+  lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
+  lv_obj_t *cell = lv_obj_get_child(list, -1);
+  delete_cell(list, cell);
+  update_list(list); // Not required at the end of animation ?
+}
+
+static void update_close_cb(lv_anim_t* a) {
+  lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
+  lv_obj_t *cell = (lv_obj_t*)a->var;
+
+  // Avoid LVGL bug (?)
+  adjust_bottom(list);
+  lv_async_call(delete_cell_async, (void*)cell);
+}
+
+//--------------------------------------------------------------------------------
+// Processing when opening and closing the cell
+//--------------------------------------------------------------------------------
+static void update_open(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *a) {
+  Node *prev = node;
+  std::vector <Node*> stack = {node};
+
+  uint32_t depth = node->meta.depth;
+  uint32_t d = depth + 1;
+
+  for (int key = node->key + 1; key < list_control.n_nodes; key++) {
+    node = list_control.root->find_preorder(key);
+    if (node->meta.depth <= depth) {
+      break;
+    }
+
+    // Update the stack depending on the depth
+    if (node->meta.depth > d) {
+      d = node->meta.depth;
+      stack.push_back(prev);
+    } else if (node->meta.depth < d) {
+      d = node->meta.depth;
+      stack.pop_back();
+    }
+
+    // Child's "hidden" follows parent's "checked"
+    bool hidden = (stack.back()->meta.checked == NODE_OPEN ? false : true);
+    node->meta.hidden = hidden;
+
+    if (hidden == false && ++index < CELL_MAX_VISIBLE + 1) {
+      // 1. Add a new cell and re-index
+      lv_obj_t *cell = append_cell(list, node);
+      lv_obj_move_to_index(cell, index);
+      update_list(list);
+
+      // 2. Set the animation to delete the last cell
+      lv_anim_set_var(a, cell);
+      lv_anim_start(a);
+    }
+
+    // Update previous node
+    prev = node;
+  }
+}
+
+static void update_close(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *a) {
+  uint32_t depth = node->meta.depth;
+
+  // Hide all the children
+  for (int key = node->key + 1; key < list_control.n_nodes; key++) {
+    node = list_control.root->find_preorder(key);
+    if (node->meta.depth <= depth) {
+      break;
+    }
+    node->meta.hidden = true;
+  }
+
+  // Get the last node key in the list
+  uint32_t last_key = get_node(lv_obj_get_child(list, -1))->key;
+
+  lv_obj_t *cell;
+  while (cell = lv_obj_get_child(list, ++index)) {
+    node = get_node(cell);
+    if (node->meta.depth <= depth) {
+      break;
+    }
+
+    // 1. Apply animation to the cell and start playing
+    lv_anim_set_var(a, cell);
+    lv_anim_start(a);
+
+    // 2. Add the same number of new cells to the end of the list
+    if (node = find_after(last_key)) {
+      last_key = node->key;
+      append_cell(list, node);
+      update_list(list);
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Event handler for when a cell is clicked
 //--------------------------------------------------------------------------------
 static void event_handler(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
 
   if (code == LV_EVENT_CLICKED) {
     lv_obj_t *cell = lv_event_get_target_obj(e);
-    NodeMeta_t *meta = get_node_meta(cell);
+    lv_obj_t *list = lv_obj_get_parent(cell);
+
+    Node *node = get_node(cell);
+    NodeMeta_t *meta = &node->meta;
 
     if (meta->type == TYPE_NODE) {
-      uint8_t depth = meta->depth;
+      // Update the node status and appearance
       bool checked  = meta->checked = !meta->checked;
       lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
 
+      // Setup an animation template
       lv_anim_t a;
       lv_anim_init(&a);
       lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_height);
       lv_anim_set_duration(&a, FOLDING_DURATION);
+      lv_anim_set_user_data(&a, list);
 
-      if (checked) {
-        lv_anim_set_values(&a, CELL_HEIGHT_SMALL, 0);
-      } else {
+      uint32_t index = lv_obj_get_index(cell);
+
+      if (checked == NODE_OPEN) {
         lv_anim_set_values(&a, 0, CELL_HEIGHT_SMALL);
+        lv_anim_set_completed_cb(&a, update_open_cb);
+        update_open(list, node, index, &a);
       }
 
-      // folding with animation
-      while (cell = lv_obj_get_sibling(cell, 1)) {
-        meta = get_node_meta(cell);
-        if (meta->depth <= depth) {
-          break;
-        }
-
-        // RULE 1: child inherits the state of parent
-        lv_obj_t *obj = get_parent(cell);
-        NodeMeta_t *m = get_node_meta(obj);
-
-        // RULE 2: child follows the state of parents
-        bool hidden = checked | m->checked;
-        if (meta->hidden == hidden) {
-          continue;
-        } else {
-          meta->hidden = hidden;
-        }
-
-        lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
-        lv_anim_set_var(&a, cell);
-        lv_anim_start(&a);
+      else /* checked == NODE_CLOSED */ {
+        lv_anim_set_values(&a, CELL_HEIGHT_SMALL, 0);
+        lv_anim_set_completed_cb(&a, update_close_cb);
+        update_close(list, node, index, &a);
       }
     }
 
-    // change the state of checkbox
-    else {
+    else /* meta->type == TYPE_LEAF */ {
+      // Update the checkbox state and appearance
       meta->checked = !meta->checked;
       lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
     }
@@ -174,52 +355,79 @@ static void event_handler(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-//
+// Adjust the number of cells in the list according to the scroll
+// https://docs.lvgl.io/master/details/common-widget-features/scrolling.html
+// https://github.com/lvgl/lvgl/blob/master/examples/scroll/lv_example_scroll_7.c
 //--------------------------------------------------------------------------------
-static void set_styles(lv_obj_t *cell, Node *node) {
-  static constexpr lv_style_const_prop_t style_prop_common[] = {
-    LV_STYLE_CONST_ALIGN(LV_ALIGN_LEFT_MID),
-    LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
-//  LV_STYLE_CONST_HEIGHT(CELL_HEIGHT_SMALL),
-    LV_STYLE_CONST_PAD_TOP(CELL_PADDING_BORDER),
-    LV_STYLE_CONST_PAD_BOTTOM(CELL_PADDING_BORDER),
-    LV_STYLE_CONST_OUTLINE_COLOR(CELL_COLOR_OUTLINE),
-    LV_STYLE_CONST_OUTLINE_WIDTH(1),
-    LV_STYLE_CONST_PROPS_END
-  };
-  static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
-  lv_obj_add_style(cell, &style_common, (uint32_t)LV_PART_MAIN);
+static void update_scroll(lv_obj_t *list) {
+  // Do not re-enter this function when `lv_obj_scroll_by` triggers this callback again.
+  if (update_scroll_running) return;
+  update_scroll_running = true;
 
-  NodeMeta_t *meta = &node->meta;
-  lv_obj_set_style_height   (cell, (meta->depth > 1 && meta->hidden ? 0 : CELL_HEIGHT_SMALL), LV_PART_MAIN);
-  lv_obj_set_style_bg_color (cell, (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF), LV_PART_MAIN);
-  lv_obj_set_style_pad_left (cell, (meta->type == TYPE_NODE ? CELL_OFFSET_NODE: CELL_OFFSET_LEAF) + meta->depth * CELL_PADDING_LEFT, LV_PART_MAIN);
-  lv_label_set_long_mode    (cell, LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_DOT, LV_LABEL_LONG_SCROLL_CIRCULAR
+  Node *node;
+  int32_t pos;
 
-  lv_obj_set_user_data(cell, (void*)node);
-  lv_obj_add_flag(cell, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_add_flag(cell, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
-  lv_obj_add_event_cb(cell, draw_image_cb, LV_EVENT_DRAW_TASK_ADDED, NULL);
-  lv_obj_add_event_cb(cell, event_handler, LV_EVENT_CLICKED, NULL);
-}
-
-//--------------------------------------------------------------------------------
-//
-//--------------------------------------------------------------------------------
-static void add_node_to_list(Node *node, lv_obj_t *list) {
-  for (auto &n : node->children) {
-    if (cell_count++ >= MAX_CELLS) {
-      // printf("count: %d\n", cell_count);
-      return;
-    }
-
-    lv_obj_t * cell = lv_list_add_text(list, n->name.c_str());
-    set_styles(cell, n);
-
-    if (n->children.size()) {
-      add_node_to_list(n, list);
+  // Scroll DOWN: Add new cells to END while the bottom position of the scroll range is smaller than the cell height
+  while (list_control.end < list_control.n_nodes - 1 && (pos = lv_obj_get_scroll_bottom(list)) < CELL_OFFSET_NODE) {
+    if (node = find_after(list_control.end)) {
+      append_cell(list, node);
+      update_list(list);
+      // printf("added end --> pos: %d, top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count);
+    } else {
+      break;
     }
   }
+
+  // Scroll UP: Add new cells to TOP while the bottom position of the scroll range is smaller than the cell height
+  while (list_control.top > 0 && (pos = lv_obj_get_scroll_top(list)) < CELL_OFFSET_NODE) {
+    if (node = find_before(list_control.top)) {
+      int32_t bottom_before = lv_obj_get_scroll_bottom(list);
+      lv_obj_t *new_item = append_cell(list, node);
+      lv_obj_move_to_index(new_item, 0);
+      update_list(list);
+      int32_t bottom_after = lv_obj_get_scroll_bottom(list);
+      lv_obj_scroll_by(list, 0, bottom_before - bottom_after, LV_ANIM_OFF);
+      // printf("added top --> pos: %d, top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count);
+    } else {
+      break;
+    }
+  }
+
+  // Scroll UP: Delete the END cells outside the scrolling range
+  while (list_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_bottom(list)) > CELL_HEIGHT_SMALL) {
+    if (node = find_before(list_control.end)) {
+      lv_obj_t *child = lv_obj_get_child(list, -1);
+      delete_cell(list, child);
+      update_list(list);
+      // printf("deleted end --> pos: %d, top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count);
+    } else {
+      break;
+    }
+  }
+
+  // Scroll DOWN: Delete the TOP cells outside the scrolling range
+  while (list_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_top(list)) > CELL_HEIGHT_SMALL) {
+    if (node = find_after(list_control.top)) {
+      int32_t bottom_before = lv_obj_get_scroll_bottom(list);
+      lv_obj_t *child = lv_obj_get_child(list, 0);
+      delete_cell(list, child);
+      update_list(list);
+      int32_t bottom_after = lv_obj_get_scroll_bottom(list);
+      lv_obj_scroll_by(list, 0, bottom_before - bottom_after, LV_ANIM_OFF);
+      // printf("deleted top --> pos: %d, top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count);
+    } else {
+      break;
+    }
+  }
+
+  update_scroll_running = false;
+}
+
+static void scroll_cb(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(event_code == LV_EVENT_SCROLL);
+  DBG_ASSERT(album_list == lv_event_get_target_obj(e));
+  update_scroll(album_list);
 }
 
 //--------------------------------------------------------------------------------
@@ -329,23 +537,27 @@ void ui_ScreenAlbumList_screen_init(void) {
       LV_STYLE_CONST_X(LV_PCT_X(5)),
       LV_STYLE_CONST_Y(LV_PCT_Y(26)),
       LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LV_PCT_X(10)),
-      LV_STYLE_CONST_HEIGHT(ALBUM_CELL_HEIGHT * ALBUM_CELL_COUNTS - 4),
+      LV_STYLE_CONST_HEIGHT(ALBUM_LIST_HEIGHT),
       LV_STYLE_CONST_PROPS_END
     };
     static LV_STYLE_CONST_INIT(style_album, (void*)style_prop_album);
 
     album_list = lv_list_create(ui_ScreenAlbumList);
-    lv_obj_add_style    (album_list, &style_album, 0);
-    lv_obj_add_event_cb (album_list, delete_cb, LV_EVENT_DELETE, (void*)&album_list);
+    lv_obj_add_style          (album_list, &style_album, 0);
+//  lv_obj_set_scrollbar_mode (album_list, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb       (album_list, scroll_cb, LV_EVENT_SCROLL, NULL);
+    lv_obj_add_event_cb       (album_list, delete_cb, LV_EVENT_DELETE, (void*)&album_list);
   }
 }
 
 void ui_ScreenAlbumList_screen_deinit(void) {
   if (ui_ScreenAlbumList) {
-    // Clear playlist before creating a new list
+    // Clear playlist and re-traverse tree before creating a new list
     CYD_MP3Player *player = ui_get_player();
     player->ClearAudioFiles();
+    player->m_tree->traverse_node();
 
+    // Delete all the instances at delete_cb()
     lv_obj_delete_async(ui_ScreenAlbumList);
   }
 }
@@ -354,12 +566,13 @@ void ui_ScreenAlbumList_screen_deinit(void) {
 // Create selectable playlist
 //--------------------------------------------------------------------------------
 void ui_ScreenAlbumList_create_list(const char *root_dir) {
-  // Clear album list before creating a new list
-  reset_cell_count(); // Defined in list.cpp
-
-  // Create the album list from playlist
   CYD_MP3Player *player = ui_get_player();
   if (player->m_tree) {
-    add_node_to_list(player->m_tree, album_list);
+    list_control.root = player->m_tree;
+    list_control.top = list_control.end = 0;
+    list_control.n_nodes = list_control.root->traverse_preorder();
+
+    append_cell(album_list, list_control.root->find_preorder(0));
+    update_scroll(album_list);
   }
 }
