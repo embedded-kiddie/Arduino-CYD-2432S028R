@@ -161,7 +161,6 @@ static Node *find_before(int key) {
 // Reference: https://docs.lvgl.io/master/details/widgets/table.html
 //--------------------------------------------------------------------------------
 static void draw_image_cb(lv_event_t *e) {
-  // If the cells are drawn...
   lv_draw_task_t *draw_task = lv_event_get_draw_task(e);
   lv_draw_task_type_t type  = lv_draw_task_get_type(draw_task);
 
@@ -212,18 +211,21 @@ static void draw_image_cb(lv_event_t *e) {
 //--------------------------------------------------------------------------------
 static void update_open_cb(lv_anim_t* a) {
   lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
-  lv_obj_t *cell = lv_obj_get_child(list, -1);
-  delete_cell(list, cell);
+
+  // Scroll to make it visible
+  lv_obj_scroll_to_view((lv_obj_t *)a->var, LV_ANIM_ON);
+
+  // Delete the last cell
+  delete_cell(list, lv_obj_get_child(list, -1));
   update_list(list); // Not required at the end of animation ?
 }
 
 static void update_close_cb(lv_anim_t* a) {
   lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
-  lv_obj_t *cell = (lv_obj_t*)a->var;
 
   // Avoid LVGL bug (?)
   adjust_bottom(list);
-  lv_async_call(delete_cell_async, (void*)cell);
+  lv_async_call(delete_cell_async, a->var);
 }
 
 //--------------------------------------------------------------------------------
