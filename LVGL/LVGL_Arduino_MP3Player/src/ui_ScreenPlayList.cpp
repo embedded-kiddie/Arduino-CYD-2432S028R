@@ -454,21 +454,14 @@ void ui_ScreenPlayList_screen_init(void) {
     lv_obj_set_style_bg_opa   (ui_ScreenPlayList, 255,                   0);
   }
 
-  lv_obj_t *container = lv_obj_create(ui_ScreenPlayList);
-  lv_obj_remove_style_all (container);
-  lv_obj_set_size         (container, lv_pct(100), lv_pct(100));
-  lv_obj_set_align        (container, LV_ALIGN_TOP_MID);
-  lv_obj_remove_flag      (container, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
-
   lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_GESTURE, NULL);
   lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_SCREEN_UNLOADED, NULL);
 
   // Initialize play list container
-  ui_ScreenPlayList_list_init(container);
+  ui_ScreenPlayList_list_init(ui_ScreenPlayList);
 
   // Add a callback when an object is deleted
   lv_obj_add_event_cb(ui_ScreenPlayList,  delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenPlayList);
-  lv_obj_add_event_cb(container,          delete_cb, LV_EVENT_DELETE, (void*)&container);
   lv_obj_add_event_cb(play_list,          delete_cb, LV_EVENT_DELETE, (void*)&play_list);
   lv_obj_add_event_cb(slider,             delete_cb, LV_EVENT_DELETE, (void*)&slider);
 
