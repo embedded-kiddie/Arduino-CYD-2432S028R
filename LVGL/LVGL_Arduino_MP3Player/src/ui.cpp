@@ -47,13 +47,13 @@ lv_obj_t *ui_ScreenPlayList;
 lv_obj_t *ui_ScreenOptions;
 
 /////////////////////////// STYLES //////////////////////////
-static constexpr lv_style_const_prop_t style_prop_album[] = {
+static constexpr lv_style_const_prop_t style_prop_picture[] = {
   LV_STYLE_CONST_SHADOW_WIDTH(10),
   LV_STYLE_CONST_SHADOW_OFFSET_Y(5),
   LV_STYLE_CONST_SHADOW_OPA(LV_OPA_40),
   LV_STYLE_CONST_PROPS_END
 };
-static LV_STYLE_CONST_INIT(album_style, (void*)style_prop_album);
+static LV_STYLE_CONST_INIT(style_picture, (void*)style_prop_picture);
 
 /////////////////////////// IMAGES //////////////////////////
 #if (LV_USE_FS_ARDUINO_SD == 0) && (MY_USE_FS_ARDUINO_SD == 0)
@@ -381,7 +381,7 @@ static void display_picture(uint32_t playNo) {
     strcpy(ptr + 1, PICTURE_EXT);
     if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
-      lv_obj_add_style(ui_AlbumImage, &album_style, 0);
+      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
       return;
     }
   }
@@ -391,13 +391,13 @@ static void display_picture(uint32_t playNo) {
     strcpy(ptr + 1, PICTURE_BASE PICTURE_EXT);
     if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
-      lv_obj_add_style(ui_AlbumImage, &album_style, 0);
+      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
       return;
     }
   }
 
   lv_image_set_src    (ui_AlbumImage, &img_album);
-  lv_obj_remove_style (ui_AlbumImage, &album_style, 0);
+  lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
 
 #else // MY_USE_FS_ARDUINO_SD == 0
 
@@ -406,10 +406,10 @@ static void display_picture(uint32_t playNo) {
 
   if (0 < pictNo && pictNo < N_PICTURES) {
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
-    lv_obj_add_style(ui_AlbumImage, &album_style, 0);
+    lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
   } else {
     lv_image_set_src    (ui_AlbumImage, &img_album);
-    lv_obj_remove_style (ui_AlbumImage, &album_style, 0);
+    lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
   }
 
 #endif

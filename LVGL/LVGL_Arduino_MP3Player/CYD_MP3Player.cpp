@@ -200,7 +200,7 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
 
   DBG_EXEC({
     m_tree->dump_tree();
-    print_files();
+    dump_files();
     printf("Total: %d\n", m_list.size());
   });
 
@@ -270,7 +270,11 @@ void CYD_MP3Player::ScanAudioFiles(void) {
         DBG_ASSERT(album_dst); // Out of memory?
 
         if (album_dst) {
+#ifdef USE_SDFAT
           dst = fd.read((void*)album_dst, dst);
+#else
+          dst = fd.read((uint8_t*)album_dst, dst);
+#endif
 
           // Find a matching hash and update meta data
           for (int i = 0; i < n; i++) {
@@ -293,7 +297,11 @@ void CYD_MP3Player::ScanAudioFiles(void) {
       if (src != dst || n != counts) {
         if (fd = SD.open(meta.c_str(), FILE_WRITE)) {
           fd.seek(0);
+#ifdef USE_SDFAT
           fd.write((void*)album_src, src);
+#else
+          fd.write((uint8_t*)album_src, src);
+#endif
           fd.close();
         }
       }

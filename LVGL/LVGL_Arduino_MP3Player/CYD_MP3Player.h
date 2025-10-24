@@ -163,7 +163,7 @@ private:
     return false;
   }
 
-  void print_files(void) {
+  void dump_files(void) {
     int i = 0; 
     for (auto &f : m_list) {
       std::string path = m_tree->find_path(f.parent);
