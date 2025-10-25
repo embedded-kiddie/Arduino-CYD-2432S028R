@@ -14,9 +14,11 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_FONT_SMALL_HEIGHT    17  // For font size: 12px
 #define LIST_FONT_MEDIUM_HEIGHT   22  // For font size: 14px
 #define LIST_LABEL_MARGINE        100 // left(50) + right(50)
-#define LIST_CELL_HEIGHT          54  // SCREEN_HEIGHT / LIST_CELL_VIEWS
+#define LIST_CELL_HEIGHT          52  // SCREEN_HEIGHT / LIST_CELL_VIEWS
 #define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT = LIST_CELL_VIEWS * LIST_CELL_HEIGHT
 #define LIST_CELL_SPARE           2   // 1 <= LIST_CELL_SPARE <= 2 (1: disable auto-scroll, 2: enable auto-scroll)
+#define CELL_OUTLINE_COLOR        { .blue = 0x3f, .green = 0x3f, .red = 0x3f }
+#define CELL_BORDER_COLOR         { .blue = 0x60, .green = 0x60, .red = 0x60 }
 
 /**********************
  *  STATIC VARIABLES
@@ -30,6 +32,13 @@ static constexpr lv_style_const_prop_t style_cell_prop[] = {
   LV_STYLE_CONST_BG_OPA(LV_OPA_TRANSP),
   LV_STYLE_CONST_LAYOUT(LV_LAYOUT_GRID),
   LV_STYLE_CONST_PAD_RIGHT(20),
+  LV_STYLE_CONST_MARGIN_TOP(1),
+  LV_STYLE_CONST_MARGIN_BOTTOM(1),
+  LV_STYLE_CONST_OUTLINE_COLOR(CELL_OUTLINE_COLOR),
+  LV_STYLE_CONST_OUTLINE_WIDTH(1),
+  LV_STYLE_CONST_BORDER_WIDTH(2),
+  LV_STYLE_CONST_BORDER_SIDE(LV_BORDER_SIDE_TOP),
+  LV_STYLE_CONST_BORDER_COLOR(CELL_BORDER_COLOR),
   LV_STYLE_CONST_PROPS_END
 };
 static constexpr lv_style_const_prop_t style_cell_pressed_prop[] = {
@@ -70,21 +79,6 @@ static constexpr lv_style_const_prop_t style_heart_prop[] = {
   LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
   LV_STYLE_CONST_PROPS_END
 };
-static constexpr lv_style_const_prop_t style_menu_back_prop[] = {
-  LV_STYLE_CONST_BG_COLOR(UI_COLOR_LIST_DEFAULT),
-  LV_STYLE_CONST_SHADOW_COLOR(UI_COLOR_LIST_SHADOW),
-  LV_STYLE_CONST_BG_OPA(255),
-  LV_STYLE_CONST_BORDER_WIDTH(0),
-  LV_STYLE_CONST_SHADOW_OPA(255),
-  LV_STYLE_CONST_SHADOW_WIDTH(1),
-  LV_STYLE_CONST_SHADOW_SPREAD(0),
-  LV_STYLE_CONST_SHADOW_OFFSET_X(0),
-  LV_STYLE_CONST_PAD_TOP(8),
-  LV_STYLE_CONST_PAD_RIGHT(0),
-  LV_STYLE_CONST_PAD_BOTTOM(0),
-  LV_STYLE_CONST_PAD_LEFT(249),
-  LV_STYLE_CONST_PROPS_END
-};
 static LV_STYLE_CONST_INIT(style_cell,          (void*)style_cell_prop);
 static LV_STYLE_CONST_INIT(style_cell_pressed,  (void*)style_cell_pressed_prop);
 static LV_STYLE_CONST_INIT(style_cell_checked,  (void*)style_cell_checked_prop);
@@ -92,7 +86,6 @@ static LV_STYLE_CONST_INIT(style_title,         (void*)style_title_prop);
 static LV_STYLE_CONST_INIT(style_artist,        (void*)style_artist_prop);
 static LV_STYLE_CONST_INIT(style_time,          (void*)style_time_prop);
 static LV_STYLE_CONST_INIT(style_heart,         (void*)style_heart_prop);
-static LV_STYLE_CONST_INIT(style_menu_back,     (void*)style_menu_back_prop);
 
 /**********************
  *  GLOBAL FUNCTIONS
@@ -240,14 +233,6 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_set_style_bg_image_src (obj, &img_heart_off_small, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
   lv_obj_set_style_bg_image_src (obj, &img_heart_on_small,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_set_style_bg_image_src (obj, &img_heart_off_small, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-
-  //////////////////// Border Image ////////////////////
-  obj = lv_image_create(cell);
-  lv_image_set_src              (obj, &img_list_border);
-  lv_image_set_inner_align      (obj, LV_IMAGE_ALIGN_TILE);
-  lv_obj_set_width              (obj, lv_pct(120));
-  lv_obj_align                  (obj, LV_ALIGN_BOTTOM_MID, 0, 0);
-  lv_obj_add_flag               (obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
 
   return cell;
 }
