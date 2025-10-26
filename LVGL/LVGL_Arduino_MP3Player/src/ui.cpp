@@ -256,7 +256,7 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
   player.GetMetaData(track_id, &meta);
 
   lv_obj_t *obj = (lv_obj_t*)lv_event_get_current_target(e);
-  meta.selected = lv_obj_get_state(obj) & LV_STATE_CHECKED;
+  meta.selected = ui_list_get_heart_state(track_id);
 
   // prevent input while saving metadata to SD card
   lv_indev_enable(NULL, false);
@@ -324,7 +324,6 @@ static void update_metadata(void) {
   player.GetMetaData(playNo, &meta);
 
   if (meta.duration < id3tags.meta.duration || saveID3tags == true) {
-
     // prevent input while saving metadata to SD card
     lv_indev_enable(NULL, false);
 

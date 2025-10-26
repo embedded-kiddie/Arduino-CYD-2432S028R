@@ -83,6 +83,7 @@ void ui_list_update_cell    (uint32_t track_id, bool state);
 void ui_list_update_play    (uint32_t track_id, bool state);
 void ui_list_focus_playing  (uint32_t track_id);
 void ui_list_update_duration(uint32_t track_id, uint32_t duration);
+bool ui_list_get_heart_state(uint32_t track_id);
 
 // SCREEN: ui_ScreenOptions
 extern lv_obj_t *ui_ScreenOptions;
