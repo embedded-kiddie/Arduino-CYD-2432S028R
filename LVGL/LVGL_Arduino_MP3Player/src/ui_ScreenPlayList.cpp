@@ -79,113 +79,8 @@ static LV_STYLE_CONST_INIT(style_artist,        (void*)style_artist_prop);
 static LV_STYLE_CONST_INIT(style_time,          (void*)style_time_prop);
 
 /**********************
- *   STATIC FUNCTIONS
+ *  STATIC FUNCTIONS
  **********************/
-static void remove_all_cells(void);
-static void create_all_cells(void);
-static lv_obj_t *get_heart_obj(uint32_t);
-
-/**********************
- *  GLOBAL FUNCTIONS
- **********************/
-void ui_list_update_icon(uint32_t track_id, bool state) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
-    if (cell) {
-      lv_obj_t* icon = lv_obj_get_child(cell, 0);
-      if (state) {
-        lv_image_set_src(icon, &img_list_pause);
-      } else {
-        lv_image_set_src(icon, &img_list_play);
-      }
-    }
-  }
-}
-
-void ui_list_update_cell(uint32_t track_id, bool state) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
-    if (cell) {
-      lv_obj_t* title  = lv_obj_get_child(cell, 1);
-      lv_obj_t* artist = lv_obj_get_child(cell, 2);
-
-      if (state) {
-        lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_obj_add_state(cell, LV_STATE_CHECKED);
-      } else {
-        lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
-        lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
-        lv_obj_remove_state(cell, LV_STATE_CHECKED);
-      }
-    }
-  }
-}
-
-void ui_list_update_play(uint32_t track_id, bool state) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
-    if (cell) {
-      lv_obj_t* icon   = lv_obj_get_child(cell, 0);
-      lv_obj_t* title  = lv_obj_get_child(cell, 1);
-      lv_obj_t* artist = lv_obj_get_child(cell, 2);
-
-      if (state) {
-        lv_image_set_src(icon, &img_list_pause);
-        lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_obj_add_state(cell, LV_STATE_CHECKED);
-        lv_obj_scroll_to_view(cell, LV_ANIM_ON);
-      } else {
-        lv_image_set_src(icon, &img_list_play);
-        lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
-        lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
-        lv_obj_remove_state(cell, LV_STATE_CHECKED);
-      }
-    }
-  }
-}
-
-//--------------------------------------------------------------------------------
-// Focus the specified cell when it is out of range
-//--------------------------------------------------------------------------------
-void ui_list_focus_playing(uint32_t track_id) {
-  if (track_id < ui_control.top || ui_control.end < track_id) {
-    // Delete all cells in playlist
-    remove_all_cells();
-
-    // Add new cells according to the specified id
-    ui_control.focusNo = ui_control.top = ui_control.end = track_id;
-    create_all_cells();
-  }
-}
-
-//--------------------------------------------------------------------------------
-// Updates the duration to the specified cell
-//--------------------------------------------------------------------------------
-void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
-  if (play_list && ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
-    if (cell) {
-      lv_obj_t* time_label = lv_obj_get_child(cell, 3);
-      lv_label_set_text_fmt(time_label, "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
-    }
-  }
-}
-
-//--------------------------------------------------------------------------------
-// Get the state of heart icon (true: on, false: off)
-//--------------------------------------------------------------------------------
-bool ui_list_get_heart_state(uint32_t track_id) {
-  lv_obj_t *obj = get_heart_obj(track_id);
-  if (obj) {
-    const void *src = lv_image_get_src(obj);
-    return (src == (const void*)&img_heart_on_small ? true : false);
-  } else {
-    return false;
-  }
-}
-
 //--------------------------------------------------------------------------------
 // Get the state of the heart icon
 //--------------------------------------------------------------------------------
@@ -375,24 +270,24 @@ static void list_init(lv_obj_t* parent) {
   // Create an empty transparent container
   if (play_list == NULL) {
     play_list = lv_obj_create(parent);
-    lv_obj_remove_style_all         (play_list);
-    lv_obj_set_size                 (play_list, lv_pct(100), lv_pct(100));
-    lv_obj_set_align                (play_list, LV_ALIGN_CENTER);
-    lv_obj_set_flex_flow            (play_list, LV_FLEX_FLOW_COLUMN);
-    lv_obj_add_event_cb             (play_list, scroll_cb, LV_EVENT_SCROLL, NULL);
+    lv_obj_remove_style_all   (play_list);
+    lv_obj_set_size           (play_list, lv_pct(100), lv_pct(100));
+    lv_obj_set_align          (play_list, LV_ALIGN_CENTER);
+    lv_obj_set_flex_flow      (play_list, LV_FLEX_FLOW_COLUMN);
+    lv_obj_add_event_cb       (play_list, scroll_cb, LV_EVENT_SCROLL, NULL);
   }
 
   // Creating a slider as an alternative to a scrollbar
   if (slider == NULL) {
     slider = lv_slider_create(parent);
-    lv_obj_align                    (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
-    lv_obj_remove_flag              (slider, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size                 (slider, 4, SCREEN_HEIGHT);
-    lv_obj_set_style_radius         (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa         (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color       (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_slider_set_mode              (slider, LV_SLIDER_MODE_RANGE);
-    lv_slider_set_range             (slider, ui_get_counts() * LIST_CELL_HEIGHT, 0);
+    lv_obj_align              (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
+    lv_obj_remove_flag        (slider, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size           (slider, 4, SCREEN_HEIGHT);
+    lv_obj_set_style_radius   (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa   (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
+    lv_slider_set_range       (slider, ui_get_counts() * LIST_CELL_HEIGHT, 0);
   }
 }
 
@@ -439,6 +334,107 @@ static void create_all_cells(void) {
   add_list_cell(play_list, ui_control.top);
   update_scroll(play_list);
   ui_list_update_cell(ui_control.focusNo, true);
+}
+
+/**********************
+ *  GLOBAL FUNCTIONS
+ **********************/
+void ui_list_update_icon(uint32_t track_id, bool state) {
+  if (ui_control.top <= track_id && track_id <= ui_control.end) {
+    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+    if (cell) {
+      lv_obj_t* icon = lv_obj_get_child(cell, 0);
+      if (state) {
+        lv_image_set_src(icon, &img_list_pause);
+      } else {
+        lv_image_set_src(icon, &img_list_play);
+      }
+    }
+  }
+}
+
+void ui_list_update_cell(uint32_t track_id, bool state) {
+  if (ui_control.top <= track_id && track_id <= ui_control.end) {
+    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+    if (cell) {
+      lv_obj_t* title  = lv_obj_get_child(cell, 1);
+      lv_obj_t* artist = lv_obj_get_child(cell, 2);
+
+      if (state) {
+        lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_obj_add_state(cell, LV_STATE_CHECKED);
+      } else {
+        lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
+        lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
+        lv_obj_remove_state(cell, LV_STATE_CHECKED);
+      }
+    }
+  }
+}
+
+void ui_list_update_play(uint32_t track_id, bool state) {
+  if (ui_control.top <= track_id && track_id <= ui_control.end) {
+    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+    if (cell) {
+      lv_obj_t* icon   = lv_obj_get_child(cell, 0);
+      lv_obj_t* title  = lv_obj_get_child(cell, 1);
+      lv_obj_t* artist = lv_obj_get_child(cell, 2);
+
+      if (state) {
+        lv_image_set_src(icon, &img_list_pause);
+        lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_obj_add_state(cell, LV_STATE_CHECKED);
+        lv_obj_scroll_to_view(cell, LV_ANIM_ON);
+      } else {
+        lv_image_set_src(icon, &img_list_play);
+        lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
+        lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
+        lv_obj_remove_state(cell, LV_STATE_CHECKED);
+      }
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Focus the specified cell when it is out of range
+//--------------------------------------------------------------------------------
+void ui_list_focus_playing(uint32_t track_id) {
+  if (track_id < ui_control.top || ui_control.end < track_id) {
+    // Delete all cells in playlist
+    remove_all_cells();
+
+    // Add new cells according to the specified id
+    ui_control.focusNo = ui_control.top = ui_control.end = track_id;
+    create_all_cells();
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Updates the duration to the specified cell
+//--------------------------------------------------------------------------------
+void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
+  if (play_list && ui_control.top <= track_id && track_id <= ui_control.end) {
+    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+    if (cell) {
+      lv_obj_t* time_label = lv_obj_get_child(cell, 3);
+      lv_label_set_text_fmt(time_label, "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Get the state of heart icon (true: on, false: off)
+//--------------------------------------------------------------------------------
+bool ui_list_get_heart_state(uint32_t track_id) {
+  lv_obj_t *obj = get_heart_obj(track_id);
+  if (obj) {
+    const void *src = lv_image_get_src(obj);
+    return (src == (const void*)&img_heart_on_small ? true : false);
+  } else {
+    return false;
+  }
 }
 
 //--------------------------------------------------------------------------------
