@@ -8,7 +8,6 @@
 
 #include <lvgl.h>
 #include "ui_helpers.h"
-#include "ui_events.h"
 #include "../debug.h"
 
 // Arrow buttons to navigate to each screen

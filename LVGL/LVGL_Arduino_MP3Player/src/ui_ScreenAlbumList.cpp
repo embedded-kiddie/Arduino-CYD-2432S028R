@@ -564,7 +564,7 @@ void ui_ScreenAlbumList_screen_deinit(void) {
 void ui_ScreenAlbumList_create_list(void *root) {
   if (root) {
     // Re-traverse node tree by preorder
-    list_control.root = (Node*)root;
+    list_control.root = static_cast<Node*>(root);
     list_control.n_nodes = list_control.root->traverse_preorder();
 
     list_control.top = list_control.end = 0;
