@@ -5,10 +5,6 @@
 
 #include "ui.h"
 #include "../tree.hpp"
-#include <string.h>
-
-#include "../CYD_MP3Player.h"
-extern CYD_MP3Player *ui_get_player(void);  // Defined in ui.cpp
 
 // List Components
 #define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
@@ -554,10 +550,8 @@ void ui_ScreenAlbumList_screen_init(void) {
 
 void ui_ScreenAlbumList_screen_deinit(void) {
   if (ui_ScreenAlbumList) {
-    // Clear playlist and re-traverse tree before creating a new list
-    CYD_MP3Player *player = ui_get_player();
-    player->ClearAudioFiles();
-    player->m_tree->traverse_node();
+    // Re-traverse node tree before making a new playlist
+    list_control.root->traverse_node();
 
     // Delete all the instances at delete_cb()
     lv_obj_delete_async(ui_ScreenAlbumList);
@@ -567,13 +561,13 @@ void ui_ScreenAlbumList_screen_deinit(void) {
 //--------------------------------------------------------------------------------
 // Create selectable playlist
 //--------------------------------------------------------------------------------
-void ui_ScreenAlbumList_create_list(const char *root_dir) {
-  CYD_MP3Player *player = ui_get_player();
-  if (player->m_tree) {
-    list_control.root = player->m_tree;
-    list_control.top = list_control.end = 0;
+void ui_ScreenAlbumList_create_list(void *root) {
+  if (root) {
+    // Re-traverse node tree by preorder
+    list_control.root = (Node*)root;
     list_control.n_nodes = list_control.root->traverse_preorder();
 
+    list_control.top = list_control.end = 0;
     append_cell(album_list, list_control.root->find_preorder(0));
     update_scroll(album_list);
   }

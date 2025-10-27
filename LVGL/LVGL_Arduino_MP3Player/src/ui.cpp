@@ -216,11 +216,13 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
       ui_state = UI_STATE_PAUSE;
     }
 
-    ui_ScreenAlbumList_create_list(MP3_PATH_ROOT);
+    ui_ScreenAlbumList_create_list((void*)player.m_tree);
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
+    // Make album list and playlist clean
     ui_ScreenAlbumList_screen_deinit();
+    player.ClearAudioFiles();
 
     lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
     ui_state = UI_STATE_START;
@@ -457,10 +459,6 @@ static bool check_favorite(void) {
 }
 
 ////////////////// GLOBAL FUNCTIONS /////////////////
-CYD_MP3Player *ui_get_player(void) {
-  return &player;
-}
-
 //--------------------------------------------------------------------------------
 // Redraw the display panel when waking up from sleep
 //--------------------------------------------------------------------------------

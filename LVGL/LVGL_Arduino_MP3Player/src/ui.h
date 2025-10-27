@@ -70,7 +70,7 @@ extern lv_obj_t *ui_ScreenAlbumList;
 void ui_event_ScreenAlbumList(lv_event_t *e);
 void ui_ScreenAlbumList_screen_init  (void);
 void ui_ScreenAlbumList_screen_deinit(void);
-void ui_ScreenAlbumList_create_list(const char *root);
+void ui_ScreenAlbumList_create_list  (void *root);
 
 // SCREEN: ui_ScreenPlayList
 extern lv_obj_t *ui_ScreenPlayList;
