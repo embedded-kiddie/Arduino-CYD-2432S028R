@@ -1,5 +1,8 @@
 //================================================================================
 // ESP32 onboard built-in peripherals
+// Target board: ESP32 Dev Module / ESP32-2432S028R CYD
+// https://github.com/espressif/arduino-esp32/tree/master/variants/esp32
+// https://github.com/espressif/arduino-esp32/tree/master/variants/jczn_2432s028r
 //================================================================================
 #ifndef _PERIPHERALS_H
 #define _PERIPHERALS_H
@@ -16,7 +19,6 @@
 #define RGB_LED_OFF() CYD_LED_RGB_OFF()
 
 // "ESP32 Dev Module" on 2.0.17
-// https://github.com/espressif/arduino-esp32/blob/master/variants/jczn_2432s028r/pins_arduino.h
 #else
 #define CYD_LED_RED   4
 #define CYD_LED_GREEN 16

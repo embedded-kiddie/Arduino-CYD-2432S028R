@@ -1,9 +1,10 @@
-/* Using LVGL with Arduino requires some extra steps:
- * Be sure to read the docs here: https://docs.lvgl.io/master/integration/framework/arduino.html */
-
+//================================================================================
+// MP3 Music Player for CYD - Main Screen
+// LVGL version: 9.x
 // IN lv_conf.h
 //  DO NOT FORGET TO SET 'LV_USE_TFT_ESPI' TO 0
 //  DO NOT FORGET TO SET 'LV_USE_ILI9341' and/or 'LV_USE_ST7789'
+//================================================================================
 #include <lvgl.h>
 #include "src/ui.h"
 
