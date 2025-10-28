@@ -17,6 +17,7 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_CELL_HEIGHT          52  // SCREEN_HEIGHT / LIST_CELL_VIEWS
 #define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT = LIST_CELL_VIEWS * LIST_CELL_HEIGHT
 #define LIST_CELL_SPARE           2   // 1 <= LIST_CELL_SPARE <= 2 (1: disable auto-scroll, 2: enable auto-scroll)
+#define CELL_HEART_SIZE           15  // img_heart_{on|off}_small.header.{w|h}
 #define CELL_OUTLINE_COLOR        { .blue = 0x44, .green = 0x44, .red = 0x44 }
 #define CELL_BORDER_COLOR         { .blue = 0x60, .green = 0x60, .red = 0x60 }
 
@@ -78,6 +79,9 @@ static LV_STYLE_CONST_INIT(style_title,         (void*)style_title_prop);
 static LV_STYLE_CONST_INIT(style_artist,        (void*)style_artist_prop);
 static LV_STYLE_CONST_INIT(style_time,          (void*)style_time_prop);
 
+static constexpr int32_t col_dsc[] = { LV_GRID_CONTENT, LV_GRID_FR(1), CELL_HEART_SIZE, LV_GRID_TEMPLATE_LAST };
+static constexpr int32_t row_dsc[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
+
 /**********************
  *  STATIC FUNCTIONS
  **********************/
@@ -135,9 +139,6 @@ static void event_handler(lv_event_t* e) {
 }
 
 static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
-  static const int32_t col_dsc[] = { LV_GRID_CONTENT, LV_GRID_FR(1), (int32_t)img_heart_on_small.header.w, LV_GRID_TEMPLATE_LAST };
-  static const int32_t row_dsc[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
-
   lv_obj_t* cell = lv_obj_create(parent);
   lv_obj_remove_style_all       (cell);
   lv_obj_set_size               (cell, lv_pct(100), LIST_CELL_HEIGHT);
