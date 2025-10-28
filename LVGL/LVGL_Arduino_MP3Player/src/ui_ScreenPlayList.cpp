@@ -17,7 +17,7 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_CELL_HEIGHT          52  // SCREEN_HEIGHT / LIST_CELL_VIEWS
 #define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT = LIST_CELL_VIEWS * LIST_CELL_HEIGHT
 #define LIST_CELL_SPARE           2   // 1 <= LIST_CELL_SPARE <= 2 (1: disable auto-scroll, 2: enable auto-scroll)
-#define CELL_OUTLINE_COLOR        { .blue = 0x40, .green = 0x40, .red = 0x40 }
+#define CELL_OUTLINE_COLOR        { .blue = 0x44, .green = 0x44, .red = 0x44 }
 #define CELL_BORDER_COLOR         { .blue = 0x60, .green = 0x60, .red = 0x60 }
 
 /**********************
@@ -104,9 +104,8 @@ static void event_handler(lv_event_t* e) {
   if (p.x <= img_list_play.header.w) {
     // If currently playing...
     if (ui_control.playNo == track_id) {
-      // Execute pause/resume
-      ui_state = (ui_state == UI_STATE_PLAY ? UI_STATE_PAUSE : UI_STATE_RESUME);
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, ui_state == UI_STATE_PAUSE ? false : true);
+      // Toggle pause/resume
+      ui_event_PlayList_Play(e);
     }
     // Else select the new track to play
     else {

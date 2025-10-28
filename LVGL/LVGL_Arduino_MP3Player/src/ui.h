@@ -76,6 +76,7 @@ extern lv_obj_t *ui_ScreenPlayList;
 void ui_ScreenPlayList_screen_init  (void);
 void ui_ScreenPlayList_screen_deinit(void);
 void ui_event_ScreenPlayList(lv_event_t *e);
+void ui_event_PlayList_Play (lv_event_t *e);
 void ui_event_PlayList_Heart(lv_event_t *e);
 void ui_list_update_icon    (uint32_t track_id, bool state);
 void ui_list_update_cell    (uint32_t track_id, bool state);

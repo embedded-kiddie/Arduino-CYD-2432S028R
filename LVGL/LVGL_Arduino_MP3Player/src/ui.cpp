@@ -250,6 +250,13 @@ void ui_event_ScreenPlayList(lv_event_t *e) {
   }
 }
 
+void ui_event_PlayList_Play(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
+
+  ui_state = (ui_state == UI_STATE_PLAY ? UI_STATE_PAUSE : UI_STATE_RESUME);
+  lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, ui_state == UI_STATE_PAUSE ? false : true);
+}
+
 void ui_event_PlayList_Heart(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
