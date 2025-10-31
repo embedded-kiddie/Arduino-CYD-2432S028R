@@ -295,11 +295,23 @@ void loop() {
   }
 #else
   if (Serial.available()) {
-    Serial.readStringUntil('\n');
   #if SCREENSHORT
-    SaveBMP24(SD, "/demo.bmp", tft);
+    Serial.readStringUntil('\n');
+    static int No;
+    char fname[16];
+    sprintf(fname, "/demo%02d.bmp", ++No);
+    SaveBMP24(SD, fname, tft);
   #else
-    PrintESP32Memory();
+    void show_ui_control(void);
+    String in = Serial.readStringUntil('\n');
+    switch (in[0]) {
+      case '0':
+        show_ui_control();
+        break;
+      default:
+        PrintESP32Memory();
+        break;
+    }
   #endif
   }
 #endif

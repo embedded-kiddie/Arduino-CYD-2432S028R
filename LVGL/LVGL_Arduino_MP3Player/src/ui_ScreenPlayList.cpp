@@ -23,7 +23,7 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_CELL_HEIGHT          54  // SCREEN_HEIGHT / LIST_CELL_VIEWS + 1
 #define CELL_CONTENT_HEIGHT       52  // LIST_CELL_HEIGHT - BORDER TOP(1px) - OUTLINE BUTTOM(1px)
 #define CELL_HEART_SIZE           15  // img_heart_{on|off}_small.header.{w|h}
-#define CELL_BORDER_COLOR         { .blue = 0x60, .green = 0x60, .red = 0x60 }
+#define CELL_BORDER_COLOR         { .blue = 0x5c, .green = 0x5c, .red = 0x5c }
 #define CELL_OUTLINE_COLOR        { .blue = 0x44, .green = 0x44, .red = 0x44 }
 
 ////////////////////// STATIC VARIABLES /////////////////////
@@ -87,11 +87,15 @@ static constexpr int32_t row_dsc[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_
 
 ////////////////////// STATIC FUNCTIONS /////////////////////
 //--------------------------------------------------------------------------------
-// Get the state of the heart icon
+// Gets the object specified by the track ID
 //--------------------------------------------------------------------------------
+inline static lv_obj_t *get_cell_obj(uint32_t track_id) {
+  return play_list ? lv_obj_get_child(play_list, track_id - ui_control.top) : NULL;
+}
+
 static lv_obj_t *get_heart_obj(uint32_t track_id) {
   if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t *cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+    lv_obj_t *cell = get_cell_obj(track_id);
     DBG_ASSERT(cell);
     return lv_obj_get_child(cell, 4);
   } else {
@@ -346,7 +350,7 @@ static void create_init_cells(void) {
 ////////////////////// GLOBAL FUNCTIONS /////////////////////
 void ui_list_update_icon(uint32_t track_id, bool state) {
   if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+    lv_obj_t* cell = get_cell_obj(track_id);
     if (cell) {
       lv_obj_t* icon = lv_obj_get_child(cell, 0);
       if (state) {
@@ -360,7 +364,7 @@ void ui_list_update_icon(uint32_t track_id, bool state) {
 
 void ui_list_update_cell(uint32_t track_id, bool state) {
   if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+    lv_obj_t* cell = get_cell_obj(track_id);
     if (cell) {
       lv_obj_t* title  = lv_obj_get_child(cell, 1);
       lv_obj_t* artist = lv_obj_get_child(cell, 2);
@@ -380,7 +384,7 @@ void ui_list_update_cell(uint32_t track_id, bool state) {
 
 void ui_list_update_play(uint32_t track_id, bool state) {
   if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+    lv_obj_t* cell = get_cell_obj(track_id);
     if (cell) {
       lv_obj_t* icon   = lv_obj_get_child(cell, 0);
       lv_obj_t* title  = lv_obj_get_child(cell, 1);
@@ -420,8 +424,8 @@ void ui_list_focus_playing(uint32_t track_id) {
 // Updates the duration to the specified cell
 //--------------------------------------------------------------------------------
 void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
-  if (play_list && ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = lv_obj_get_child(play_list, track_id - ui_control.top);
+  if (ui_control.top <= track_id && track_id <= ui_control.end) {
+    lv_obj_t* cell = get_cell_obj(track_id);
     if (cell) {
       lv_obj_t* time_label = lv_obj_get_child(cell, 3);
       lv_label_set_text_fmt(time_label, "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
@@ -475,7 +479,7 @@ void ui_ScreenPlayList_screen_deinit(void) {
   }
 }
 
-#if   false
+#if   true
 //--------------------------------------------------------------------------------
 // Debug functions
 //--------------------------------------------------------------------------------
