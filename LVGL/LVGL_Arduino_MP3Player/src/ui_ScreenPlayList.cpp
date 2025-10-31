@@ -15,13 +15,16 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 /////////////////////////// MACROS //////////////////////////
 #define LIST_FONT_SMALL_HEIGHT    17  // For font size: 12px
 #define LIST_FONT_MEDIUM_HEIGHT   22  // For font size: 14px
-#define LIST_LABEL_MARGINE        100 // left(50) + right(50)
-#define LIST_CELL_HEIGHT          52  // SCREEN_HEIGHT / LIST_CELL_VIEWS
-#define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT = LIST_CELL_VIEWS * LIST_CELL_HEIGHT
-#define LIST_CELL_SPARE           2   // 1 <= LIST_CELL_SPARE <= 2 (1: disable auto-scroll, 2: enable auto-scroll)
+#define LIST_LABEL_MARGIN         100 // Left(50) + Right(50)
+#define LIST_SLIDER_WIDTH         5   // Slider Width: 5px
+#define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT <= LIST_CELL_VIEWS * LIST_CELL_HEIGHT
+#define LIST_CELL_SPARE           1   // Additional cells while scrolling (1: recommended)
+#define LIST_CELL_SCROLL_GAP      2   // The gap at the top/end that triggers a list update
+#define LIST_CELL_HEIGHT          54  // SCREEN_HEIGHT / LIST_CELL_VIEWS + 1
+#define CELL_CONTENT_HEIGHT       52  // LIST_CELL_HEIGHT - BORDER TOP(1px) - OUTLINE BUTTOM(1px)
 #define CELL_HEART_SIZE           15  // img_heart_{on|off}_small.header.{w|h}
-#define CELL_OUTLINE_COLOR        { .blue = 0x44, .green = 0x44, .red = 0x44 }
 #define CELL_BORDER_COLOR         { .blue = 0x60, .green = 0x60, .red = 0x60 }
+#define CELL_OUTLINE_COLOR        { .blue = 0x44, .green = 0x44, .red = 0x44 }
 
 ////////////////////// STATIC VARIABLES /////////////////////
 static lv_obj_t *play_list;
@@ -53,14 +56,14 @@ static constexpr lv_style_const_prop_t style_cell_checked_prop[] = {
   LV_STYLE_CONST_PROPS_END
 };
 static constexpr lv_style_const_prop_t style_title_prop[] = {
-  LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LIST_LABEL_MARGINE),
+  LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LIST_LABEL_MARGIN),
   LV_STYLE_CONST_HEIGHT(LIST_FONT_MEDIUM_HEIGHT),
   LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_MEDIUM),
   LV_STYLE_CONST_TEXT_COLOR(UI_COLOR_BACKGROUND),
   LV_STYLE_CONST_PROPS_END
 };
 static constexpr lv_style_const_prop_t style_artist_prop[] = {
-  LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LIST_LABEL_MARGINE),
+  LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LIST_LABEL_MARGIN),
   LV_STYLE_CONST_HEIGHT(LIST_FONT_SMALL_HEIGHT),
   LV_STYLE_CONST_PAD_RIGHT(5),
   LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
@@ -139,7 +142,7 @@ static void event_handler(lv_event_t* e) {
 static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_t* cell = lv_obj_create(parent);
   lv_obj_remove_style_all       (cell);
-  lv_obj_set_size               (cell, lv_pct(100), LIST_CELL_HEIGHT);
+  lv_obj_set_size               (cell, lv_pct(100), CELL_CONTENT_HEIGHT);
   lv_obj_set_grid_dsc_array     (cell, col_dsc, row_dsc);
   lv_obj_add_style              (cell, &style_cell, 0);
   lv_obj_add_style              (cell, &style_cell_pressed, LV_STATE_PRESSED);
@@ -183,6 +186,29 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   return cell;
 }
 
+static void put_list_cell(lv_obj_t* obj, uint32_t track_id) {
+  ID3Tags_t tags;
+  ui_get_id3tags(track_id, tags);
+
+  lv_image_set_src      (lv_obj_get_child(obj, 0), &img_list_play);
+  lv_label_set_text     (lv_obj_get_child(obj, 1), tags.title.c_str());
+  lv_label_set_text_fmt (lv_obj_get_child(obj, 2), "%s / %s", tags.artist.c_str(), tags.album.c_str());
+  lv_label_set_text_fmt (lv_obj_get_child(obj, 3), "%" LV_PRIu32 ":%02" LV_PRIu32, tags.meta.duration / 60UL, tags.meta.duration % 60UL);
+  lv_image_set_src      (lv_obj_get_child(obj, 4), tags.meta.selected ? &img_heart_on_small : &img_heart_off_small);
+
+  // Update user data
+  lv_obj_remove_event   (obj, 0);
+  lv_obj_add_event_cb   (obj, event_handler, LV_EVENT_CLICKED, (void*)track_id);
+
+  // Reset cell style
+  ui_list_update_cell   (track_id, false);
+}
+
+static void update_slider(lv_obj_t *obj) {
+  lv_slider_set_value     (slider, ui_control.end, LV_ANIM_OFF);
+  lv_slider_set_left_value(slider, ui_control.top, LV_ANIM_OFF); // v9.3: lv_slider_set_start_value()
+}
+
 //--------------------------------------------------------------------------------
 // Adjust the number of cells according to the scroll
 // https://docs.lvgl.io/master/details/common-widget-features/scrolling.html
@@ -193,61 +219,42 @@ static void update_scroll(lv_obj_t *obj) {
   if (update_scroll_running) return;
   update_scroll_running = true;
 
-  int32_t pos;
-
-  // Scroll DOWN: while the pos from the bottom of the scroll range (negative) is smaller than the cell size
-  while (ui_control.end < ui_get_counts() - 1 && (pos = lv_obj_get_scroll_bottom(obj)) < LIST_CELL_HEIGHT) {
-    ui_control.end += 1;
-    add_list_cell(obj, ui_control.end);
+  // Scroll DOWN
+  while (ui_control.end < ui_get_counts() - 1 && lv_obj_get_scroll_bottom(obj) <= LIST_CELL_SCROLL_GAP) {
+//  show_ui_control();
+//  if (ui_control.end - ui_control.top >= LIST_CELL_VIEWS) {
+      ++ui_control.top;
+//  }
+    ++ui_control.end;
+    lv_obj_t *top = lv_obj_get_child(obj, 0);
+    lv_obj_move_to_index(top, -1);
+    put_list_cell(top, ui_control.end);
+    lv_obj_scroll_by(obj, 0, lv_obj_get_height(top), LV_ANIM_OFF);
     lv_obj_update_layout(obj);
-    // printf("added end --> top: %d, end: %d, pos: %d\n", ui_control.top, ui_control.end, pos);
   }
 
-  // Scroll UP: while the pos from the top of the scroll range (positive) is smaller than the cell size
-  while (ui_control.top > 0 && (pos = lv_obj_get_scroll_top(obj)) < LIST_CELL_HEIGHT) {
-    ui_control.top -= 1;
-    int32_t bottom_before = lv_obj_get_scroll_bottom(obj);
-    lv_obj_t *new_item = add_list_cell(obj, ui_control.top);
-    lv_obj_move_to_index(new_item, 0);
+  // Scroll UP
+  while (ui_control.top > 0 && lv_obj_get_scroll_top(obj) <= LIST_CELL_SCROLL_GAP) {
+//  show_ui_control();
+    --ui_control.top;
+//  if (ui_control.end - ui_control.top >= LIST_CELL_VIEWS) {
+      --ui_control.end;
+//  }
+    lv_obj_t *end = lv_obj_get_child(obj, -1);
+    lv_obj_move_to_index(end, 0);
+    put_list_cell(end, ui_control.top);
+    lv_obj_scroll_by(obj, 0, -lv_obj_get_height(end), LV_ANIM_OFF);
     lv_obj_update_layout(obj);
-    int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
-    lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    // printf("added top --> top: %d, end: %d, pos: %d\n", ui_control.top, ui_control.end, pos);
   }
 
-  // Scroll UP: delete cells outside the range
-  while ((pos = lv_obj_get_scroll_bottom(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && ui_control.end - ui_control.top > LIST_CELL_VIEWS) {
-    ui_control.end -= 1;
-    lv_obj_t *child = lv_obj_get_child(obj, -1);
-    lv_obj_delete(child);
-    lv_obj_update_layout(obj);
-    // printf("deleted end --> top: %d, end: %d, pos: %d\n", ui_control.top, ui_control.end, pos);
-  }
+  // Always less than equal LIST_CELL_VIEWS + LIST_CELL_SPARE cells are allocated
+  DBG_ASSERT(ui_control.end - ui_control.top + 1 <= LIST_CELL_VIEWS + LIST_CELL_SPARE);
 
-  // Scroll DOWN: delete cells outside the range
-  while ((pos = lv_obj_get_scroll_top(obj)) > (LIST_CELL_HEIGHT * LIST_CELL_SPARE) && ui_control.end - ui_control.top > LIST_CELL_VIEWS) {
-    ui_control.top += 1;
-    int32_t bottom_before = lv_obj_get_scroll_bottom(obj);
-    lv_obj_t *child = lv_obj_get_child(obj, 0);
-    lv_obj_delete(child);
-    lv_obj_update_layout(obj);
-    int32_t bottom_after = lv_obj_get_scroll_bottom(obj);
-    lv_obj_scroll_by(obj, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-    // printf("deleted top --> top: %d, end: %d, pos: %d\n", ui_control.top, ui_control.end, pos);
-  }
-
-  // Always less than equal LIST_CELL_VIEWS + LIST_CELL_SPARE + 1 cells are allocated
-  DBG_ASSERT(ui_control.end - ui_control.top <= LIST_CELL_VIEWS + LIST_CELL_SPARE);
-
-  update_scroll_running = false;
+  update_slider(obj);
   ui_list_update_cell(ui_control.focusNo, true);
   ui_list_update_icon(ui_control.playNo,  true);
 
-  // Update slider
-  int32_t top = lv_obj_get_scroll_top(obj) + ui_control.top * LIST_CELL_HEIGHT;
-  int32_t end = top + LIST_CELL_VIEWS * LIST_CELL_HEIGHT;
-  lv_slider_set_value     (slider, end, LV_ANIM_OFF);
-  lv_slider_set_left_value(slider, top, LV_ANIM_OFF);
+  update_scroll_running = false;
 }
 
 //--------------------------------------------------------------------------------
@@ -280,12 +287,12 @@ static void list_init(lv_obj_t* parent) {
     slider = lv_slider_create(parent);
     lv_obj_align              (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
     lv_obj_remove_flag        (slider, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size           (slider, 4, SCREEN_HEIGHT);
+    lv_obj_set_size           (slider, LIST_SLIDER_WIDTH, SCREEN_HEIGHT);
     lv_obj_set_style_radius   (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa   (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
-    lv_slider_set_range       (slider, ui_get_counts() * LIST_CELL_HEIGHT, 0);
+    lv_slider_set_range       (slider, ui_get_counts() - 1 + LIST_CELL_VIEWS, 0);
   }
 }
 
@@ -322,16 +329,18 @@ static void remove_all_cells(void) {
 //--------------------------------------------------------------------------------
 // Create cells from top to end in the list
 //--------------------------------------------------------------------------------
-static void create_all_cells(void) {
-  // Update layout before add new cells
-  lv_slider_set_value     (slider, 0, LV_ANIM_OFF);
-  lv_slider_set_left_value(slider, 0, LV_ANIM_OFF);
-  lv_obj_update_layout    (slider);
-  lv_obj_update_layout    (play_list);
+static void create_init_cells(void) {
+  #define MIN(a, b) ((a) < (b) ? (a) : (b))
+  int i = ui_control.top;
+  int n = ui_control.top + MIN(ui_get_counts(), LIST_CELL_VIEWS + LIST_CELL_SPARE);
+  while (i < n) {
+    add_list_cell(play_list, i++);
+  }
+  ui_control.end = i - 1;
 
-  add_list_cell(play_list, ui_control.top);
-  update_scroll(play_list);
+  update_slider(play_list);
   ui_list_update_cell(ui_control.focusNo, true);
+  ui_list_update_icon(ui_control.playNo,  true);
 }
 
 ////////////////////// GLOBAL FUNCTIONS /////////////////////
@@ -403,7 +412,7 @@ void ui_list_focus_playing(uint32_t track_id) {
 
     // Add new cells according to the specified id
     ui_control.focusNo = ui_control.top = ui_control.end = track_id;
-    create_all_cells();
+    create_init_cells();
   }
 }
 
@@ -455,9 +464,9 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_event_cb(play_list,          delete_cb, LV_EVENT_DELETE, (void*)&play_list);
   lv_obj_add_event_cb(slider,             delete_cb, LV_EVENT_DELETE, (void*)&slider);
 
-  // Add new cells according to the specified id
-  ui_control.top = ui_control.end = ui_control.playNo;
-  create_all_cells();
+  // Add new cells and set focus according to the ui_control.playNo
+  ui_control.top = ui_control.end = ui_control.focusNo = ui_control.playNo;
+  create_init_cells();
 }
 
 void ui_ScreenPlayList_screen_deinit(void) {
@@ -465,3 +474,37 @@ void ui_ScreenPlayList_screen_deinit(void) {
     lv_obj_delete_async(ui_ScreenPlayList);
   }
 }
+
+#if   false
+//--------------------------------------------------------------------------------
+// Debug functions
+//--------------------------------------------------------------------------------
+size_t get_cell_count(void) {
+  return lv_obj_get_child_count(play_list);
+}
+
+void show_ui_control(void) {
+  ID3Tags_t tags[2];
+  ui_get_id3tags(ui_control.top, tags[0]);
+  ui_get_id3tags(ui_control.end, tags[1]);
+
+  printf("top:%3d (pos: %d) \"%s\", end:%3d (pos: %d) \"%s\", count: %d/%d\n",
+    ui_control.top, lv_obj_get_scroll_top   (play_list), tags[0].title.c_str(),
+    ui_control.end, lv_obj_get_scroll_bottom(play_list), tags[1].title.c_str(),
+    lv_obj_get_child_count(play_list), ui_get_counts()
+  );
+}
+
+void dump_play_list(void) {
+  const int n = lv_obj_get_child_count(play_list);
+  for (int i = 0; i < n; i++) {
+    ID3Tags_t tags;
+    ui_get_id3tags(ui_control.top + i, tags);
+
+    printf("key: %3d, saved: %d, selected: %d, duration: %3d, artist: %s, album: %s, title: %s\n",
+      ui_control.top + i, tags.meta.saved, tags.meta.selected, tags.meta.duration,
+      tags.artist.c_str(), tags.album.c_str(), tags.title.c_str()
+    );
+  }
+}
+#endif // Debug functions
