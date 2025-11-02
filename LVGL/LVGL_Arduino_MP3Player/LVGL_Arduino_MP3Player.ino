@@ -302,11 +302,13 @@ void loop() {
     sprintf(fname, "/demo%02d.bmp", ++No);
     SaveBMP24(SD, fname, tft);
   #else
-    void show_ui_control(void);
     String in = Serial.readStringUntil('\n');
     switch (in[0]) {
       case '0':
         show_ui_control();
+        break;
+      case '1':
+        dump_play_list();
         break;
       default:
         PrintESP32Memory();

@@ -7,14 +7,14 @@
 #define DEBUG   0
 
 #if   (DEBUG == 1)
-#include <stdio.h>
 #include <assert.h>
-#define DBG_EXEC(x)   x
+#define DBG_EXEC(x)
 #define DBG_ASSERT(x) assert(x)
 
 #elif (DEBUG == 2)
+#include <stdio.h>
 #include <assert.h>
-#define DBG_EXEC(x)
+#define DBG_EXEC(x)   x
 #define DBG_ASSERT(x) assert(x)
 
 #else

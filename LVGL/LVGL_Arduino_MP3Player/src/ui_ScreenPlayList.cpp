@@ -17,9 +17,9 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_FONT_MEDIUM_HEIGHT   22  // For font size: 14px
 #define LIST_LABEL_MARGIN         100 // Left(50) + Right(50)
 #define LIST_SLIDER_WIDTH         5   // Slider Width: 5px
+#define LIST_UPDATE_SCROLL_POS    5   // Scroll Position to update playlist to add/remove cells
 #define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT <= LIST_CELL_VIEWS * LIST_CELL_HEIGHT
-#define LIST_CELL_SPARE           1   // Additional cells while scrolling (1: recommended)
-#define LIST_CELL_SCROLL_GAP      2   // The gap at the top/end that triggers a list update
+#define LIST_CELL_SPARE           2   // Add 1 cell each to the top and the bottom
 #define LIST_CELL_HEIGHT          54  // SCREEN_HEIGHT / LIST_CELL_VIEWS + 1
 #define CELL_CONTENT_HEIGHT       52  // LIST_CELL_HEIGHT - BORDER TOP(1px) - OUTLINE BUTTOM(1px)
 #define CELL_HEART_SIZE           15  // img_heart_{on|off}_small.header.{w|h}
@@ -89,20 +89,36 @@ static constexpr int32_t row_dsc[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_
 //--------------------------------------------------------------------------------
 // Gets the object specified by the track ID
 //--------------------------------------------------------------------------------
-inline static lv_obj_t *get_cell_obj(uint32_t track_id) {
-  return play_list ? lv_obj_get_child(play_list, track_id - ui_control.top) : NULL;
-}
-
-static lv_obj_t *get_heart_obj(uint32_t track_id) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t *cell = get_cell_obj(track_id);
-    DBG_ASSERT(cell);
-    return lv_obj_get_child(cell, 4);
+static lv_obj_t *get_cell_obj(uint32_t track_id) {
+  if (play_list && ui_control.top <= track_id && track_id <= ui_control.end) {
+    return lv_obj_get_child(play_list, track_id - ui_control.top);
   } else {
     return NULL;
   }
 }
 
+static lv_obj_t *get_heart_obj(uint32_t track_id) {
+  lv_obj_t *cell = get_cell_obj(track_id);
+  if (cell) {
+    return lv_obj_get_child(cell, 4); // 4: Heart Checkbox
+  } else {
+    return NULL;
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Scroll the list to ensure the specified cell is visible
+//--------------------------------------------------------------------------------
+static void scroll_to_view(void* track_id) {
+  lv_obj_t *cell = get_cell_obj((uint32_t)track_id);
+  if (cell) {
+    lv_obj_scroll_to_view (cell, LV_ANIM_ON);
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Callback function to handle user interactions
+//--------------------------------------------------------------------------------
 static void event_handler(lv_event_t* e) {
   uint32_t track_id = (uint32_t)lv_event_get_user_data(e);
 
@@ -130,10 +146,9 @@ static void event_handler(lv_event_t* e) {
     ui_control.focusNo = track_id;
     ui_list_update_cell(track_id, true);
 
-    // the clicked coordinates within the heart icon area...
+    // If clicked coordinates within the heart icon area...
     if (p.x >= SCREEN_WIDTH - img_heart_on_small.header.w * 3) {
       lv_obj_t *obj = get_heart_obj(track_id);
-      DBG_ASSERT(obj);
       const void* src = lv_image_get_src(obj);
       lv_image_set_src(obj, src == (const void*)&img_heart_on_small ? &img_heart_off_small : &img_heart_on_small);
 
@@ -143,6 +158,9 @@ static void event_handler(lv_event_t* e) {
   }
 }
 
+//--------------------------------------------------------------------------------
+// Create a new cell and add it to the playlist
+//--------------------------------------------------------------------------------
 static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_t* cell = lv_obj_create(parent);
   lv_obj_remove_style_all       (cell);
@@ -190,6 +208,9 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   return cell;
 }
 
+//--------------------------------------------------------------------------------
+// Overwrite the existing cell data
+//--------------------------------------------------------------------------------
 static void put_list_cell(lv_obj_t* obj, uint32_t track_id) {
   ID3Tags_t tags;
   ui_get_id3tags(track_id, tags);
@@ -208,15 +229,16 @@ static void put_list_cell(lv_obj_t* obj, uint32_t track_id) {
   ui_list_update_cell   (track_id, false);
 }
 
-static void update_slider(lv_obj_t *obj) {
+//--------------------------------------------------------------------------------
+// Update the scroll bar position
+//--------------------------------------------------------------------------------
+static void update_slider(void) {
   lv_slider_set_value     (slider, ui_control.end, LV_ANIM_OFF);
   lv_slider_set_left_value(slider, ui_control.top, LV_ANIM_OFF); // v9.3: lv_slider_set_start_value()
 }
 
 //--------------------------------------------------------------------------------
-// Adjust the number of cells according to the scroll
-// https://docs.lvgl.io/master/details/common-widget-features/scrolling.html
-// https://github.com/lvgl/lvgl/blob/master/examples/scroll/lv_example_scroll_7.c
+// Update the playlist in view according to the scrolling
 //--------------------------------------------------------------------------------
 static void update_scroll(lv_obj_t *obj) {
   // Do not re-enter this function when `lv_obj_scroll_by` triggers this callback again.
@@ -224,7 +246,7 @@ static void update_scroll(lv_obj_t *obj) {
   update_scroll_running = true;
 
   // Scroll DOWN
-  while (ui_control.end < ui_get_counts() - 1 && lv_obj_get_scroll_bottom(obj) <= LIST_CELL_SCROLL_GAP) {
+  while (ui_control.end < ui_get_counts() - 1 && lv_obj_get_scroll_bottom(obj) <= LIST_UPDATE_SCROLL_POS) {
 //  show_ui_control();
 //  if (ui_control.end - ui_control.top >= LIST_CELL_VIEWS) {
       ++ui_control.top;
@@ -238,7 +260,7 @@ static void update_scroll(lv_obj_t *obj) {
   }
 
   // Scroll UP
-  while (ui_control.top > 0 && lv_obj_get_scroll_top(obj) <= LIST_CELL_SCROLL_GAP) {
+  while (ui_control.top > 0 && lv_obj_get_scroll_top(obj) <= LIST_UPDATE_SCROLL_POS) {
 //  show_ui_control();
     --ui_control.top;
 //  if (ui_control.end - ui_control.top >= LIST_CELL_VIEWS) {
@@ -254,7 +276,7 @@ static void update_scroll(lv_obj_t *obj) {
   // Always less than equal LIST_CELL_VIEWS + LIST_CELL_SPARE cells are allocated
   DBG_ASSERT(ui_control.end - ui_control.top + 1 <= LIST_CELL_VIEWS + LIST_CELL_SPARE);
 
-  update_slider(obj);
+  update_slider();
   ui_list_update_cell(ui_control.focusNo, true);
   ui_list_update_icon(ui_control.playNo,  true);
 
@@ -266,17 +288,37 @@ static void update_scroll(lv_obj_t *obj) {
 //--------------------------------------------------------------------------------
 static void scroll_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
-  if (event_code == LV_EVENT_SCROLL) {
-    DBG_ASSERT(play_list == lv_event_get_target_obj(e));
-    update_scroll(play_list);
+  DBG_ASSERT(event_code == LV_EVENT_SCROLL && play_list == lv_event_get_target_obj(e));
+
+  update_scroll(play_list);
+}
+
+//--------------------------------------------------------------------------------
+// Set the widget pointer to NULL when the object is deleted
+//--------------------------------------------------------------------------------
+static void delete_cb(lv_event_t *e) {
+  lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
+  static constexpr lv_obj_t ** const adrs[] = {
+    &ui_ScreenPlayList,
+    &play_list,
+    &slider,
+  };
+
+  for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
+    if (obj == adrs[i]) {
+      *obj = NULL;
+      DBG_EXEC(printf("deleted: %d\n", i));
+      return;
+    }
   }
+  DBG_EXEC(printf("deleted: 0x%x\n", obj));
 }
 
 //--------------------------------------------------------------------------------
 // Initialize the style of each cell in the playlist
 //--------------------------------------------------------------------------------
 static void list_init(lv_obj_t* parent) {
-  // Create an empty transparent container
+  // Create an empty container for playlist
   if (play_list == NULL) {
     play_list = lv_obj_create(parent);
     lv_obj_remove_style_all   (play_list);
@@ -301,36 +343,6 @@ static void list_init(lv_obj_t* parent) {
 }
 
 //--------------------------------------------------------------------------------
-// Set the pointer to the widget to NULL when its object is deleted
-//--------------------------------------------------------------------------------
-static void delete_cb(lv_event_t *e) {
-  lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
-  static constexpr lv_obj_t ** const adrs[] = {
-    &ui_ScreenPlayList,
-    &play_list,
-    &slider,
-  };
-
-  for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
-    if (obj == adrs[i]) {
-      *obj = NULL;
-      DBG_EXEC(printf("deleted: %d\n", i));
-      return;
-    }
-  }
-  DBG_EXEC(printf("deleted: 0x%x\n", obj));
-}
-
-//--------------------------------------------------------------------------------
-// Delete all cells in the list
-//--------------------------------------------------------------------------------
-static void remove_all_cells(void) {
-  while (lv_obj_get_child_count(play_list)) {
-    lv_obj_clean(play_list);
-  }
-}
-
-//--------------------------------------------------------------------------------
 // Create cells from top to end in the list
 //--------------------------------------------------------------------------------
 static void create_init_cells(void) {
@@ -342,66 +354,60 @@ static void create_init_cells(void) {
   }
   ui_control.end = i - 1;
 
-  update_slider(play_list);
+  update_slider();
   ui_list_update_cell(ui_control.focusNo, true);
   ui_list_update_icon(ui_control.playNo,  true);
 }
 
 ////////////////////// GLOBAL FUNCTIONS /////////////////////
 void ui_list_update_icon(uint32_t track_id, bool state) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = get_cell_obj(track_id);
-    if (cell) {
-      lv_obj_t* icon = lv_obj_get_child(cell, 0);
-      if (state) {
-        lv_image_set_src(icon, &img_list_pause);
-      } else {
-        lv_image_set_src(icon, &img_list_play);
-      }
+  lv_obj_t* cell = get_cell_obj(track_id);
+  if (cell) {
+    lv_obj_t* icon = lv_obj_get_child(cell, 0);
+    if (state) {
+      lv_image_set_src(icon, &img_list_pause);
+    } else {
+      lv_image_set_src(icon, &img_list_play);
     }
   }
 }
 
 void ui_list_update_cell(uint32_t track_id, bool state) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = get_cell_obj(track_id);
-    if (cell) {
-      lv_obj_t* title  = lv_obj_get_child(cell, 1);
-      lv_obj_t* artist = lv_obj_get_child(cell, 2);
+  lv_obj_t* cell = get_cell_obj(track_id);
+  if (cell) {
+    lv_obj_t* title  = lv_obj_get_child(cell, 1);
+    lv_obj_t* artist = lv_obj_get_child(cell, 2);
 
-      if (state) {
-        lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_obj_add_state(cell, LV_STATE_CHECKED);
-      } else {
-        lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
-        lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
-        lv_obj_remove_state(cell, LV_STATE_CHECKED);
-      }
+    if (state) {
+      lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
+      lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
+      lv_obj_add_state(cell, LV_STATE_CHECKED);
+    } else {
+      lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
+      lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
+      lv_obj_remove_state(cell, LV_STATE_CHECKED);
     }
   }
 }
 
 void ui_list_update_play(uint32_t track_id, bool state) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = get_cell_obj(track_id);
-    if (cell) {
-      lv_obj_t* icon   = lv_obj_get_child(cell, 0);
-      lv_obj_t* title  = lv_obj_get_child(cell, 1);
-      lv_obj_t* artist = lv_obj_get_child(cell, 2);
+  lv_obj_t* cell = get_cell_obj(track_id);
+  if (cell) {
+    lv_obj_t* icon   = lv_obj_get_child(cell, 0);
+    lv_obj_t* title  = lv_obj_get_child(cell, 1);
+    lv_obj_t* artist = lv_obj_get_child(cell, 2);
 
-      if (state) {
-        lv_image_set_src(icon, &img_list_pause);
-        lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_obj_add_state(cell, LV_STATE_CHECKED);
-        lv_obj_scroll_to_view(cell, LV_ANIM_ON);
-      } else {
-        lv_image_set_src(icon, &img_list_play);
-        lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
-        lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
-        lv_obj_remove_state(cell, LV_STATE_CHECKED);
-      }
+    if (state) {
+      lv_image_set_src(icon, &img_list_pause);
+      lv_label_set_long_mode(title,  LV_LABEL_LONG_SCROLL_CIRCULAR);
+      lv_label_set_long_mode(artist, LV_LABEL_LONG_SCROLL_CIRCULAR);
+      lv_obj_add_state(cell, LV_STATE_CHECKED);
+      lv_async_call(scroll_to_view, (void*)track_id);
+    } else {
+      lv_image_set_src(icon, &img_list_play);
+      lv_label_set_long_mode(title,  LV_LABEL_LONG_DOT);
+      lv_label_set_long_mode(artist, LV_LABEL_LONG_DOT);
+      lv_obj_remove_state(cell, LV_STATE_CHECKED);
     }
   }
 }
@@ -410,9 +416,14 @@ void ui_list_update_play(uint32_t track_id, bool state) {
 // Focus the specified cell when it is out of range
 //--------------------------------------------------------------------------------
 void ui_list_focus_playing(uint32_t track_id) {
-  if (track_id < ui_control.top || ui_control.end < track_id) {
-    // Delete all cells in playlist
-    remove_all_cells();
+  DBG_ASSERT(play_list);
+
+  lv_obj_t* cell = get_cell_obj(track_id);
+  if (cell) {
+    lv_obj_scroll_to_view(cell, LV_ANIM_OFF);
+  } else {
+    // Remove all cells from the playlist
+    lv_obj_clean(play_list);
 
     // Add new cells according to the specified id
     ui_control.focusNo = ui_control.top = ui_control.end = track_id;
@@ -424,12 +435,10 @@ void ui_list_focus_playing(uint32_t track_id) {
 // Updates the duration to the specified cell
 //--------------------------------------------------------------------------------
 void ui_list_update_duration(uint32_t track_id, uint32_t duration) {
-  if (ui_control.top <= track_id && track_id <= ui_control.end) {
-    lv_obj_t* cell = get_cell_obj(track_id);
-    if (cell) {
-      lv_obj_t* time_label = lv_obj_get_child(cell, 3);
-      lv_label_set_text_fmt(time_label, "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
-    }
+  lv_obj_t* cell = get_cell_obj(track_id);
+  if (cell) {
+    lv_obj_t* time_label = lv_obj_get_child(cell, 3);
+    lv_label_set_text_fmt(time_label, "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
   }
 }
 
@@ -468,8 +477,7 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_event_cb(play_list,          delete_cb, LV_EVENT_DELETE, (void*)&play_list);
   lv_obj_add_event_cb(slider,             delete_cb, LV_EVENT_DELETE, (void*)&slider);
 
-  // Add new cells and set focus according to the ui_control.playNo
-  ui_control.top = ui_control.end = ui_control.focusNo = ui_control.playNo;
+  // Add new cells and set focus according to the ui_control
   create_init_cells();
 }
 
@@ -488,27 +496,31 @@ size_t get_cell_count(void) {
 }
 
 void show_ui_control(void) {
-  ID3Tags_t tags[2];
-  ui_get_id3tags(ui_control.top, tags[0]);
-  ui_get_id3tags(ui_control.end, tags[1]);
+  if (play_list) {
+    ID3Tags_t tags[2];
+    ui_get_id3tags(ui_control.top, tags[0]);
+    ui_get_id3tags(ui_control.end, tags[1]);
 
-  printf("top:%3d (pos: %d) \"%s\", end:%3d (pos: %d) \"%s\", count: %d/%d\n",
-    ui_control.top, lv_obj_get_scroll_top   (play_list), tags[0].title.c_str(),
-    ui_control.end, lv_obj_get_scroll_bottom(play_list), tags[1].title.c_str(),
-    lv_obj_get_child_count(play_list), ui_get_counts()
-  );
+    printf("top:%3d (pos: %d) \"%s\", end:%3d (pos: %d) \"%s\", playNo: %d, count: %d/%d\n",
+      ui_control.top,  lv_obj_get_scroll_top   (play_list), tags[0].title.c_str(),
+      ui_control.end,  lv_obj_get_scroll_bottom(play_list), tags[1].title.c_str(),
+      ui_get_playNo(), lv_obj_get_child_count  (play_list), ui_get_counts()
+    );
+  }
 }
 
 void dump_play_list(void) {
-  const int n = lv_obj_get_child_count(play_list);
-  for (int i = 0; i < n; i++) {
-    ID3Tags_t tags;
-    ui_get_id3tags(ui_control.top + i, tags);
+  if (play_list) {
+    const int n = lv_obj_get_child_count(play_list);
+    for (int i = 0; i < n; i++) {
+      ID3Tags_t tags;
+      ui_get_id3tags(ui_control.top + i, tags);
 
-    printf("key: %3d, saved: %d, selected: %d, duration: %3d, artist: %s, album: %s, title: %s\n",
-      ui_control.top + i, tags.meta.saved, tags.meta.selected, tags.meta.duration,
-      tags.artist.c_str(), tags.album.c_str(), tags.title.c_str()
-    );
+      printf("key: %3d, saved: %d, selected: %d, duration: %3d, artist: %s, album: %s, title: %s\n",
+        ui_control.top + i, tags.meta.saved, tags.meta.selected, tags.meta.duration,
+        tags.artist.c_str(), tags.album.c_str(), tags.title.c_str()
+      );
+    }
   }
 }
 #endif // Debug functions
