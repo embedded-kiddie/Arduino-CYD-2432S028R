@@ -14,15 +14,16 @@ lv_obj_t *ui_ScreenAlbumList;
 #define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
 #define CELL_COLOR_LEAF     lv_color_hex(0xffffff)
 #define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }  // lv_color_hex(0xe4e0e4)
-#define CELL_HEIGHT_SMALL   31  // for CUSTOM_FONT_SMALL
-#define CELL_HEIGHT_MEDIUM  34  // for CUSTOM_FONT_MEDIUM
-#define CELL_OFFSET_NODE    6   // offset for node text
-#define CELL_OFFSET_LEAF    10  // offset for leaf text
-#define CELL_PADDING_LEFT   6   // padding left in pixels
-#define CELL_PADDING_BORDER 8   // padding top/bottom in pixels
-#define CELL_MAX_VISIBLE    7   // number of cells visible in the list
-#define ALBUM_LIST_HEIGHT   220 // height of the album list (CELL_HEIGHT_SMALL * CELL_MAX_VISIBLE + alpha)
-#define FOLDING_DURATION    250 // folding animation duration
+#define CELL_HEIGHT_SMALL   31  // For CUSTOM_FONT_SMALL
+#define CELL_HEIGHT_MEDIUM  34  // For CUSTOM_FONT_MEDIUM
+#define CELL_OFFSET_NODE    6   // Offset for node text
+#define CELL_OFFSET_LEAF    10  // Offset for leaf text
+#define CELL_PADDING_LEFT   6   // Padding left in pixels
+#define CELL_PADDING_BORDER 8   // Padding top/bottom in pixels
+#define CELL_MAX_VISIBLE    7   // Number of visible cells in the album list
+#define CELL_SCROLL_POS     6   // Scroll Position to update list to add/remove cells
+#define ALBUM_LIST_HEIGHT   220 // Height of the album list (CELL_HEIGHT_SMALL * CELL_MAX_VISIBLE + alpha)
+#define FOLDING_DURATION    250 // Folding animation duration
 
 // Settings for controlling cells in the list
 #define NODE_OPEN   false
@@ -209,15 +210,26 @@ static void draw_image_cb(lv_event_t *e) {
 //--------------------------------------------------------------------------------
 // Callbacks when a cell is opened or closed
 //--------------------------------------------------------------------------------
+static void scroll_to_view(void* obj) {
+  lv_obj_scroll_to_view((lv_obj_t *)obj, LV_ANIM_OFF);
+}
+
 static void update_open_cb(lv_anim_t* a) {
-  lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
-
   // Scroll to make it visible
-  lv_obj_scroll_to_view((lv_obj_t *)a->var, LV_ANIM_ON);
+  lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_ON);
 
-  // Delete the last cell
-  delete_cell(list, lv_obj_get_child(list, -1));
-  update_list(list); // Not required at the end of animation ?
+  // Delete the last cell if it is not newly added
+  lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
+  lv_obj_t *cell = lv_obj_get_child(list, -1);
+  if (a->var != cell) {
+    delete_cell(list, cell);
+  } else {
+    // Ensure to make the last cell visible
+    lv_async_call(scroll_to_view, a->var);
+  }
+
+  // Not required at the end of animation ?
+  update_list(list);
 }
 
 static void update_close_cb(lv_anim_t* a) {
@@ -257,7 +269,7 @@ static void update_open(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *a
     bool hidden = (stack.back()->meta.checked == NODE_OPEN ? false : true);
     node->meta.hidden = hidden;
 
-    if (hidden == false && ++index < CELL_MAX_VISIBLE + 1) {
+    if (hidden == false && ++index <= CELL_MAX_VISIBLE + 1) {
       // 1. Add a new cell and re-index
       lv_obj_t *cell = append_cell(list, node);
       lv_obj_move_to_index(cell, index);
@@ -312,47 +324,45 @@ static void update_close(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *
 // Event handler for when a cell is clicked
 //--------------------------------------------------------------------------------
 static void event_handler(lv_event_t *e) {
-  lv_event_code_t code = lv_event_get_code(e);
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  if (code == LV_EVENT_CLICKED) {
-    lv_obj_t *cell = lv_event_get_target_obj(e);
-    lv_obj_t *list = lv_obj_get_parent(cell);
+  lv_obj_t *cell = lv_event_get_target_obj(e);
+  lv_obj_t *list = lv_obj_get_parent(cell);
 
-    Node *node = get_node(cell);
-    NodeMeta_t *meta = &node->meta;
+  Node *node = get_node(cell);
+  NodeMeta_t *meta = &node->meta;
 
-    if (meta->type == TYPE_NODE) {
-      // Update the node status and appearance
-      bool checked  = meta->checked = !meta->checked;
-      lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
+  if (meta->type == TYPE_NODE) {
+    // Update the node status and appearance
+    bool checked  = meta->checked = !meta->checked;
+    lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
 
-      // Setup an animation template
-      lv_anim_t a;
-      lv_anim_init(&a);
-      lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_height);
-      lv_anim_set_duration(&a, FOLDING_DURATION);
-      lv_anim_set_user_data(&a, list);
+    // Setup an animation template
+    lv_anim_t a;
+    lv_anim_init(&a);
+    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_height);
+    lv_anim_set_duration(&a, FOLDING_DURATION);
+    lv_anim_set_user_data(&a, (void*)list);
 
-      uint32_t index = lv_obj_get_index(cell);
+    uint32_t index = lv_obj_get_index(cell);
 
-      if (checked == NODE_OPEN) {
-        lv_anim_set_values(&a, 0, CELL_HEIGHT_SMALL);
-        lv_anim_set_completed_cb(&a, update_open_cb);
-        update_open(list, node, index, &a);
-      }
-
-      else /* checked == NODE_CLOSED */ {
-        lv_anim_set_values(&a, CELL_HEIGHT_SMALL, 0);
-        lv_anim_set_completed_cb(&a, update_close_cb);
-        update_close(list, node, index, &a);
-      }
+    if (checked == NODE_OPEN) {
+      lv_anim_set_values(&a, 0, CELL_HEIGHT_SMALL);
+      lv_anim_set_completed_cb(&a, update_open_cb);
+      update_open(list, node, index, &a);
     }
 
-    else /* meta->type == TYPE_LEAF */ {
-      // Update the checkbox state and appearance
-      meta->checked = !meta->checked;
-      lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
+    else /* checked == NODE_CLOSED */ {
+      lv_anim_set_values(&a, CELL_HEIGHT_SMALL, 0);
+      lv_anim_set_completed_cb(&a, update_close_cb);
+      update_close(list, node, index, &a);
     }
+  }
+
+  else /* meta->type == TYPE_LEAF */ {
+    // Update the checkbox state and appearance
+    meta->checked = !meta->checked;
+    lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
   }
 }
 
@@ -370,18 +380,18 @@ static void update_scroll(lv_obj_t *list) {
   int32_t pos;
 
   // Scroll DOWN: Add new cells to END while the bottom position of the scroll range is smaller than the cell height
-  while (list_control.end < list_control.n_nodes - 1 && (pos = lv_obj_get_scroll_bottom(list)) < CELL_OFFSET_NODE) {
+  while (list_control.end < list_control.n_nodes - 1 && (pos = lv_obj_get_scroll_bottom(list)) < CELL_SCROLL_POS) {
     if (node = find_after(list_control.end)) {
       append_cell(list, node);
       update_list(list);
-      // printf("added end --> pos: %d, top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count);
+      DBG_EXEC(printf("added   end at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count));
     } else {
       break;
     }
   }
 
   // Scroll UP: Add new cells to TOP while the bottom position of the scroll range is smaller than the cell height
-  while (list_control.top > 0 && (pos = lv_obj_get_scroll_top(list)) < CELL_OFFSET_NODE) {
+  while (list_control.top > 0 && (pos = lv_obj_get_scroll_top(list)) < CELL_SCROLL_POS) {
     if (node = find_before(list_control.top)) {
       int32_t bottom_before = lv_obj_get_scroll_bottom(list);
       lv_obj_t *new_item = append_cell(list, node);
@@ -389,7 +399,7 @@ static void update_scroll(lv_obj_t *list) {
       update_list(list);
       int32_t bottom_after = lv_obj_get_scroll_bottom(list);
       lv_obj_scroll_by(list, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-      // printf("added top --> pos: %d, top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count);
+      DBG_EXEC(printf("added   top at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count));
     } else {
       break;
     }
@@ -401,7 +411,7 @@ static void update_scroll(lv_obj_t *list) {
       lv_obj_t *child = lv_obj_get_child(list, -1);
       delete_cell(list, child);
       update_list(list);
-      // printf("deleted end --> pos: %d, top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count);
+      DBG_EXEC(printf("deleted end at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count));
     } else {
       break;
     }
@@ -416,7 +426,7 @@ static void update_scroll(lv_obj_t *list) {
       update_list(list);
       int32_t bottom_after = lv_obj_get_scroll_bottom(list);
       lv_obj_scroll_by(list, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-      // printf("deleted top --> pos: %d, top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count);
+      DBG_EXEC(printf("deleted top at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count));
     } else {
       break;
     }
@@ -433,9 +443,9 @@ static void scroll_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-//
+// Callback for dropdown list
 //--------------------------------------------------------------------------------
-static void playlist_cb(lv_event_t *e) {
+static void dropdown_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
@@ -530,7 +540,7 @@ void ui_ScreenAlbumList_screen_init(void) {
     obj = lv_dropdown_create(ui_ScreenAlbumList);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(11));
     lv_obj_set_size         (obj, OPTIONS_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_add_event_cb     (obj, playlist_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb     (obj, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options (obj, "All");
     lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
 
@@ -576,3 +586,111 @@ void ui_ScreenAlbumList_create_list(void *root) {
     update_scroll(album_list);
   }
 }
+
+#if   false
+//--------------------------------------------------------------------------------
+// Debug functions (static)
+//--------------------------------------------------------------------------------
+static size_t count_nodes(Node *node) {
+  size_t count = 0;
+  for (auto &n : node->children) {
+    ++count; // count self
+
+    // when node is open and has children...
+    size_t size = n->children.size();
+    if (size && n->meta.checked == false) {
+      if (n->children[0]->children.size()) {
+        count += count_nodes(n);
+      } else {
+        count += size;
+      }
+    }
+  }
+
+  return count;
+}
+
+static void show_control(lv_obj_t *list) {
+  Node *top = list_control.root->find_preorder(list_control.top);
+  Node *end = list_control.root->find_preorder(list_control.end);
+  printf("top:%3d (pos: %d) \"%s\", end:%3d (pos: %d) \"%s\", count: %d/%d\n",
+    list_control.top, lv_obj_get_scroll_top   (list), top->name.c_str(),
+    list_control.end, lv_obj_get_scroll_bottom(list), end->name.c_str(),
+    list_control.count, lv_obj_get_child_count(list)
+  );
+}
+
+// Dump the contents of a list
+typedef struct {
+  const lv_obj_class_t *m_class;
+  const char *m_name;
+} ClassName_t;
+
+static const char *check_class(lv_obj_t *obj) {
+  // https://docs.lvgl.io/master/details/widgets/index.html
+  static const ClassName_t list[] = {
+    { &lv_bar_class,      "lv_bar"      },
+    { &lv_label_class,    "lv_label"    },
+    { &lv_button_class,   "lv_button"   },
+    { &lv_checkbox_class, "lv_checkbox" },
+    { &lv_image_class,    "lv_image"    },
+    { &lv_list_class,     "lv_list"     },
+    { &lv_obj_class,      "lv_obj"      },
+  };
+
+  for (int i = 0; i < sizeof(list) / sizeof(list[0]); i++) {
+    if (lv_obj_has_class(obj, list[i].m_class)) {
+      return list[i].m_name;
+    }
+  }
+
+  return "unknown";
+}
+
+static void dump_album(lv_obj_t *obj, int depth) {
+  for (int i = 0; i < depth; i++) { printf("  "); }
+
+  Node *node = get_node(obj);
+  if (node) {
+    NodeMeta_t *meta = &node->meta;
+    printf("key: %3d, type: %d, depth: %d, hidden: %d, checked: %d --> ",
+      node->key, meta->type, meta->depth, meta->hidden, meta->checked
+    );
+  }
+
+  const char *c = check_class(obj);
+  if (strcmp(c, "lv_label"   ) == 0) { printf("%s \"%s\"\n", c, lv_label_get_text(obj));    } else
+  if (strcmp(c, "lv_checkbox") == 0) { printf("%s \"%s\"\n", c, lv_checkbox_get_text(obj)); } else
+  if (strcmp(c, "lv_dropdown") == 0) { printf("%s \"%s\"\n", c, lv_dropdown_get_text(obj)); } else
+  if (strcmp(c, "lv_dropdown") == 0) { printf("%s \"%s\"\n", c, lv_dropdown_get_text(obj)); } else
+  printf("%s\n", c);
+
+  lv_obj_t *cell;
+  for (int i = 0; cell = lv_obj_get_child(obj, i); i++) {
+    dump_album(cell, depth + 1);
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Debug functions (global)
+//--------------------------------------------------------------------------------
+size_t count_album_cells(void) {
+  return list_control.count; // number of cells in album list
+}
+
+size_t count_total_cells(void) {
+  return count_nodes(list_control.root); // number of open nodes in tree
+}
+
+void show_album_list(void) {
+  show_control(album_list); // show list_control
+}
+
+void dump_album_list(void) {
+  dump_album(album_list, 0); // dump all cells in album list
+}
+
+void dump_preorder(void) {
+  list_control.root->dump_preorder(true); // dump all nodes in tree by preorder
+}
+#endif // Debug functions

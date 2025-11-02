@@ -11,7 +11,7 @@
 // Arrow buttons to navigate to each screen
 #define SHOW_ARROW_BUTTON false
 
-// Screen size / coordinate
+// Screen size / coordinate / color / font
 #define SCREEN_WIDTH      240
 #define SCREEN_HEIGHT     320
 #define LV_PCT_X(a)       (SCREEN_WIDTH  * (a) / 100) // for LV_STYLE_CONST_X
@@ -19,7 +19,6 @@
 #define ICON_OFFSET_R     (SCREEN_WIDTH / 2 - 24) // need LV_ALIGN_CENTER
 #define ICON_OFFSET_L     (24 - SCREEN_WIDTH / 2) // need LV_ALIGN_CENTER
 #define OPTIONS_WIDTH     100
-
 
 #define UI_COLOR_BACKGROUND   { .blue = 0xf5, .green = 0xf5, .red = 0xf5 }  // lv_color_hex(0xf5f5f5)
 #define UI_COLOR_SLIDER       { .blue = 0x00, .green = 0x00, .red = 0x00 }  // lv_color_hex(0x000000)
@@ -30,14 +29,12 @@
 #define UI_COLOR_LIST_ARTIST  { .blue = 0xbe, .green = 0xb0, .red = 0xb1 }  // lv_color_hex(0xb1b0be)
 #define UI_COLOR_LIST_SLIDER  { .blue = 0xee, .green = 0xee, .red = 0xee }  // lv_color_hex(0xeeeeee)
 
-// Custom font
 #define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
 #define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
-
 LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
 LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 
-// SCREEN: ui_ScreenMain
+////////// SCREEN: ui_ScreenMain //////////
 extern lv_obj_t *ui_ScreenMain;
 extern lv_obj_t *ui_MusicTitle;
 extern lv_obj_t *ui_ElapsedStart;
@@ -62,14 +59,21 @@ void ui_event_ButtonPrev  (lv_event_t *e);
 void ui_event_VolumeMax   (lv_event_t *e);
 void ui_event_VolumeMin   (lv_event_t *e);
 
-// SCREEN: ui_ScreenAlbumList
+////////// SCREEN: ui_ScreenAlbumList //////////
 extern lv_obj_t *ui_ScreenAlbumList;
 void ui_event_ScreenAlbumList(lv_event_t *e);
 void ui_ScreenAlbumList_screen_init  (void);
 void ui_ScreenAlbumList_screen_deinit(void);
 void ui_ScreenAlbumList_create_list  (void *root);
 
-// SCREEN: ui_ScreenPlayList
+// Debug functions
+size_t count_album_cells(void);
+size_t count_total_cells(void);
+void show_album_list(void);
+void dump_album_list(void);
+void dump_preorder(void);
+
+////////// SCREEN: ui_ScreenPlayList //////////
 extern lv_obj_t *ui_ScreenPlayList;
 void ui_ScreenPlayList_screen_init  (void);
 void ui_ScreenPlayList_screen_deinit(void);
@@ -82,11 +86,13 @@ void ui_list_update_play    (uint32_t track_id, bool state);
 void ui_list_focus_playing  (uint32_t track_id);
 void ui_list_update_duration(uint32_t track_id, uint32_t duration);
 bool ui_list_get_heart_state(uint32_t track_id);
-size_t get_cell_count(void);  // for debug
-void show_ui_control(void);   // for debug
-void dump_play_list(void);    // for debug
 
-// SCREEN: ui_ScreenOptions
+// Debug functions
+size_t get_cell_count(void);
+void show_ui_control(void);
+void dump_play_list(void);
+
+////////// SCREEN: ui_ScreenOptions //////////
 extern lv_obj_t *ui_ScreenOptions;
 void ui_event_ScreenOptions(lv_event_t *e);
 void ui_ScreenOptions_screen_init  (void);

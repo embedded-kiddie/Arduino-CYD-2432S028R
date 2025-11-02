@@ -18,10 +18,10 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_LABEL_MARGIN         100 // Left(50) + Right(50)
 #define LIST_SLIDER_WIDTH         5   // Slider Width: 5px
 #define LIST_UPDATE_SCROLL_POS    5   // Scroll Position to update playlist to add/remove cells
-#define LIST_CELL_VIEWS           6   // SCREEN_HEIGHT <= LIST_CELL_VIEWS * LIST_CELL_HEIGHT
-#define LIST_CELL_SPARE           2   // Add 1 cell each to the top and the bottom
-#define LIST_CELL_HEIGHT          54  // SCREEN_HEIGHT / LIST_CELL_VIEWS + 1
-#define CELL_CONTENT_HEIGHT       52  // LIST_CELL_HEIGHT - BORDER TOP(1px) - OUTLINE BUTTOM(1px)
+#define CELL_VISIBLE_MAX          6   // Number of visible cells (SCREEN_HEIGHT <= CELL_VISIBLE_MAX * CELL_OUTLINE_HEIGHT)
+#define CELL_VISIBLE_SPARE        2   // Add 1 cell each to the top and the bottom
+#define CELL_OUTLINE_HEIGHT       54  // SCREEN_HEIGHT / CELL_VISIBLE_MAX + 1
+#define CELL_CONTENT_HEIGHT       52  // CELL_OUTLINE_HEIGHT - BORDER TOP(1px) - OUTLINE BUTTOM(1px)
 #define CELL_HEART_SIZE           15  // img_heart_{on|off}_small.header.{w|h}
 #define CELL_BORDER_COLOR         { .blue = 0x5c, .green = 0x5c, .red = 0x5c }
 #define CELL_OUTLINE_COLOR        { .blue = 0x44, .green = 0x44, .red = 0x44 }
@@ -248,7 +248,7 @@ static void update_scroll(lv_obj_t *obj) {
   // Scroll DOWN
   while (ui_control.end < ui_get_counts() - 1 && lv_obj_get_scroll_bottom(obj) <= LIST_UPDATE_SCROLL_POS) {
 //  show_ui_control();
-//  if (ui_control.end - ui_control.top >= LIST_CELL_VIEWS) {
+//  if (ui_control.end - ui_control.top >= CELL_VISIBLE_MAX) {
       ++ui_control.top;
 //  }
     ++ui_control.end;
@@ -263,7 +263,7 @@ static void update_scroll(lv_obj_t *obj) {
   while (ui_control.top > 0 && lv_obj_get_scroll_top(obj) <= LIST_UPDATE_SCROLL_POS) {
 //  show_ui_control();
     --ui_control.top;
-//  if (ui_control.end - ui_control.top >= LIST_CELL_VIEWS) {
+//  if (ui_control.end - ui_control.top >= CELL_VISIBLE_MAX) {
       --ui_control.end;
 //  }
     lv_obj_t *end = lv_obj_get_child(obj, -1);
@@ -273,8 +273,8 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
   }
 
-  // Always less than equal LIST_CELL_VIEWS + LIST_CELL_SPARE cells are allocated
-  DBG_ASSERT(ui_control.end - ui_control.top + 1 <= LIST_CELL_VIEWS + LIST_CELL_SPARE);
+  // Always less than equal CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE cells are allocated
+  DBG_ASSERT(ui_control.end - ui_control.top + 1 <= CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE);
 
   update_slider();
   ui_list_update_cell(ui_control.focusNo, true);
@@ -288,8 +288,8 @@ static void update_scroll(lv_obj_t *obj) {
 //--------------------------------------------------------------------------------
 static void scroll_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
-  DBG_ASSERT(event_code == LV_EVENT_SCROLL && play_list == lv_event_get_target_obj(e));
-
+  DBG_ASSERT(event_code == LV_EVENT_SCROLL);
+  DBG_ASSERT(play_list == lv_event_get_target_obj(e));
   update_scroll(play_list);
 }
 
@@ -338,7 +338,7 @@ static void list_init(lv_obj_t* parent) {
     lv_obj_set_style_bg_opa   (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
-    lv_slider_set_range       (slider, ui_get_counts() - 1 + LIST_CELL_VIEWS, 0);
+    lv_slider_set_range       (slider, ui_get_counts() - 1 + CELL_VISIBLE_MAX, 0);
   }
 }
 
@@ -348,7 +348,7 @@ static void list_init(lv_obj_t* parent) {
 static void create_init_cells(void) {
   #define MIN(a, b) ((a) < (b) ? (a) : (b))
   int i = ui_control.top;
-  int n = ui_control.top + MIN(ui_get_counts(), LIST_CELL_VIEWS + LIST_CELL_SPARE);
+  int n = ui_control.top + MIN(ui_get_counts(), CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE);
   while (i < n) {
     add_list_cell(play_list, i++);
   }
@@ -487,7 +487,7 @@ void ui_ScreenPlayList_screen_deinit(void) {
   }
 }
 
-#if   true
+#if   false
 //--------------------------------------------------------------------------------
 // Debug functions
 //--------------------------------------------------------------------------------

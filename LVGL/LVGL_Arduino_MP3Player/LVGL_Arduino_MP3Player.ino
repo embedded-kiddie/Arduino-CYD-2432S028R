@@ -303,13 +303,13 @@ void loop() {
     SaveBMP24(SD, fname, tft);
   #else
     String in = Serial.readStringUntil('\n');
-    switch (in[0]) {
+    switch (in[0]) {/*
       case '0':
         show_ui_control();
         break;
       case '1':
         dump_play_list();
-        break;
+        break;//*/
       default:
         PrintESP32Memory();
         break;
