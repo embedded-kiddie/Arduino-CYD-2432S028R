@@ -1,6 +1,6 @@
 //================================================================================
 // MP3 Music Player for CYD - User Interface
-// LVGL version: 9.x
+// LVGL version: 9.2.2 and up
 //================================================================================
 #ifndef _UI_H_
 #define _UI_H_
@@ -14,8 +14,8 @@
 // Screen size / coordinate / color / font
 #define SCREEN_WIDTH      240
 #define SCREEN_HEIGHT     320
-#define LV_PCT_X(a)       (SCREEN_WIDTH  * (a) / 100) // for LV_STYLE_CONST_X
-#define LV_PCT_Y(a)       (SCREEN_HEIGHT * (a) / 100) // for LV_STYLE_CONST_Y
+#define LV_PCT_X(x)       (SCREEN_WIDTH  * (x) / 100) // for LV_STYLE_CONST_X
+#define LV_PCT_Y(y)       (SCREEN_HEIGHT * (y) / 100) // for LV_STYLE_CONST_Y
 #define ICON_OFFSET_R     (SCREEN_WIDTH / 2 - 24) // need LV_ALIGN_CENTER
 #define ICON_OFFSET_L     (24 - SCREEN_WIDTH / 2) // need LV_ALIGN_CENTER
 #define OPTIONS_WIDTH     100

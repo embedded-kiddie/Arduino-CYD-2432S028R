@@ -1,6 +1,6 @@
 //================================================================================
 // MP3 Music Player for CYD - Album List Screen
-// LVGL version: 9.x
+// LVGL version: 9.2.2 and up
 //================================================================================
 #include "ui.h"
 #include "../tree.hpp"
@@ -610,16 +610,6 @@ static size_t count_nodes(Node *node) {
   return count;
 }
 
-static void show_control(lv_obj_t *list) {
-  Node *top = list_control.root->find_preorder(list_control.top);
-  Node *end = list_control.root->find_preorder(list_control.end);
-  printf("top:%3d (pos: %d) \"%s\", end:%3d (pos: %d) \"%s\", count: %d/%d\n",
-    list_control.top, lv_obj_get_scroll_top   (list), top->name.c_str(),
-    list_control.end, lv_obj_get_scroll_bottom(list), end->name.c_str(),
-    list_control.count, lv_obj_get_child_count(list)
-  );
-}
-
 // Dump the contents of a list
 typedef struct {
   const lv_obj_class_t *m_class;
@@ -683,7 +673,13 @@ size_t count_total_cells(void) {
 }
 
 void show_album_list(void) {
-  show_control(album_list); // show list_control
+  Node *top = list_control.root->find_preorder(list_control.top);
+  Node *end = list_control.root->find_preorder(list_control.end);
+  printf("top:%3d (pos: %d) \"%s\", end:%3d (pos: %d) \"%s\", count: %d/%d\n",
+    list_control.top, lv_obj_get_scroll_top   (album_list), top->name.c_str(),
+    list_control.end, lv_obj_get_scroll_bottom(album_list), end->name.c_str(),
+    list_control.count, lv_obj_get_child_count(album_list)
+  );
 }
 
 void dump_album_list(void) {

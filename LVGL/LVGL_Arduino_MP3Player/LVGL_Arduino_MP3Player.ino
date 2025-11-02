@@ -1,6 +1,6 @@
 //================================================================================
 // MP3 Music Player for CYD
-// LVGL version: 9.x
+// LVGL version: 9.2.2 and up
 // IN lv_conf.h
 //  DO NOT FORGET TO SET 'LV_USE_TFT_ESPI' TO 0
 //  DO NOT FORGET TO SET 'LV_USE_ILI9341' and/or 'LV_USE_ST7789'
