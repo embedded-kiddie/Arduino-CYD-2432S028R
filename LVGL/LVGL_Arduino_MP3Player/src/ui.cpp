@@ -3,7 +3,6 @@
 // LVGL version: 9.2.2 and up
 //================================================================================
 #include "ui.h"
-#include "ui_helpers.h"
 #include <string.h> // for strncpy(), strrchr()
 
 ////////////////////// GLOBAL VARIABLES /////////////////////
@@ -41,10 +40,13 @@ static LV_STYLE_CONST_INIT(style_picture, (void*)style_prop_picture);
 #include "_pictures.h"
 #endif
 
-///////////////////// TEST LVGL SETTINGS ////////////////////
-#if LV_COLOR_DEPTH != 16
-#error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
-#endif
+////////////////////// HELPER FUNCTION //////////////////////
+static void change_screen(lv_obj_t ** target, lv_screen_load_anim_t fademode, void (*target_init)(void)) {
+  if(*target == NULL) {
+    target_init();
+  }
+  lv_screen_load_anim(*target, fademode, 500, 0, false);
+}
 
 ///////////////////// CALLBACK FUNCTIONS ////////////////////
 //--------------------------------------------------------------------------------
@@ -56,37 +58,36 @@ void ui_event_ScreenMain(lv_event_t *e) {
   lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
 
   if (dir == LV_DIR_RIGHT) {
-    _ui_screen_change(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenAlbumList_screen_init);
+    change_screen(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_RIGHT, &ui_ScreenAlbumList_screen_init);
   }
 
   else if (dir == LV_DIR_LEFT) {
-    _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
-
+    change_screen(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, &ui_ScreenPlayList_screen_init);
     ui_list_focus_playing(player.GetPlayNo());
   }
 
   else if (dir == LV_DIR_TOP || dir == LV_DIR_BOTTOM) {
     lv_screen_load_anim_t anim = (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM);
-    _ui_screen_change(&ui_ScreenOptions, anim, 500, 0, &ui_ScreenOptions_screen_init);
+    change_screen(&ui_ScreenOptions, anim, &ui_ScreenOptions_screen_init);
   }
 }
 
 void ui_event_GoAlbumList(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  _ui_screen_change(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_ScreenAlbumList_screen_init);
+  change_screen(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_RIGHT, &ui_ScreenAlbumList_screen_init);
 }
 
 void ui_event_GoPlayList(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  _ui_screen_change(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenPlayList_screen_init);
+  change_screen(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, &ui_ScreenPlayList_screen_init);
 }
 
 void ui_event_GoOptions(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  _ui_screen_change(&ui_ScreenOptions, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_ScreenOptions_screen_init);
+  change_screen(&ui_ScreenOptions, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, &ui_ScreenOptions_screen_init);
 }
 
 void ui_event_Favorite(lv_event_t *e) {
@@ -178,13 +179,13 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
   );
 
   if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_ScreenMain_screen_init);
+    change_screen(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_LEFT, &ui_ScreenMain_screen_init);
   }
 
   else if (event_code == LV_EVENT_GESTURE) {
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
     lv_screen_load_anim_t anim = (dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT);
-    _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
+    change_screen(&ui_ScreenMain, anim, &ui_ScreenMain_screen_init);
   }
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
@@ -223,7 +224,7 @@ void ui_event_ScreenPlayList(lv_event_t *e) {
   if (event_code == LV_EVENT_GESTURE) {
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
     lv_screen_load_anim_t anim = dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT;
-    _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
+    change_screen(&ui_ScreenMain, anim, &ui_ScreenMain_screen_init);
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
@@ -271,13 +272,13 @@ void ui_event_ScreenOptions(lv_event_t *e) {
   );
 
   if (event_code == LV_EVENT_CLICKED) {
-    _ui_screen_change(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_ScreenMain_screen_init);
+    change_screen(&ui_ScreenMain, LV_SCR_LOAD_ANIM_MOVE_TOP, &ui_ScreenMain_screen_init);
   }
 
   else if (event_code == LV_EVENT_GESTURE) {
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
     lv_screen_load_anim_t anim = (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM);
-    _ui_screen_change(&ui_ScreenMain, anim, 500, 0, &ui_ScreenMain_screen_init);
+    change_screen(&ui_ScreenMain, anim, &ui_ScreenMain_screen_init);
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
@@ -599,10 +600,7 @@ UI_State_t ui_loop(void) {
       break;
     case UI_STATE_ID3:
       lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
-        LV_SYMBOL_AUDIO,
-        id3tags.title.c_str(),
-        id3tags.artist.c_str(),
-        id3tags.album.c_str()
+        LV_SYMBOL_AUDIO, id3tags.title.c_str(), id3tags.artist.c_str(), id3tags.album.c_str()
       );
       ui_state = UI_STATE_PLAY;
       break;

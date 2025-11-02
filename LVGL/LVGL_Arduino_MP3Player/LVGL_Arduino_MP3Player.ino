@@ -8,6 +8,10 @@
 #include <lvgl.h>
 #include "src/ui.h"
 
+#if LV_COLOR_DEPTH != 16
+#error "LV_COLOR_DEPTH in lv_conf.h should be 16bit"
+#endif
+
 /* Set to your screen resolution and rotation */
 #define TFT_HOR_RES   SCREEN_WIDTH  // Portrait orientation default width  (defined in ui.h)
 #define TFT_VER_RES   SCREEN_HEIGHT // Portrait orientation default height (defined in ui.h)
