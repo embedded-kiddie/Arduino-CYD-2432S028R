@@ -216,10 +216,8 @@ void CYD_MP3Player::ScanAudioFiles(void) {
   // Extract audio files in the parents directory
   for (int p = 0, parent = 0; parent < n; parent++) {
     std::string path = m_tree->find_path(parent);
-    const Node *node = m_tree->get_node();
-    if (node == NULL || node->meta.checked == false) {
-      continue;
-    }
+    Node *node = m_tree->get_node();
+    DBG_ASSERT(node);
 
     File fd, dir = SD.open(path.c_str());
     while (fd = dir.openNextFile()) {
@@ -227,11 +225,17 @@ void CYD_MP3Player::ScanAudioFiles(void) {
       char buf[BUF_SIZE];
       fd.getName(buf, sizeof(buf));
       if (check_mp3(buf)) {
-        append(buf, parent);
+        node->n_files++; // count audio files
+        if (node->meta.checked) {
+          append(buf, parent);
+        }
       }
 #else
       if (check_mp3(fd.name())) {
-        append(fd.name(), parent);
+        node->n_files++; // count audio files
+        if (node->meta.checked) {
+          append(fd.name(), parent);
+        }
       }
 #endif
       fd.close();

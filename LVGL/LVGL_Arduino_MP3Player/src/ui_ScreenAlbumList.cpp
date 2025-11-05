@@ -24,6 +24,7 @@ lv_obj_t *ui_ScreenAlbumList;
 #define CELL_SCROLL_POS     6   // Scroll Position to update list to add/remove cells
 #define ALBUM_LIST_HEIGHT   220 // Height of the album list (CELL_HEIGHT_SMALL * CELL_MAX_VISIBLE + alpha)
 #define FOLDING_DURATION    250 // Folding animation duration
+#define DROPDOWN_LIST_WIDTH 100
 
 // Settings for controlling cells in the list
 #define NODE_OPEN   false
@@ -539,7 +540,7 @@ void ui_ScreenAlbumList_screen_init(void) {
     //////////////////// Dropdown List ////////////////////
     obj = lv_dropdown_create(ui_ScreenAlbumList);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(11));
-    lv_obj_set_size         (obj, OPTIONS_WIDTH, LV_SIZE_CONTENT);
+    lv_obj_set_size         (obj, DROPDOWN_LIST_WIDTH, LV_SIZE_CONTENT);
     lv_obj_add_event_cb     (obj, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_dropdown_set_options (obj, "All");
     lv_dropdown_set_selected(obj, ui_option.selectPlaylist);

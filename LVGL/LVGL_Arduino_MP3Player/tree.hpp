@@ -48,12 +48,14 @@ private:
 public:
   uint8_t key;                  // a key assigned to each node
   NodeMeta_t meta;              // information for album list
+  uint16_t n_files;             // number of audio files
   std::string name;             // folder name or file name
   std::vector<Node*> children;  // a set of child nodes
 
   Node(const char * name) {
     n_nodes++;
     this->meta = {0,};
+    this->n_files = 0;
     this->name = name;
   }
 
@@ -75,7 +77,7 @@ public:
   const uint32_t get_n_depth(void) {
     return n_depth;
   }
-  const Node * get_node(void) {
+  Node * get_node(void) {
     return m_found_node;
   }
 

@@ -11,9 +11,10 @@
 lv_obj_t *ui_ScreenOptions;
 
 //--------------------------------------------------------------------------------
-// Offset from the top
+// Offset from the top / Roller width
 //--------------------------------------------------------------------------------
-#define OFFSET_TOP  0
+#define OFFSET_TOP    0
+#define OPTIONS_WIDTH 100
 
 //--------------------------------------------------------------------------------
 // Contents of dropdown list

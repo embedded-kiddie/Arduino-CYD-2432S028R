@@ -18,7 +18,6 @@
 #define LV_PCT_Y(y)       (SCREEN_HEIGHT * (y) / 100) // for LV_STYLE_CONST_Y
 #define ICON_OFFSET_R     (SCREEN_WIDTH / 2 - 24) // need LV_ALIGN_CENTER
 #define ICON_OFFSET_L     (24 - SCREEN_WIDTH / 2) // need LV_ALIGN_CENTER
-#define OPTIONS_WIDTH     100
 
 #define UI_COLOR_BACKGROUND   { .blue = 0xf5, .green = 0xf5, .red = 0xf5 }  // lv_color_hex(0xf5f5f5)
 #define UI_COLOR_SLIDER       { .blue = 0x00, .green = 0x00, .red = 0x00 }  // lv_color_hex(0x000000)
