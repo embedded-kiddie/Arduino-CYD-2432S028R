@@ -21,10 +21,18 @@
 #define IsValidFile(f)  ((f)[0] != '@' && (f)[0] != '.')
 
 //----------------------------------------------------------------------
-// Meta information for album list
+// Meta information for Node class
 //----------------------------------------------------------------------
 #define TYPE_NODE   0 // typically "folder"
 #define TYPE_LEAF   1 // typically "file"
+
+// States of Node and Leaf
+#define NODE_HIDDEN     true  // for 'bool hidden'
+#define NODE_REVEALED   false // for 'bool hidden'
+#define NODE_FOLDED     true  // for 'bool checked'
+#define NODE_UNFOLDED   false // for 'bool checked'
+#define LEAF_SELECTED   true  // for 'bool checked'
+#define LEAF_UNSELECTED false // for 'bool checked'
 
 typedef struct {
   uint8_t depth    : 4;         // hierarchy depth in N-ary tree

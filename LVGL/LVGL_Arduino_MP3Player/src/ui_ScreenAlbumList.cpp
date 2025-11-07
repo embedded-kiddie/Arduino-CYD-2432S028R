@@ -11,9 +11,10 @@
 lv_obj_t *ui_ScreenAlbumList;
 
 // Components in list widget
+#define INFO_LABEL_COLOR    { .blue = 0x88, .green = 0x88, .red = 0x88 }
+#define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }
 #define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
 #define CELL_COLOR_LEAF     lv_color_hex(0xffffff)
-#define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }  // lv_color_hex(0xe4e0e4)
 #define CELL_HEIGHT_SMALL   31  // For CUSTOM_FONT_SMALL
 #define CELL_HEIGHT_MEDIUM  34  // For CUSTOM_FONT_MEDIUM
 #define CELL_OFFSET_NODE    6   // Offset for node text
@@ -24,25 +25,52 @@ lv_obj_t *ui_ScreenAlbumList;
 #define CELL_SCROLL_POS     6   // Scroll Position to update list to add/remove cells
 #define ALBUM_LIST_HEIGHT   220 // Height of the album list (CELL_HEIGHT_SMALL * CELL_MAX_VISIBLE + alpha)
 #define FOLDING_DURATION    250 // Folding animation duration
-#define DROPDOWN_LIST_WIDTH 100
 
-// Settings for controlling cells in the list
-#define NODE_OPEN   false
-#define NODE_CLOSE  true
+#if   true
+#define DROPDOWN_LIST_WIDTH 100
+#define DROPDOWN_LIST_X     LV_PCT_X(42)    // Dropdown List
+#define DROPDOWN_LIST_Y     LV_PCT_Y(2)+1   // Dropdown List
+#define TITLE_LABEL_X       LV_PCT_X(5)     // Title Label
+#define TITLE_LABEL_Y       LV_PCT_Y(5)     // Title Label
+#define TOGGLE_BUTTON_X     LV_PCT_X(6)     // Button Matrix
+#define TOGGLE_BUTTON_Y     LV_PCT_Y(14)    // Button Matrix
+#define KEYPAD_BUTTON_X     LV_PCT_X(41)    // Button Matrix
+#define KEYPAD_BUTTON_Y     LV_PCT_Y(14)    // Button Matrix
+#else
+#define DROPDOWN_LIST_WIDTH 90
+#define DROPDOWN_LIST_X     LV_PCT_X(5)     // Dropdown List
+#define DROPDOWN_LIST_Y     LV_PCT_Y(2)+1   // Dropdown List
+#define TITLE_LABEL_X       LV_PCT_X(7)     // Title Label
+#define TITLE_LABEL_Y       LV_PCT_Y(16)    // Title Label
+#define TOGGLE_BUTTON_X     LV_PCT_X(44)    // Button Matrix
+#define TOGGLE_BUTTON_Y     LV_PCT_Y(14)    // Button Matrix
+#define KEYPAD_BUTTON_X     LV_PCT_X(44)    // Button Matrix
+#define KEYPAD_BUTTON_Y     LV_PCT_Y(3)     // Button Matrix
+#endif
+
+#define ALBUM_LIST_X      LV_PCT_X(5)     // List Container
+#define ALBUM_LIST_Y      LV_PCT_Y(24)    // List Container
+#define BACK_TO_MAIN_X    LV_PCT_X(87)    // Back to Main
+#define BACK_TO_MAIN_Y    LV_PCT_Y(4)     // Back to Main
 
 typedef struct {
-  int   top;      // node key at the top of the list
-  int   end;      // node key at the end of the list
-  int   count;    // number of the cells in the list
-  int   n_nodes;  // total number of the nodes in tree
+  int   top;        // node key at the top of the list
+  int   end;        // node key at the end of the list
+  int   count;      // number of the cells in the list
+  int   n_nodes;    // total number of the nodes in tree
+  int   n_leafs;    // total number of the leafs in tree
+  int   n_folded;   // number of folded   nodes in tree
+  int   n_selected; // number of selected leafs in tree
+  int   n_files;    // number of selected audio files
   Node  *root;
-} ListControl_t;
+} AlbumControl_t;
 
 //--------------------------------------------------------------------------------
 // Global variables and prototype
 //--------------------------------------------------------------------------------
 static lv_obj_t *album_list;
-static ListControl_t list_control;
+static lv_obj_t *album_info;
+static AlbumControl_t album_control;
 static bool update_scroll_running = false;
 
 static void event_handler(lv_event_t *e);
@@ -61,7 +89,7 @@ static void set_properties(lv_obj_t *cell, Node *node) {
     LV_STYLE_CONST_OUTLINE_WIDTH(1),
     LV_STYLE_CONST_PROPS_END
   };
-  static LV_STYLE_CONST_INIT(style_common, (void*)style_prop_common);
+  static LV_STYLE_CONST_INIT(style_common, (void*)(style_prop_common));
   lv_obj_add_style(cell, &style_common, (uint32_t)LV_PART_MAIN);
 
   NodeMeta_t *meta = &node->meta;
@@ -73,39 +101,97 @@ static void set_properties(lv_obj_t *cell, Node *node) {
   lv_obj_add_flag           (cell, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
   lv_obj_add_event_cb       (cell, draw_image_cb, LV_EVENT_DRAW_TASK_ADDED, NULL);
   lv_obj_add_event_cb       (cell, event_handler, LV_EVENT_CLICKED, NULL);
-  lv_obj_set_user_data      (cell, (void*)node);
+  lv_obj_set_user_data      (cell, reinterpret_cast<void*>(node));
+}
+
+//--------------------------------------------------------------------------------
+// Count / Update open cells, selected nodes and selected audio files
+//--------------------------------------------------------------------------------
+static void count_checked_node(Node *node) {
+  if (node->meta.type == TYPE_NODE) {
+    // Is the node open?
+    if (node->meta.checked == NODE_FOLDED) {
+      album_control.n_folded++;
+    }
+    for (auto &n : node->children) {
+      count_checked_node(n);
+    }
+  }
+  // Is the leaf selected?
+  else if (node->meta.checked == LEAF_SELECTED) {
+    album_control.n_selected++;
+    album_control.n_files += node->n_files;
+  }
+}
+
+static void count_selected_list(void) {
+  album_control.n_folded    =
+  album_control.n_selected =
+  album_control.n_files    = 0;
+
+  for (auto &n : album_control.root->children) {
+    count_checked_node(n);
+  }
+}
+
+static void update_info(lv_obj_t *label) {
+  count_selected_list();
+  lv_label_set_text_fmt(label, "Selected albums: %d, files: %d", album_control.n_selected, album_control.n_files);
+}
+
+//--------------------------------------------------------------------------------
+// Sets the state of all cells in the album list
+//--------------------------------------------------------------------------------
+static void set_state_all(int type, int state) {
+  const int n = album_control.n_nodes;
+  for (int i = 0; i < n; i++) {
+    Node *node = album_control.root->find_preorder(i);
+    DBG_ASSERT(node);
+    if (type == TYPE_NODE) {
+      node->meta.hidden = (state == NODE_FOLDED ? NODE_HIDDEN : NODE_REVEALED);
+      if (node->meta.type == TYPE_NODE) {
+        node->meta.checked = state;
+      }
+    } else if (node->meta.type == TYPE_LEAF) {
+      node->meta.checked = state;
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------
 // Get the node pointer from the cell's userdata
 //--------------------------------------------------------------------------------
-inline static Node *get_node(lv_obj_t *cell) {
+static inline Node *get_node(lv_obj_t *cell) {
   return (Node*)lv_obj_get_user_data(cell);
 }
 
 //--------------------------------------------------------------------------------
 // Update cells' position in the list
 //--------------------------------------------------------------------------------
-inline static void update_list(lv_obj_t *list) {
+static inline void update_list(lv_obj_t *list) {
   lv_obj_update_layout(list);
-  list_control.top = get_node(lv_obj_get_child(list,  0))->key;
-  list_control.end = get_node(lv_obj_get_child(list, -1))->key;
-  list_control.count = lv_obj_get_child_count(list);
+  album_control.top = get_node(lv_obj_get_child(list,  0))->key;
+  album_control.end = get_node(lv_obj_get_child(list, -1))->key;
+  album_control.count = lv_obj_get_child_count(list);
 }
 
 //--------------------------------------------------------------------------------
 // Append / Delete the specified node to the list
 //--------------------------------------------------------------------------------
-inline static lv_obj_t *append_cell(lv_obj_t *list, Node *node) {
-//printf("count:%3d added   %3d \"%s\"\n", list_control.count, node->key, node->name.c_str());
+static inline lv_obj_t *append_cell(lv_obj_t *list, Node *node) {
+  DBG_EXEC(printf("count:%3d added   %3d \"%s\"\n", album_control.count, node->key, node->name.c_str()));
+
   lv_obj_t * cell = lv_list_add_text(list, node->name.c_str());
   set_properties(cell, node);
   return cell;
 }
 
-inline static void delete_cell(lv_obj_t *list, lv_obj_t *cell) {
-//Node *node = get_node(cell);
-//printf("count:%3d deleted %3d \"%s\"\n", list_control.count, node->key, node->name.c_str());
+static inline void delete_cell(lv_obj_t *list, lv_obj_t *cell) {
+  DBG_EXEC({
+    Node *node = get_node(cell);
+    printf("count:%3d deleted %3d \"%s\"\n", album_control.count, node->key, node->name.c_str());
+  });
+
   lv_obj_delete(cell);
 }
 
@@ -120,8 +206,8 @@ static void delete_cell_async(void *cell) {
 // Note: This bug occurs if a blank space is created at the bottom of the list 
 // after deleting a cell.
 //--------------------------------------------------------------------------------
-inline static void adjust_bottom(lv_obj_t *list) {
-//printf("bottom: %d --> ", lv_obj_get_scroll_bottom(list));
+static void adjust_bottom(lv_obj_t *list) {
+  DBG_EXEC(printf("bottom: %d --> ", lv_obj_get_scroll_bottom(list)));
 
   // If the bottom position is negative, reposition it to a positive
   if (lv_obj_get_scroll_bottom(list) <= 0) {
@@ -132,16 +218,17 @@ inline static void adjust_bottom(lv_obj_t *list) {
   // Update cells' position in the list
   update_list(list);
 
-//printf("%d\n", lv_obj_get_scroll_bottom(list));
+  DBG_EXEC(printf("%d\n", lv_obj_get_scroll_bottom(list)));
 }
 
 //--------------------------------------------------------------------------------
 // Get the open node after/before the specified key
 //--------------------------------------------------------------------------------
 static Node *find_after(int key) {
-  while (++key < list_control.n_nodes) {
-    Node *node = list_control.root->find_preorder(key);
-    if (node && (node->meta.depth == 1 || node->meta.hidden == false)) {
+  while (++key < album_control.n_nodes) {
+    Node *node = album_control.root->find_preorder(key);
+    DBG_ASSERT(node);
+    if (node->meta.depth == 1 || node->meta.hidden == false) {
       return node;
     }
   }
@@ -150,7 +237,7 @@ static Node *find_after(int key) {
 
 static Node *find_before(int key) {
   while (--key >= 0) {
-    Node *node = list_control.root->find_preorder(key);
+    Node *node = album_control.root->find_preorder(key);
     if (node && (node->meta.depth == 1 || node->meta.hidden == false)) {
       return node;
     }
@@ -165,8 +252,9 @@ static Node *find_before(int key) {
 static void draw_image_cb(lv_event_t *e) {
   lv_draw_task_t *draw_task = lv_event_get_draw_task(e);
   lv_draw_task_type_t type  = lv_draw_task_get_type(draw_task);
+  lv_draw_dsc_base_t *base_dsc = (lv_draw_dsc_base_t *)lv_draw_task_get_draw_dsc(draw_task);
 
-  if (type == LV_DRAW_TASK_TYPE_FILL) {
+  if (base_dsc->part == LV_PART_MAIN && type == LV_DRAW_TASK_TYPE_FILL) {
     lv_obj_t *cell = lv_event_get_target_obj(e);
     NodeMeta_t *meta = &(get_node(cell)->meta);
     if (meta->depth > 1 && meta->hidden) {
@@ -182,21 +270,18 @@ static void draw_image_cb(lv_event_t *e) {
     }
 
     lv_area_t area;
-    area.x1 = 0;
-    area.x2 = img->header.w - 1;
-    area.y1 = 0;
-    area.y2 = img->header.h - 1;
+    area.x1 = 0; area.x2 = img->header.w - 1;
+    area.y1 = 0; area.y2 = img->header.h - 1;
+
     lv_area_t draw_task_area;
     lv_draw_task_get_area(draw_task, &draw_task_area);
     lv_area_align(&draw_task_area, &area, LV_ALIGN_LEFT_MID, meta->depth * CELL_PADDING_LEFT, 0);
 
-    lv_draw_dsc_base_t *base_dsc = (lv_draw_dsc_base_t *)lv_draw_task_get_draw_dsc(draw_task);
-
-#if 1
+#if 0
     lv_draw_rect_dsc_t rect_dsc;
     lv_draw_rect_dsc_init(&rect_dsc);
     rect_dsc.bg_image_src = (const void *)img;
-    rect_dsc.bg_color = meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF;
+    rect_dsc.bg_color = (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF);
     lv_draw_rect(base_dsc->layer, &rect_dsc, &area);
 #else
     lv_draw_image_dsc_t img_dsc;
@@ -222,6 +307,7 @@ static void update_open_cb(lv_anim_t* a) {
   // Delete the last cell if it is not newly added
   lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
   lv_obj_t *cell = lv_obj_get_child(list, -1);
+
   if (a->var != cell) {
     delete_cell(list, cell);
   } else {
@@ -251,8 +337,8 @@ static void update_open(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *a
   uint32_t depth = node->meta.depth;
   uint32_t d = depth + 1;
 
-  for (int key = node->key + 1; key < list_control.n_nodes; key++) {
-    node = list_control.root->find_preorder(key);
+  for (int key = node->key + 1; key < album_control.n_nodes; key++) {
+    node = album_control.root->find_preorder(key);
     if (node->meta.depth <= depth) {
       break;
     }
@@ -267,7 +353,7 @@ static void update_open(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *a
     }
 
     // Child's "hidden" follows parent's "checked"
-    bool hidden = (stack.back()->meta.checked == NODE_OPEN ? false : true);
+    bool hidden = (stack.back()->meta.checked == NODE_UNFOLDED ? false : true);
     node->meta.hidden = hidden;
 
     if (hidden == false && ++index <= CELL_MAX_VISIBLE + 1) {
@@ -290,8 +376,8 @@ static void update_close(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *
   uint32_t depth = node->meta.depth;
 
   // Hide all the children
-  for (int key = node->key + 1; key < list_control.n_nodes; key++) {
-    node = list_control.root->find_preorder(key);
+  for (int key = node->key + 1; key < album_control.n_nodes; key++) {
+    node = album_control.root->find_preorder(key);
     if (node->meta.depth <= depth) {
       break;
     }
@@ -343,17 +429,17 @@ static void event_handler(lv_event_t *e) {
     lv_anim_init(&a);
     lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_height);
     lv_anim_set_duration(&a, FOLDING_DURATION);
-    lv_anim_set_user_data(&a, (void*)list);
+    lv_anim_set_user_data(&a, reinterpret_cast<void*>(list));
 
     uint32_t index = lv_obj_get_index(cell);
 
-    if (checked == NODE_OPEN) {
+    if (checked == NODE_UNFOLDED) {
       lv_anim_set_values(&a, 0, CELL_HEIGHT_SMALL);
       lv_anim_set_completed_cb(&a, update_open_cb);
       update_open(list, node, index, &a);
     }
 
-    else /* checked == NODE_CLOSED */ {
+    else /* checked == NODE_FOLDED */ {
       lv_anim_set_values(&a, CELL_HEIGHT_SMALL, 0);
       lv_anim_set_completed_cb(&a, update_close_cb);
       update_close(list, node, index, &a);
@@ -363,6 +449,7 @@ static void event_handler(lv_event_t *e) {
   else /* meta->type == TYPE_LEAF */ {
     // Update the checkbox state and appearance
     meta->checked = !meta->checked;
+    update_info(album_info);
     lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
   }
 }
@@ -381,53 +468,53 @@ static void update_scroll(lv_obj_t *list) {
   int32_t pos;
 
   // Scroll DOWN: Add new cells to END while the bottom position of the scroll range is smaller than the cell height
-  while (list_control.end < list_control.n_nodes - 1 && (pos = lv_obj_get_scroll_bottom(list)) < CELL_SCROLL_POS) {
-    if (node = find_after(list_control.end)) {
+  while (album_control.end < album_control.n_nodes - 1 && (pos = lv_obj_get_scroll_bottom(list)) < CELL_SCROLL_POS) {
+    if (node = find_after(album_control.end)) {
       append_cell(list, node);
       update_list(list);
-      DBG_EXEC(printf("added   end at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count));
+      DBG_EXEC(printf("added   end at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, album_control.top, album_control.end, album_control.count));
     } else {
       break;
     }
   }
 
   // Scroll UP: Add new cells to TOP while the bottom position of the scroll range is smaller than the cell height
-  while (list_control.top > 0 && (pos = lv_obj_get_scroll_top(list)) < CELL_SCROLL_POS) {
-    if (node = find_before(list_control.top)) {
+  while (album_control.top > 0 && (pos = lv_obj_get_scroll_top(list)) < CELL_SCROLL_POS) {
+    if (node = find_before(album_control.top)) {
       int32_t bottom_before = lv_obj_get_scroll_bottom(list);
       lv_obj_t *new_item = append_cell(list, node);
       lv_obj_move_to_index(new_item, 0);
       update_list(list);
       int32_t bottom_after = lv_obj_get_scroll_bottom(list);
       lv_obj_scroll_by(list, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-      DBG_EXEC(printf("added   top at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count));
+      DBG_EXEC(printf("added   top at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, album_control.top, album_control.end, album_control.count));
     } else {
       break;
     }
   }
 
   // Scroll UP: Delete the END cells outside the scrolling range
-  while (list_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_bottom(list)) > CELL_HEIGHT_SMALL) {
-    if (node = find_before(list_control.end)) {
+  while (album_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_bottom(list)) > CELL_HEIGHT_SMALL) {
+    if (node = find_before(album_control.end)) {
       lv_obj_t *child = lv_obj_get_child(list, -1);
       delete_cell(list, child);
       update_list(list);
-      DBG_EXEC(printf("deleted end at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count));
+      DBG_EXEC(printf("deleted end at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, album_control.top, album_control.end, album_control.count));
     } else {
       break;
     }
   }
 
   // Scroll DOWN: Delete the TOP cells outside the scrolling range
-  while (list_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_top(list)) > CELL_HEIGHT_SMALL) {
-    if (node = find_after(list_control.top)) {
+  while (album_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_top(list)) > CELL_HEIGHT_SMALL) {
+    if (node = find_after(album_control.top)) {
       int32_t bottom_before = lv_obj_get_scroll_bottom(list);
       lv_obj_t *child = lv_obj_get_child(list, 0);
       delete_cell(list, child);
       update_list(list);
       int32_t bottom_after = lv_obj_get_scroll_bottom(list);
       lv_obj_scroll_by(list, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-      DBG_EXEC(printf("deleted top at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, list_control.top, list_control.end, list_control.count));
+      DBG_EXEC(printf("deleted top at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, album_control.top, album_control.end, album_control.count));
     } else {
       break;
     }
@@ -444,6 +531,22 @@ static void scroll_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
+// Append a first cell to the album list
+//--------------------------------------------------------------------------------
+static void album_init(int key = 0) {
+  update_scroll_running = true;   // Disable 'update_scroll()' once
+  lv_obj_clean  (album_list);
+  update_scroll_running = false;  // Enable 'update_scroll()' again
+
+  if (album_control.root) {
+    append_cell   (album_list, album_control.root->find_preorder(album_control.top = key));
+    update_list   (album_list);
+    update_scroll (album_list);
+    update_info   (album_info);
+  }
+}
+
+//--------------------------------------------------------------------------------
 // Callback for dropdown list
 //--------------------------------------------------------------------------------
 static void dropdown_cb(lv_event_t *e) {
@@ -454,6 +557,79 @@ static void dropdown_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
+// Callback for button matrix (toggle)
+// https://docs.lvgl.io/master/details/widgets/buttonmatrix.html#custom-buttons
+//--------------------------------------------------------------------------------
+static void button_draw_cb(lv_event_t *e) {
+  lv_draw_task_t *draw_task = lv_event_get_draw_task(e);
+  lv_draw_task_type_t type  = lv_draw_task_get_type(draw_task);
+  lv_draw_dsc_base_t *base_dsc = (lv_draw_dsc_base_t *)lv_draw_task_get_draw_dsc(draw_task);
+
+  // When the button matrix draws the buttons...
+  if(base_dsc->part == LV_PART_ITEMS) {
+    lv_obj_t *obj = lv_event_get_target_obj(e);
+    bool pressed  = lv_obj_has_state(obj, LV_STATE_PRESSED);
+    int selected  = lv_buttonmatrix_get_selected_button(obj);
+
+    if (type == LV_DRAW_TASK_TYPE_LABEL) {
+      lv_draw_label_dsc_t *label_dsc = lv_draw_task_get_label_dsc(draw_task);
+      if (label_dsc) {
+        label_dsc->ofs_x = label_dsc->ofs_y = (base_dsc->id1 == selected && pressed == true) ? 1 : 0;
+      }
+    }
+
+    else if (type == LV_DRAW_TASK_TYPE_FILL) {
+      lv_draw_fill_dsc_t *fill_dsc = lv_draw_task_get_fill_dsc(draw_task);
+      if (fill_dsc) {
+        fill_dsc->opa = (base_dsc->id1 == selected && pressed == true) ? 128 : 0;
+      }
+    }
+  }
+}
+
+static void toggle_click_cb(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t *obj = lv_event_get_target_obj(e);
+  uint32_t id = lv_buttonmatrix_get_selected_button(obj);
+  switch (id) {
+    case 0:
+      set_state_all(TYPE_NODE, album_control.n_folded == 0 ? NODE_FOLDED : NODE_UNFOLDED);
+      break;
+    case 1:
+      set_state_all(TYPE_LEAF, album_control.n_selected == 0 ? LEAF_SELECTED : LEAF_UNSELECTED);
+      break;
+    case LV_BUTTONMATRIX_BUTTON_NONE:
+    default:
+      DBG_ASSERT(false);
+      break;
+  }
+
+  album_init(/*album_control.top*/);
+}
+
+static void keypad_click_cb(lv_event_t *e) {
+  lv_event_code_t event_code = lv_event_get_code(e);
+  DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t *obj = lv_event_get_target_obj(e);
+  uint32_t id = lv_buttonmatrix_get_selected_button(obj);
+  switch (id) {
+    case 0:
+      break;
+    case 1:
+      break;
+    case 2:
+      break;
+    case LV_BUTTONMATRIX_BUTTON_NONE:
+    default:
+      DBG_ASSERT(false);
+      break;
+  }
+}
+
+//--------------------------------------------------------------------------------
 // Set the pointer to the widget to NULL when its object is deleted
 //--------------------------------------------------------------------------------
 static void delete_cb(lv_event_t *e) {
@@ -461,6 +637,7 @@ static void delete_cb(lv_event_t *e) {
   static constexpr lv_obj_t ** const adrs[] = {
     &ui_ScreenAlbumList,
     &album_list,
+    &album_info,
   };
 
   for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
@@ -483,17 +660,16 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_GESTURE, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_LOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_UNLOADED, NULL);
-    lv_obj_add_event_cb       (ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenAlbumList);
+    lv_obj_add_event_cb       (ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&ui_ScreenAlbumList));
 
-#if SHOW_ARROW_BUTTON
-    //////////////////// Arrow Icon ////////////////////
+#if SHOW_ARROW_BUTTON || true
+    /////////////////// Back to Main ///////////////////
     {
       static constexpr lv_style_const_prop_t style_prop_common[] = {
         LV_STYLE_CONST_WIDTH(27),
         LV_STYLE_CONST_HEIGHT(27),
-        LV_STYLE_CONST_X(LV_PCT_X(42)),
-        LV_STYLE_CONST_Y(LV_PCT_Y(-44)),
-        LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
+        LV_STYLE_CONST_X(BACK_TO_MAIN_X),
+        LV_STYLE_CONST_Y(BACK_TO_MAIN_Y),
         LV_STYLE_CONST_PROPS_END
       };
       static constexpr lv_style_const_prop_t style_prop_default[] = {
@@ -517,10 +693,10 @@ void ui_ScreenAlbumList_screen_init(void) {
         LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
         LV_STYLE_CONST_PROPS_END
       };
-      static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
-      static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
-      static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
-      static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+      static LV_STYLE_CONST_INIT(style_common,  (void*)(style_prop_common ));
+      static LV_STYLE_CONST_INIT(style_default, (void*)(style_prop_default));
+      static LV_STYLE_CONST_INIT(style_pressed, (void*)(style_prop_pressed));
+      static LV_STYLE_CONST_INIT(style_checked, (void*)(style_prop_checked));
 
       lv_obj_t *obj = lv_checkbox_create(ui_ScreenAlbumList);
       lv_checkbox_set_text_static(obj, "");
@@ -533,40 +709,137 @@ void ui_ScreenAlbumList_screen_init(void) {
 #endif
 
     //////////////////// Title Label ////////////////////
-    lv_obj_t *obj = lv_label_create(ui_ScreenAlbumList);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
-    lv_label_set_text_static(obj, "Album list");
+    {
+      lv_obj_t *obj = lv_label_create(ui_ScreenAlbumList);
+      lv_obj_set_pos(obj, TITLE_LABEL_X, TITLE_LABEL_Y);
+      lv_label_set_text_static(obj, "Album List");
+    }
 
     //////////////////// Dropdown List ////////////////////
-    obj = lv_dropdown_create(ui_ScreenAlbumList);
-    lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(11));
-    lv_obj_set_size         (obj, DROPDOWN_LIST_WIDTH, LV_SIZE_CONTENT);
-    lv_obj_add_event_cb     (obj, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_dropdown_set_options (obj, "All");
-    lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
+    {
+      static constexpr lv_style_const_prop_t style_prop_dropdown[] = {
+        LV_STYLE_CONST_X(DROPDOWN_LIST_X),
+        LV_STYLE_CONST_Y(DROPDOWN_LIST_Y),
+        LV_STYLE_CONST_WIDTH(DROPDOWN_LIST_WIDTH),
+        LV_STYLE_CONST_HEIGHT(LV_SIZE_CONTENT),
+        LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static LV_STYLE_CONST_INIT(style_dropdown, (void*)(style_prop_dropdown));
+
+      lv_obj_t *obj = lv_dropdown_create(ui_ScreenAlbumList);
+      lv_obj_add_style        (obj, &style_dropdown, 0);
+      lv_obj_add_event_cb     (obj, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
+      lv_dropdown_set_options (obj, "All");
+      lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
+    }
+
+    //////////////////// Button Matrix /////////////////////
+    {
+      static constexpr lv_style_const_prop_t style_prop_button_main[] = {
+        LV_STYLE_CONST_HEIGHT(30),
+        LV_STYLE_CONST_BG_OPA(0),
+        LV_STYLE_CONST_BORDER_WIDTH(0),
+        LV_STYLE_CONST_PAD_TOP(0),
+        LV_STYLE_CONST_PAD_LEFT(0),
+        LV_STYLE_CONST_PAD_RIGHT(0),
+        LV_STYLE_CONST_PAD_BOTTOM(0),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_button_item[] = {
+        LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+        LV_STYLE_CONST_BORDER_WIDTH(0),
+        LV_STYLE_CONST_SHADOW_WIDTH(0),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_toggle_main[] = {
+        LV_STYLE_CONST_X(TOGGLE_BUTTON_X),
+        LV_STYLE_CONST_Y(TOGGLE_BUTTON_Y),
+        LV_STYLE_CONST_WIDTH(68), // 34 * 2
+        LV_STYLE_CONST_PROPS_END
+      };
+      static constexpr lv_style_const_prop_t style_prop_keypad_main[] = {
+        LV_STYLE_CONST_X(KEYPAD_BUTTON_X),
+        LV_STYLE_CONST_Y(KEYPAD_BUTTON_Y),
+        LV_STYLE_CONST_WIDTH(102), // 34 * 3
+        LV_STYLE_CONST_PROPS_END
+      };
+      static LV_STYLE_CONST_INIT(style_button_main, (void*)(style_prop_button_main));
+      static LV_STYLE_CONST_INIT(style_button_item, (void*)(style_prop_button_item));
+      static LV_STYLE_CONST_INIT(style_toggle_main, (void*)(style_prop_toggle_main));
+      static LV_STYLE_CONST_INIT(style_keypad_main, (void*)(style_prop_keypad_main));
+      static const lv_buttonmatrix_ctrl_t button_ctrl = (lv_buttonmatrix_ctrl_t)(
+        (uint32_t)LV_BUTTONMATRIX_CTRL_CLICK_TRIG |
+        (uint32_t)LV_BUTTONMATRIX_CTRL_NO_REPEAT
+      );
+      static const char *toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
+      static const char *keypad_map[] = { LV_SYMBOL_PLUS, LV_SYMBOL_KEYBOARD, LV_SYMBOL_MINUS, NULL };
+
+      lv_obj_t *obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
+      lv_buttonmatrix_set_map             (obj, toggle_map);
+      lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
+      lv_obj_add_style                    (obj, &style_toggle_main, LV_PART_MAIN );
+      lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
+      lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
+      lv_obj_add_event_cb                 (obj, button_draw_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
+      lv_obj_add_event_cb                 (obj, toggle_click_cb, LV_EVENT_VALUE_CHANGED,   NULL);
+      lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+
+      obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
+      lv_buttonmatrix_set_map             (obj, keypad_map);
+      lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
+      lv_obj_add_style                    (obj, &style_keypad_main, LV_PART_MAIN );
+      lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
+      lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
+      lv_obj_add_event_cb                 (obj, button_draw_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
+      lv_obj_add_event_cb                 (obj, keypad_click_cb, LV_EVENT_VALUE_CHANGED,   NULL);
+      lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+    }
 
     //////////////////// List Container ////////////////////
-    static constexpr lv_style_const_prop_t style_prop_album[] = {
-      LV_STYLE_CONST_X(LV_PCT_X(5)),
-      LV_STYLE_CONST_Y(LV_PCT_Y(26)),
-      LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LV_PCT_X(10)),
-      LV_STYLE_CONST_HEIGHT(ALBUM_LIST_HEIGHT),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static LV_STYLE_CONST_INIT(style_album, (void*)style_prop_album);
+    {
+      static constexpr lv_style_const_prop_t style_prop_album[] = {
+        LV_STYLE_CONST_X(ALBUM_LIST_X),
+        LV_STYLE_CONST_Y(ALBUM_LIST_Y),
+        LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LV_PCT_X(10)),
+        LV_STYLE_CONST_HEIGHT(ALBUM_LIST_HEIGHT),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static LV_STYLE_CONST_INIT(style_album, (void*)(style_prop_album));
 
-    album_list = lv_list_create(ui_ScreenAlbumList);
-    lv_obj_add_style          (album_list, &style_album, 0);
-//  lv_obj_set_scrollbar_mode (album_list, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_add_event_cb       (album_list, scroll_cb, LV_EVENT_SCROLL, NULL);
-    lv_obj_add_event_cb       (album_list, delete_cb, LV_EVENT_DELETE, (void*)&album_list);
+      album_list = lv_list_create(ui_ScreenAlbumList);
+      lv_obj_add_style          (album_list, &style_album, 0);
+//    lv_obj_set_scrollbar_mode (album_list, LV_SCROLLBAR_MODE_OFF);
+      lv_obj_add_event_cb       (album_list, scroll_cb, LV_EVENT_SCROLL, NULL);
+      lv_obj_add_event_cb       (album_list, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_list));
+    }
+
+    /////////////////// Infomation Label ///////////////////
+    {
+      static constexpr lv_style_const_prop_t style_prop_info[] = {
+        LV_STYLE_CONST_Y(LV_PCT_Y(-2)+1),
+        LV_STYLE_CONST_ALIGN(LV_ALIGN_BOTTOM_MID),
+//      LV_STYLE_CONST_TEXT_COLOR(LV_PALETTE_GREY),
+        LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
+        LV_STYLE_CONST_PROPS_END
+      };
+      static LV_STYLE_CONST_INIT(style_info, (void*)(style_prop_info));
+
+      album_info = lv_label_create(ui_ScreenAlbumList);
+      lv_obj_add_style            (album_info, &style_info, LV_PART_MAIN);
+      lv_label_set_text_static    (album_info, "No album");
+      lv_obj_set_style_text_color (album_info, INFO_LABEL_COLOR, LV_PART_MAIN);
+      lv_obj_add_event_cb         (album_info, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_info));
+    }
   }
 }
 
 void ui_ScreenAlbumList_screen_deinit(void) {
   if (ui_ScreenAlbumList) {
     // Re-traverse node tree before making a new playlist
-    list_control.root->traverse_node();
+    if (album_control.root) {
+      album_control.root->traverse_node();
+    }
 
     // Delete all the instances at delete_cb()
     lv_obj_delete_async(ui_ScreenAlbumList);
@@ -579,12 +852,12 @@ void ui_ScreenAlbumList_screen_deinit(void) {
 void ui_ScreenAlbumList_create_list(void *root) {
   if (root) {
     // Re-traverse node tree by preorder
-    list_control.root = static_cast<Node*>(root);
-    list_control.n_nodes = list_control.root->traverse_preorder();
-
-    list_control.top = list_control.end = 0;
-    append_cell(album_list, list_control.root->find_preorder(0));
-    update_scroll(album_list);
+    album_control.root = reinterpret_cast<Node*>(root);
+    album_control.n_nodes = album_control.root->traverse_preorder();
+    album_control.n_leafs = album_control.root->get_n_leafs();
+    album_init();
+  } else {
+    memset((void*)&album_control, 0, sizeof(album_control));
   }
 }
 
@@ -666,21 +939,28 @@ static void dump_album(lv_obj_t *obj, int depth) {
 // Debug functions (global)
 //--------------------------------------------------------------------------------
 size_t count_album_cells(void) {
-  return list_control.count; // number of cells in album list
+  return album_control.count; // number of cells in album list
 }
 
 size_t count_total_cells(void) {
-  return count_nodes(list_control.root); // number of open nodes in tree
+  return count_nodes(album_control.root); // number of open nodes in tree
 }
 
 void show_album_list(void) {
-  Node *top = list_control.root->find_preorder(list_control.top);
-  Node *end = list_control.root->find_preorder(list_control.end);
+#if   true
+  Node *top = album_control.root->find_preorder(album_control.top);
+  Node *end = album_control.root->find_preorder(album_control.end);
   printf("top:%3d (pos: %d) \"%s\", end:%3d (pos: %d) \"%s\", count: %d/%d\n",
-    list_control.top, lv_obj_get_scroll_top   (album_list), top->name.c_str(),
-    list_control.end, lv_obj_get_scroll_bottom(album_list), end->name.c_str(),
-    list_control.count, lv_obj_get_child_count(album_list)
+    album_control.top, lv_obj_get_scroll_top   (album_list), top->name.c_str(),
+    album_control.end, lv_obj_get_scroll_bottom(album_list), end->name.c_str(),
+    album_control.count, lv_obj_get_child_count(album_list)
   );
+#else
+  count_selected_list();
+  printf("n_nodes: %d, n_leafs: %d, n_folded: %d, n_selected: %d, n_files: %d\n",
+    album_control.n_nodes, album_control.n_leafs, album_control.n_folded, album_control.n_selected, album_control.n_files
+  );
+#endif
 }
 
 void dump_album_list(void) {
@@ -688,6 +968,6 @@ void dump_album_list(void) {
 }
 
 void dump_preorder(void) {
-  list_control.root->dump_preorder(true); // dump all nodes in tree by preorder
+  album_control.root->dump_preorder(true); // dump all nodes in tree by preorder
 }
 #endif // Debug functions
