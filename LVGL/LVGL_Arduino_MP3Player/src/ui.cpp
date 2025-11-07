@@ -72,19 +72,19 @@ void ui_event_ScreenMain(lv_event_t *e) {
   }
 }
 
-void ui_event_GoAlbumList(lv_event_t *e) {
+void ui_event_GoToAlbumList(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   change_screen(&ui_ScreenAlbumList, LV_SCR_LOAD_ANIM_MOVE_RIGHT, &ui_ScreenAlbumList_screen_init);
 }
 
-void ui_event_GoPlayList(lv_event_t *e) {
+void ui_event_GoToPlayList(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   change_screen(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, &ui_ScreenPlayList_screen_init);
 }
 
-void ui_event_GoOptions(lv_event_t *e) {
+void ui_event_GoToOptions(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   change_screen(&ui_ScreenOptions, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, &ui_ScreenOptions_screen_init);

@@ -125,7 +125,7 @@ static void count_checked_node(Node *node) {
 }
 
 static void count_selected_list(void) {
-  album_control.n_folded    =
+  album_control.n_folded   =
   album_control.n_selected =
   album_control.n_files    = 0;
 

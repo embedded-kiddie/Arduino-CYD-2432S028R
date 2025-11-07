@@ -208,7 +208,7 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style    (obj, &style_default_R, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_checked_R, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
     lv_obj_add_style    (obj, &style_pressed,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_add_event_cb (obj,ui_event_GoPlayList, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb (obj,ui_event_GoToPlayList, LV_EVENT_CLICKED, NULL);
 
     //////////////////// Move to Album List ////////////////////
     obj = lv_checkbox_create(ui_ScreenMain);
@@ -219,7 +219,7 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style    (obj, &style_default_L, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_checked_L, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
     lv_obj_add_style    (obj, &style_pressed,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_add_event_cb (obj, ui_event_GoAlbumList, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb (obj, ui_event_GoToAlbumList, LV_EVENT_CLICKED, NULL);
 
     ////////////////////// Move to Options /////////////////////
     obj = lv_checkbox_create(ui_ScreenMain);
@@ -230,7 +230,7 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style    (obj, &style_default_H, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_checked_H, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
     lv_obj_add_style    (obj, &style_pressed,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_add_event_cb (obj, ui_event_GoOptions, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb (obj, ui_event_GoToOptions, LV_EVENT_CLICKED, NULL);
   }
 #endif // SHOW_ARROW_BUTTON
 
