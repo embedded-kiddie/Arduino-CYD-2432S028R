@@ -315,34 +315,6 @@ static void delete_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-// Initialize the style of each cell in the playlist
-//--------------------------------------------------------------------------------
-static void list_init(lv_obj_t* parent) {
-  // Create an empty container for playlist
-  if (play_list == NULL) {
-    play_list = lv_obj_create(parent);
-    lv_obj_remove_style_all   (play_list);
-    lv_obj_set_size           (play_list, lv_pct(100), lv_pct(100));
-    lv_obj_set_align          (play_list, LV_ALIGN_CENTER);
-    lv_obj_set_flex_flow      (play_list, LV_FLEX_FLOW_COLUMN);
-    lv_obj_add_event_cb       (play_list, scroll_cb, LV_EVENT_SCROLL, NULL);
-  }
-
-  // Creating a slider as an alternative to a scrollbar
-  if (slider == NULL) {
-    slider = lv_slider_create(parent);
-    lv_obj_align              (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
-    lv_obj_remove_flag        (slider, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size           (slider, LIST_SLIDER_WIDTH, SCREEN_HEIGHT);
-    lv_obj_set_style_radius   (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa   (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
-    lv_slider_set_range       (slider, ui_get_counts() - 1 + CELL_VISIBLE_MAX, 0);
-  }
-}
-
-//--------------------------------------------------------------------------------
 // Create cells from top to end in the list
 //--------------------------------------------------------------------------------
 static void create_init_cells(void) {
@@ -469,8 +441,28 @@ void ui_ScreenPlayList_screen_init(void) {
   lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_GESTURE, NULL);
   lv_obj_add_event_cb(ui_ScreenPlayList, ui_event_ScreenPlayList, LV_EVENT_SCREEN_UNLOADED, NULL);
 
-  // Initialize play list container
-  list_init(ui_ScreenPlayList);
+  // Create an empty container for playlist
+  if (play_list == NULL) {
+    play_list = lv_obj_create(ui_ScreenPlayList);
+    lv_obj_remove_style_all   (play_list);
+    lv_obj_set_size           (play_list, lv_pct(100), lv_pct(100));
+    lv_obj_set_align          (play_list, LV_ALIGN_CENTER);
+    lv_obj_set_flex_flow      (play_list, LV_FLEX_FLOW_COLUMN);
+    lv_obj_add_event_cb       (play_list, scroll_cb, LV_EVENT_SCROLL, NULL);
+  }
+
+  // Creating a slider as an alternative to a scrollbar
+  if (slider == NULL) {
+    slider = lv_slider_create(ui_ScreenPlayList);
+    lv_obj_align              (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
+    lv_obj_remove_flag        (slider, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size           (slider, LIST_SLIDER_WIDTH, SCREEN_HEIGHT);
+    lv_obj_set_style_radius   (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa   (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
+    lv_slider_set_range       (slider, ui_get_counts() - 1 + CELL_VISIBLE_MAX, 0);
+  }
 
   // Add a callback when an object is deleted
   lv_obj_add_event_cb(ui_ScreenPlayList,  delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenPlayList);

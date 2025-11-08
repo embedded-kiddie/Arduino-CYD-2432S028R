@@ -82,7 +82,7 @@ static void draw_image_cb(lv_event_t *e);
 // Setup cell styles and properties
 //--------------------------------------------------------------------------------
 static void set_properties(lv_obj_t *cell, Node *node) {
-  static constexpr lv_style_const_prop_t style_prop_common[] = {
+  static constexpr lv_style_const_prop_t style_prop_cell[] = {
     LV_STYLE_CONST_ALIGN(LV_ALIGN_LEFT_MID),
     LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
     LV_STYLE_CONST_PAD_TOP(CELL_PADDING_BORDER),
@@ -91,8 +91,8 @@ static void set_properties(lv_obj_t *cell, Node *node) {
     LV_STYLE_CONST_OUTLINE_WIDTH(1),
     LV_STYLE_CONST_PROPS_END
   };
-  static LV_STYLE_CONST_INIT(style_common, (void*)(style_prop_common));
-  lv_obj_add_style(cell, &style_common, (uint32_t)LV_PART_MAIN);
+  static LV_STYLE_CONST_INIT(style_cell, (void*)(style_prop_cell));
+  lv_obj_add_style(cell, &style_cell, (uint32_t)LV_PART_MAIN);
 
   NodeMeta_t *meta = &node->meta;
   lv_obj_set_style_height   (cell, (meta->depth > 1 && meta->hidden ? 0 : CELL_HEIGHT_SMALL), LV_PART_MAIN);
@@ -665,175 +665,169 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_UNLOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&ui_ScreenAlbumList));
 
+    lv_obj_t *obj;
+
 #if SHOW_ARROW_BUTTON || true
     /////////////////// Back to Main ///////////////////
-    {
-      static constexpr lv_style_const_prop_t style_prop_common[] = {
-        LV_STYLE_CONST_WIDTH(27),
-        LV_STYLE_CONST_HEIGHT(27),
-        LV_STYLE_CONST_X(BACK_TO_MAIN_X),
-        LV_STYLE_CONST_Y(BACK_TO_MAIN_Y),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static constexpr lv_style_const_prop_t style_prop_default[] = {
-        LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
-        LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-        LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
-        LV_STYLE_CONST_BORDER_WIDTH(0),
-        LV_STYLE_CONST_PAD_TOP(8),
-        LV_STYLE_CONST_PAD_RIGHT(0),
-        LV_STYLE_CONST_PAD_BOTTOM(0),
-        LV_STYLE_CONST_PAD_LEFT(8),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static constexpr lv_style_const_prop_t style_prop_pressed[] = {
-        LV_STYLE_CONST_PAD_TOP(10),
-        LV_STYLE_CONST_PAD_LEFT(10),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static constexpr lv_style_const_prop_t style_prop_checked[] = {
-        LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
-        LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static LV_STYLE_CONST_INIT(style_common,  (void*)(style_prop_common ));
-      static LV_STYLE_CONST_INIT(style_default, (void*)(style_prop_default));
-      static LV_STYLE_CONST_INIT(style_pressed, (void*)(style_prop_pressed));
-      static LV_STYLE_CONST_INIT(style_checked, (void*)(style_prop_checked));
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
+      LV_STYLE_CONST_WIDTH(27),
+      LV_STYLE_CONST_HEIGHT(27),
+      LV_STYLE_CONST_X(BACK_TO_MAIN_X),
+      LV_STYLE_CONST_Y(BACK_TO_MAIN_Y),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
+      LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
+      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+      LV_STYLE_CONST_BORDER_WIDTH(0),
+      LV_STYLE_CONST_PAD_TOP(8),
+      LV_STYLE_CONST_PAD_RIGHT(0),
+      LV_STYLE_CONST_PAD_BOTTOM(0),
+      LV_STYLE_CONST_PAD_LEFT(8),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
+      LV_STYLE_CONST_PAD_TOP(10),
+      LV_STYLE_CONST_PAD_LEFT(10),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
+      LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
+      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_common,  (void*)(style_prop_common ));
+    static LV_STYLE_CONST_INIT(style_default, (void*)(style_prop_default));
+    static LV_STYLE_CONST_INIT(style_pressed, (void*)(style_prop_pressed));
+    static LV_STYLE_CONST_INIT(style_checked, (void*)(style_prop_checked));
 
-      lv_obj_t *obj = lv_checkbox_create(ui_ScreenAlbumList);
-      lv_checkbox_set_text_static(obj, "");
-      lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-      lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-      lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-      lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-      lv_obj_add_event_cb (obj, ui_event_ScreenAlbumList, LV_EVENT_CLICKED, NULL);
-    }
+    obj = lv_checkbox_create(ui_ScreenAlbumList);
+    lv_checkbox_set_text_static(obj, "");
+    lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+    lv_obj_add_event_cb (obj, ui_event_ScreenAlbumList, LV_EVENT_CLICKED, NULL);
 #endif
 
     //////////////////// Title Label ////////////////////
-    {
-      lv_obj_t *obj = lv_label_create(ui_ScreenAlbumList);
-      lv_obj_set_pos(obj, TITLE_LABEL_X, TITLE_LABEL_Y);
-      lv_label_set_text_static(obj, "Album List");
-    }
+    obj = lv_label_create(ui_ScreenAlbumList);
+    lv_obj_set_pos(obj, TITLE_LABEL_X, TITLE_LABEL_Y);
+    lv_label_set_text_static(obj, "Album List");
 
     //////////////////// Dropdown List ////////////////////
-    {
-      static constexpr lv_style_const_prop_t style_prop_dropdown[] = {
-        LV_STYLE_CONST_X(DROPDOWN_LIST_X),
-        LV_STYLE_CONST_Y(DROPDOWN_LIST_Y),
-        LV_STYLE_CONST_WIDTH(DROPDOWN_LIST_WIDTH),
-        LV_STYLE_CONST_HEIGHT(LV_SIZE_CONTENT),
-        LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static LV_STYLE_CONST_INIT(style_dropdown, (void*)(style_prop_dropdown));
+    static constexpr lv_style_const_prop_t style_prop_dropdown[] = {
+      LV_STYLE_CONST_X(DROPDOWN_LIST_X),
+      LV_STYLE_CONST_Y(DROPDOWN_LIST_Y),
+      LV_STYLE_CONST_WIDTH(DROPDOWN_LIST_WIDTH),
+      LV_STYLE_CONST_HEIGHT(LV_SIZE_CONTENT),
+      LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_dropdown, (void*)(style_prop_dropdown));
 
-      lv_obj_t *obj = lv_dropdown_create(ui_ScreenAlbumList);
-      lv_obj_add_style        (obj, &style_dropdown, 0);
-      lv_obj_add_event_cb     (obj, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
-      lv_dropdown_set_options (obj, "All");
-      lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
-    }
+    obj = lv_dropdown_create(ui_ScreenAlbumList);
+    lv_obj_add_style        (obj, &style_dropdown, 0);
+    lv_obj_add_event_cb     (obj, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_dropdown_set_options (obj, "All");
+    lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
 
     //////////////////// Button Matrix /////////////////////
-    {
-      static constexpr lv_style_const_prop_t style_prop_button_main[] = {
-        LV_STYLE_CONST_HEIGHT(30),
-        LV_STYLE_CONST_BG_OPA(0),
-        LV_STYLE_CONST_BORDER_WIDTH(0),
-        LV_STYLE_CONST_PAD_TOP(0),
-        LV_STYLE_CONST_PAD_LEFT(0),
-        LV_STYLE_CONST_PAD_RIGHT(0),
-        LV_STYLE_CONST_PAD_BOTTOM(0),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static constexpr lv_style_const_prop_t style_prop_button_item[] = {
-        LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
-        LV_STYLE_CONST_BORDER_WIDTH(0),
-        LV_STYLE_CONST_SHADOW_WIDTH(0),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static constexpr lv_style_const_prop_t style_prop_toggle_main[] = {
-        LV_STYLE_CONST_X(TOGGLE_BUTTON_X),
-        LV_STYLE_CONST_Y(TOGGLE_BUTTON_Y),
-        LV_STYLE_CONST_WIDTH(68), // 34 * 2
-        LV_STYLE_CONST_PROPS_END
-      };
-      static constexpr lv_style_const_prop_t style_prop_keypad_main[] = {
-        LV_STYLE_CONST_X(KEYPAD_BUTTON_X),
-        LV_STYLE_CONST_Y(KEYPAD_BUTTON_Y),
-        LV_STYLE_CONST_WIDTH(102), // 34 * 3
-        LV_STYLE_CONST_PROPS_END
-      };
-      static LV_STYLE_CONST_INIT(style_button_main, (void*)(style_prop_button_main));
-      static LV_STYLE_CONST_INIT(style_button_item, (void*)(style_prop_button_item));
-      static LV_STYLE_CONST_INIT(style_toggle_main, (void*)(style_prop_toggle_main));
-      static LV_STYLE_CONST_INIT(style_keypad_main, (void*)(style_prop_keypad_main));
-      static const lv_buttonmatrix_ctrl_t button_ctrl = (lv_buttonmatrix_ctrl_t)(
-        (uint32_t)LV_BUTTONMATRIX_CTRL_CLICK_TRIG |
-        (uint32_t)LV_BUTTONMATRIX_CTRL_NO_REPEAT
-      );
-      static const char *toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
-      static const char *keypad_map[] = { LV_SYMBOL_PLUS, LV_SYMBOL_KEYBOARD, LV_SYMBOL_MINUS, NULL };
+    static constexpr lv_style_const_prop_t style_prop_button_main[] = {
+      LV_STYLE_CONST_HEIGHT(30),
+      LV_STYLE_CONST_BG_OPA(0),
+      LV_STYLE_CONST_BORDER_WIDTH(0),
+      LV_STYLE_CONST_PAD_TOP(0),
+      LV_STYLE_CONST_PAD_LEFT(0),
+      LV_STYLE_CONST_PAD_RIGHT(0),
+      LV_STYLE_CONST_PAD_BOTTOM(0),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_button_item[] = {
+      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+      LV_STYLE_CONST_BORDER_WIDTH(0),
+      LV_STYLE_CONST_SHADOW_WIDTH(0),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_toggle_main[] = {
+      LV_STYLE_CONST_X(TOGGLE_BUTTON_X),
+      LV_STYLE_CONST_Y(TOGGLE_BUTTON_Y),
+      LV_STYLE_CONST_WIDTH(68), // 34 * 2
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_keypad_main[] = {
+      LV_STYLE_CONST_X(KEYPAD_BUTTON_X),
+      LV_STYLE_CONST_Y(KEYPAD_BUTTON_Y),
+      LV_STYLE_CONST_WIDTH(102), // 34 * 3
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_button_main, (void*)(style_prop_button_main));
+    static LV_STYLE_CONST_INIT(style_button_item, (void*)(style_prop_button_item));
+    static LV_STYLE_CONST_INIT(style_toggle_main, (void*)(style_prop_toggle_main));
+    static LV_STYLE_CONST_INIT(style_keypad_main, (void*)(style_prop_keypad_main));
+    static constexpr lv_buttonmatrix_ctrl_t button_ctrl = (lv_buttonmatrix_ctrl_t)(
+      (uint32_t)LV_BUTTONMATRIX_CTRL_CLICK_TRIG |
+      (uint32_t)LV_BUTTONMATRIX_CTRL_NO_REPEAT
+    );
+    static constexpr char* const toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
+    static constexpr char* const keypad_map[] = { LV_SYMBOL_PLUS, LV_SYMBOL_KEYBOARD, LV_SYMBOL_MINUS, NULL };
 
-      lv_obj_t *obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
-      lv_buttonmatrix_set_map             (obj, toggle_map);
-      lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
-      lv_obj_add_style                    (obj, &style_toggle_main, LV_PART_MAIN );
-      lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
-      lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
-      lv_obj_add_event_cb                 (obj, button_draw_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
-      lv_obj_add_event_cb                 (obj, toggle_click_cb, LV_EVENT_VALUE_CHANGED,   NULL);
-      lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+    obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
+    lv_buttonmatrix_set_map             (obj, toggle_map );
+    lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
+    lv_obj_add_style                    (obj, &style_toggle_main, LV_PART_MAIN );
+    lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
+    lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
+    lv_obj_add_event_cb                 (obj, button_draw_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
+    lv_obj_add_event_cb                 (obj, toggle_click_cb, LV_EVENT_VALUE_CHANGED,   NULL);
+    lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
 
-      obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
-      lv_buttonmatrix_set_map             (obj, keypad_map);
-      lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
-      lv_obj_add_style                    (obj, &style_keypad_main, LV_PART_MAIN );
-      lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
-      lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
-      lv_obj_add_event_cb                 (obj, button_draw_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
-      lv_obj_add_event_cb                 (obj, keypad_click_cb, LV_EVENT_VALUE_CHANGED,   NULL);
-      lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
-    }
+    obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
+    lv_buttonmatrix_set_map             (obj, keypad_map);
+    lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
+    lv_obj_add_style                    (obj, &style_keypad_main, LV_PART_MAIN );
+    lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
+    lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
+    lv_obj_add_event_cb                 (obj, button_draw_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
+    lv_obj_add_event_cb                 (obj, keypad_click_cb, LV_EVENT_VALUE_CHANGED,   NULL);
+    lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+  }
 
-    //////////////////// List Container ////////////////////
-    {
-      static constexpr lv_style_const_prop_t style_prop_album[] = {
-        LV_STYLE_CONST_X(ALBUM_LIST_X),
-        LV_STYLE_CONST_Y(ALBUM_LIST_Y),
-        LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LV_PCT_X(10)),
-        LV_STYLE_CONST_HEIGHT(ALBUM_LIST_HEIGHT),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static LV_STYLE_CONST_INIT(style_album, (void*)(style_prop_album));
+  //////////////////// List Container ////////////////////
+  if (album_list == NULL) {
+    static constexpr lv_style_const_prop_t style_prop_album[] = {
+      LV_STYLE_CONST_X(ALBUM_LIST_X),
+      LV_STYLE_CONST_Y(ALBUM_LIST_Y),
+      LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LV_PCT_X(10)),
+      LV_STYLE_CONST_HEIGHT(ALBUM_LIST_HEIGHT),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_album, (void*)(style_prop_album));
 
-      album_list = lv_list_create(ui_ScreenAlbumList);
-      lv_obj_add_style          (album_list, &style_album, 0);
-//    lv_obj_set_scrollbar_mode (album_list, LV_SCROLLBAR_MODE_OFF);
-      lv_obj_add_event_cb       (album_list, scroll_cb, LV_EVENT_SCROLL, NULL);
-      lv_obj_add_event_cb       (album_list, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_list));
-    }
+    album_list = lv_list_create(ui_ScreenAlbumList);
+    lv_obj_add_style          (album_list, &style_album, 0);
+//  lv_obj_set_scrollbar_mode (album_list, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_event_cb       (album_list, scroll_cb, LV_EVENT_SCROLL, NULL);
+    lv_obj_add_event_cb       (album_list, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_list));
+  }
 
-    /////////////////// Infomation Label ///////////////////
-    {
-      static constexpr lv_style_const_prop_t style_prop_info[] = {
-        LV_STYLE_CONST_Y(LV_PCT_Y(-2)+1),
-        LV_STYLE_CONST_ALIGN(LV_ALIGN_BOTTOM_MID),
-//      LV_STYLE_CONST_TEXT_COLOR(LV_PALETTE_GREY),
-        LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
-        LV_STYLE_CONST_PROPS_END
-      };
-      static LV_STYLE_CONST_INIT(style_info, (void*)(style_prop_info));
+  /////////////////// Infomation Label ///////////////////
+  if (album_info == NULL) {
+    static constexpr lv_style_const_prop_t style_prop_info[] = {
+      LV_STYLE_CONST_Y(LV_PCT_Y(-2)+1),
+      LV_STYLE_CONST_ALIGN(LV_ALIGN_BOTTOM_MID),
+//    LV_STYLE_CONST_TEXT_COLOR(LV_PALETTE_GREY),
+      LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_info, (void*)(style_prop_info));
 
-      album_info = lv_label_create(ui_ScreenAlbumList);
-      lv_obj_add_style            (album_info, &style_info, LV_PART_MAIN);
-      lv_label_set_text_static    (album_info, "No album");
-      lv_obj_set_style_text_color (album_info, INFO_LABEL_COLOR, LV_PART_MAIN);
-      lv_obj_add_event_cb         (album_info, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_info));
-    }
+    album_info = lv_label_create(ui_ScreenAlbumList);
+    lv_obj_add_style            (album_info, &style_info, LV_PART_MAIN);
+    lv_label_set_text_static    (album_info, "No album");
+    lv_obj_set_style_text_color (album_info, INFO_LABEL_COLOR, LV_PART_MAIN);
+    lv_obj_add_event_cb         (album_info, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_info));
   }
 }
 
