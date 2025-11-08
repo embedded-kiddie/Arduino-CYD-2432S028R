@@ -61,7 +61,7 @@ public:
   std::vector<Node*> children;  // a set of child nodes
 
   Node(const char * name) {
-    n_nodes++;
+    ++n_nodes;
     this->meta = {0,};
     this->n_files = 0;
     this->name = name;

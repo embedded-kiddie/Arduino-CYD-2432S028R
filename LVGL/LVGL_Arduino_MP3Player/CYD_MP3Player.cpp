@@ -161,7 +161,7 @@ bool CYD_MP3Player::UpdateMetaData(void) {
     if (list.meta.saved != list.meta.selected) {
       ret &= SaveMetaData(i, &list.meta);
     }
-    i++;
+    ++i;
   }
   return ret;
 }
@@ -218,6 +218,7 @@ void CYD_MP3Player::ScanAudioFiles(void) {
     std::string path = m_tree->find_path(parent);
     Node *node = m_tree->get_node();
     DBG_ASSERT(node);
+    node->n_files = 0;
 
     File fd, dir = SD.open(path.c_str());
     while (fd = dir.openNextFile()) {
@@ -225,14 +226,14 @@ void CYD_MP3Player::ScanAudioFiles(void) {
       char buf[BUF_SIZE];
       fd.getName(buf, sizeof(buf));
       if (check_mp3(buf)) {
-        node->n_files++; // count audio files
+        ++node->n_files; // count audio files
         if (node->meta.checked) {
           append(buf, parent);
         }
       }
 #else
       if (check_mp3(fd.name())) {
-        node->n_files++; // count audio files
+        ++node->n_files; // count audio files
         if (node->meta.checked) {
           append(fd.name(), parent);
         }
@@ -285,7 +286,7 @@ void CYD_MP3Player::ScanAudioFiles(void) {
             for (int j = 0; j < m; j++) {
               if (album_src[i].hash == album_dst[j].hash) {
                 m_list[p + i].meta = album_src[i].meta = album_dst[j].meta;
-                counts++;
+                ++counts;
                 break;
               }
             }

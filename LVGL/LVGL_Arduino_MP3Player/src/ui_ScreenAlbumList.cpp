@@ -54,16 +54,18 @@ lv_obj_t *ui_ScreenAlbumList;
 #define BACK_TO_MAIN_Y    LV_PCT_Y(4)     // Back to Main
 
 typedef struct {
-  int   top;        // node key at the top of the list
-  int   end;        // node key at the end of the list
-  int   count;      // number of the cells in the list
+  int   top;        // node key at the top of the album list
+  int   end;        // node key at the end of the album list
+  int   count;      // number of the cells in the album list
   int   n_nodes;    // total number of the nodes in tree
-  int   n_leafs;    // total number of the leafs in tree
+  Node  *root;
+} AlbumControl_t;
+
+typedef struct {
   int   n_folded;   // number of folded   nodes in tree
   int   n_selected; // number of selected leafs in tree
   int   n_files;    // number of selected audio files
-  Node  *root;
-} AlbumControl_t;
+} AlbumInfo_t;
 
 //--------------------------------------------------------------------------------
 // Global variables and prototype
@@ -107,36 +109,34 @@ static void set_properties(lv_obj_t *cell, Node *node) {
 //--------------------------------------------------------------------------------
 // Count / Update open cells, selected nodes and selected audio files
 //--------------------------------------------------------------------------------
-static void count_checked_node(Node *node) {
+static void count_checked(Node *node, AlbumInfo_t *info) {
   if (node->meta.type == TYPE_NODE) {
     // Is the node open?
     if (node->meta.checked == NODE_FOLDED) {
-      album_control.n_folded++;
+      info->n_folded++;
     }
     for (auto &n : node->children) {
-      count_checked_node(n);
+      count_checked(n, info);
     }
   }
   // Is the leaf selected?
   else if (node->meta.checked == LEAF_SELECTED) {
-    album_control.n_selected++;
-    album_control.n_files += node->n_files;
+    info->n_selected++;
+    info->n_files += node->n_files;
   }
 }
 
-static void count_selected_list(void) {
-  album_control.n_folded   =
-  album_control.n_selected =
-  album_control.n_files    = 0;
-
+static void get_album_info(AlbumInfo_t *info) {
+  *info = {0,};
   for (auto &n : album_control.root->children) {
-    count_checked_node(n);
+    count_checked(n, info);
   }
 }
 
 static void update_info(lv_obj_t *label) {
-  count_selected_list();
-  lv_label_set_text_fmt(label, "Selected albums: %d, files: %d", album_control.n_selected, album_control.n_files);
+  AlbumInfo_t info;
+  get_album_info(&info);
+  lv_label_set_text_fmt(label, "Selected albums: %d, files: %d", info.n_selected, info.n_files);
 }
 
 //--------------------------------------------------------------------------------
@@ -591,14 +591,17 @@ static void toggle_click_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
 
+  AlbumInfo_t info;
+  get_album_info(&info);
+
   lv_obj_t *obj = lv_event_get_target_obj(e);
   uint32_t id = lv_buttonmatrix_get_selected_button(obj);
   switch (id) {
     case 0:
-      set_state_all(TYPE_NODE, album_control.n_folded == 0 ? NODE_FOLDED : NODE_UNFOLDED);
+      set_state_all(TYPE_NODE, info.n_folded == 0 ? NODE_FOLDED : NODE_UNFOLDED);
       break;
     case 1:
-      set_state_all(TYPE_LEAF, album_control.n_selected == 0 ? LEAF_SELECTED : LEAF_UNSELECTED);
+      set_state_all(TYPE_LEAF, info.n_selected == 0 ? LEAF_SELECTED : LEAF_UNSELECTED);
       break;
     case LV_BUTTONMATRIX_BUTTON_NONE:
     default:
@@ -854,7 +857,6 @@ void ui_ScreenAlbumList_create_list(void *root) {
     // Re-traverse node tree by preorder
     album_control.root = reinterpret_cast<Node*>(root);
     album_control.n_nodes = album_control.root->traverse_preorder();
-    album_control.n_leafs = album_control.root->get_n_leafs();
     album_init();
   } else {
     memset((void*)&album_control, 0, sizeof(album_control));
@@ -956,9 +958,10 @@ void show_album_list(void) {
     album_control.count, lv_obj_get_child_count(album_list)
   );
 #else
-  count_selected_list();
+  AlbumInfo_t info;
+  get_album_info(&info);
   printf("n_nodes: %d, n_leafs: %d, n_folded: %d, n_selected: %d, n_files: %d\n",
-    album_control.n_nodes, album_control.n_leafs, album_control.n_folded, album_control.n_selected, album_control.n_files
+    album_control.n_nodes, album_control.root->get_n_leafs(), info.n_folded, info.n_selected, info.n_files
   );
 #endif
 }
