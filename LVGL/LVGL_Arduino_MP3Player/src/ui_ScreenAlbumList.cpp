@@ -770,8 +770,8 @@ void ui_ScreenAlbumList_screen_init(void) {
       (uint32_t)LV_BUTTONMATRIX_CTRL_CLICK_TRIG |
       (uint32_t)LV_BUTTONMATRIX_CTRL_NO_REPEAT
     );
-    static const char* const toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
-    static const char* const keypad_map[] = { LV_SYMBOL_PLUS, LV_SYMBOL_KEYBOARD, LV_SYMBOL_MINUS, NULL };
+    static constexpr const char* toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
+    static constexpr const char* keypad_map[] = { LV_SYMBOL_PLUS, LV_SYMBOL_KEYBOARD, LV_SYMBOL_MINUS, NULL };
 
     obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
     lv_buttonmatrix_set_map             (obj, toggle_map );
