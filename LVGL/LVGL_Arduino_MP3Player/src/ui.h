@@ -66,8 +66,8 @@ void ui_ScreenAlbumList_screen_deinit(void);
 void ui_ScreenAlbumList_create_list  (void *root);
 
 // Debug functions
-size_t count_album_cells(void);
-size_t count_total_cells(void);
+size_t count_exposed_nodes(void);
+size_t count_album_list(void);
 void show_album_list(void);
 void dump_album_list(void);
 void dump_preorder(void);

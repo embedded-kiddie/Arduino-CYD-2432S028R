@@ -770,8 +770,8 @@ void ui_ScreenAlbumList_screen_init(void) {
       (uint32_t)LV_BUTTONMATRIX_CTRL_CLICK_TRIG |
       (uint32_t)LV_BUTTONMATRIX_CTRL_NO_REPEAT
     );
-    static constexpr char* const toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
-    static constexpr char* const keypad_map[] = { LV_SYMBOL_PLUS, LV_SYMBOL_KEYBOARD, LV_SYMBOL_MINUS, NULL };
+    static const char* const toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
+    static const char* const keypad_map[] = { LV_SYMBOL_PLUS, LV_SYMBOL_KEYBOARD, LV_SYMBOL_MINUS, NULL };
 
     obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
     lv_buttonmatrix_set_map             (obj, toggle_map );
@@ -861,16 +861,16 @@ void ui_ScreenAlbumList_create_list(void *root) {
 //--------------------------------------------------------------------------------
 // Debug functions (static)
 //--------------------------------------------------------------------------------
-static size_t count_nodes(Node *node) {
+static size_t count_exposed(Node *node) {
   size_t count = 0;
   for (auto &n : node->children) {
     ++count; // count self
 
     // when node is open and has children...
     size_t size = n->children.size();
-    if (size && n->meta.checked == false) {
+    if (size && n->meta.checked == NODE_UNFOLDED) {
       if (n->children[0]->children.size()) {
-        count += count_nodes(n);
+        count += count_exposed(n);
       } else {
         count += size;
       }
@@ -934,12 +934,12 @@ static void dump_album(lv_obj_t *obj, int depth) {
 //--------------------------------------------------------------------------------
 // Debug functions (global)
 //--------------------------------------------------------------------------------
-size_t count_album_cells(void) {
-  return album_control.count; // number of cells in album list
+size_t count_exposed_nodes(void) {
+  return count_exposed(album_control.root); // number of exposed nodes in tree
 }
 
-size_t count_total_cells(void) {
-  return count_nodes(album_control.root); // number of open nodes in tree
+size_t count_album_list(void) {
+  return lv_obj_get_child_count(album_list); // number of cells in album list
 }
 
 void show_album_list(void) {
