@@ -557,7 +557,7 @@ static void dropdown_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-// Callback for button matrix (toggle)
+// Callback for button matrix
 // https://docs.lvgl.io/master/details/widgets/buttonmatrix.html#custom-buttons
 //--------------------------------------------------------------------------------
 static void button_draw_cb(lv_event_t *e) {
@@ -668,7 +668,7 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_t *obj;
 
 #if SHOW_ARROW_BUTTON || true
-    /////////////////// Back to Main ///////////////////
+    //////////////////// Back to Main ////////////////////
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(27),
       LV_STYLE_CONST_HEIGHT(27),
@@ -711,7 +711,7 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_add_event_cb (obj, ui_event_ScreenAlbumList, LV_EVENT_CLICKED, NULL);
 #endif
 
-    //////////////////// Title Label ////////////////////
+    ///////////////////// Title Label /////////////////////
     obj = lv_label_create(ui_ScreenAlbumList);
     lv_obj_set_pos(obj, TITLE_LABEL_X, TITLE_LABEL_Y);
     lv_label_set_text_static(obj, "Album List");
@@ -733,7 +733,7 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_dropdown_set_options (obj, "All");
     lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
 
-    //////////////////// Button Matrix /////////////////////
+    //////////////////// Button Matrix ////////////////////
     static constexpr lv_style_const_prop_t style_prop_button_main[] = {
       LV_STYLE_CONST_HEIGHT(30),
       LV_STYLE_CONST_BG_OPA(0),

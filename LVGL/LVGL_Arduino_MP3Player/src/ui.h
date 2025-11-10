@@ -66,11 +66,11 @@ void ui_ScreenAlbumList_screen_deinit(void);
 void ui_ScreenAlbumList_create_list  (void *root);
 
 // Debug functions
-size_t count_exposed_nodes(void);
-size_t count_album_list(void);
-void show_album_list(void);
-void dump_album_list(void);
-void dump_preorder(void);
+extern __attribute__((weak)) size_t count_exposed_nodes(void);
+extern __attribute__((weak)) size_t count_album_list(void);
+extern __attribute__((weak)) void show_album_list(void);
+extern __attribute__((weak)) void dump_album_list(void);
+extern __attribute__((weak)) void dump_preorder(void);
 
 ////////// SCREEN: ui_ScreenPlayList //////////
 extern lv_obj_t *ui_ScreenPlayList;
@@ -87,9 +87,9 @@ void ui_list_update_duration(uint32_t track_id, uint32_t duration);
 bool ui_list_get_heart_state(uint32_t track_id);
 
 // Debug functions
-size_t get_cell_count(void);
-void show_ui_control(void);
-void dump_play_list(void);
+extern __attribute__((weak)) size_t get_cell_count(void);
+extern __attribute__((weak)) void show_ui_control(void);
+extern __attribute__((weak)) void dump_play_list(void);
 
 ////////// SCREEN: ui_ScreenOptions //////////
 extern lv_obj_t *ui_ScreenOptions;

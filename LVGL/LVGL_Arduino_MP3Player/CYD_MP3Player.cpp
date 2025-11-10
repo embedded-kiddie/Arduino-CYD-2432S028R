@@ -31,16 +31,6 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
     return false;
   }
 
-#if   0
-  // Create directories for metadata
-  std::string path = m_root + META_DATA_PREFIX "/";
-  if (!SD.exists(path.c_str()) && !SD.mkdir(path.c_str())) {
-    m_error = "mkdir failed: " + path;
-    DBG_EXEC(printf("%s\n", m_error.c_str()));
-    return false;
-  }
-#endif
-
 #if MY_USE_FS_ARDUINO_SD
   lv_fs_arduino_sd_init(); // Arduino SD File System for image
 #endif
@@ -120,7 +110,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
     fd = SD.open(data.c_str(), FILE_WRITE);
     if (fd) {
       fd.seek(0);
-      fd.write((void*)album, size);
+      fd.write((void*)album, size); // should check return value!
       fd.close();
     }
 
@@ -227,14 +217,14 @@ void CYD_MP3Player::ScanAudioFiles(void) {
       fd.getName(buf, sizeof(buf));
       if (check_mp3(buf)) {
         ++node->n_files; // count audio files
-        if (node->meta.checked) {
+        if (node->meta.checked == LEAF_SELECTED) {
           append(buf, parent);
         }
       }
 #else
       if (check_mp3(fd.name())) {
         ++node->n_files; // count audio files
-        if (node->meta.checked) {
+        if (node->meta.checked == LEAF_SELECTED) {
           append(fd.name(), parent);
         }
       }
@@ -243,13 +233,18 @@ void CYD_MP3Player::ScanAudioFiles(void) {
     }
     dir.close();
 
+    // If the album is not selected then proceed next
+    if (node->meta.checked != LEAF_SELECTED) {
+      continue;
+    }
+
     std::sort(m_list.begin() + p, m_list.end(), [](MP3List_t &a, MP3List_t &b) {
       return a.name.compare(b.name) < 0 ? true : false; // Ascending order
     });
 
     const int n = m_list.size() - p;
     MetaHash_t *album_src = new MetaHash_t[n];
-    DBG_ASSERT(album_src); // Out of memory?
+    DBG_ASSERT(album_src); // Out of memory
 
     if (album_src) {
       size_t src = sizeof(MetaHash_t) * n;
@@ -272,7 +267,7 @@ void CYD_MP3Player::ScanAudioFiles(void) {
 #endif
         const int m = dst / sizeof(MetaHash_t);
         MetaHash_t *album_dst = new MetaHash_t[m];
-        DBG_ASSERT(album_dst); // Out of memory?
+        DBG_ASSERT(album_dst); // Out of memory
 
         if (album_dst) {
 #ifdef USE_SDFAT

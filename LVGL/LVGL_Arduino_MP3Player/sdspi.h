@@ -67,7 +67,7 @@ enum SeekMode {
 // Chip select pin and SPI clock frequency
 //--------------------------------------------------------------------------------
 #define SD_CS         SS
-#define SD_SPI_CLOCK  25000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
+#define SD_SPI_CLOCK  24000000 // The maximum SD SPI clock of ESP32-2432S028 would be 24 MHz
 
 //--------------------------------------------------------------------------------
 // Temporary buffer size for file path

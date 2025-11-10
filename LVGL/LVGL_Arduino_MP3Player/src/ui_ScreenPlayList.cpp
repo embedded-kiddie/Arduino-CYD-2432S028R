@@ -16,7 +16,9 @@ extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui
 #define LIST_FONT_SMALL_HEIGHT    17  // For font size: 12px
 #define LIST_FONT_MEDIUM_HEIGHT   22  // For font size: 14px
 #define LIST_LABEL_MARGIN         100 // Left(50) + Right(50)
+#define LIST_SLIDER_PADDING       3   // Slider Padding: 4px
 #define LIST_SLIDER_WIDTH         5   // Slider Width: 5px
+#define LIST_SLIDER_SCALE         10  // Scale factor for precise slider movement
 #define LIST_UPDATE_SCROLL_POS    5   // Scroll Position to update playlist to add/remove cells
 #define CELL_VISIBLE_MAX          6   // Number of visible cells (SCREEN_HEIGHT <= CELL_VISIBLE_MAX * CELL_OUTLINE_HEIGHT)
 #define CELL_VISIBLE_SPARE        2   // Add 1 cell each to the top and the bottom
@@ -147,7 +149,8 @@ static void event_handler(lv_event_t* e) {
     ui_list_update_cell(track_id, true);
 
     // If clicked coordinates within the heart icon area...
-    if (p.x >= SCREEN_WIDTH - img_heart_on_small.header.w * 3) {
+    p.x = SCREEN_WIDTH - p.x;
+    if (img_heart_on_small.header.w <= p.x && p.x <= img_heart_on_small.header.w * 3) {
       lv_obj_t *obj = get_heart_obj(track_id);
       const void* src = lv_image_get_src(obj);
       lv_image_set_src(obj, src == (const void*)&img_heart_on_small ? &img_heart_off_small : &img_heart_on_small);
@@ -232,9 +235,13 @@ static void put_list_cell(lv_obj_t* obj, uint32_t track_id) {
 //--------------------------------------------------------------------------------
 // Update the scroll bar position
 //--------------------------------------------------------------------------------
-static void update_slider(void) {
-  lv_slider_set_value     (slider, ui_control.end, LV_ANIM_OFF);
-  lv_slider_set_left_value(slider, ui_control.top, LV_ANIM_OFF); // v9.3: lv_slider_set_start_value()
+static void update_slider(lv_obj_t *obj) {
+  // Set the top and bottom visible cells
+  lv_obj_update_layout(obj);
+  int32_t top = ui_control.top * LIST_SLIDER_SCALE + (lv_obj_get_scroll_top   (obj) * LIST_SLIDER_SCALE) / CELL_OUTLINE_HEIGHT;
+  int32_t end = ui_control.end * LIST_SLIDER_SCALE - (lv_obj_get_scroll_bottom(obj) * LIST_SLIDER_SCALE) / CELL_OUTLINE_HEIGHT;
+  lv_bar_set_start_value(slider, top, LV_ANIM_OFF);
+  lv_bar_set_value      (slider, end, LV_ANIM_OFF);
 }
 
 //--------------------------------------------------------------------------------
@@ -276,7 +283,7 @@ static void update_scroll(lv_obj_t *obj) {
   // Always less than equal CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE cells are allocated
   DBG_ASSERT(ui_control.end - ui_control.top + 1 <= CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE);
 
-  update_slider();
+  update_slider(obj);
   ui_list_update_cell(ui_control.focusNo, true);
   ui_list_update_icon(ui_control.playNo,  true);
 
@@ -326,7 +333,7 @@ static void create_init_cells(void) {
   }
   ui_control.end = i - 1;
 
-  update_slider();
+  update_slider(play_list);
   ui_list_update_cell(ui_control.focusNo, true);
   ui_list_update_icon(ui_control.playNo,  true);
 }
@@ -453,15 +460,14 @@ void ui_ScreenPlayList_screen_init(void) {
 
   // Creating a slider as an alternative to a scrollbar
   if (slider == NULL) {
-    slider = lv_slider_create(ui_ScreenPlayList);
-    lv_obj_align              (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
-    lv_obj_remove_flag        (slider, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size           (slider, LIST_SLIDER_WIDTH, SCREEN_HEIGHT);
-    lv_obj_set_style_radius   (slider, LV_RADIUS_CIRCLE,      (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa   (slider, 0, /* set invisible */ (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color (slider, UI_COLOR_LIST_SLIDER,  (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_slider_set_mode        (slider, LV_SLIDER_MODE_RANGE);
-    lv_slider_set_range       (slider, ui_get_counts() - 1 + CELL_VISIBLE_MAX, 0);
+    slider = lv_bar_create(ui_ScreenPlayList);
+    lv_obj_align                (slider, LV_ALIGN_TOP_RIGHT, -2, 0);
+    lv_obj_set_size             (slider, LIST_SLIDER_WIDTH, SCREEN_HEIGHT);
+    lv_obj_set_style_pad_bottom (slider, LIST_SLIDER_PADDING,  (uint32_t)LV_STATE_DEFAULT | (uint32_t)LV_PART_MAIN);
+    lv_obj_set_style_bg_color   (slider, UI_COLOR_LIST_SLIDER, (uint32_t)LV_STATE_DEFAULT | (uint32_t)LV_PART_INDICATOR);
+    lv_bar_set_mode             (slider, LV_BAR_MODE_RANGE);
+    lv_bar_set_orientation      (slider, LV_BAR_ORIENTATION_VERTICAL);
+    lv_bar_set_range            (slider, ((int32_t)ui_get_counts() - 1) * LIST_SLIDER_SCALE, 0);
   }
 
   // Add a callback when an object is deleted
