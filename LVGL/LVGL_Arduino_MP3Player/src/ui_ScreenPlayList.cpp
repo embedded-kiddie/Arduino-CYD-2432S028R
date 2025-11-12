@@ -109,16 +109,6 @@ static lv_obj_t *get_heart_obj(uint32_t track_id) {
 }
 
 //--------------------------------------------------------------------------------
-// Scroll the list to ensure the specified cell is visible
-//--------------------------------------------------------------------------------
-static void scroll_to_view(void* track_id) {
-  lv_obj_t *cell = get_cell_obj((uint32_t)track_id);
-  if (cell) {
-    lv_obj_scroll_to_view (cell, LV_ANIM_ON);
-  }
-}
-
-//--------------------------------------------------------------------------------
 // Callback function to handle user interactions
 //--------------------------------------------------------------------------------
 static void event_handler(lv_event_t* e) {
@@ -301,6 +291,16 @@ static void scroll_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
+// Scroll the list to ensure the specified cell is visible
+//--------------------------------------------------------------------------------
+static void scroll_to_view(void* track_id) {
+  lv_obj_t *cell = get_cell_obj((uint32_t)track_id);
+  if (cell) {
+    lv_obj_scroll_to_view(cell, LV_ANIM_ON);
+  }
+}
+
+//--------------------------------------------------------------------------------
 // Set the widget pointer to NULL when the object is deleted
 //--------------------------------------------------------------------------------
 static void delete_cb(lv_event_t *e) {
@@ -400,6 +400,7 @@ void ui_list_focus_playing(uint32_t track_id) {
   lv_obj_t* cell = get_cell_obj(track_id);
   if (cell) {
     lv_obj_scroll_to_view(cell, LV_ANIM_OFF);
+    update_slider(play_list);
   } else {
     // Remove all cells from the playlist
     lv_obj_clean(play_list);
