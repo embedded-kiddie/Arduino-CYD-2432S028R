@@ -226,12 +226,15 @@ static void put_list_cell(lv_obj_t* obj, uint32_t track_id) {
 // Update the scroll bar position
 //--------------------------------------------------------------------------------
 static void update_slider(lv_obj_t *obj) {
-  // Set the top and bottom visible cells
   lv_obj_update_layout(obj);
+
+  // Set the top and bottom visible cells
   int32_t top = ui_control.top * LIST_SLIDER_SCALE + (lv_obj_get_scroll_top   (obj) * LIST_SLIDER_SCALE) / CELL_OUTLINE_HEIGHT;
   int32_t end = ui_control.end * LIST_SLIDER_SCALE - (lv_obj_get_scroll_bottom(obj) * LIST_SLIDER_SCALE) / CELL_OUTLINE_HEIGHT;
+
   lv_bar_set_start_value(slider, top, LV_ANIM_OFF);
   lv_bar_set_value      (slider, end, LV_ANIM_OFF);
+  lv_obj_update_layout  (slider);
 }
 
 //--------------------------------------------------------------------------------
@@ -327,7 +330,8 @@ static void delete_cb(lv_event_t *e) {
 static void create_init_cells(void) {
   #define MIN(a, b) ((a) < (b) ? (a) : (b))
   int i = ui_control.top;
-  int n = ui_control.top + MIN(ui_get_counts(), CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE);
+  int n = ui_get_counts();
+  n = ui_control.top + MIN(n, CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE);
   while (i < n) {
     add_list_cell(play_list, i++);
   }
@@ -408,6 +412,9 @@ void ui_list_focus_playing(uint32_t track_id) {
     // Add new cells according to the specified id
     ui_control.focusNo = ui_control.top = ui_control.end = track_id;
     create_init_cells();
+
+    scroll_to_view((void*)track_id);
+    update_slider(play_list);
   }
 }
 
