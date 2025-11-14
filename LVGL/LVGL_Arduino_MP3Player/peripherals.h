@@ -50,16 +50,21 @@
 
 #endif // RGB_BUILTIN or CYD_LED_RGB_OFF
 
+//#include "esp_sleep.h"    // ESP_PD_DOMAIN_XXX for esp_sleep_pd_config()
 //#include "esp_bt.h"       // esp_bt_controller_disable(), esp_bt_controller_deinit()
 //#include "esp_bt_main.h"  // esp_bluedroid_disable(), esp_bluedroid_deinit()
 //#include "esp_wifi.h"     // esp_wifi_stop()
 
 #define shutdown_peripherals() {  \
-/*esp_bluedroid_disable();        \
+/*esp_sleep_pd_config(ESP_PD_DOMAIN_VDDSDIO,    ESP_PD_OPTION_OFF); \
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF); \
+  esp_bluedroid_disable();        \
   esp_bluedroid_deinit();         \
   esp_bt_controller_disable();    \
   esp_bt_controller_deinit();     \
-  esp_wifi_stop();*/              \
+  esp_wifi_stop();                \
+  WiFi.disconnect(true);          \
+  WiFi.mode(WIFI_OFF);*/          \
   RGB_LED_OFF();                  \
 }
 

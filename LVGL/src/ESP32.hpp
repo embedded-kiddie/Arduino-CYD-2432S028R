@@ -121,30 +121,45 @@ void PrintESP32Memory(void) {
   printf("Sleep wakeup cause    : %2d (%s)\n", W, wakeup_cause     [W]);
 #endif
 
+  // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/Esp.cpp
+  // https://github.com/espressif/esp-idf/blob/master/components/heap/include/esp_heap_caps.h
   printf("============ Memory Usage =============\n");
+#if 0
   printf("Sketch space:%7d\n", ESP.getFreeSketchSpace());
   printf("Sketch size :%7d\n", ESP.getSketchSize());
-  printf("Heap total  :%7d\n", ESP.getHeapSize());
-  printf("Heap free   :%7d\n", esp_get_free_internal_heap_size());
-  printf("Heap remain :%7d\n", ESP.getMinFreeHeap());
-  printf("Heap lowest :%7d\n", esp_get_minimum_free_heap_size());
+  printf("Heap total  :%7d\n", ESP.getHeapSize());                  // heap_caps_get_total_size(MALLOC_CAP_INTERNAL);
+  printf("Heap free   :%7d\n", esp_get_free_internal_heap_size());  // heap_caps_get_free_size(MALLOC_CAP_8BIT | MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+  printf("Heap remain :%7d\n", ESP.getMinFreeHeap());               // heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL); // Other than flash/spiram
+  printf("Heap lowest :%7d\n", esp_get_minimum_free_heap_size());   // heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT); // non-capability-specific memory allocation (e.g. malloc(), calloc()) call
+
+  printf("Min MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_minimum_free_size (MALLOC_CAP_INTERNAL)); // ESP.getMinFreeHeap()
+  printf("Min MALLOC_CAP_DMA     :%7d\n", heap_caps_get_minimum_free_size (MALLOC_CAP_DMA));
+  printf("Max MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL)); // ESP.getMaxAllocHeap()
+  printf("Max MALLOC_CAP_DMA     :%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
+#else
+  // https://github.com/espressif/esp-idf/blob/master/components/heap/heap_caps.c#L408-L427
+  multi_heap_info_t info;
+  heap_caps_get_info(&info, MALLOC_CAP_INTERNAL);
+  printf("Sketch space        :%7d\n", ESP.getFreeSketchSpace()  );
+  printf("Sketch size         :%7d\n", ESP.getSketchSize()       );
+  printf("Heap total free     :%7d\n", info.total_free_bytes     );
+  printf("Heap total allocated:%7d\n", info.total_allocated_bytes);
+  printf("Heap free minimum   :%7d\n", info.minimum_free_bytes   );
+  printf("Heap free largest   :%7d\n", info.largest_free_block   );
+#endif
 
   // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/heap_debug.html
   // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/mem_alloc.html
-  if (psramInit()) {
-    printf("PSRAM total :%7d\n", ESP.getPsramSize());
-    printf("PSRAM lowest:%7d\n", ESP.getMinFreePsram());
+  if (psramFound()) {
+    printf("PSRAM total :%7d\n", ESP.getPsramSize());     // heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
+    printf("PSRAM free  :%7d\n", ESP.getFreePsram());     // heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+    printf("PSRAM lowest:%7d\n", ESP.getMinFreePsram());  // heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM);
   }
-
-  printf("Min MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_minimum_free_size (MALLOC_CAP_INTERNAL));
-  printf("Min MALLOC_CAP_DMA     :%7d\n", heap_caps_get_minimum_free_size (MALLOC_CAP_DMA));
-  printf("Max MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
-  printf("Max MALLOC_CAP_DMA     :%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
 
 #ifdef LVGL_H
   // LVGL memory usage
   lv_mem_monitor_t mon;
   lv_mem_monitor(&mon);
-  printf("LVGL memory usage      : Watermark (max): %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
+  printf("LVGL memory usage   : Watermark (max): %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
 #endif
 }
