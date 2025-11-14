@@ -137,15 +137,22 @@ void PrintESP32Memory(void) {
   printf("Max MALLOC_CAP_INTERNAL:%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL)); // ESP.getMaxAllocHeap()
   printf("Max MALLOC_CAP_DMA     :%7d\n", heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
 #else
+  // https://github.com/espressif/esp-idf/blob/master/components/heap/include/esp_heap_caps.h#L32-L51
+  // MALLOC_CAP_DMA     : Memory must be able to accessed by DMA
+  // MALLOC_CAP_SPIRAM  : Memory must be in SPI RAM
+  // MALLOC_CAP_INTERNAL: Memory must be internal; specifically it should not disappear when flash/spiram cache is switched off
+  // MALLOC_CAP_DEFAULT : Memory can be returned in a non-capability-specific memory allocation (e.g. malloc(), calloc()) call
   // https://github.com/espressif/esp-idf/blob/master/components/heap/heap_caps.c#L408-L427
   multi_heap_info_t info;
-  heap_caps_get_info(&info, MALLOC_CAP_INTERNAL);
-  printf("Sketch space        :%7d\n", ESP.getFreeSketchSpace()  );
-  printf("Sketch size         :%7d\n", ESP.getSketchSize()       );
-  printf("Heap total free     :%7d\n", info.total_free_bytes     );
+  uint32_t caps = MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL; // MALLOC_CAP_INTERNAL or MALLOC_CAP_DEFAULT
+  heap_caps_get_info(&info, caps);
+  printf("Sketch space        :%7d\n", ESP.getFreeSketchSpace());
+  printf("Sketch size         :%7d\n", ESP.getSketchSize());
+  printf("Heap total size     :%7d\n", heap_caps_get_total_size(caps));
+  printf("Heap total free     :%7d\n", info.total_free_bytes);
   printf("Heap total allocated:%7d\n", info.total_allocated_bytes);
-  printf("Heap free minimum   :%7d\n", info.minimum_free_bytes   );
-  printf("Heap free largest   :%7d\n", info.largest_free_block   );
+  printf("Heap free minimum   :%7d\n", info.minimum_free_bytes);
+  printf("Heap free largest   :%7d\n", info.largest_free_block);
 #endif
 
   // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/heap_debug.html
