@@ -296,10 +296,6 @@ static void draw_image_cb(lv_event_t *e) {
 //--------------------------------------------------------------------------------
 // Callbacks when a cell is opened or closed
 //--------------------------------------------------------------------------------
-static void scroll_to_view(void* obj) {
-  lv_obj_scroll_to_view((lv_obj_t *)obj, LV_ANIM_OFF);
-}
-
 static void update_open_cb(lv_anim_t* a) {
   // Scroll to make it visible
   lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_ON);
@@ -311,8 +307,8 @@ static void update_open_cb(lv_anim_t* a) {
   if (a->var != cell) {
     delete_cell(list, cell);
   } else {
-    // Ensure to make the last cell visible
-    lv_async_call(scroll_to_view, a->var);
+    // Make the last cell visible (LV_ANIM_ON works incompletely)
+    lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_OFF);
   }
 
   // Not required at the end of animation ?
