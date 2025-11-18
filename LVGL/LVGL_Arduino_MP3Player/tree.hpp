@@ -290,7 +290,6 @@ public:
     return find_preorder(this, key);
   }
 
-private:
   void print_node(Node *node) {
     Serial.printf("key:%3d, size:%2d, depth:%d, type:%d, hidden:%d, checked:%d %s\n",
                   node->key, node->children.size(), node->meta.depth, node->meta.type,
@@ -308,7 +307,6 @@ private:
     }
   }
 
-public:
   // traverse the tree and print node information
   void dump_tree(void) {
     print_node(this);

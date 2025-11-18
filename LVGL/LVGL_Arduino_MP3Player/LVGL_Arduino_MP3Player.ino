@@ -52,20 +52,22 @@ static LGFX tft;
 //----------------------------------------------------------------------
 #define SCREENSHORT false
 #if SCREENSHORT
-#include "sdfs.h"
+#define USE_SDFAT
 #include "../src/sdcard.hpp"
-#else
-#include "ESP32.hpp"
 #endif
 
 #define SAVE_SEQUENCIAL_BMP false
 #if SAVE_SEQUENCIAL_BMP
-#include "sdfs.h"
 #include "../src/sdcard.hpp"
 static uint32_t _skip = 0;
 static uint32_t _prev = 0;
 static uint32_t N = 0;
 static char fname[16];
+#endif
+
+#ifndef _SDCARD_HPP_
+SdFat SD;
+#include "../src/ESP32.hpp"
 #endif
 
 //----------------------------------------------------------------------
