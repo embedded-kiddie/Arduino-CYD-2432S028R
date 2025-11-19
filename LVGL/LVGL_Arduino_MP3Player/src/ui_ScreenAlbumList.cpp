@@ -48,10 +48,10 @@ lv_obj_t *ui_ScreenAlbumList;
 #define KEYPAD_BUTTON_Y     LV_PCT_Y(3)     // Button Matrix
 #endif
 
-#define ALBUM_LIST_X      LV_PCT_X(5)     // List Container
-#define ALBUM_LIST_Y      LV_PCT_Y(24)    // List Container
-#define BACK_TO_MAIN_X    LV_PCT_X(87)    // Back to Main
-#define BACK_TO_MAIN_Y    LV_PCT_Y(4)     // Back to Main
+#define ALBUM_LIST_X        LV_PCT_X(5)     // List Container
+#define ALBUM_LIST_Y        LV_PCT_Y(24)    // List Container
+#define BACK_TO_MAIN_X      LV_PCT_X(87)    // Back to Main
+#define BACK_TO_MAIN_Y      LV_PCT_Y(4)     // Back to Main
 
 typedef struct {
   int   top;        // node key at the top of the album list
@@ -179,10 +179,13 @@ static inline void update_list(lv_obj_t *list) {
 // Append / Delete the specified node to the list
 //--------------------------------------------------------------------------------
 static inline lv_obj_t *append_cell(lv_obj_t *list, Node *node) {
-  DBG_EXEC(printf("count:%3d added   %3d \"%s\"\n", album_control.count, node->key, node->name.c_str()));
+  DBG_EXEC({
+    printf("count:%3d added   %3d \"%s\"\n", album_control.count, node->key, node->name.c_str());
+  });
 
   lv_obj_t * cell = lv_list_add_text(list, node->name.c_str());
   set_properties(cell, node);
+
   return cell;
 }
 
@@ -300,10 +303,10 @@ static void update_open_cb(lv_anim_t* a) {
   // Scroll to make it visible
   lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_ON);
 
-  // Delete the last cell if it is not newly added
   lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
   lv_obj_t *cell = lv_obj_get_child(list, -1);
 
+  // Delete the last cell if it is not newly added
   if (a->var != cell) {
     delete_cell(list, cell);
   } else {
@@ -463,7 +466,7 @@ static void update_scroll(lv_obj_t *list) {
   Node *node;
   int32_t pos;
 
-  // Scroll DOWN: Add new cells to END while the bottom position of the scroll range is smaller than the cell height
+  // Swipe UP: Add new cells to END while the bottom position of the scroll range is smaller than the cell height
   while (album_control.end < album_control.n_nodes - 1 && (pos = lv_obj_get_scroll_bottom(list)) < CELL_SCROLL_POS) {
     if (node = find_after(album_control.end)) {
       append_cell(list, node);
@@ -474,7 +477,7 @@ static void update_scroll(lv_obj_t *list) {
     }
   }
 
-  // Scroll UP: Add new cells to TOP while the bottom position of the scroll range is smaller than the cell height
+  // Swipe DOWN: Add new cells to TOP while the bottom position of the scroll range is smaller than the cell height
   while (album_control.top > 0 && (pos = lv_obj_get_scroll_top(list)) < CELL_SCROLL_POS) {
     if (node = find_before(album_control.top)) {
       int32_t bottom_before = lv_obj_get_scroll_bottom(list);
@@ -489,7 +492,7 @@ static void update_scroll(lv_obj_t *list) {
     }
   }
 
-  // Scroll UP: Delete the END cells outside the scrolling range
+  // Swipe DOWN: Delete the END cells outside the scrolling range
   while (album_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_bottom(list)) > CELL_HEIGHT_SMALL) {
     if (node = find_before(album_control.end)) {
       lv_obj_t *child = lv_obj_get_child(list, -1);
@@ -501,7 +504,7 @@ static void update_scroll(lv_obj_t *list) {
     }
   }
 
-  // Scroll DOWN: Delete the TOP cells outside the scrolling range
+  // Swipe UP: Delete the TOP cells outside the scrolling range
   while (album_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_top(list)) > CELL_HEIGHT_SMALL) {
     if (node = find_after(album_control.top)) {
       int32_t bottom_before = lv_obj_get_scroll_bottom(list);
@@ -849,6 +852,7 @@ void ui_ScreenAlbumList_create_list(void *root) {
     album_control.n_nodes = album_control.root->traverse_preorder();
     album_init();
   } else {
+    // In case the SD card is not inserted
     memset((void*)&album_control, 0, sizeof(album_control));
   }
 }

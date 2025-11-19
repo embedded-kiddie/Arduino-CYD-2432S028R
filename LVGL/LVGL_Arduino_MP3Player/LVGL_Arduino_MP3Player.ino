@@ -66,7 +66,6 @@ static char fname[16];
 #endif
 
 #ifndef _SDCARD_HPP_
-SdFat SD;
 #include "../src/ESP32.hpp"
 #endif
 
