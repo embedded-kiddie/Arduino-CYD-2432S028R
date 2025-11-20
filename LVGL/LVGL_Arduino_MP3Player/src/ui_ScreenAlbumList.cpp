@@ -21,9 +21,10 @@ lv_obj_t *ui_ScreenAlbumList;
 #define CELL_OFFSET_LEAF    10  // Offset for leaf text
 #define CELL_PADDING_LEFT   6   // Padding left in pixels
 #define CELL_PADDING_BORDER 8   // Padding top/bottom in pixels
-#define CELL_MAX_VISIBLE    7   // Number of visible cells in the album list
-#define CELL_SCROLL_POS     6   // Scroll Position to update list to add/remove cells
-#define ALBUM_LIST_HEIGHT   220 // Height of the album list (CELL_HEIGHT_SMALL * CELL_MAX_VISIBLE + alpha)
+#define CELL_VISIBLE_MAX    7   // Number of visible cells in the album list
+#define CELL_VISIBLE_SPARE  2   // Add 1 cell each to the top and the bottom
+#define CELL_UPDATE_SCROLL  6   // Scroll Position to update list to add/remove cells
+#define ALBUM_LIST_HEIGHT   220 // Height of the album list (CELL_HEIGHT_SMALL * CELL_VISIBLE_MAX + alpha)
 #define FOLDING_DURATION    250 // Folding animation duration
 
 #if   true
@@ -48,10 +49,10 @@ lv_obj_t *ui_ScreenAlbumList;
 #define KEYPAD_BUTTON_Y     LV_PCT_Y(3)     // Button Matrix
 #endif
 
-#define ALBUM_LIST_X        LV_PCT_X(5)     // List Container
-#define ALBUM_LIST_Y        LV_PCT_Y(24)    // List Container
-#define BACK_TO_MAIN_X      LV_PCT_X(87)    // Back to Main
-#define BACK_TO_MAIN_Y      LV_PCT_Y(4)     // Back to Main
+#define ALBUM_LIST_X      LV_PCT_X(5)     // List Container
+#define ALBUM_LIST_Y      LV_PCT_Y(24)    // List Container
+#define BACK_TO_MAIN_X    LV_PCT_X(87)    // Back to Main
+#define BACK_TO_MAIN_Y    LV_PCT_Y(4)     // Back to Main
 
 typedef struct {
   int   top;        // node key at the top of the album list
@@ -81,7 +82,7 @@ static void draw_image_cb(lv_event_t *e);
 //--------------------------------------------------------------------------------
 // Setup cell styles and properties
 //--------------------------------------------------------------------------------
-static void set_properties(lv_obj_t *cell, Node *node) {
+static void init_styles(lv_obj_t *cell, Node *node) {
   static constexpr lv_style_const_prop_t style_prop_cell[] = {
     LV_STYLE_CONST_ALIGN(LV_ALIGN_LEFT_MID),
     LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
@@ -92,17 +93,22 @@ static void set_properties(lv_obj_t *cell, Node *node) {
     LV_STYLE_CONST_PROPS_END
   };
   static LV_STYLE_CONST_INIT(style_cell, (void*)(style_prop_cell));
-  lv_obj_add_style(cell, &style_cell, (uint32_t)LV_PART_MAIN);
 
+  // Common styles
+  if (lv_obj_get_event_count(cell) == 0) {
+    lv_obj_add_style        (cell, &style_cell, (uint32_t)LV_PART_MAIN);
+    lv_label_set_long_mode  (cell, LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_DOT, LV_LABEL_LONG_SCROLL_CIRCULAR
+    lv_obj_add_flag         (cell, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag         (cell, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+    lv_obj_add_event_cb     (cell, draw_image_cb, LV_EVENT_DRAW_TASK_ADDED, NULL);
+    lv_obj_add_event_cb     (cell, event_handler, LV_EVENT_CLICKED, NULL);
+  }
+
+  // Individual styles
   NodeMeta_t *meta = &node->meta;
   lv_obj_set_style_height   (cell, (meta->depth > 1 && meta->hidden ? 0 : CELL_HEIGHT_SMALL), LV_PART_MAIN);
   lv_obj_set_style_bg_color (cell, (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF), LV_PART_MAIN);
   lv_obj_set_style_pad_left (cell, (meta->depth * CELL_PADDING_LEFT + (meta->type == TYPE_NODE ? CELL_OFFSET_NODE: CELL_OFFSET_LEAF)), LV_PART_MAIN);
-  lv_label_set_long_mode    (cell, LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_DOT, LV_LABEL_LONG_SCROLL_CIRCULAR
-  lv_obj_add_flag           (cell, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_add_flag           (cell, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
-  lv_obj_add_event_cb       (cell, draw_image_cb, LV_EVENT_DRAW_TASK_ADDED, NULL);
-  lv_obj_add_event_cb       (cell, event_handler, LV_EVENT_CLICKED, NULL);
   lv_obj_set_user_data      (cell, reinterpret_cast<void*>(node));
 }
 
@@ -178,14 +184,18 @@ static inline void update_list(lv_obj_t *list) {
 //--------------------------------------------------------------------------------
 // Append / Delete the specified node to the list
 //--------------------------------------------------------------------------------
+static inline void update_cell(lv_obj_t *cell, Node *node) {
+  lv_label_set_text(cell, node->name.c_str());
+  init_styles(cell, node);
+}
+
 static inline lv_obj_t *append_cell(lv_obj_t *list, Node *node) {
   DBG_EXEC({
     printf("count:%3d added   %3d \"%s\"\n", album_control.count, node->key, node->name.c_str());
   });
 
   lv_obj_t * cell = lv_list_add_text(list, node->name.c_str());
-  set_properties(cell, node);
-
+  init_styles(cell, node);
   return cell;
 }
 
@@ -196,32 +206,7 @@ static inline void delete_cell(lv_obj_t *list, lv_obj_t *cell) {
   });
 
   lv_obj_delete(cell);
-}
-
-static void delete_cell_async(void *cell) {
-  lv_obj_t *list = lv_obj_get_parent((lv_obj_t *)cell);
-  delete_cell(list, (lv_obj_t *)cell);
   update_list(list);
-}
-
-//--------------------------------------------------------------------------------
-// A function to reduce the impact of a bug related to LVGL lv_list animation
-// Note: This bug occurs if a blank space is created at the bottom of the list 
-// after deleting a cell.
-//--------------------------------------------------------------------------------
-static void adjust_bottom(lv_obj_t *list) {
-  DBG_EXEC(printf("bottom: %d --> ", lv_obj_get_scroll_bottom(list)));
-
-  // If the bottom position is negative, reposition it to a positive
-  if (lv_obj_get_scroll_bottom(list) <= 0) {
-    lv_obj_scroll_to_y(list, CELL_HEIGHT_SMALL, LV_ANIM_OFF); // 1. Move to positive position
-    lv_obj_scroll_to_y(list, 0, LV_ANIM_OFF);                 // 2. Snap to the bottom position
-  }
-
-  // Update cells' position in the list
-  update_list(list);
-
-  DBG_EXEC(printf("%d\n", lv_obj_get_scroll_bottom(list)));
 }
 
 //--------------------------------------------------------------------------------
@@ -299,31 +284,32 @@ static void draw_image_cb(lv_event_t *e) {
 //--------------------------------------------------------------------------------
 // Callbacks when a cell is opened or closed
 //--------------------------------------------------------------------------------
-static void update_open_cb(lv_anim_t* a) {
-  // Scroll to make it visible
-  lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_ON);
+static void update_close_cb(lv_anim_t* a) {
+  lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
+  lv_obj_t *cell = (lv_obj_t*)a->var;
+  delete_cell(list, cell);
+}
 
+static void update_open_cb(lv_anim_t* a) {
   lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
   lv_obj_t *cell = lv_obj_get_child(list, -1);
 
-  // Delete the last cell if it is not newly added
+  // Scroll to make it visible, then delete the appropriate cell
   if (a->var != cell) {
-    delete_cell(list, cell);
+    lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_ON);
+    delete_cell(list, cell); // delete the last cell
   } else {
-    // Make the last cell visible (LV_ANIM_ON works incompletely)
-    lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_OFF);
+    // Apply an open-to-close animation to the top cell
+    lv_anim_t b;
+    lv_anim_init            (&b);
+    lv_anim_set_exec_cb     (&b, (lv_anim_exec_xcb_t)lv_obj_set_height);
+    lv_anim_set_duration    (&b, FOLDING_DURATION);
+    lv_anim_set_user_data   (&b, reinterpret_cast<void*>(list));
+    lv_anim_set_values      (&b, CELL_HEIGHT_SMALL, 0);
+    lv_anim_set_completed_cb(&b, update_close_cb);            // delete the top cell
+    lv_anim_set_var         (&b, lv_obj_get_child(list, 0));  // after an animation
+    lv_anim_start           (&b);
   }
-
-  // Not required at the end of animation ?
-  update_list(list);
-}
-
-static void update_close_cb(lv_anim_t* a) {
-  lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
-
-  // Avoid LVGL bug (?)
-  adjust_bottom(list);
-  lv_async_call(delete_cell_async, a->var);
 }
 
 //--------------------------------------------------------------------------------
@@ -355,7 +341,7 @@ static void update_open(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *a
     bool hidden = (stack.back()->meta.checked == NODE_UNFOLDED ? false : true);
     node->meta.hidden = hidden;
 
-    if (hidden == false && ++index <= CELL_MAX_VISIBLE + 1) {
+    if (hidden == false && ++index <= CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE) {
       // 1. Add a new cell and re-index
       lv_obj_t *cell = append_cell(list, node);
       lv_obj_move_to_index(cell, index);
@@ -393,15 +379,33 @@ static void update_close(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *
       break;
     }
 
-    // 1. Apply animation to the cell and start playing
+    // 1. Apply an open-to-close animation to each cell
     lv_anim_set_var(a, cell);
     lv_anim_start(a);
 
-    // 2. Add the same number of new cells to the end of the list
+    // 2. Add the same number of new cells to the end/top of the list
     if (node = find_after(last_key)) {
       last_key = node->key;
       append_cell(list, node);
       update_list(list);
+    } else {
+      cell = lv_obj_get_child(list, 0);
+      node = get_node(cell);
+      node = find_before(node->key);
+      cell = append_cell(list, node);
+      lv_obj_move_to_index(cell, 0);
+      update_list(list);
+      ++index;
+
+      // Apply a close-to-open animation to the top cell
+      lv_anim_t b;
+      lv_anim_init          (&b);
+      lv_anim_set_exec_cb   (&b, (lv_anim_exec_xcb_t)lv_obj_set_height);
+      lv_anim_set_duration  (&b, FOLDING_DURATION);
+      lv_anim_set_user_data (&b, reinterpret_cast<void*>(list));
+      lv_anim_set_values    (&b, 0, CELL_HEIGHT_SMALL);
+      lv_anim_set_var       (&b, cell);
+      lv_anim_start         (&b);
     }
   }
 }
@@ -425,10 +429,10 @@ static void event_handler(lv_event_t *e) {
 
     // Setup an animation template
     lv_anim_t a;
-    lv_anim_init(&a);
-    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_height);
-    lv_anim_set_duration(&a, FOLDING_DURATION);
-    lv_anim_set_user_data(&a, reinterpret_cast<void*>(list));
+    lv_anim_init          (&a);
+    lv_anim_set_exec_cb   (&a, (lv_anim_exec_xcb_t)lv_obj_set_height);
+    lv_anim_set_duration  (&a, FOLDING_DURATION);
+    lv_anim_set_user_data (&a, reinterpret_cast<void*>(list));
 
     uint32_t index = lv_obj_get_index(cell);
 
@@ -455,8 +459,6 @@ static void event_handler(lv_event_t *e) {
 
 //--------------------------------------------------------------------------------
 // Adjust the number of cells in the list according to the scroll
-// https://docs.lvgl.io/master/details/common-widget-features/scrolling.html
-// https://github.com/lvgl/lvgl/blob/master/examples/scroll/lv_example_scroll_7.c
 //--------------------------------------------------------------------------------
 static void update_scroll(lv_obj_t *list) {
   // Do not re-enter this function when `lv_obj_scroll_by` triggers this callback again.
@@ -464,60 +466,45 @@ static void update_scroll(lv_obj_t *list) {
   update_scroll_running = true;
 
   Node *node;
-  int32_t pos;
 
-  // Swipe UP: Add new cells to END while the bottom position of the scroll range is smaller than the cell height
-  while (album_control.end < album_control.n_nodes - 1 && (pos = lv_obj_get_scroll_bottom(list)) < CELL_SCROLL_POS) {
+  // Scroll DOWN (Swipe UP)
+  while (album_control.end < album_control.n_nodes - 1 && lv_obj_get_scroll_bottom(list) <= CELL_UPDATE_SCROLL) {
+    // Find the cell to be replaced
     if (node = find_after(album_control.end)) {
-      append_cell(list, node);
+      lv_obj_t *top = lv_obj_get_child(list, 0); // 0: get top
+      update_cell(top, node);
+      lv_obj_move_to_index(top, -1);  // -1: move top to end
+      lv_obj_scroll_by(list, 0, lv_obj_get_height(top), LV_ANIM_OFF);
       update_list(list);
-      DBG_EXEC(printf("added   end at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, album_control.top, album_control.end, album_control.count));
+      DBG_EXEC({
+        album_control.root->print_node(node);
+      });
     } else {
       break;
     }
   }
 
-  // Swipe DOWN: Add new cells to TOP while the bottom position of the scroll range is smaller than the cell height
-  while (album_control.top > 0 && (pos = lv_obj_get_scroll_top(list)) < CELL_SCROLL_POS) {
+  // Scroll UP (Swipe DOWN)
+  while (album_control.top > 0 && lv_obj_get_scroll_top(list) <= CELL_UPDATE_SCROLL) {
+    // Find the cell to be replaced
     if (node = find_before(album_control.top)) {
-      int32_t bottom_before = lv_obj_get_scroll_bottom(list);
-      lv_obj_t *new_item = append_cell(list, node);
-      lv_obj_move_to_index(new_item, 0);
+      lv_obj_t *end = lv_obj_get_child(list, -1); // -1: get end
+      update_cell(end, node);
+      lv_obj_move_to_index(end, 0); // 0: move end to top
+      lv_obj_scroll_by(list, 0, -lv_obj_get_height(end), LV_ANIM_OFF);
       update_list(list);
-      int32_t bottom_after = lv_obj_get_scroll_bottom(list);
-      lv_obj_scroll_by(list, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-      DBG_EXEC(printf("added   top at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, album_control.top, album_control.end, album_control.count));
+      DBG_EXEC({
+        album_control.root->print_node(node);
+      });
     } else {
       break;
     }
   }
 
-  // Swipe DOWN: Delete the END cells outside the scrolling range
-  while (album_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_bottom(list)) > CELL_HEIGHT_SMALL) {
-    if (node = find_before(album_control.end)) {
-      lv_obj_t *child = lv_obj_get_child(list, -1);
-      delete_cell(list, child);
-      update_list(list);
-      DBG_EXEC(printf("deleted end at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, album_control.top, album_control.end, album_control.count));
-    } else {
-      break;
-    }
-  }
-
-  // Swipe UP: Delete the TOP cells outside the scrolling range
-  while (album_control.count > CELL_MAX_VISIBLE + 1 && (pos = lv_obj_get_scroll_top(list)) > CELL_HEIGHT_SMALL) {
-    if (node = find_after(album_control.top)) {
-      int32_t bottom_before = lv_obj_get_scroll_bottom(list);
-      lv_obj_t *child = lv_obj_get_child(list, 0);
-      delete_cell(list, child);
-      update_list(list);
-      int32_t bottom_after = lv_obj_get_scroll_bottom(list);
-      lv_obj_scroll_by(list, 0, bottom_before - bottom_after, LV_ANIM_OFF);
-      DBG_EXEC(printf("deleted top at pos:%4d --> top:%3d, end:%3d, count: %d\n", pos, album_control.top, album_control.end, album_control.count));
-    } else {
-      break;
-    }
-  }
+  DBG_EXEC({
+    printf("album_control.count: %d\n", album_control.count);
+    dump_album_list();
+  });
 
   update_scroll_running = false;
 }
@@ -530,19 +517,33 @@ static void scroll_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-// Append a first cell to the album list
+// Initialize the album list with a specified number of cells
 //--------------------------------------------------------------------------------
 static void album_init(int key = 0) {
   update_scroll_running = true;   // Disable 'update_scroll()' once
-  lv_obj_clean  (album_list);
+  lv_obj_clean(album_list);
   update_scroll_running = false;  // Enable 'update_scroll()' again
 
   if (album_control.root) {
-    append_cell   (album_list, album_control.root->find_preorder(album_control.top = key));
-    update_list   (album_list);
-    update_scroll (album_list);
-    update_info   (album_info);
+    #define MIN(a, b) ((a) < (b) ? (a) : (b))
+    int i = album_control.top = album_control.end = key - 1;
+    int n = album_control.top + MIN(album_control.n_nodes, CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE);
+    while (i++ < n) {
+      Node *node = find_after(album_control.end);
+      DBG_ASSERT(node);
+      DBG_EXEC({
+        NodeMeta_t *meta = &node->meta;
+        printf("i = %2d, key: %3d, type: %d, depth: %d, hidden: %d, checked: %d, name: %s\n",
+          i, node->key, meta->type, meta->depth, meta->hidden, meta->checked, node->name.c_str()
+        );
+      });
+
+      append_cell(album_list, node);
+      update_list(album_list);
+    }
   }
+
+  update_info(album_info);
 }
 
 //--------------------------------------------------------------------------------
@@ -816,7 +817,6 @@ void ui_ScreenAlbumList_screen_init(void) {
     static constexpr lv_style_const_prop_t style_prop_info[] = {
       LV_STYLE_CONST_Y(LV_PCT_Y(-2)+1),
       LV_STYLE_CONST_ALIGN(LV_ALIGN_BOTTOM_MID),
-//    LV_STYLE_CONST_TEXT_COLOR(LV_PALETTE_GREY),
       LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
       LV_STYLE_CONST_PROPS_END
     };
