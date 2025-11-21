@@ -16,9 +16,9 @@
 //
 // | Image source / Symbol  | MY_USE_TJPGD | LV_USE_TJPGD | LV_USE_BMP |
 // | ---------------------- | ------------ | ------------ | ---------- |
-// | Binary from Flash      |       0      |       0      |      0     |
 // | Jpg from SD with cache |       1      |       0      |      0     |
 // | Bmp from SD with cache |       0      |       0      |      1     |
+// | Binary from Flash      |       0      |       0      |      0     |
 //
 // Note: In either case, LV_USE_FS_ARDUINO_SD must be set to 0.
 //--------------------------------------------------------------------------------
@@ -32,9 +32,8 @@
   void lv_fs_arduino_sd_init(void);
   void lv_fs_clear_cache(void);
   #if (MY_USE_TJPGD)
-    #if (LV_USE_TJPGD == 0) && (LV_USE_BMP == 0)
-      void lv_tjpgd_init(void);
-    #else
+    void lv_tjpgd_init(void);
+    #if (LV_USE_TJPGD != 0) || (LV_USE_BMP != 0)
       #error LV_USE_TJPGD and LV_USE_BMP should be 0
     #endif
   #endif

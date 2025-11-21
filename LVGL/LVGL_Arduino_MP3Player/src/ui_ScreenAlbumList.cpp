@@ -3,7 +3,7 @@
 // LVGL version: 9.2.2 and up
 //================================================================================
 #include "ui.h"
-#include "../tree.hpp"
+#include "tree.hpp"
 
 //--------------------------------------------------------------------------------
 // Instance of the screen widget
@@ -143,25 +143,6 @@ static void update_info(lv_obj_t *label) {
   AlbumInfo_t info;
   get_album_info(&info);
   lv_label_set_text_fmt(label, "Selected albums: %d, files: %d", info.n_selected, info.n_files);
-}
-
-//--------------------------------------------------------------------------------
-// Sets the state of all cells in the album list
-//--------------------------------------------------------------------------------
-static void set_state_all(int type, int state) {
-  const int n = album_control.n_nodes;
-  for (int i = 0; i < n; i++) {
-    Node *node = album_control.root->find_preorder(i);
-    DBG_ASSERT(node);
-    if (type == TYPE_NODE) {
-      node->meta.hidden = (state == NODE_FOLDED ? NODE_HIDDEN : NODE_REVEALED);
-      if (node->meta.type == TYPE_NODE) {
-        node->meta.checked = state;
-      }
-    } else if (node->meta.type == TYPE_LEAF) {
-      node->meta.checked = state;
-    }
-  }
 }
 
 //--------------------------------------------------------------------------------
@@ -526,18 +507,18 @@ static void album_init(int key = 0) {
 
   if (album_control.root) {
     #define MIN(a, b) ((a) < (b) ? (a) : (b))
-    int i = album_control.top = album_control.end = key - 1;
-    int n = album_control.top + MIN(album_control.n_nodes, CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE);
-    while (i++ < n) {
+    int top = album_control.top = album_control.end = key - 1;
+    int end = album_control.top + CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE;
+    end = MIN(album_control.n_nodes, end);
+    while (top++ < end) {
       Node *node = find_after(album_control.end);
       DBG_ASSERT(node);
       DBG_EXEC({
         NodeMeta_t *meta = &node->meta;
-        printf("i = %2d, key: %3d, type: %d, depth: %d, hidden: %d, checked: %d, name: %s\n",
-          i, node->key, meta->type, meta->depth, meta->hidden, meta->checked, node->name.c_str()
+        printf("No.%3d, key: %3d, type: %d, depth: %d, hidden: %d, checked: %d, name: %s\n",
+          top, node->key, meta->type, meta->depth, meta->hidden, meta->checked, node->name.c_str()
         );
       });
-
       append_cell(album_list, node);
       update_list(album_list);
     }
@@ -587,6 +568,25 @@ static void button_draw_cb(lv_event_t *e) {
   }
 }
 
+//--------------------------------------------------------------------------------
+// Sets the state of all cells in the album list
+//--------------------------------------------------------------------------------
+static void toggle_state(int type, int state) {
+  const int n = album_control.n_nodes;
+  for (int i = 0; i < n; i++) {
+    Node *node = album_control.root->find_preorder(i);
+    DBG_ASSERT(node);
+    if (type == TYPE_NODE) {
+      node->meta.hidden = (state == NODE_FOLDED ? NODE_HIDDEN : NODE_REVEALED);
+      if (node->meta.type == TYPE_NODE) {
+        node->meta.checked = state;
+      }
+    } else if (node->meta.type == TYPE_LEAF) {
+      node->meta.checked = state;
+    }
+  }
+}
+
 static void toggle_click_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
@@ -598,10 +598,10 @@ static void toggle_click_cb(lv_event_t *e) {
   uint32_t id = lv_buttonmatrix_get_selected_button(obj);
   switch (id) {
     case 0:
-      set_state_all(TYPE_NODE, info.n_folded == 0 ? NODE_FOLDED : NODE_UNFOLDED);
+      toggle_state(TYPE_NODE, info.n_folded == 0 ? NODE_FOLDED : NODE_UNFOLDED);
       break;
     case 1:
-      set_state_all(TYPE_LEAF, info.n_selected == 0 ? LEAF_SELECTED : LEAF_UNSELECTED);
+      toggle_state(TYPE_LEAF, info.n_selected == 0 ? LEAF_SELECTED : LEAF_UNSELECTED);
       break;
     case LV_BUTTONMATRIX_BUTTON_NONE:
     default:
@@ -857,7 +857,7 @@ void ui_ScreenAlbumList_create_list(void *root) {
   }
 }
 
-#if   false
+#if   true
 //--------------------------------------------------------------------------------
 // Debug functions (static)
 //--------------------------------------------------------------------------------

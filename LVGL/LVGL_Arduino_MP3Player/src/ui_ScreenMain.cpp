@@ -21,6 +21,7 @@ lv_obj_t *ui_AlbumImage;
 //--------------------------------------------------------------------------------
 void ui_ScreenMain_screen_init(void) {
   ui_ScreenMain = lv_obj_create(NULL);
+  lv_obj_set_scrollbar_mode(ui_ScreenMain, LV_SCROLLBAR_MODE_OFF);
   lv_obj_set_style_bg_color(ui_ScreenMain, UI_COLOR_BACKGROUND, 0);
 
   /////////////////////// Album Image ///////////////////////
@@ -123,10 +124,6 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style(ui_ElapsedBar, &style_indicator, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style(ui_ElapsedBar, &style_knob,      (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
   }
-
-  // Compensating for LVGL9.1 draw crash with bar/slider max value when top-padding is nonzero and right-padding is 0
-  if (lv_slider_get_mode      (ui_ElapsedBar) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_ElapsedBar, 0, LV_ANIM_OFF);
-  if (lv_obj_get_style_pad_top(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_ElapsedBar, lv_obj_get_style_pad_right(ui_ElapsedBar, (uint32_t)LV_PART_MAIN) + 1, (uint32_t)LV_PART_MAIN);
 
 #if SHOW_ARROW_BUTTON
   /////////////////////// Arrow Icon ////////////////////////
@@ -627,10 +624,6 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style(ui_Volume, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style(ui_Volume, &style_default, (uint32_t)LV_PART_KNOB      | (uint32_t)LV_STATE_DEFAULT);
   }
-
-  // Compensating for LVGL9.1 draw crash with bar/slider max value when top-padding is nonzero and right-padding is 0
-  if (lv_slider_get_mode      (ui_Volume) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_Volume, 0, LV_ANIM_OFF);
-  if (lv_obj_get_style_pad_top(ui_Volume, (uint32_t)LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_Volume, lv_obj_get_style_pad_right(ui_Volume, (uint32_t)LV_PART_MAIN) + 1, (uint32_t)LV_PART_MAIN);
 
   lv_obj_add_event_cb(ui_Favorite,    ui_event_Favorite,    LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_Repeat,      ui_event_Repeat,      LV_EVENT_CLICKED, NULL);
