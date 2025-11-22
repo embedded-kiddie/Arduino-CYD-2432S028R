@@ -3,6 +3,7 @@
 // LVGL version: 9.2.2 and up
 //================================================================================
 #include "ui.h"
+#include "peripherals.h"
 #include <string.h> // for strncpy(), strrchr()
 
 ////////////////////// GLOBAL VARIABLES /////////////////////
@@ -608,6 +609,10 @@ UI_State_t ui_loop(void) {
       update_metadata();
       ui_state = nextState;
       break;
+    case UI_STATE_SLEEP:
+      shutdown_peripherals();
+      esp_deep_sleep_start();
+      break;
     case UI_STATE_ERROR:
       lv_label_set_text_fmt(ui_MusicTitle, "%s %s", LV_SYMBOL_WARNING, player.GetError());
       ui_state = UI_STATE_IDLE;
@@ -628,7 +633,7 @@ UI_State_t ui_loop(void) {
     // deep sleep
     if (ui_option.selectSleepTimer) {
       if (millis() - ui_control.sleepStart > ui_control.sleepTimer) {
-        ret = UI_STATE_SLEEP; // enter deep sleep
+        ret = ui_state = UI_STATE_SLEEP; // enter deep sleep
       }
     }
 

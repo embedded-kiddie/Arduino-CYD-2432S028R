@@ -132,25 +132,19 @@ static void tft_init(void) {
 //----------------------------------------------------------------------
 // Display sleep/wakeup
 //----------------------------------------------------------------------
-#include "peripherals.h"
-
 static bool is_awake = true;
 
 static void update_display_state(UI_State_t state) {
   switch (state) {
-    case UI_STATE_SLEEP:
-      shutdown_peripherals();
-      esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
-      esp_deep_sleep_start();
+    case UI_STATE_AWAKE:
+      tft.wakeup();
+      ui_redisplay();
+      is_awake = true;
       break;
     case UI_STATE_BLOFF:
+    default: // may be UI_STATE_SLEEP
       tft.sleep();
       is_awake = false;
-      break;
-    case UI_STATE_AWAKE:
-    default:
-      tft.wakeup();
-      is_awake = true;
       break;
   }
 }
@@ -189,7 +183,6 @@ static void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
 
   else if (!is_awake) {
     update_display_state(UI_STATE_AWAKE);
-    ui_redisplay();
     delay(200); // Prevent unintended events from firing
     data->state = LV_INDEV_STATE_RELEASED;
   }
