@@ -34,16 +34,16 @@ static uint32_t color_index = 0;
 /* Set to your screen resolution and rotation */
 #define TFT_HOR_RES   240 // Portrait orientation default width
 #define TFT_VER_RES   320 // Portrait orientation default height
-#define TFT_ROTATION  LV_DISPLAY_ROTATION_270 // LV_DISPLAY_ROTATION_{0|90|180|270}
+#define TFT_ROTATION  LV_DISPLAY_ROTATION_0 // LV_DISPLAY_ROTATION_{0|90|180|270}
 
 /* LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes */
 #define DRAW_BUF_SIZE (TFT_HOR_RES * TFT_VER_RES / DRAW_BUF_N_DIVS * (LV_COLOR_DEPTH / 8))
 
 #define USE_HEAP_MALLOC true
 #if USE_HEAP_MALLOC
-static uint8_t* draw_buf[2] = { NULL, };
+static uint8_t* draw_buf[DRAW_BUF_N_BUFS] = { NULL, };
 #else
-static uint8_t draw_buf[2][DRAW_BUF_SIZE];
+static uint8_t draw_buf[DRAW_BUF_N_BUFS][DRAW_BUF_SIZE];
 #endif
 
 //----------------------------------------------------------------------
@@ -325,8 +325,8 @@ void setup() {
 
 #if defined(LV_DEMOS_H)
 
-  //lv_demo_widgets();
-  lv_demo_music();
+  lv_demo_widgets();
+//lv_demo_music();
 
 #elif defined(LV_EXAMPLES_H)
 

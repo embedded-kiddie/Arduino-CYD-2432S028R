@@ -99,11 +99,12 @@ static void tft_init(void) {
         3800,  // x_max
         200    // y_max
       };
+      tft.setTouchCalibrate((uint16_t*)cal);
     } else {
       uint16_t cal[8];
       calibrate_touch(cal);
+      tft.setTouchCalibrate((uint16_t*)cal);
     }
-    tft.setTouchCalibrate((uint16_t*)cal);
   } else {
     Serial.println("Touch device not found.");
   }
