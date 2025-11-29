@@ -66,7 +66,7 @@ static char fname[16];
 #endif
 
 #ifndef _SDCARD_HPP_
-#include "../src/ESP32.hpp"
+#include "ESP32.hpp"
 #endif
 
 //----------------------------------------------------------------------
@@ -244,10 +244,10 @@ static uint32_t my_tick(void) {
 }
 
 void setup() {
-  DBG_EXEC({
+//DBG_EXEC({
     Serial.begin(115200);
     while (millis() < 500);
-  });
+//});
 
   tft_init();
   lv_init();

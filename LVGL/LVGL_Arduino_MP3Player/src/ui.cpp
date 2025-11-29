@@ -3,7 +3,7 @@
 // LVGL version: 9.2.2 and up
 //================================================================================
 #include "ui.h"
-#include "peripherals.h"
+#include "../peripherals.h"
 #include <string.h> // for strncpy(), strrchr()
 
 ////////////////////// GLOBAL VARIABLES /////////////////////
