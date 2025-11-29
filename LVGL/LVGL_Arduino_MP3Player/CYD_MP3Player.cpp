@@ -3,7 +3,7 @@
 //================================================================================
 #include <ctype.h>    // isdigit(), isprint()
 #include <stdlib.h>   // atoi()
-#include <string.h>   // strcpy(), strtok_r(), strrchr()
+#include <string.h>   // strncpy(), strtok_r(), strrchr()
 #include <string>     // std::string
 #include <random>     // std::mt19937
 #include <algorithm>  // std::shuffle
@@ -375,15 +375,9 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
     char *ptr, *token, *tmp[8], copy[BUF_SIZE];
     std::string path = GetFilePath(playNo);
 
-    if (path.size() < sizeof(copy)) {
-      strcpy(copy, path.c_str());
-    } else {
-      // Copy a string including the null character from the end
-      strcpy(copy, path.c_str() + path.size() + 1 - sizeof(copy));
-      if (!isprint(copy[0])) {
-        copy[0] = ' ';
-      }
-    }
+    // UTF-8 multibyte characters should be handled correctly
+    strncpy(copy, path.c_str(), sizeof(copy));
+    copy[sizeof(copy) - 1] = '\0';
 
     token = strtok_r(copy, "/", &ptr);
     while (token != NULL && n < 8) {
