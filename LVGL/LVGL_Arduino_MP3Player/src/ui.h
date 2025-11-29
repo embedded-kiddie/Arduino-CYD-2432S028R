@@ -96,8 +96,8 @@ extern lv_obj_t *ui_ScreenOptions;
 void ui_event_ScreenOptions(lv_event_t *e);
 void ui_ScreenOptions_screen_init  (void);
 void ui_ScreenOptions_screen_deinit(void);
-void ui_set_option_backlight(void);
-void ui_set_option_sleeptime(void);
+void ui_option_set_backlight(void);
+void ui_option_set_sleeptime(void);
 
 // IMAGES
 LV_IMAGE_DECLARE(img_album);            // assets/icons/img_album.png

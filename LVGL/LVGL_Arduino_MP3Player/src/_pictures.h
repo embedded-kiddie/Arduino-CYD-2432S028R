@@ -29,6 +29,9 @@ LV_IMAGE_DECLARE(_35xxxv);
 LV_IMAGE_DECLARE(Luxury_Disease);
 LV_IMAGE_DECLARE(Jinsei_Kakeru_Boku);
 LV_IMAGE_DECLARE(Zankyou_Reference);
+LV_IMAGE_DECLARE(Hybrid_Theory);
+LV_IMAGE_DECLARE(海のYeah);
+LV_IMAGE_DECLARE(Ballad3);
 
 const lv_image_dsc_t *pictures[] = {
   /*  0 */  & img_album,
@@ -60,6 +63,9 @@ const lv_image_dsc_t *pictures[] = {
   /* 26 */  & Luxury_Disease,
   /* 27 */  & Jinsei_Kakeru_Boku,
   /* 28 */  & Zankyou_Reference,
+  /* 29 */  & Hybrid_Theory,
+  /* 30 */  & 海のYeah,
+  /* 31 */  & Ballad3,
 };
 
 #define N_PICTURES  (sizeof(pictures) / sizeof(lv_image_dsc_t *))

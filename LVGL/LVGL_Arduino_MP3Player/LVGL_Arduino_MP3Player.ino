@@ -244,8 +244,10 @@ static uint32_t my_tick(void) {
 }
 
 void setup() {
-  Serial.begin(115200);
-  while (millis() < 500);
+  DBG_EXEC({
+    Serial.begin(115200);
+    while (millis() < 500);
+  });
 
   tft_init();
   lv_init();

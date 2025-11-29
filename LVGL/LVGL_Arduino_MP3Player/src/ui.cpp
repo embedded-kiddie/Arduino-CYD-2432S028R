@@ -527,8 +527,8 @@ void audio_eof_mp3(const char *info) {
 // Load / Save options in SD
 //--------------------------------------------------------------------------------
 void ui_load_options(void) {
-  ui_set_option_backlight();
-  ui_set_option_sleeptime();
+  ui_option_set_backlight();
+  ui_option_set_sleeptime();
 }
 
 void ui_save_options(void) {

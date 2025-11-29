@@ -46,11 +46,11 @@ static const DropdownOpts_t opts_sleeptime = {
   }
 };
 
-void ui_set_option_backlight(void) {
+void ui_option_set_backlight(void) {
   ui_control.backlightTimer = opts_backlight.time[ui_option.selectBacklight];
 }
 
-void ui_set_option_sleeptime(void) {
+void ui_option_set_sleeptime(void) {
   ui_control.sleepTimer = opts_sleeptime.time[ui_option.selectSleepTimer];
 }
 
@@ -62,7 +62,7 @@ static void backlight_cb(lv_event_t *e) {
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
   ui_option.selectBacklight = lv_roller_get_selected(obj);
-  ui_set_option_backlight();
+  ui_option_set_backlight();
 }
 
 static void sleeptimer_cb(lv_event_t *e) {
@@ -71,7 +71,7 @@ static void sleeptimer_cb(lv_event_t *e) {
   lv_obj_t * obj = lv_event_get_target_obj(e);
   ui_option.selectSleepTimer = lv_roller_get_selected(obj);
   ui_control.sleepStart = millis();
-  ui_set_option_sleeptime();
+  ui_option_set_sleeptime();
 }
 
 //--------------------------------------------------------------------------------
