@@ -7,6 +7,7 @@
 //================================================================================
 #include <lvgl.h>
 #include "src/ui.h"
+#include "peripherals.h"
 
 #if LV_COLOR_DEPTH != 16
 #error "LV_COLOR_DEPTH in lv_conf.h should be 16bit"
@@ -138,12 +139,14 @@ static void update_display_state(UI_State_t state) {
   switch (state) {
     case UI_STATE_AWAKE:
       tft.wakeup();
+      RGB_LED_ON();
       ui_redisplay();
       is_awake = true;
       break;
     case UI_STATE_BLOFF:
     default: // may be UI_STATE_SLEEP
       tft.sleep();
+      RGB_LED_OFF();
       is_awake = false;
       break;
   }
@@ -313,6 +316,9 @@ void loop() {
         if (dump_play_list) {
           dump_play_list();
         }
+        break;
+      case '2':
+        PrintESP32System();
         break;
       default:
         PrintESP32Memory();
