@@ -318,10 +318,10 @@ void loop() {
         }
         break;
       case '2':
-        PrintESP32System();
+        ESP32::print_task();
         break;
       default:
-        PrintESP32Memory();
+        ESP32::print_heap();
         break;
     }
   #endif

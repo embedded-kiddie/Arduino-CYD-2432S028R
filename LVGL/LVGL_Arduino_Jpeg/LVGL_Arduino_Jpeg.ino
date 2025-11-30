@@ -290,7 +290,7 @@ void loop() {
 #if SCREENSHORT
     SaveBMP24(SD, "/demo.bmp", tft);
 #else
-    PrintESP32Memory();
+    ESP32::print_heap();
 #if LV_USE_FS_ARDUINO_ESP_LITTLEFS
     listDir(LittleFS, "/", 3);
     Serial.printf("Total: %d, Used: %d\n", LittleFS.totalBytes(), LittleFS.usedBytes());
