@@ -149,17 +149,6 @@ typedef enum {
   UI_STATE_ERROR,
 } UI_State_t;
 
-// UI INIT
-void ui_init(void);
-
-// Custom Functions
-UI_State_t ui_loop(void);
-void ui_redisplay(void);
-void ui_set_playNo(uint32_t playNo);
-
-const uint32_t ui_get_playNo(void);
-const uint32_t ui_get_counts(void);
-
 // Variables
 typedef struct {
   bool      shuffle;
@@ -183,5 +172,13 @@ typedef struct {
 extern UI_State_t ui_state;
 extern UI_Option_t ui_option;
 extern UI_Control_t ui_control;
+
+// UI Functions
+void ui_init(void);
+UI_State_t ui_loop(void);
+void ui_redisplay(void);
+void ui_set_playNo(uint32_t playNo);
+const uint32_t ui_get_playNo(void);
+const uint32_t ui_get_counts(void);
 
 #endif // _UI_H_
