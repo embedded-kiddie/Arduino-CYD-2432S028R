@@ -1,6 +1,9 @@
 //================================================================================
 // CYD_MP3Player class definition
 //================================================================================
+#include "CYD28_audio.h"
+#include "CYD_MP3Player.h"
+
 #include <ctype.h>    // isdigit(), isprint()
 #include <stdlib.h>   // atoi()
 #include <string.h>   // strncpy(), strtok_r(), strrchr()
@@ -8,8 +11,6 @@
 #include <random>     // std::mt19937
 #include <algorithm>  // std::shuffle
 #include <functional> // std::hash
-
-#include "CYD_MP3Player.h"
 
 // Functional object to make a hash from the music title
 std::hash<std::string> MakeHash;
@@ -159,9 +160,7 @@ bool CYD_MP3Player::UpdateMetaData(void) {
 //--------------------------------------------------------------------------------
 // Scan and create a list of audio m_list in a specified directory.
 //--------------------------------------------------------------------------------
-uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
-//uint32_t t = millis();
-
+uint32_t CYD_MP3Player::ScanPlayList(void) {
   if (m_tree == NULL) {
     File dir = SD.open(m_root.c_str());
     if (!dir) {
@@ -174,36 +173,21 @@ uint32_t CYD_MP3Player::ScanPlayList(bool shuffle) {
     dir.close();
   }
 
-  if (m_list.size() == 0) {
-    ScanAudioFiles();
-
-    if (shuffle) {
-      ShuffleAudioFiles();
-    }
-  }
-
-//printf("%d [msec]\n", millis() - t);
-
-  if (m_list.size() == 0) {
-    m_error = "No music to play";
-  }
-
   DBG_EXEC({
     m_tree->dump_tree();
-    dump_files();
-    printf("Total: %d\n", m_list.size());
   });
 
-  return m_list.size();
+  return m_tree->get_n_leafs();
 }
 
 //--------------------------------------------------------------------------------
 // Scan audio files and make a play list
 //--------------------------------------------------------------------------------
-void CYD_MP3Player::ScanAudioFiles(void) {
-  const size_t n = m_tree->get_n_leafs();
+uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
+  DBG_ASSERT(m_tree && m_list.size() == 0);
 
   // Extract audio files in the parents directory
+  const size_t n = m_tree->get_n_leafs();
   for (int p = 0, parent = 0; parent < n; parent++) {
     std::string path = m_tree->find_path(parent);
     Node *node = m_tree->get_node();
@@ -311,6 +295,20 @@ void CYD_MP3Player::ScanAudioFiles(void) {
 
     p = m_list.size();
   }
+
+  if (m_list.size() == 0) {
+    m_error = "No music to play";
+  }
+
+  else if (shuffle) {
+    ShuffleAudioFiles();
+  }
+
+  DBG_EXEC({
+    dump_files();
+  });
+
+  return m_list.size();
 }
 
 //--------------------------------------------------------------------------------

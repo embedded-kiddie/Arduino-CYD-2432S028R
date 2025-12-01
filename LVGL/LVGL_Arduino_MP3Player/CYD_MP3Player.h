@@ -4,11 +4,7 @@
 #ifndef _CYD_MP3PLAYER_H_
 #define _CYD_MP3PLAYER_H_
 
-#include "CYD28_audio.h"
-#include "sdfs.h"
 #include "tree.hpp"
-#include "debug.h"
-
 #include <string>
 #include <vector>
 
@@ -105,8 +101,8 @@ public:
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_list.size(); }
-  uint32_t    ScanPlayList(bool shuffle = true);
-  void        ScanAudioFiles(void);
+  uint32_t    ScanPlayList(void);
+  uint32_t    ScanAudioFiles(bool shuffle = true);
   void        ShuffleAudioFiles(void);
   void        ClearAudioFiles(void);
   std::string GetDirPath  (uint32_t playNo);
@@ -167,8 +163,11 @@ private:
     int i = 0; 
     for (auto &f : m_list) {
       std::string path = m_tree->find_path(f.parent);
-      printf("No %3d: %d/%d, %3d, %s/%s\n", i++, f.meta.saved, f.meta.selected, f.meta.duration, path.c_str(), f.name.c_str());
+      printf("No %3d: %d/%d, %3d, %s/%s (%d/%d)\n", i++,
+            f.meta.saved, f.meta.selected, f.meta.duration, path.c_str(),
+            f.name.c_str(), f.name.size(), f.name.capacity());
     }
+    printf("Total: %d\n", m_list.size());
   }
 };
 /*

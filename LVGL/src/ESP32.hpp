@@ -37,10 +37,10 @@ typedef struct {
 //--------------------------------------------------------------------------------
 //
 //--------------------------------------------------------------------------------
-class ESP32 {
+class ESP32Info {
 public:
-  ESP32() {}
-  ~ESP32() {}
+  ESP32Info() {}
+  ~ESP32Info() {}
 
 private:
   static void get_mem(ESP32Memory_t *mem) {
@@ -107,10 +107,12 @@ public:
   }
 
   static void print_task(void) {
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
     // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/freertos_stats.h
     // https://forum.arduino.cc/t/how-to-make-tasks-and-determine-stack-size-in-freertos/978325/29
     // uxTaskGetStackHighWaterMark()
     printRunningTasks(Serial);
+#endif
   }
 
   static void print_info(void) {

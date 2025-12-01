@@ -291,9 +291,9 @@ public:
   }
 
   void print_node(Node *node) {
-    Serial.printf("key:%3d, size:%2d, depth:%d, type:%d, hidden:%d, checked:%d %s\n",
-                  node->key, node->children.size(), node->meta.depth, node->meta.type,
-                  node->meta.hidden, node->meta.checked, node->name.c_str());
+    Serial.printf("key:%3d, size:%2d, depth:%d, type:%d, hidden:%d, checked:%d %s (%d/%d)\n",
+                  node->key, node->children.size(), node->meta.depth, node->meta.type, node->meta.hidden,
+                  node->meta.checked, node->name.c_str(), node->name.size(), node->name.capacity());
   }
 
   void print_nodes(Node * node, int indent = 0) {
