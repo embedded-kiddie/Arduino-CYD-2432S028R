@@ -139,14 +139,12 @@ static void update_display_state(UI_State_t state) {
   switch (state) {
     case UI_STATE_AWAKE:
       tft.wakeup();
-      RGB_LED_ON();
       ui_redisplay();
       is_awake = true;
       break;
     case UI_STATE_BLOFF:
     default: // may be UI_STATE_SLEEP
       tft.sleep();
-      RGB_LED_OFF();
       is_awake = false;
       break;
   }
@@ -252,6 +250,7 @@ void setup() {
     while (millis() < 500);
 //});
 
+  RGB_LED_OFF();
   tft_init();
   lv_init();
 

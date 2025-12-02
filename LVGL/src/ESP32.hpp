@@ -19,7 +19,7 @@ typedef struct {
   size_t allocated;
   size_t minimum;
   size_t largest;
-} ESP32Memory_t;
+} ESP32MemInfo_t;
 
 // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/Esp.cpp
 // https://github.com/espressif/esp-idf/blob/master/components/heap/include/esp_heap_caps.h#L32-L51
@@ -43,7 +43,7 @@ public:
   ~ESP32Info() {}
 
 private:
-  static void get_mem(ESP32Memory_t *mem) {
+  static void get_mem_info(ESP32MemInfo_t *mem) {
     multi_heap_info_t info;
     heap_caps_get_info(&info, HEAP_MEM_CAPS);
     mem->sketch_space = ESP.getFreeSketchSpace();
@@ -55,7 +55,7 @@ private:
     mem->largest      = info.largest_free_block;
   }
 
-  static void print(ESP32Memory_t *mem) {
+  static void print_mem_info(ESP32MemInfo_t *mem) {
     printf("Sketch space        :%7d\n", mem->sketch_space);
     printf("Sketch size         :%7d\n", mem->sketch_size);
     printf("Heap total size     :%7d\n", mem->total);
@@ -65,7 +65,7 @@ private:
     printf("Heap free largest   :%7d\n", mem->largest);
   }
 
-  static void diff(ESP32Memory_t *start, ESP32Memory_t *end) {
+  static void print_diff(ESP32MemInfo_t *start, ESP32MemInfo_t *end) {
     printf("Heap total size     :%7d (%7d ==> %7d)\n", end->total     - start->total,     start->total,     end->total    );
     printf("Heap total free     :%7d (%7d ==> %7d)\n", end->free      - start->free,      start->free,      end->free     );
     printf("Heap total allocated:%7d (%7d ==> %7d)\n", end->allocated - start->allocated, start->allocated, end->allocated);
@@ -76,9 +76,9 @@ private:
 public:
   static void print_heap(void) {
     printf("============ Memory Usage =============\n");
-    ESP32Memory_t mem;
-    get_mem(&mem);
-    print(&mem);
+    ESP32MemInfo_t mem;
+    get_mem_info(&mem);
+    print_mem_info(&mem);
 
     // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/heap_debug.html
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/mem_alloc.html
@@ -96,14 +96,14 @@ public:
 #endif
   }
 
-  static void heap_begin(ESP32Memory_t *start) {
-    get_mem(start);
+  static void heap_begin(ESP32MemInfo_t *start) {
+    get_mem_info(start);
   }
 
-  static void heap_usage(ESP32Memory_t *start) {
-    ESP32Memory_t end;
-    get_mem(&end);
-    diff(start, &end);
+  static void heap_usage(ESP32MemInfo_t *start) {
+    ESP32MemInfo_t end;
+    get_mem_info(&end);
+    print_diff(start, &end);
   }
 
   static void print_task(void) {
