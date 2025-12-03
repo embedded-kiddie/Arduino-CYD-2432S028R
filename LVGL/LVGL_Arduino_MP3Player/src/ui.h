@@ -115,16 +115,12 @@ LV_IMAGE_DECLARE(img_menu_up);          // assets/icons/img_menu_up.png
 LV_IMAGE_DECLARE(img_menu_down);        // assets/icons/img_menu_down.png
 LV_IMAGE_DECLARE(img_menu_right);       // assets/icons/img_menu_right.png
 LV_IMAGE_DECLARE(img_menu_left);        // assets/icons/img_menu_left.png
-LV_IMAGE_DECLARE(img_menu_dot);         // assets/icons/img_menu_dot.png
 LV_IMAGE_DECLARE(img_bluetooth_on);     // assets/icons/img_bluetooth_on.png
 LV_IMAGE_DECLARE(img_bluetooth_off);    // assets/icons/img_bluetooth_off.png
 LV_IMAGE_DECLARE(img_heart_off_small);  // assets/icons/img_heart_off_small.png
 LV_IMAGE_DECLARE(img_heart_on_small);   // assets/icons/img_heart_on_small.png
 LV_IMAGE_DECLARE(img_list_play);        // assets/icons/img_list_play.png
 LV_IMAGE_DECLARE(img_list_pause);       // assets/icons/img_list_pause.png
-LV_IMAGE_DECLARE(img_toggle_folder);    // assets/icons/img_toggle_folder.png
-LV_IMAGE_DECLARE(img_toggle_check);     // assets/icons/img_toggle_check.png
-LV_IMAGE_DECLARE(img_list_border);      // assets/icons/img_list_border.png
 LV_IMAGE_DECLARE(img_checkbox);         // assets/icons/img_checkbox.png
 LV_IMAGE_DECLARE(img_checked);          // assets/icons/img_checked.png
 LV_IMAGE_DECLARE(img_symbol_down);      // assets/icons/img_symbol_down.png
