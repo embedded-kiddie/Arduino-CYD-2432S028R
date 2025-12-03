@@ -256,6 +256,9 @@ static void update_scroll(lv_obj_t *obj) {
     put_list_cell(top, ui_control.end);
     lv_obj_scroll_by(obj, 0, lv_obj_get_height(top), LV_ANIM_OFF);
     lv_obj_update_layout(obj);
+    DBG_EXEC({
+      show_ui_control();
+    });
   }
 
   // Scroll UP (Swipe DOWN)
@@ -269,6 +272,9 @@ static void update_scroll(lv_obj_t *obj) {
     put_list_cell(end, ui_control.top);
     lv_obj_scroll_by(obj, 0, -lv_obj_get_height(end), LV_ANIM_OFF);
     lv_obj_update_layout(obj);
+    DBG_EXEC({
+      show_ui_control();
+    });
   }
 
   // Always less than equal CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE cells are allocated
@@ -277,6 +283,10 @@ static void update_scroll(lv_obj_t *obj) {
   update_slider(obj);
   ui_list_update_cell(ui_control.focusNo, true);
   ui_list_update_icon(ui_control.playNo,  true);
+
+  DBG_EXEC({
+    dump_play_list();
+  });
 
   update_scroll_running = false;
 }
@@ -491,7 +501,7 @@ void ui_ScreenPlayList_screen_deinit(void) {
   }
 }
 
-#if   false
+#if   DEBUG
 //--------------------------------------------------------------------------------
 // Debug functions
 //--------------------------------------------------------------------------------
