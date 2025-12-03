@@ -38,10 +38,6 @@ typedef struct {
 //
 //--------------------------------------------------------------------------------
 class ESP32Info {
-public:
-  ESP32Info() {}
-  ~ESP32Info() {}
-
 private:
   static void get_mem_info(ESP32MemInfo_t *mem) {
     multi_heap_info_t info;

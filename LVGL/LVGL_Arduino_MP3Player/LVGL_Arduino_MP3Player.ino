@@ -135,8 +135,12 @@ static void tft_init(void) {
 //----------------------------------------------------------------------
 static bool is_awake = true;
 
-static void update_display_state(UI_State_t state) {
+static void update_device_state(UI_State_t state) {
   switch (state) {
+    case UI_STATE_SLEEP:
+      shutdown_peripherals();
+      esp_deep_sleep_start();
+      break;
     case UI_STATE_AWAKE:
       tft.wakeup();
       ui_redisplay();
@@ -183,7 +187,7 @@ static void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
   }
 
   else if (!is_awake) {
-    update_display_state(UI_STATE_AWAKE);
+    update_device_state(UI_STATE_AWAKE);
     delay(200); // Prevent unintended events from firing
     data->state = LV_INDEV_STATE_RELEASED;
   }
@@ -285,7 +289,7 @@ void loop() {
 
   UI_State_t state = ui_loop();
   if (state == UI_STATE_SLEEP || (state == UI_STATE_BLOFF && is_awake == true)) {
-    update_display_state(state);
+    update_device_state(state);
   }
 
 #if SAVE_SEQUENCIAL_BMP

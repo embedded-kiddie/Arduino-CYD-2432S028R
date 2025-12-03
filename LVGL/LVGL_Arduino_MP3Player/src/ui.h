@@ -122,8 +122,8 @@ LV_IMAGE_DECLARE(img_heart_off_small);  // assets/icons/img_heart_off_small.png
 LV_IMAGE_DECLARE(img_heart_on_small);   // assets/icons/img_heart_on_small.png
 LV_IMAGE_DECLARE(img_list_play);        // assets/icons/img_list_play.png
 LV_IMAGE_DECLARE(img_list_pause);       // assets/icons/img_list_pause.png
-LV_IMAGE_DECLARE(img_rotate_folder);    // assets/icons/img_rotate_folder.png
-LV_IMAGE_DECLARE(img_rotate_check);     // assets/icons/img_rotate_check.png
+LV_IMAGE_DECLARE(img_toggle_folder);    // assets/icons/img_toggle_folder.png
+LV_IMAGE_DECLARE(img_toggle_check);     // assets/icons/img_toggle_check.png
 LV_IMAGE_DECLARE(img_list_border);      // assets/icons/img_list_border.png
 LV_IMAGE_DECLARE(img_checkbox);         // assets/icons/img_checkbox.png
 LV_IMAGE_DECLARE(img_checked);          // assets/icons/img_checked.png
