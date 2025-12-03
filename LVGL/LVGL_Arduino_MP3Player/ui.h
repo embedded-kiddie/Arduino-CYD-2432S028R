@@ -5,8 +5,10 @@
 #ifndef _UI_H_
 #define _UI_H_
 
+#include "debug.h"
 #include <lvgl.h>
-#include "../debug.h"
+#include <vector>
+#include <WString.h>  // for String class
 
 // Arrow buttons to navigate to each screen
 #define SHOW_ARROW_BUTTON false
@@ -147,12 +149,18 @@ typedef enum {
 
 // Variables
 typedef struct {
+  String    name; // name in dropdown list
+  size_t    hash; // hash of json document
+} AlbumList_t;
+
+typedef struct {
   bool      shuffle;
   bool      favorite;
   uint8_t   repeat;
-  uint8_t   selectPlaylist;
   uint8_t   selectBacklight;
   uint8_t   selectSleepTimer;
+  uint8_t   selectAlbumList;
+  std::vector<AlbumList_t> album;
 } UI_Option_t;
 
 typedef struct {
@@ -176,5 +184,8 @@ void ui_redisplay(void);
 void ui_set_playNo(uint32_t playNo);
 const uint32_t ui_get_playNo(void);
 const uint32_t ui_get_counts(void);
+bool ui_album_list_json(void);
+bool ui_album_list_save(void);
+bool ui_album_list_load(void);
 
 #endif // _UI_H_

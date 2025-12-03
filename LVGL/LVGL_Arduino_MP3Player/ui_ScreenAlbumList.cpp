@@ -3,7 +3,8 @@
 // LVGL version: 9.2.2 and up
 //================================================================================
 #include "ui.h"
-#include "../tree.hpp"
+#include "tree.hpp"
+#include "json.hpp"
 
 //--------------------------------------------------------------------------------
 // Instance of the screen widget
@@ -69,48 +70,16 @@ typedef struct {
 } AlbumInfo_t;
 
 //--------------------------------------------------------------------------------
-// Global variables and prototype
+// Local variables and prototype
 //--------------------------------------------------------------------------------
 static lv_obj_t *album_list;
 static lv_obj_t *album_info;
+static lv_obj_t *keypad_panel;
 static AlbumControl_t album_control;
 static bool update_scroll_running = false;
 
 static void event_handler(lv_event_t *e);
 static void draw_image_cb(lv_event_t *e);
-
-//--------------------------------------------------------------------------------
-// Setup cell styles and properties
-//--------------------------------------------------------------------------------
-static void init_styles(lv_obj_t *cell, Node *node) {
-  static constexpr lv_style_const_prop_t style_prop_cell[] = {
-    LV_STYLE_CONST_ALIGN(LV_ALIGN_LEFT_MID),
-    LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
-    LV_STYLE_CONST_PAD_TOP(CELL_PADDING_BORDER),
-    LV_STYLE_CONST_PAD_BOTTOM(CELL_PADDING_BORDER),
-    LV_STYLE_CONST_OUTLINE_COLOR(CELL_COLOR_OUTLINE),
-    LV_STYLE_CONST_OUTLINE_WIDTH(1),
-    LV_STYLE_CONST_PROPS_END
-  };
-  static LV_STYLE_CONST_INIT(style_cell, (void*)(style_prop_cell));
-
-  // Common styles
-  if (lv_obj_get_event_count(cell) == 0) {
-    lv_obj_add_style        (cell, &style_cell, (uint32_t)LV_PART_MAIN);
-    lv_label_set_long_mode  (cell, LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_DOT, LV_LABEL_LONG_SCROLL_CIRCULAR
-    lv_obj_add_flag         (cell, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_flag         (cell, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
-    lv_obj_add_event_cb     (cell, draw_image_cb, LV_EVENT_DRAW_TASK_ADDED, NULL);
-    lv_obj_add_event_cb     (cell, event_handler, LV_EVENT_CLICKED, NULL);
-  }
-
-  // Individual styles
-  NodeMeta_t *meta = &node->meta;
-  lv_obj_set_style_height   (cell, (meta->depth > 1 && meta->hidden ? 0 : CELL_HEIGHT_SMALL), LV_PART_MAIN);
-  lv_obj_set_style_bg_color (cell, (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF), LV_PART_MAIN);
-  lv_obj_set_style_pad_left (cell, (meta->depth * CELL_PADDING_LEFT + (meta->type == TYPE_NODE ? CELL_OFFSET_NODE: CELL_OFFSET_LEAF)), LV_PART_MAIN);
-  lv_obj_set_user_data      (cell, reinterpret_cast<void*>(node));
-}
 
 //--------------------------------------------------------------------------------
 // Count / Update open cells, selected nodes and selected audio files
@@ -142,7 +111,7 @@ static void get_album_info(AlbumInfo_t *info) {
 static void update_info(lv_obj_t *label) {
   AlbumInfo_t info;
   get_album_info(&info);
-  lv_label_set_text_fmt(label, "Selected albums: %d, files: %d", info.n_selected, info.n_files);
+  lv_label_set_text_fmt(label, "Selected album: %d, files: %d", info.n_selected, info.n_files);
 }
 
 //--------------------------------------------------------------------------------
@@ -163,11 +132,44 @@ static inline void update_list(lv_obj_t *list) {
 }
 
 //--------------------------------------------------------------------------------
+// Setup cell styles and properties
+//--------------------------------------------------------------------------------
+static void setup_cell_styles(lv_obj_t *cell, Node *node) {
+  static constexpr lv_style_const_prop_t style_prop_cell[] = {
+    LV_STYLE_CONST_ALIGN(LV_ALIGN_LEFT_MID),
+    LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
+    LV_STYLE_CONST_PAD_TOP(CELL_PADDING_BORDER),
+    LV_STYLE_CONST_PAD_BOTTOM(CELL_PADDING_BORDER),
+    LV_STYLE_CONST_OUTLINE_COLOR(CELL_COLOR_OUTLINE),
+    LV_STYLE_CONST_OUTLINE_WIDTH(1),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static LV_STYLE_CONST_INIT(style_cell, (void*)(style_prop_cell));
+
+  // Common styles
+  if (lv_obj_get_event_count(cell) == 0) {
+    lv_obj_add_style        (cell, &style_cell, (uint32_t)LV_PART_MAIN);
+    lv_label_set_long_mode  (cell, LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_DOT, LV_LABEL_LONG_SCROLL_CIRCULAR
+    lv_obj_add_flag         (cell, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag         (cell, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+    lv_obj_add_event_cb     (cell, draw_image_cb, LV_EVENT_DRAW_TASK_ADDED, NULL);
+    lv_obj_add_event_cb     (cell, event_handler, LV_EVENT_CLICKED, NULL);
+  }
+
+  // Individual styles
+  NodeMeta_t *meta = &node->meta;
+  lv_obj_set_style_height   (cell, (meta->depth > 1 && meta->hidden ? 0 : CELL_HEIGHT_SMALL), LV_PART_MAIN);
+  lv_obj_set_style_bg_color (cell, (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF), LV_PART_MAIN);
+  lv_obj_set_style_pad_left (cell, (meta->depth * CELL_PADDING_LEFT + (meta->type == TYPE_NODE ? CELL_OFFSET_NODE: CELL_OFFSET_LEAF)), LV_PART_MAIN);
+  lv_obj_set_user_data      (cell, reinterpret_cast<void*>(node));
+}
+
+//--------------------------------------------------------------------------------
 // Append / Delete the specified node to the list
 //--------------------------------------------------------------------------------
 static inline void update_cell(lv_obj_t *cell, Node *node) {
   lv_label_set_text(cell, node->name.c_str());
-  init_styles(cell, node);
+  setup_cell_styles(cell, node);
 }
 
 static inline lv_obj_t *append_cell(lv_obj_t *list, Node *node) {
@@ -176,7 +178,7 @@ static inline lv_obj_t *append_cell(lv_obj_t *list, Node *node) {
   });
 
   lv_obj_t * cell = lv_list_add_text(list, node->name.c_str());
-  init_styles(cell, node);
+  setup_cell_styles(cell, node);
   return cell;
 }
 
@@ -366,10 +368,12 @@ static void update_close(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *
 
     // 2. Add the same number of new cells to the end/top of the list
     if (node = find_after(last_key)) {
+      // In case node is not in the last cell
       last_key = node->key;
       append_cell(list, node);
       update_list(list);
     } else {
+      // In case node is in the last cell
       cell = lv_obj_get_child(list, 0);
       node = get_node(cell);
       node = find_before(node->key);
@@ -506,10 +510,12 @@ static void album_init(int key = 0) {
   update_scroll_running = false;  // Enable 'update_scroll()' again
 
   if (album_control.root) {
-    #define MIN(a, b) ((a) < (b) ? (a) : (b))
     int top = album_control.top = album_control.end = key - 1;
     int end = album_control.top + CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE;
-    end = MIN(album_control.n_nodes, end);
+    if (end > album_control.n_nodes) {
+      end = album_control.n_nodes;
+    }
+
     while (top++ < end) {
       Node *node = find_after(album_control.end);
       DBG_ASSERT(node);
@@ -534,7 +540,7 @@ static void dropdown_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectPlaylist = lv_dropdown_get_selected(obj);
+  ui_option.selectAlbumList = lv_dropdown_get_selected(obj);
 }
 
 //--------------------------------------------------------------------------------
@@ -612,6 +618,27 @@ static void toggle_click_cb(lv_event_t *e) {
   album_init(/*album_control.top*/);
 }
 
+static void keypad_event_cb(lv_event_t *e) {
+  lv_event_code_t code = lv_event_get_code(e);
+  lv_obj_t *ta = (lv_obj_t *)lv_event_get_target(e);
+  lv_obj_t *kb = (lv_obj_t *)lv_event_get_user_data(e);
+
+  if (code == LV_EVENT_FOCUSED) {
+    lv_keyboard_set_textarea(kb, ta);
+  }
+
+  else if (code == LV_EVENT_DEFOCUSED) {
+    lv_keyboard_set_textarea(kb, NULL);
+    lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+    lv_indev_reset(NULL, ta);
+  }
+
+  else if (code == LV_EVENT_READY || code == LV_EVENT_CANCEL) {
+    lv_obj_add_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
+    lv_indev_reset(NULL, ta); /* To forget the last clicked object to make it focusable again */
+  }
+}
+
 static void keypad_click_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
@@ -619,11 +646,24 @@ static void keypad_click_cb(lv_event_t *e) {
   lv_obj_t *obj = lv_event_get_target_obj(e);
   uint32_t id = lv_buttonmatrix_get_selected_button(obj);
   switch (id) {
-    case 0:
+    case 0: /* + */
+      lv_obj_remove_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
       break;
-    case 1:
+    case 1: /* keypad */
+      {
+        JsonDocument doc;
+        JsonTree::tree2json(album_control.root, doc); // A few milliseconds
+
+        DBG_EXEC({
+          serializeJsonPretty(doc, Serial);
+          Serial.println();
+        });
+
+        toggle_state(TYPE_LEAF, LEAF_UNSELECTED);       // < 1[msec]
+        JsonTree::select_leaf(doc, album_control.root); // < 1[msec]
+      }
       break;
-    case 2:
+    case 2: /* - */
       break;
     case LV_BUTTONMATRIX_BUTTON_NONE:
     default:
@@ -641,6 +681,7 @@ static void delete_cb(lv_event_t *e) {
     &ui_ScreenAlbumList,
     &album_list,
     &album_info,
+    &keypad_panel,
   };
 
   for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
@@ -663,7 +704,6 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_GESTURE, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_LOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_UNLOADED, NULL);
-    lv_obj_add_event_cb       (ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&ui_ScreenAlbumList));
 
     lv_obj_t *obj;
 
@@ -728,10 +768,15 @@ void ui_ScreenAlbumList_screen_init(void) {
     static LV_STYLE_CONST_INIT(style_dropdown, (void*)(style_prop_dropdown));
 
     obj = lv_dropdown_create(ui_ScreenAlbumList);
+    String list;
+    for (auto &i : ui_option.album) {
+      list += i.name + "\n";
+    }
+    list.trim();
     lv_obj_add_style        (obj, &style_dropdown, 0);
+    lv_dropdown_set_options (obj, list.c_str());
+    lv_dropdown_set_selected(obj, ui_option.selectAlbumList);
     lv_obj_add_event_cb     (obj, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_dropdown_set_options (obj, "All");
-    lv_dropdown_set_selected(obj, ui_option.selectPlaylist);
 
     //////////////////// Button Matrix ////////////////////
     static constexpr lv_style_const_prop_t style_prop_button_main[] = {
@@ -809,7 +854,6 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_add_style          (album_list, &style_album, 0);
 //  lv_obj_set_scrollbar_mode (album_list, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb       (album_list, scroll_cb, LV_EVENT_SCROLL, NULL);
-    lv_obj_add_event_cb       (album_list, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_list));
   }
 
   /////////////////// Infomation Label ///////////////////
@@ -826,8 +870,62 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_add_style            (album_info, &style_info, LV_PART_MAIN);
     lv_label_set_text_static    (album_info, "No album");
     lv_obj_set_style_text_color (album_info, INFO_LABEL_COLOR, LV_PART_MAIN);
-    lv_obj_add_event_cb         (album_info, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_info));
   }
+
+  //////////////////// Keypad Panel ////////////////////
+  if (keypad_panel == NULL) {
+    // Base panel
+    static constexpr lv_style_const_prop_t style_keypad_panel_prop[] = {
+      LV_STYLE_CONST_ALIGN(LV_ALIGN_BOTTOM_MID),
+      LV_STYLE_CONST_Y(-24),
+      LV_STYLE_CONST_HEIGHT(LV_PCT_Y(70)-4),
+      LV_STYLE_CONST_WIDTH(LV_PCT_X(100)),
+      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+      LV_STYLE_CONST_PAD_TOP(12),
+      LV_STYLE_CONST_PAD_LEFT(0),
+      LV_STYLE_CONST_PAD_RIGHT(0),
+      LV_STYLE_CONST_PAD_BOTTOM(0),
+      LV_STYLE_CONST_BORDER_SIDE(LV_BORDER_SIDE_NONE),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_paenl, (void *)style_keypad_panel_prop);
+    keypad_panel = lv_obj_create(ui_ScreenAlbumList);
+    lv_obj_add_style          (keypad_panel, &style_paenl, (uint32_t)LV_PART_MAIN);
+    lv_obj_set_scrollbar_mode (keypad_panel, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_flag           (keypad_panel, LV_OBJ_FLAG_HIDDEN);
+
+    // Keypad
+    static constexpr lv_style_const_prop_t style_keypad_prop[] = {
+      LV_STYLE_CONST_HEIGHT(160),
+      LV_STYLE_CONST_PAD_LEFT(0),
+      LV_STYLE_CONST_PAD_RIGHT(0),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_keypad, (void *)style_keypad_prop);
+    lv_obj_t *kb = lv_keyboard_create(keypad_panel);
+    lv_obj_add_style(kb, &style_keypad, (uint32_t)LV_PART_MAIN);
+
+    // Textarea
+    static constexpr lv_style_const_prop_t style_textarea_prop[] = {
+      LV_STYLE_CONST_ALIGN(LV_ALIGN_TOP_MID),
+      LV_STYLE_CONST_WIDTH(LV_PCT_X(90)),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_textarea, (void *)style_textarea_prop);
+    lv_obj_t *ta = lv_textarea_create(keypad_panel);
+    lv_obj_add_style                (ta, &style_textarea, (uint32_t)LV_PART_MAIN);
+    lv_textarea_set_one_line        (ta, true);
+    lv_textarea_set_max_length      (ta, 32);
+    lv_textarea_set_placeholder_text(ta, "List name");
+//  lv_textarea_set_text            (ta, "List1");
+    lv_obj_add_event_cb             (ta, keypad_event_cb, LV_EVENT_ALL, (void *)kb);
+    lv_obj_send_event               (ta, LV_EVENT_FOCUSED, NULL);
+  }
+
+  lv_obj_add_event_cb(ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&ui_ScreenAlbumList));
+  lv_obj_add_event_cb(album_list,         delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_list)        );
+  lv_obj_add_event_cb(album_info,         delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_info)        );
+  lv_obj_add_event_cb(keypad_panel,       delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&keypad_panel)      );
 }
 
 void ui_ScreenAlbumList_screen_deinit(void) {

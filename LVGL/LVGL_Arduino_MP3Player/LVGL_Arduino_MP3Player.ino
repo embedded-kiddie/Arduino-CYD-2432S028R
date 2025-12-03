@@ -5,8 +5,7 @@
 //  DO NOT FORGET TO SET 'LV_USE_TFT_ESPI' TO 0
 //  DO NOT FORGET TO SET 'LV_USE_ILI9341' and/or 'LV_USE_ST7789'
 //================================================================================
-#include <lvgl.h>
-#include "src/ui.h"
+#include "ui.h"
 #include "peripherals.h"
 
 #if LV_COLOR_DEPTH != 16

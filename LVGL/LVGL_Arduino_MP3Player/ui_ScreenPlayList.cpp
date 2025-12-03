@@ -9,7 +9,7 @@
 //--------------------------------------------------------------------------------
 lv_obj_t *ui_ScreenPlayList;
 
-#include "../CYD_MP3Player.h"
+#include "CYD_MP3Player.h"
 extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui.cpp (it needs CYD_MP3Player.h)
 
 /////////////////////////// MACROS //////////////////////////
@@ -247,7 +247,6 @@ static void update_scroll(lv_obj_t *obj) {
 
   // Scroll DOWN
   while (ui_control.end < ui_get_counts() - 1 && lv_obj_get_scroll_bottom(obj) <= LIST_UPDATE_SCROLL_POS) {
-//  show_ui_control();
 //  if (ui_control.end - ui_control.top >= CELL_VISIBLE_MAX) {
       ++ui_control.top;
 //  }
@@ -261,7 +260,6 @@ static void update_scroll(lv_obj_t *obj) {
 
   // Scroll UP
   while (ui_control.top > 0 && lv_obj_get_scroll_top(obj) <= LIST_UPDATE_SCROLL_POS) {
-//  show_ui_control();
     --ui_control.top;
 //  if (ui_control.end - ui_control.top >= CELL_VISIBLE_MAX) {
       --ui_control.end;

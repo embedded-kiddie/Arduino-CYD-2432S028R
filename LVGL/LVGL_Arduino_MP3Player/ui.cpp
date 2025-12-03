@@ -3,15 +3,23 @@
 // LVGL version: 9.2.2 and up
 //================================================================================
 #include "ui.h"
+#include "json.hpp"
 #include <string.h> // for strncpy(), strrchr()
+
+#define ALBUM_LIST_FILE "@album.txt"
+#define PATH_ALBUM_LIST META_DATA_PREFIX "/" ALBUM_LIST_FILE
 
 ////////////////////// GLOBAL VARIABLES /////////////////////
 UI_State_t ui_state;
-UI_Option_t ui_option = { .shuffle = true, .selectBacklight = 1 };
 UI_Control_t ui_control;
+UI_Option_t ui_option = {
+  .shuffle = true,
+  .selectBacklight = 1,
+  .selectAlbumList = 255,
+};
 
 ////////////////////// LOCAL VARIABLES //////////////////////
-#include "../CYD_MP3Player.h"
+#include "CYD_MP3Player.h"
 static CYD_MP3Player player;
 
 static bool saveID3tags;
@@ -525,17 +533,84 @@ void audio_eof_mp3(const char *info) {
 //--------------------------------------------------------------------------------
 // Load / Save options in SD
 //--------------------------------------------------------------------------------
-void ui_load_options(void) {
+void ui_options_load(void) {
   ui_option_set_backlight();
   ui_option_set_sleeptime();
 }
 
-void ui_save_options(void) {
+void ui_options_save(void) {
+}
+
+bool ui_album_list_json(void) {
+  if (ui_option.album.size() && ui_option.selectAlbumList > 0) {
+    String path = ui_option.album[ui_option.selectAlbumList - 1].name + ".json";
+    File fd = SD.open(path.c_str(), FILE_READ);
+    if (fd) {
+      JsonDocument doc;
+      DeserializationError error = deserializeJson(doc, fd);
+      fd.close();
+      if (!error) {
+        JsonTree::select_leaf(doc, player.m_tree);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool ui_album_list_save(void) {
+  std::string path = player.m_tree->name + META_DATA_PREFIX;
+  if (!SD.exists(path.c_str())) {
+    SD.mkdir(path.c_str());
+  }
+
+  path += "/" ALBUM_LIST_FILE;
+  File fd = SD.open(path.c_str(), FILE_WRITE);
+  if (fd) {
+    fd.println(ui_option.selectAlbumList);
+    for (auto &i : ui_option.album) {
+      fd.print(i.name);
+      fd.print("\t");
+      fd.println(i.hash);
+    }
+    fd.close();
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool ui_album_list_load(void) {
+  const char *path = (player.m_tree->name + PATH_ALBUM_LIST).c_str();
+  File fd = SD.open(path, FILE_READ);
+  if (!fd) {
+    // Create a new file
+    ui_option.selectAlbumList = 0;
+    ui_option.album.push_back({ "All", 0 });
+    ui_album_list_save();
+    return false;
+  } else {
+    // Read data from an existing file
+    ui_option.selectAlbumList = fd.readStringUntil('\n').toInt();
+    String buf;
+    while (fd.available()) {
+      buf = fd.readStringUntil('\n');
+      int index = buf.indexOf('\t');
+      if (index > 0) {
+        ui_option.album.push_back({
+          /* .name = */ buf.substring(0, index++),
+          /* .hash = */ (size_t)buf.substring(index).toInt()
+        });
+      }
+    }
+    fd.close();
+    return ui_album_list_json();
+  }
 }
 
 ///////////////////// SCREENS ////////////////////
 void ui_init(void) {
-  ui_load_options();
+  ui_options_load();
   ui_ScreenMain_screen_init();
   lv_screen_load(ui_ScreenMain);
 
