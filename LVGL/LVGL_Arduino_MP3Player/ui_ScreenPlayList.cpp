@@ -245,12 +245,12 @@ static void update_scroll(lv_obj_t *obj) {
   if (update_scroll_running) return;
   update_scroll_running = true;
 
-  // Scroll DOWN
+  // Scroll DOWN (Swipe UP)
   while (ui_control.end < ui_get_counts() - 1 && lv_obj_get_scroll_bottom(obj) <= LIST_UPDATE_SCROLL_POS) {
+    ++ui_control.end;
 //  if (ui_control.end - ui_control.top >= CELL_VISIBLE_MAX) {
       ++ui_control.top;
 //  }
-    ++ui_control.end;
     lv_obj_t *top = lv_obj_get_child(obj, 0);
     lv_obj_move_to_index(top, -1);
     put_list_cell(top, ui_control.end);
@@ -258,7 +258,7 @@ static void update_scroll(lv_obj_t *obj) {
     lv_obj_update_layout(obj);
   }
 
-  // Scroll UP
+  // Scroll UP (Swipe DOWN)
   while (ui_control.top > 0 && lv_obj_get_scroll_top(obj) <= LIST_UPDATE_SCROLL_POS) {
     --ui_control.top;
 //  if (ui_control.end - ui_control.top >= CELL_VISIBLE_MAX) {
