@@ -567,6 +567,7 @@ UI_State_t ui_loop(void) {
       break;
     case UI_STATE_START:
       if (player.ScanPlayList()) {
+        ui_ScreenAlbumList_screen_load((void*)player.m_tree);
         if (player.ScanAudioFiles(ui_option.shuffle)) {
           ui_set_playNo(ui_control.playNo);
           ui_state = UI_STATE_PLAY;

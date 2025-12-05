@@ -319,12 +319,14 @@ void loop() {
           dump_play_list();
         }
         break;
+    #ifdef _ESP32_HPP_
       case '2':
         ESP32Info::print_task();
         break;
       default:
         ESP32Info::print_heap();
         break;
+    #endif // _ESP32_HPP_
     }
   #endif
   }

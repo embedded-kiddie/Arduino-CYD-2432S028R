@@ -179,8 +179,5 @@ void ui_redisplay(void);
 void ui_set_playNo(uint32_t playNo);
 const uint32_t ui_get_playNo(void);
 const uint32_t ui_get_counts(void);
-bool ui_album_list_json(void);
-bool ui_album_list_save(void);
-bool ui_album_list_load(void);
 
 #endif // _UI_H_

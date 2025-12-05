@@ -652,20 +652,12 @@ static bool album_list_save(void) {
   }
 }
 
-static bool album_list_load(void) {
+static void album_list_load(void) {
   const char *path = (album_control.root->name + PATH_ALBUM_LIST).c_str();
   File fd = SD.open(path, FILE_READ);
 
-  // Create a new file
-  if (!fd) {
-    album_control.list_id = 0;
-    album_control.list.push_back({ "All", 0 });
-    album_list_save();
-    return false;
-  }
-
   // Read data from an existing file
-  else {
+  if (fd) {
     album_control.list_id = fd.readStringUntil('\n').toInt();
     while (fd.available()) {
       String buf = fd.readStringUntil('\n');
@@ -678,7 +670,14 @@ static bool album_list_load(void) {
       }
     }
     fd.close();
-    return album_json_load();
+    album_json_load();
+  }
+
+  // Create a new file
+  if (album_control.list.size() == 0) {
+    album_control.list_id = 0;
+    album_control.list.push_back({ "All", 0 });
+    album_list_save();
   }
 }
 
