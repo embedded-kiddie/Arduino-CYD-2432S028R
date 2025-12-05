@@ -5,13 +5,14 @@
 #include "ui.h"
 #include "tree.hpp"
 #include "json.hpp"
+#include <functional> // std::hash
 
 //--------------------------------------------------------------------------------
 // Instance of the screen widget
 //--------------------------------------------------------------------------------
 lv_obj_t *ui_ScreenAlbumList;
 
-// Components in list widget
+////////////////// Styles for list widget ///////////////////
 #define INFO_LABEL_COLOR    { .blue = 0x88, .green = 0x88, .red = 0x88 }
 #define CELL_COLOR_OUTLINE  { .blue = 0xe4, .green = 0xe0, .red = 0xe4 }
 #define CELL_COLOR_NODE     lv_color_hex(0xf4f4f4)
@@ -55,12 +56,24 @@ lv_obj_t *ui_ScreenAlbumList;
 #define BACK_TO_MAIN_X    LV_PCT_X(87)    // Back to Main
 #define BACK_TO_MAIN_Y    LV_PCT_Y(4)     // Back to Main
 
+/////////// Folder and file for saving album list ///////////
+#define CONFIG_DIR_NAME "@conf/"
+#define ALBUM_LIST_FILE "@album.txt"
+#define PATH_ALBUM_LIST CONFIG_DIR_NAME ALBUM_LIST_FILE
+
 typedef struct {
-  int   top;        // node key at the top of the album list
-  int   end;        // node key at the end of the album list
-  int   count;      // number of the cells in the album list
-  int   n_nodes;    // total number of the nodes in tree
-  Node  *root;
+  String    name; // name in dropdown list
+  size_t    hash; // hash of json document
+} AlbumList_t;
+
+typedef struct {
+  Node    *root;      // root of the node tree (player.m_tree)
+  int     top;        // node key at the top of the album list
+  int     end;        // node key at the end of the album list
+  int     count;      // number of the cells in the album list
+  int     n_nodes;    // total number of the nodes in tree
+  int     list_id;    // ID of the selected album list
+  std::vector<AlbumList_t> list;
 } AlbumControl_t;
 
 typedef struct {
@@ -75,6 +88,7 @@ typedef struct {
 static lv_obj_t *album_list;
 static lv_obj_t *album_info;
 static lv_obj_t *keypad_panel;
+static lv_obj_t *dropdown_list;
 static AlbumControl_t album_control;
 static bool update_scroll_running = false;
 
@@ -504,7 +518,7 @@ static void scroll_cb(lv_event_t *e) {
 //--------------------------------------------------------------------------------
 // Initialize the album list with a specified number of cells
 //--------------------------------------------------------------------------------
-static void album_init(int key = 0) {
+static void init_album_list(int key = 0) {
   update_scroll_running = true;   // Disable 'update_scroll()' once
   lv_obj_clean(album_list);
   update_scroll_running = false;  // Enable 'update_scroll()' again
@@ -534,13 +548,152 @@ static void album_init(int key = 0) {
 }
 
 //--------------------------------------------------------------------------------
+// Sets the state of all cells in the album list
+//--------------------------------------------------------------------------------
+static void toggle_state(int type, int state) {
+  const int n = album_control.n_nodes;
+  for (int i = 0; i < n; i++) {
+    Node *node = album_control.root->find_preorder(i);
+    DBG_ASSERT(node);
+    if (type == TYPE_NODE) {
+      node->meta.hidden = (state == NODE_FOLDED ? NODE_HIDDEN : NODE_REVEALED);
+      if (node->meta.type == TYPE_NODE) {
+        node->meta.checked = state;
+      }
+    } else if (node->meta.type == TYPE_LEAF) {
+      node->meta.checked = state;
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Functions for manipulating JSON data for album lists
+//--------------------------------------------------------------------------------
+static inline String make_json_path(uint8_t id) {
+  return String(album_control.root->name.c_str()) + CONFIG_DIR_NAME + String(id) + ".json";
+}
+
+static bool album_json_diff(void) {
+  bool ret = false;
+
+  if (album_control.list.size() && album_control.list_id > 0) {
+    JsonDocument doc;
+    JsonTree::tree2json(album_control.root, doc);
+  }
+  return true;
+}
+
+static bool album_json_save(void) {
+  bool ret = false;
+
+  if (album_control.list.size() && album_control.list_id > 0) {
+    JsonDocument doc;
+    JsonTree::tree2json(album_control.root, doc);
+    size_t size = measureJson(doc);
+
+    String path = make_json_path(album_control.list_id);
+    File fd = SD.open(path.c_str(), FILE_WRITE);
+    if (fd) {
+      if (size == serializeJson(doc, fd)) {
+        ret = true;
+      } else {
+        printf("failed writing json to %s\n", path.c_str());
+      }
+      fd.close();
+    }
+  }
+
+  return ret;
+}
+
+static bool album_json_load(void) {
+  if (album_control.list_id == 0) {
+    toggle_state(TYPE_LEAF, LEAF_SELECTED);
+    return true;
+  }
+
+  else if (album_control.list.size()) {
+    String path = make_json_path(album_control.list_id);
+    File fd = SD.open(path.c_str(), FILE_READ);
+    if (fd) {
+      JsonDocument doc;
+      DeserializationError error = deserializeJson(doc, fd);
+      fd.close();
+      if (!error) {
+        toggle_state(TYPE_LEAF, LEAF_UNSELECTED);       // < 1[msec]
+        JsonTree::select_leaf(doc, album_control.root); // < 1[msec]
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+static bool album_list_save(void) {
+  std::string path = album_control.root->name + CONFIG_DIR_NAME;
+  if (!SD.exists(path.c_str())) {
+    SD.mkdir(path.c_str());
+  }
+
+  path += ALBUM_LIST_FILE;
+  File fd = SD.open(path.c_str(), FILE_WRITE);
+  if (fd) {
+    fd.println(album_control.list_id);
+    for (auto &i : album_control.list) {
+      fd.print(i.name);
+      fd.print("\t");
+      fd.println(i.hash);
+    }
+    fd.close();
+    return true;
+  } else {
+    return false;
+  }
+}
+
+static bool album_list_load(void) {
+  const char *path = (album_control.root->name + PATH_ALBUM_LIST).c_str();
+  File fd = SD.open(path, FILE_READ);
+
+  // Create a new file
+  if (!fd) {
+    album_control.list_id = 0;
+    album_control.list.push_back({ "All", 0 });
+    album_list_save();
+    return false;
+  }
+
+  // Read data from an existing file
+  else {
+    album_control.list_id = fd.readStringUntil('\n').toInt();
+    while (fd.available()) {
+      String buf = fd.readStringUntil('\n');
+      int index = buf.indexOf('\t');
+      if (index > 0) {
+        album_control.list.push_back({
+          /* .name = */ buf.substring(0, index++),
+          /* .hash = */ (size_t)buf.substring(index).toInt()
+        });
+      }
+    }
+    fd.close();
+    return album_json_load();
+  }
+}
+
+//--------------------------------------------------------------------------------
 // Callback for dropdown list
 //--------------------------------------------------------------------------------
 static void dropdown_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectAlbumList = lv_dropdown_get_selected(obj);
+  album_control.list_id = lv_dropdown_get_selected(obj);
+
+  album_json_load();
+  init_album_list();
+  album_list_save();
 }
 
 //--------------------------------------------------------------------------------
@@ -575,24 +728,8 @@ static void button_draw_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-// Sets the state of all cells in the album list
+// Callback for button matrix
 //--------------------------------------------------------------------------------
-static void toggle_state(int type, int state) {
-  const int n = album_control.n_nodes;
-  for (int i = 0; i < n; i++) {
-    Node *node = album_control.root->find_preorder(i);
-    DBG_ASSERT(node);
-    if (type == TYPE_NODE) {
-      node->meta.hidden = (state == NODE_FOLDED ? NODE_HIDDEN : NODE_REVEALED);
-      if (node->meta.type == TYPE_NODE) {
-        node->meta.checked = state;
-      }
-    } else if (node->meta.type == TYPE_LEAF) {
-      node->meta.checked = state;
-    }
-  }
-}
-
 static void toggle_click_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
@@ -615,9 +752,12 @@ static void toggle_click_cb(lv_event_t *e) {
       break;
   }
 
-  album_init(/*album_control.top*/);
+  init_album_list(/*album_control.top*/);
 }
 
+//--------------------------------------------------------------------------------
+// Callback for textarea in keypad panel
+//--------------------------------------------------------------------------------
 static void keypad_event_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t *ta = (lv_obj_t *)lv_event_get_target(e);
@@ -627,15 +767,51 @@ static void keypad_event_cb(lv_event_t *e) {
     lv_keyboard_set_textarea(kb, ta);
   }
 
-  else if (code == LV_EVENT_DEFOCUSED) {
-    lv_keyboard_set_textarea(kb, NULL);
-    lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
-    lv_indev_reset(NULL, ta);
-  }
-
-  else if (code == LV_EVENT_READY || code == LV_EVENT_CANCEL) {
+  else if (code == LV_EVENT_CANCEL) {
     lv_obj_add_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
     lv_indev_reset(NULL, ta); /* To forget the last clicked object to make it focusable again */
+  }
+
+  else if (code == LV_EVENT_READY) {
+    lv_obj_add_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
+    lv_indev_reset(NULL, ta);
+
+    String text = lv_textarea_get_text(ta);
+    lv_textarea_set_text(ta, "");
+    text.trim();
+
+    if (text != "") {
+      // Check the text is already in the array
+      int n = album_control.list.size();
+      for (int i = 1; i < n; i++) {
+        if (album_control.list[i].name == text) {
+          album_control.list_id = i;
+          lv_dropdown_set_selected(dropdown_list, album_control.list_id);
+          album_json_load();
+          return;
+        }
+      }
+
+      // Create a new entry
+      JsonDocument doc;
+      JsonTree::tree2json(album_control.root, doc);   // A few milliseconds
+
+      // Functional object to make a hash
+      std::hash<std::string> MakeHash;
+      size_t hash = MakeHash(doc.as<std::string>());  // 1.2[msec]
+
+      album_control.list.push_back({
+        /* .name = */ text,
+        /* .hash = */ hash
+      });
+
+      album_control.list_id = album_control.list.size() - 1;
+      album_list_save();
+      album_json_save();
+
+      lv_dropdown_add_option  (dropdown_list, text.c_str(), album_control.list_id);
+      lv_dropdown_set_selected(dropdown_list, album_control.list_id);
+    }
   }
 }
 
@@ -682,6 +858,7 @@ static void delete_cb(lv_event_t *e) {
     &album_list,
     &album_info,
     &keypad_panel,
+    &dropdown_list,
   };
 
   for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
@@ -767,16 +944,18 @@ void ui_ScreenAlbumList_screen_init(void) {
     };
     static LV_STYLE_CONST_INIT(style_dropdown, (void*)(style_prop_dropdown));
 
-    obj = lv_dropdown_create(ui_ScreenAlbumList);
-    String list;
-    for (auto &i : ui_option.album) {
-      list += i.name + "\n";
+    if (dropdown_list == NULL) {
+      dropdown_list = lv_dropdown_create(ui_ScreenAlbumList);
+      String list;
+      for (auto &i : album_control.list) {
+        list += i.name + "\n";
+      }
+      list.trim();
+      lv_obj_add_style        (dropdown_list, &style_dropdown, 0);
+      lv_dropdown_set_options (dropdown_list, list.c_str());
+      lv_dropdown_set_selected(dropdown_list, album_control.list_id);
+      lv_obj_add_event_cb     (dropdown_list, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
     }
-    list.trim();
-    lv_obj_add_style        (obj, &style_dropdown, 0);
-    lv_dropdown_set_options (obj, list.c_str());
-    lv_dropdown_set_selected(obj, ui_option.selectAlbumList);
-    lv_obj_add_event_cb     (obj, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     //////////////////// Button Matrix ////////////////////
     static constexpr lv_style_const_prop_t style_prop_button_main[] = {
@@ -923,6 +1102,7 @@ void ui_ScreenAlbumList_screen_init(void) {
   }
 
   lv_obj_add_event_cb(ui_ScreenAlbumList, delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&ui_ScreenAlbumList));
+  lv_obj_add_event_cb(dropdown_list,      delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&dropdown_list)     );
   lv_obj_add_event_cb(album_list,         delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_list)        );
   lv_obj_add_event_cb(album_info,         delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_info)        );
   lv_obj_add_event_cb(keypad_panel,       delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&keypad_panel)      );
@@ -943,19 +1123,31 @@ void ui_ScreenAlbumList_screen_deinit(void) {
 //--------------------------------------------------------------------------------
 // Create selectable playlist
 //--------------------------------------------------------------------------------
-void ui_ScreenAlbumList_create_list(void *root) {
+void ui_ScreenAlbumList_screen_load(void *root) {
   if (root) {
-    // Re-traverse node tree by preorder
+    // Once traverse node tree by preorder and load album list
     album_control.root = reinterpret_cast<Node*>(root);
     album_control.n_nodes = album_control.root->traverse_preorder();
-    album_init();
+    album_list_load();
+
+    // Then traverse again to scan audio files
+    album_control.root->traverse_node();
+  }
+}
+
+void ui_ScreenAlbumList_create_list(void *root) {
+  if (root) {
+    // Re-traverse node tree by preorder and initialize album list
+    album_control.root = reinterpret_cast<Node*>(root);
+    album_control.n_nodes = album_control.root->traverse_preorder();
+    init_album_list();
   } else {
     // In case the SD card is not inserted
     memset((void*)&album_control, 0, sizeof(album_control));
   }
 }
 
-#if   true
+#if   DEBUG
 //--------------------------------------------------------------------------------
 // Debug functions (static)
 //--------------------------------------------------------------------------------

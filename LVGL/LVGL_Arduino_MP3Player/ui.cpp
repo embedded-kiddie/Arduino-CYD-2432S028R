@@ -15,7 +15,6 @@ UI_Control_t ui_control;
 UI_Option_t ui_option = {
   .shuffle = true,
   .selectBacklight = 1,
-  .selectAlbumList = 255,
 };
 
 ////////////////////// LOCAL VARIABLES //////////////////////
@@ -539,73 +538,6 @@ void ui_options_load(void) {
 }
 
 void ui_options_save(void) {
-}
-
-bool ui_album_list_json(void) {
-  if (ui_option.album.size() && ui_option.selectAlbumList > 0) {
-    String path = ui_option.album[ui_option.selectAlbumList - 1].name + ".json";
-    File fd = SD.open(path.c_str(), FILE_READ);
-    if (fd) {
-      JsonDocument doc;
-      DeserializationError error = deserializeJson(doc, fd);
-      fd.close();
-      if (!error) {
-        JsonTree::select_leaf(doc, player.m_tree);
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-bool ui_album_list_save(void) {
-  std::string path = player.m_tree->name + META_DATA_PREFIX;
-  if (!SD.exists(path.c_str())) {
-    SD.mkdir(path.c_str());
-  }
-
-  path += "/" ALBUM_LIST_FILE;
-  File fd = SD.open(path.c_str(), FILE_WRITE);
-  if (fd) {
-    fd.println(ui_option.selectAlbumList);
-    for (auto &i : ui_option.album) {
-      fd.print(i.name);
-      fd.print("\t");
-      fd.println(i.hash);
-    }
-    fd.close();
-    return true;
-  } else {
-    return false;
-  }
-}
-
-bool ui_album_list_load(void) {
-  const char *path = (player.m_tree->name + PATH_ALBUM_LIST).c_str();
-  File fd = SD.open(path, FILE_READ);
-  if (!fd) {
-    // Create a new file
-    ui_option.selectAlbumList = 0;
-    ui_option.album.push_back({ "All", 0 });
-    ui_album_list_save();
-    return false;
-  } else {
-    // Read data from an existing file
-    ui_option.selectAlbumList = fd.readStringUntil('\n').toInt();
-    String buf;
-    while (fd.available()) {
-      buf = fd.readStringUntil('\n');
-      int index = buf.indexOf('\t');
-      if (index > 0) {
-        ui_option.album.push_back({
-          /* .name = */ buf.substring(0, index++),
-          /* .hash = */ (size_t)buf.substring(index).toInt()
-        });
-      }
-    }
-    fd.close();
-    return ui_album_list_json();
-  }
 }
 
 ///////////////////// SCREENS ////////////////////

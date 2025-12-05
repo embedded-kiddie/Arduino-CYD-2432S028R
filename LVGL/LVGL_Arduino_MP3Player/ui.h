@@ -65,6 +65,7 @@ extern lv_obj_t *ui_ScreenAlbumList;
 void ui_event_ScreenAlbumList(lv_event_t *e);
 void ui_ScreenAlbumList_screen_init  (void);
 void ui_ScreenAlbumList_screen_deinit(void);
+void ui_ScreenAlbumList_screen_load  (void *root);
 void ui_ScreenAlbumList_create_list  (void *root);
 
 // Debug functions
@@ -149,18 +150,12 @@ typedef enum {
 
 // Variables
 typedef struct {
-  String    name; // name in dropdown list
-  size_t    hash; // hash of json document
-} AlbumList_t;
-
-typedef struct {
   bool      shuffle;
   bool      favorite;
   uint8_t   repeat;
+  uint8_t   partition;
   uint8_t   selectBacklight;
   uint8_t   selectSleepTimer;
-  uint8_t   selectAlbumList;
-  std::vector<AlbumList_t> album;
 } UI_Option_t;
 
 typedef struct {

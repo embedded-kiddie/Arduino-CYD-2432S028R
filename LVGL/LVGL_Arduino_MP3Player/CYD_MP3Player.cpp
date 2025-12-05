@@ -12,9 +12,6 @@
 #include <algorithm>  // std::shuffle
 #include <functional> // std::hash
 
-// Functional object to make a hash from the music title
-std::hash<std::string> MakeHash;
-
 //--------------------------------------------------------------------------------
 // Begin with SD or SdFat
 //--------------------------------------------------------------------------------
@@ -97,6 +94,9 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
 
     fd.read((void*)album, size);
     fd.close();
+
+    // Functional object to make a hash
+    std::hash<std::string> MakeHash;
 
     // Search for meta data with matching hash
     size_t hash = MakeHash(list->name);
@@ -185,6 +185,9 @@ uint32_t CYD_MP3Player::ScanPlayList(void) {
 //--------------------------------------------------------------------------------
 uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
   DBG_ASSERT(m_tree && m_list.size() == 0);
+
+  // Functional object to make a hash
+  std::hash<std::string> MakeHash;
 
   // Extract audio files in the parents directory
   const size_t n = m_tree->get_n_leafs();
