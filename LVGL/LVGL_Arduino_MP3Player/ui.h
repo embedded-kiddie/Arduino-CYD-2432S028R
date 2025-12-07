@@ -7,8 +7,6 @@
 
 #include "debug.h"
 #include <lvgl.h>
-#include <vector>
-#include <WString.h>  // for String class
 
 // Arrow buttons to navigate to each screen
 #define SHOW_ARROW_BUTTON false
@@ -29,105 +27,6 @@
 #define UI_COLOR_LIST_SHADOW  { .blue = 0x4b, .green = 0x2d, .red = 0x2d }  // lv_color_hex(0x2d2d4b)
 #define UI_COLOR_LIST_ARTIST  { .blue = 0xbe, .green = 0xb0, .red = 0xb1 }  // lv_color_hex(0xb1b0be)
 #define UI_COLOR_LIST_SLIDER  { .blue = 0xee, .green = 0xee, .red = 0xee }  // lv_color_hex(0xeeeeee)
-
-#define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
-#define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
-LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
-LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
-
-////////// SCREEN: ui_ScreenMain //////////
-extern lv_obj_t *ui_ScreenMain;
-extern lv_obj_t *ui_MusicTitle;
-extern lv_obj_t *ui_ElapsedStart;
-extern lv_obj_t *ui_ElapsedEnd;
-extern lv_obj_t *ui_ButtonPlay;
-extern lv_obj_t *ui_ElapsedBar;
-extern lv_obj_t *ui_Volume;
-extern lv_obj_t *ui_AlbumImage;
-void ui_ScreenMain_screen_init(void);
-void ui_event_ScreenMain  (lv_event_t *e);
-void ui_event_ButtonPlay  (lv_event_t *e);
-void ui_event_Volume      (lv_event_t *e);
-void ui_event_ElapsedBar  (lv_event_t *e);
-void ui_event_GoToAlbumList (lv_event_t *e);
-void ui_event_GoToPlayList  (lv_event_t *e);
-void ui_event_GoToOptions   (lv_event_t *e);
-void ui_event_Favorite    (lv_event_t *e);
-void ui_event_Repeat      (lv_event_t *e);
-void ui_event_Shuffle     (lv_event_t *e);
-void ui_event_ButtonNext  (lv_event_t *e);
-void ui_event_ButtonPrev  (lv_event_t *e);
-void ui_event_VolumeMax   (lv_event_t *e);
-void ui_event_VolumeMin   (lv_event_t *e);
-
-////////// SCREEN: ui_ScreenAlbumList //////////
-extern lv_obj_t *ui_ScreenAlbumList;
-void ui_event_ScreenAlbumList(lv_event_t *e);
-void ui_ScreenAlbumList_screen_init  (void);
-void ui_ScreenAlbumList_screen_deinit(void);
-void ui_ScreenAlbumList_screen_load  (void *root);
-void ui_ScreenAlbumList_create_list  (void *root);
-
-// Debug functions
-extern __attribute__((weak)) size_t count_exposed_nodes(void);
-extern __attribute__((weak)) size_t count_album_list(void);
-extern __attribute__((weak)) void show_album_list(void);
-extern __attribute__((weak)) void dump_album_list(void);
-extern __attribute__((weak)) void dump_preorder(void);
-
-////////// SCREEN: ui_ScreenPlayList //////////
-extern lv_obj_t *ui_ScreenPlayList;
-void ui_ScreenPlayList_screen_init  (void);
-void ui_ScreenPlayList_screen_deinit(void);
-void ui_event_ScreenPlayList(lv_event_t *e);
-void ui_event_PlayList_Play (lv_event_t *e);
-void ui_event_PlayList_Heart(lv_event_t *e);
-void ui_list_update_icon    (uint32_t track_id, bool state);
-void ui_list_update_cell    (uint32_t track_id, bool state);
-void ui_list_update_play    (uint32_t track_id, bool state);
-void ui_list_focus_playing  (uint32_t track_id);
-void ui_list_update_duration(uint32_t track_id, uint32_t duration);
-bool ui_list_get_heart_state(uint32_t track_id);
-
-// Debug functions
-extern __attribute__((weak)) size_t get_cell_count(void);
-extern __attribute__((weak)) void show_ui_control(void);
-extern __attribute__((weak)) void dump_play_list(void);
-
-////////// SCREEN: ui_ScreenOptions //////////
-extern lv_obj_t *ui_ScreenOptions;
-void ui_event_ScreenOptions(lv_event_t *e);
-void ui_ScreenOptions_screen_init  (void);
-void ui_ScreenOptions_screen_deinit(void);
-void ui_option_set_backlight(void);
-void ui_option_set_sleeptime(void);
-
-// IMAGES
-LV_IMAGE_DECLARE(img_album);            // assets/icons/img_album.png
-LV_IMAGE_DECLARE(img_heart_off);        // assets/icons/img_heart_off.png
-LV_IMAGE_DECLARE(img_heart_on);         // assets/icons/img_heart_on.png
-LV_IMAGE_DECLARE(img_repeat);           // assets/icons/img_repeat.png
-LV_IMAGE_DECLARE(img_shuffle);          // assets/icons/img_shuffle.png
-LV_IMAGE_DECLARE(img_play);             // assets/icons/img_play.png
-LV_IMAGE_DECLARE(img_pause);            // assets/icons/img_pause.png
-LV_IMAGE_DECLARE(img_skip_next);        // assets/icons/img_skip_next.png
-LV_IMAGE_DECLARE(img_skip_prev);        // assets/icons/img_skip_prev.png
-LV_IMAGE_DECLARE(img_vol_max);          // assets/icons/img_vol_max.png
-LV_IMAGE_DECLARE(img_vol_min);          // assets/icons/img_vol_min.png
-LV_IMAGE_DECLARE(img_menu_up);          // assets/icons/img_menu_up.png
-LV_IMAGE_DECLARE(img_menu_down);        // assets/icons/img_menu_down.png
-LV_IMAGE_DECLARE(img_menu_right);       // assets/icons/img_menu_right.png
-LV_IMAGE_DECLARE(img_menu_left);        // assets/icons/img_menu_left.png
-LV_IMAGE_DECLARE(img_bluetooth_on);     // assets/icons/img_bluetooth_on.png
-LV_IMAGE_DECLARE(img_bluetooth_off);    // assets/icons/img_bluetooth_off.png
-LV_IMAGE_DECLARE(img_heart_off_small);  // assets/icons/img_heart_off_small.png
-LV_IMAGE_DECLARE(img_heart_on_small);   // assets/icons/img_heart_on_small.png
-LV_IMAGE_DECLARE(img_list_play);        // assets/icons/img_list_play.png
-LV_IMAGE_DECLARE(img_list_pause);       // assets/icons/img_list_pause.png
-LV_IMAGE_DECLARE(img_checkbox);         // assets/icons/img_checkbox.png
-LV_IMAGE_DECLARE(img_checked);          // assets/icons/img_checked.png
-LV_IMAGE_DECLARE(img_symbol_down);      // assets/icons/img_symbol_down.png
-LV_IMAGE_DECLARE(img_symbol_right);     // assets/icons/img_symbol_right.png
 
 // UI STATE
 typedef enum {
@@ -172,12 +71,110 @@ extern UI_State_t ui_state;
 extern UI_Option_t ui_option;
 extern UI_Control_t ui_control;
 
-// UI Functions
+////////// SCREEN: ui_ScreenMain //////////
+extern lv_obj_t *ui_ScreenMain;
+extern lv_obj_t *ui_MusicTitle;
+extern lv_obj_t *ui_ElapsedStart;
+extern lv_obj_t *ui_ElapsedEnd;
+extern lv_obj_t *ui_ButtonPlay;
+extern lv_obj_t *ui_ElapsedBar;
+extern lv_obj_t *ui_Volume;
+extern lv_obj_t *ui_AlbumImage;
+void ui_ScreenMain_screen_init(void);
+void ui_event_ScreenMain  (lv_event_t *e);
+void ui_event_ButtonPlay  (lv_event_t *e);
+void ui_event_Volume      (lv_event_t *e);
+void ui_event_ElapsedBar  (lv_event_t *e);
+void ui_event_GoToAlbumList (lv_event_t *e);
+void ui_event_GoToPlayList  (lv_event_t *e);
+void ui_event_GoToOptions   (lv_event_t *e);
+void ui_event_Favorite    (lv_event_t *e);
+void ui_event_Repeat      (lv_event_t *e);
+void ui_event_Shuffle     (lv_event_t *e);
+void ui_event_ButtonNext  (lv_event_t *e);
+void ui_event_ButtonPrev  (lv_event_t *e);
+void ui_event_VolumeMax   (lv_event_t *e);
+void ui_event_VolumeMin   (lv_event_t *e);
+
 void ui_init(void);
 UI_State_t ui_loop(void);
 void ui_redisplay(void);
 void ui_set_playNo(uint32_t playNo);
 const uint32_t ui_get_playNo(void);
 const uint32_t ui_get_counts(void);
+
+////////// SCREEN: ui_ScreenAlbumList //////////
+extern lv_obj_t *ui_ScreenAlbumList;
+void ui_event_ScreenAlbumList(lv_event_t *e);
+void ui_ScreenAlbumList_screen_init  (void);
+void ui_ScreenAlbumList_screen_deinit(void);
+void ui_ScreenAlbumList_screen_load  (void *root);
+void ui_ScreenAlbumList_create_list  (void *root);
+
+// Debug functions
+extern __attribute__((weak)) size_t count_exposed_nodes(void);
+extern __attribute__((weak)) size_t count_album_list(void);
+extern __attribute__((weak)) void show_album_list(void);
+extern __attribute__((weak)) void dump_album_list(void);
+extern __attribute__((weak)) void dump_preorder(void);
+
+////////// SCREEN: ui_ScreenPlayList //////////
+extern lv_obj_t *ui_ScreenPlayList;
+void ui_ScreenPlayList_screen_init  (void);
+void ui_ScreenPlayList_screen_deinit(void);
+void ui_event_ScreenPlayList(lv_event_t *e);
+void ui_event_PlayList_Play (lv_event_t *e);
+void ui_event_PlayList_Heart(lv_event_t *e);
+void ui_list_update_icon    (uint32_t track_id, bool state);
+void ui_list_update_cell    (uint32_t track_id, bool state);
+void ui_list_update_play    (uint32_t track_id, bool state);
+void ui_list_focus_playing  (uint32_t track_id);
+void ui_list_update_duration(uint32_t track_id, uint32_t duration);
+bool ui_list_get_heart_state(uint32_t track_id);
+
+// Debug functions
+extern __attribute__((weak)) size_t get_cell_count(void);
+extern __attribute__((weak)) void show_ui_control(void);
+extern __attribute__((weak)) void dump_play_list(void);
+
+////////// SCREEN: ui_ScreenOptions //////////
+extern lv_obj_t *ui_ScreenOptions;
+void ui_event_ScreenOptions(lv_event_t *e);
+void ui_ScreenOptions_screen_init  (void);
+void ui_ScreenOptions_screen_deinit(void);
+void ui_option_set_backlight(void);
+void ui_option_set_sleeptime(void);
+
+// FONTS & IMAGES
+#define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
+#define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
+LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
+LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
+
+LV_IMAGE_DECLARE(img_album);            // assets/icons/img_album.png
+LV_IMAGE_DECLARE(img_heart_off);        // assets/icons/img_heart_off.png
+LV_IMAGE_DECLARE(img_heart_on);         // assets/icons/img_heart_on.png
+LV_IMAGE_DECLARE(img_repeat);           // assets/icons/img_repeat.png
+LV_IMAGE_DECLARE(img_shuffle);          // assets/icons/img_shuffle.png
+LV_IMAGE_DECLARE(img_play);             // assets/icons/img_play.png
+LV_IMAGE_DECLARE(img_pause);            // assets/icons/img_pause.png
+LV_IMAGE_DECLARE(img_skip_next);        // assets/icons/img_skip_next.png
+LV_IMAGE_DECLARE(img_skip_prev);        // assets/icons/img_skip_prev.png
+LV_IMAGE_DECLARE(img_vol_max);          // assets/icons/img_vol_max.png
+LV_IMAGE_DECLARE(img_vol_min);          // assets/icons/img_vol_min.png
+LV_IMAGE_DECLARE(img_menu_up);          // assets/icons/img_menu_up.png
+LV_IMAGE_DECLARE(img_menu_down);        // assets/icons/img_menu_down.png
+LV_IMAGE_DECLARE(img_menu_right);       // assets/icons/img_menu_right.png
+LV_IMAGE_DECLARE(img_menu_left);        // assets/icons/img_menu_left.png
+LV_IMAGE_DECLARE(img_bluetooth_on);     // assets/icons/img_bluetooth_on.png
+LV_IMAGE_DECLARE(img_bluetooth_off);    // assets/icons/img_bluetooth_off.png
+LV_IMAGE_DECLARE(img_heart_off_small);  // assets/icons/img_heart_off_small.png
+LV_IMAGE_DECLARE(img_heart_on_small);   // assets/icons/img_heart_on_small.png
+LV_IMAGE_DECLARE(img_list_play);        // assets/icons/img_list_play.png
+LV_IMAGE_DECLARE(img_list_pause);       // assets/icons/img_list_pause.png
+LV_IMAGE_DECLARE(img_checkbox);         // assets/icons/img_checkbox.png
+LV_IMAGE_DECLARE(img_checked);          // assets/icons/img_checked.png
+LV_IMAGE_DECLARE(img_symbol_down);      // assets/icons/img_symbol_down.png
+LV_IMAGE_DECLARE(img_symbol_right);     // assets/icons/img_symbol_right.png
 
 #endif // _UI_H_

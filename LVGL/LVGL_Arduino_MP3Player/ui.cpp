@@ -6,9 +6,6 @@
 #include "json.hpp"
 #include <string.h> // for strncpy(), strrchr()
 
-#define ALBUM_LIST_FILE "@album.txt"
-#define PATH_ALBUM_LIST META_DATA_PREFIX "/" ALBUM_LIST_FILE
-
 ////////////////////// GLOBAL VARIABLES /////////////////////
 UI_State_t ui_state;
 UI_Control_t ui_control;

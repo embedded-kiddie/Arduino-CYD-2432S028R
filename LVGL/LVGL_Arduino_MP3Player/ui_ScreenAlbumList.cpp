@@ -37,7 +37,7 @@ lv_obj_t *ui_ScreenAlbumList;
 #define TITLE_LABEL_Y       LV_PCT_Y(5)     // Title Label
 #define TOGGLE_BUTTON_X     LV_PCT_X(6)     // Button Matrix
 #define TOGGLE_BUTTON_Y     LV_PCT_Y(14)    // Button Matrix
-#define KEYPAD_BUTTON_X     LV_PCT_X(41)    // Button Matrix
+#define KEYPAD_BUTTON_X     LV_PCT_X(42)    // Button Matrix
 #define KEYPAD_BUTTON_Y     LV_PCT_Y(14)    // Button Matrix
 #else
 #define DROPDOWN_LIST_WIDTH 90
@@ -89,11 +89,19 @@ static lv_obj_t *album_list;
 static lv_obj_t *album_info;
 static lv_obj_t *keypad_panel;
 static lv_obj_t *dropdown_list;
+static lv_obj_t *keypad_buttons;
 static AlbumControl_t album_control;
 static bool update_scroll_running = false;
 
 static void event_handler(lv_event_t *e);
 static void draw_image_cb(lv_event_t *e);
+
+//--------------------------------------------------------------------------------
+// Get the node pointer from the cell's userdata
+//--------------------------------------------------------------------------------
+static inline Node *get_node(lv_obj_t *cell) {
+  return (Node*)lv_obj_get_user_data(cell);
+}
 
 //--------------------------------------------------------------------------------
 // Count / Update open cells, selected nodes and selected audio files
@@ -122,27 +130,45 @@ static void get_album_info(AlbumInfo_t *info) {
   }
 }
 
-static void update_info(lv_obj_t *label) {
-  AlbumInfo_t info;
-  get_album_info(&info);
-  lv_label_set_text_fmt(label, "Selected album: %d, files: %d", info.n_selected, info.n_files);
-}
-
-//--------------------------------------------------------------------------------
-// Get the node pointer from the cell's userdata
-//--------------------------------------------------------------------------------
-static inline Node *get_node(lv_obj_t *cell) {
-  return (Node*)lv_obj_get_user_data(cell);
-}
-
 //--------------------------------------------------------------------------------
 // Update cells' position in the list
 //--------------------------------------------------------------------------------
-static inline void update_list(lv_obj_t *list) {
+static inline void update_album_control(lv_obj_t *list) {
   lv_obj_update_layout(list);
   album_control.top = get_node(lv_obj_get_child(list,  0))->key;
   album_control.end = get_node(lv_obj_get_child(list, -1))->key;
   album_control.count = lv_obj_get_child_count(list);
+}
+
+//--------------------------------------------------------------------------------
+// Update status label and keypad buttons
+//--------------------------------------------------------------------------------
+static void update_album_info(lv_obj_t *label) {
+  AlbumInfo_t info;
+  get_album_info(&info);
+  lv_label_set_text_fmt(label, "Selected album: %d, files: %d", info.n_selected, info.n_files);
+
+  if (album_control.list_id == 0) {
+    // Disable 'save' and 'trash'
+    lv_buttonmatrix_set_button_ctrl(keypad_buttons, 1, LV_BUTTONMATRIX_CTRL_DISABLED);  // LV_SYMBOL_SAVE
+    lv_buttonmatrix_set_button_ctrl(keypad_buttons, 2, LV_BUTTONMATRIX_CTRL_DISABLED);  // LV_SYMBOL_TRASH
+  }
+
+  else {
+    JsonDocument doc;
+    JsonTree::tree2json(album_control.root, doc);
+
+    std::hash<std::string> makeHash;
+    size_t hash = makeHash(doc.as<std::string>()); // 1.2[msec]
+
+    if (hash == album_control.list[album_control.list_id].hash) {
+      lv_buttonmatrix_set_button_ctrl  (keypad_buttons, 1, LV_BUTTONMATRIX_CTRL_DISABLED);  // LV_SYMBOL_SAVE
+      lv_buttonmatrix_clear_button_ctrl(keypad_buttons, 2, LV_BUTTONMATRIX_CTRL_DISABLED);  // LV_SYMBOL_TRASH
+    } else {
+      lv_buttonmatrix_clear_button_ctrl(keypad_buttons, 1, LV_BUTTONMATRIX_CTRL_DISABLED);  // LV_SYMBOL_SAVE
+      lv_buttonmatrix_clear_button_ctrl(keypad_buttons, 2, LV_BUTTONMATRIX_CTRL_DISABLED);  // LV_SYMBOL_TRASH
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------
@@ -203,7 +229,7 @@ static inline void delete_cell(lv_obj_t *list, lv_obj_t *cell) {
   });
 
   lv_obj_delete(cell);
-  update_list(list);
+  update_album_control(list);
 }
 
 //--------------------------------------------------------------------------------
@@ -228,54 +254,6 @@ static Node *find_before(int key) {
     }
   }
   return NULL;
-}
-
-//--------------------------------------------------------------------------------
-// Draw a graphic icon for the cell
-// Reference: https://docs.lvgl.io/master/details/widgets/table.html
-//--------------------------------------------------------------------------------
-static void draw_image_cb(lv_event_t *e) {
-  lv_draw_task_t *draw_task = lv_event_get_draw_task(e);
-  lv_draw_task_type_t type  = lv_draw_task_get_type(draw_task);
-  lv_draw_dsc_base_t *base_dsc = (lv_draw_dsc_base_t *)lv_draw_task_get_draw_dsc(draw_task);
-
-  if (base_dsc->part == LV_PART_MAIN && type == LV_DRAW_TASK_TYPE_FILL) {
-    lv_obj_t *cell = lv_event_get_target_obj(e);
-    NodeMeta_t *meta = &(get_node(cell)->meta);
-    if (meta->depth > 1 && meta->hidden) {
-      return;
-    }
-
-    // Draw icon image
-    const lv_image_dsc_t *img;
-    if (meta->type == TYPE_NODE) {
-      img = (const lv_image_dsc_t*)(meta->checked ? &img_symbol_right : &img_symbol_down);
-    } else {
-      img = (const lv_image_dsc_t*)(meta->checked ? &img_checked : &img_checkbox);
-    }
-
-    lv_area_t area;
-    area.x1 = 0; area.x2 = img->header.w - 1;
-    area.y1 = 0; area.y2 = img->header.h - 1;
-
-    lv_area_t draw_task_area;
-    lv_draw_task_get_area(draw_task, &draw_task_area);
-    lv_area_align(&draw_task_area, &area, LV_ALIGN_LEFT_MID, meta->depth * CELL_PADDING_LEFT, 0);
-
-#if 0
-    lv_draw_rect_dsc_t rect_dsc;
-    lv_draw_rect_dsc_init(&rect_dsc);
-    rect_dsc.bg_image_src = (const void *)img;
-    rect_dsc.bg_color = (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF);
-    lv_draw_rect(base_dsc->layer, &rect_dsc, &area);
-#else
-    lv_draw_image_dsc_t img_dsc;
-    lv_draw_image_dsc_init(&img_dsc);
-    img_dsc.src = (const void *)img;
-    img_dsc.recolor = lv_color_black();
-    lv_draw_image(base_dsc->layer, &img_dsc, &area);
-#endif
-  }
 }
 
 //--------------------------------------------------------------------------------
@@ -342,7 +320,7 @@ static void update_open(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *a
       // 1. Add a new cell and re-index
       lv_obj_t *cell = append_cell(list, node);
       lv_obj_move_to_index(cell, index);
-      update_list(list);
+      update_album_control(list);
 
       // 2. Set the animation to delete the last cell
       lv_anim_set_var(a, cell);
@@ -385,7 +363,7 @@ static void update_close(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *
       // In case node is not in the last cell
       last_key = node->key;
       append_cell(list, node);
-      update_list(list);
+      update_album_control(list);
     } else {
       // In case node is in the last cell
       cell = lv_obj_get_child(list, 0);
@@ -393,7 +371,7 @@ static void update_close(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *
       node = find_before(node->key);
       cell = append_cell(list, node);
       lv_obj_move_to_index(cell, 0);
-      update_list(list);
+      update_album_control(list);
       ++index;
 
       // Apply a close-to-open animation to the top cell
@@ -451,8 +429,56 @@ static void event_handler(lv_event_t *e) {
   else /* meta->type == TYPE_LEAF */ {
     // Update the checkbox state and appearance
     meta->checked = !meta->checked;
-    update_info(album_info);
+    update_album_info(album_info);
     lv_obj_send_event(cell, LV_EVENT_STYLE_CHANGED, NULL);
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Draw a graphic icon for the cell
+// Reference: https://docs.lvgl.io/master/details/widgets/table.html
+//--------------------------------------------------------------------------------
+static void draw_image_cb(lv_event_t *e) {
+  lv_draw_task_t *draw_task = lv_event_get_draw_task(e);
+  lv_draw_task_type_t type  = lv_draw_task_get_type(draw_task);
+  lv_draw_dsc_base_t *base_dsc = (lv_draw_dsc_base_t *)lv_draw_task_get_draw_dsc(draw_task);
+
+  if (base_dsc->part == LV_PART_MAIN && type == LV_DRAW_TASK_TYPE_FILL) {
+    lv_obj_t *cell = lv_event_get_target_obj(e);
+    NodeMeta_t *meta = &(get_node(cell)->meta);
+    if (meta->depth > 1 && meta->hidden) {
+      return;
+    }
+
+    // Draw icon image
+    const lv_image_dsc_t *img;
+    if (meta->type == TYPE_NODE) {
+      img = (const lv_image_dsc_t*)(meta->checked ? &img_symbol_right : &img_symbol_down);
+    } else {
+      img = (const lv_image_dsc_t*)(meta->checked ? &img_checked : &img_checkbox);
+    }
+
+    lv_area_t area;
+    area.x1 = 0; area.x2 = img->header.w - 1;
+    area.y1 = 0; area.y2 = img->header.h - 1;
+
+    lv_area_t draw_task_area;
+    lv_draw_task_get_area(draw_task, &draw_task_area);
+    lv_area_align(&draw_task_area, &area, LV_ALIGN_LEFT_MID, meta->depth * CELL_PADDING_LEFT, 0);
+
+#if 0
+    lv_draw_rect_dsc_t rect_dsc;
+    lv_draw_rect_dsc_init(&rect_dsc);
+    rect_dsc.bg_image_src = (const void *)img;
+    rect_dsc.bg_color = (meta->type == TYPE_NODE ? CELL_COLOR_NODE : CELL_COLOR_LEAF);
+    lv_draw_rect(base_dsc->layer, &rect_dsc, &area);
+#else
+    lv_draw_image_dsc_t img_dsc;
+    lv_draw_image_dsc_init(&img_dsc);
+    img_dsc.src = (const void *)img;
+    img_dsc.recolor = lv_color_black();
+    lv_draw_image(base_dsc->layer, &img_dsc, &area);
+#endif
   }
 }
 
@@ -474,7 +500,7 @@ static void update_scroll(lv_obj_t *list) {
       update_cell(top, node);
       lv_obj_move_to_index(top, -1);  // -1: move top to end
       lv_obj_scroll_by(list, 0, lv_obj_get_height(top), LV_ANIM_OFF);
-      update_list(list);
+      update_album_control(list);
       DBG_EXEC({
         album_control.root->print_node(node);
       });
@@ -491,7 +517,7 @@ static void update_scroll(lv_obj_t *list) {
       update_cell(end, node);
       lv_obj_move_to_index(end, 0); // 0: move end to top
       lv_obj_scroll_by(list, 0, -lv_obj_get_height(end), LV_ANIM_OFF);
-      update_list(list);
+      update_album_control(list);
       DBG_EXEC({
         album_control.root->print_node(node);
       });
@@ -518,7 +544,7 @@ static void scroll_cb(lv_event_t *e) {
 //--------------------------------------------------------------------------------
 // Initialize the album list with a specified number of cells
 //--------------------------------------------------------------------------------
-static void init_album_list(int key = 0) {
+static void album_list_refresh(int key = 0) {
   update_scroll_running = true;   // Disable 'update_scroll()' once
   lv_obj_clean(album_list);
   update_scroll_running = false;  // Enable 'update_scroll()' again
@@ -540,17 +566,17 @@ static void init_album_list(int key = 0) {
         );
       });
       append_cell(album_list, node);
-      update_list(album_list);
+      update_album_control(album_list);
     }
   }
 
-  update_info(album_info);
+  update_album_info(album_info);
 }
 
 //--------------------------------------------------------------------------------
 // Sets the state of all cells in the album list
 //--------------------------------------------------------------------------------
-static void toggle_state(int type, int state) {
+static void toggle_cell_state(int type, int state) {
   const int n = album_control.n_nodes;
   for (int i = 0; i < n; i++) {
     Node *node = album_control.root->find_preorder(i);
@@ -567,20 +593,28 @@ static void toggle_state(int type, int state) {
 }
 
 //--------------------------------------------------------------------------------
-// Functions for manipulating JSON data for album lists
+// Functions for manipulating JSON data / files
+//  @conf/
+//  ├── @album.txt
+//  │   ├── Current dropdown selection
+//  │   ├── "All <tab> 0"
+//  │   ├── "Name <tab> Hash" for 1.json
+//  │   ├── ...
+//  │
+//  ├── 1.json
+//  ├── ...
 //--------------------------------------------------------------------------------
-static inline String make_json_path(uint8_t id) {
-  return String(album_control.root->name.c_str()) + CONFIG_DIR_NAME + String(id) + ".json";
+static inline String make_json_list(void) {
+  String list;
+  for (auto &i : album_control.list) {
+    list += i.name + "\n";
+  }
+  list.trim();
+  return list;
 }
 
-static bool album_json_diff(void) {
-  bool ret = false;
-
-  if (album_control.list.size() && album_control.list_id > 0) {
-    JsonDocument doc;
-    JsonTree::tree2json(album_control.root, doc);
-  }
-  return true;
+static inline String make_json_path(int id) {
+  return String(album_control.root->name.c_str()) + CONFIG_DIR_NAME + String(id) + ".json";
 }
 
 static bool album_json_save(void) {
@@ -597,7 +631,7 @@ static bool album_json_save(void) {
       if (size == serializeJson(doc, fd)) {
         ret = true;
       } else {
-        printf("failed writing json to %s\n", path.c_str());
+        lv_label_set_text_fmt(album_info, "failed saving json to %s\n", path.c_str());
       }
       fd.close();
     }
@@ -608,7 +642,7 @@ static bool album_json_save(void) {
 
 static bool album_json_load(void) {
   if (album_control.list_id == 0) {
-    toggle_state(TYPE_LEAF, LEAF_SELECTED);
+    toggle_cell_state(TYPE_LEAF, LEAF_SELECTED);
     return true;
   }
 
@@ -620,7 +654,7 @@ static bool album_json_load(void) {
       DeserializationError error = deserializeJson(doc, fd);
       fd.close();
       if (!error) {
-        toggle_state(TYPE_LEAF, LEAF_UNSELECTED);       // < 1[msec]
+        toggle_cell_state(TYPE_LEAF, LEAF_UNSELECTED);  // < 1[msec]
         JsonTree::select_leaf(doc, album_control.root); // < 1[msec]
         return true;
       }
@@ -658,6 +692,7 @@ static void album_list_load(void) {
 
   // Read data from an existing file
   if (fd) {
+    album_control.list.clear();
     album_control.list_id = fd.readStringUntil('\n').toInt();
     while (fd.available()) {
       String buf = fd.readStringUntil('\n');
@@ -670,7 +705,19 @@ static void album_list_load(void) {
       }
     }
     fd.close();
-    album_json_load();
+
+    DBG_EXEC({
+      printf("list_id: %d\n", album_control.list_id);
+      for (auto &i : album_control.list) {
+        printf("name: %s, hash: %d\n", i.name.c_str(), i.hash);
+      }
+    })
+
+    // Just in case
+    if (album_json_load() == false) {
+      album_control.list_id = 0;
+      toggle_cell_state(TYPE_LEAF, LEAF_SELECTED);
+    }
   }
 
   // Create a new file
@@ -682,6 +729,52 @@ static void album_list_load(void) {
 }
 
 //--------------------------------------------------------------------------------
+// Dialog box for album list deletion confirmation
+//--------------------------------------------------------------------------------
+static void dialog_box_cb(lv_event_t *e) {
+  // https://github.com/lvgl/lvgl/blob/master/src/widgets/msgbox/lv_msgbox.c#L269-L290
+  lv_obj_t *obj = lv_event_get_target_obj(e);
+  obj = lv_obj_get_parent(lv_obj_get_parent(obj));
+  lv_msgbox_close_async(obj);
+
+  bool yes = (bool)lv_event_get_user_data(e);
+  if (yes) {
+    // Delete target file
+    SD.remove(make_json_path(album_control.list_id));
+
+    // Round up file name one by one
+    int n = album_control.list.size();
+    for (int i = album_control.list_id + 1; i < n; i++) {
+      String src = make_json_path(i);
+      String dst = make_json_path(i - 1);
+      SD.rename(src, dst);
+    }
+
+    // Update album list
+    album_control.list.erase(album_control.list.begin() + album_control.list_id);
+    lv_dropdown_set_options (dropdown_list, make_json_list().c_str());
+    lv_dropdown_set_selected(dropdown_list, album_control.list_id = 0);
+    toggle_cell_state(TYPE_LEAF, LEAF_SELECTED);
+    album_list_save();
+    album_list_refresh();
+  }
+}
+
+static void show_dialog_box(int id) {
+  String name = "Are you sure you want to delete \"" + album_control.list[id].name + "\" ?\n";
+  lv_obj_t *box = lv_msgbox_create(NULL);
+  lv_msgbox_add_text      (box, name.c_str());
+  lv_obj_set_style_pad_all(box, LV_PCT_Y( 2), (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_set_style_width  (box, LV_PCT_X(95), (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+
+  lv_obj_t *btn = lv_msgbox_add_footer_button(box, "Yes");
+  lv_obj_add_event_cb(btn, dialog_box_cb, LV_EVENT_CLICKED, (void*)true);
+
+  btn = lv_msgbox_add_footer_button(box, "No");
+  lv_obj_add_event_cb(btn, dialog_box_cb, LV_EVENT_CLICKED, (void*)false);
+}
+
+//--------------------------------------------------------------------------------
 // Callback for dropdown list
 //--------------------------------------------------------------------------------
 static void dropdown_cb(lv_event_t *e) {
@@ -689,17 +782,18 @@ static void dropdown_cb(lv_event_t *e) {
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
   album_control.list_id = lv_dropdown_get_selected(obj);
-
+  if (album_control.list_id >= album_control.list.size()) {
+    album_control.list_id = 0;
+  }
   album_json_load();
-  init_album_list();
-  album_list_save();
+  album_list_refresh();
 }
 
 //--------------------------------------------------------------------------------
-// Callback for button matrix
+// Drawing task callback for button matrix
 // https://docs.lvgl.io/master/details/widgets/buttonmatrix.html#custom-buttons
 //--------------------------------------------------------------------------------
-static void button_draw_cb(lv_event_t *e) {
+static void draw_button_cb(lv_event_t *e) {
   lv_draw_task_t *draw_task = lv_event_get_draw_task(e);
   lv_draw_task_type_t type  = lv_draw_task_get_type(draw_task);
   lv_draw_dsc_base_t *base_dsc = (lv_draw_dsc_base_t *)lv_draw_task_get_draw_dsc(draw_task);
@@ -713,7 +807,13 @@ static void button_draw_cb(lv_event_t *e) {
     if (type == LV_DRAW_TASK_TYPE_LABEL) {
       lv_draw_label_dsc_t *label_dsc = lv_draw_task_get_label_dsc(draw_task);
       if (label_dsc) {
-        label_dsc->ofs_x = label_dsc->ofs_y = (base_dsc->id1 == selected && pressed == true) ? 1 : 0;
+        if (obj == keypad_buttons) {
+          bool disabled = lv_buttonmatrix_has_button_ctrl(obj, base_dsc->id1, LV_BUTTONMATRIX_CTRL_DISABLED);
+          label_dsc->opa = (disabled ? 128 : 255);
+        }
+        else if (base_dsc->id1 == selected) {
+          label_dsc->ofs_x = label_dsc->ofs_y = (pressed == true ? 1 : 0);
+        }
       }
     }
 
@@ -727,9 +827,9 @@ static void button_draw_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-// Callback for button matrix
+// Event callback for button matrix
 //--------------------------------------------------------------------------------
-static void toggle_click_cb(lv_event_t *e) {
+static void toggle_event_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
 
@@ -740,10 +840,10 @@ static void toggle_click_cb(lv_event_t *e) {
   uint32_t id = lv_buttonmatrix_get_selected_button(obj);
   switch (id) {
     case 0:
-      toggle_state(TYPE_NODE, info.n_folded == 0 ? NODE_FOLDED : NODE_UNFOLDED);
+      toggle_cell_state(TYPE_NODE, info.n_folded == 0 ? NODE_FOLDED : NODE_UNFOLDED);
       break;
     case 1:
-      toggle_state(TYPE_LEAF, info.n_selected == 0 ? LEAF_SELECTED : LEAF_UNSELECTED);
+      toggle_cell_state(TYPE_LEAF, info.n_selected == 0 ? LEAF_SELECTED : LEAF_UNSELECTED);
       break;
     case LV_BUTTONMATRIX_BUTTON_NONE:
     default:
@@ -751,13 +851,13 @@ static void toggle_click_cb(lv_event_t *e) {
       break;
   }
 
-  init_album_list(/*album_control.top*/);
+  album_list_refresh(/*album_control.top*/);
 }
 
 //--------------------------------------------------------------------------------
-// Callback for textarea in keypad panel
+// Keypad control event callback for handling textarea
 //--------------------------------------------------------------------------------
-static void keypad_event_cb(lv_event_t *e) {
+static void keypad_button_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
   lv_obj_t *ta = (lv_obj_t *)lv_event_get_target(e);
   lv_obj_t *kb = (lv_obj_t *)lv_event_get_user_data(e);
@@ -775,70 +875,91 @@ static void keypad_event_cb(lv_event_t *e) {
     lv_obj_add_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
     lv_indev_reset(NULL, ta);
 
-    String text = lv_textarea_get_text(ta);
-    lv_textarea_set_text(ta, "");
-    text.trim();
+    String name = lv_textarea_get_text(ta);
+    name.trim();
 
-    if (text != "") {
+    if (name != "") {
       // Check the text is already in the array
       int n = album_control.list.size();
       for (int i = 1; i < n; i++) {
-        if (album_control.list[i].name == text) {
-          album_control.list_id = i;
+        if (album_control.list[i].name == name) {
+          if (album_control.list_id == i) {
+            album_json_save();
+          } else {
+            album_control.list_id = i;
+            album_json_load();
+          }
+          album_list_save();
+          album_list_refresh();
           lv_dropdown_set_selected(dropdown_list, album_control.list_id);
-          album_json_load();
           return;
         }
       }
 
-      // Create a new entry
-      JsonDocument doc;
-      JsonTree::tree2json(album_control.root, doc);   // A few milliseconds
+      if (album_control.list_id == 0) {
+        // Creating JSON with all selected will result in high memory consumption
+        toggle_cell_state(TYPE_LEAF, LEAF_UNSELECTED);
 
-      // Functional object to make a hash
-      std::hash<std::string> MakeHash;
-      size_t hash = MakeHash(doc.as<std::string>());  // 1.2[msec]
+        // Create a new empty entry
+        album_control.list_id = album_control.list.size();
+        album_control.list.push_back({
+          /* .name = */ name,
+          /* .hash = */ 0
+        });
+      } else {
+        // Replace the existing list
+        album_control.list[album_control.list_id].name = name;
+      }
 
-      album_control.list.push_back({
-        /* .name = */ text,
-        /* .hash = */ hash
-      });
-
-      album_control.list_id = album_control.list.size() - 1;
-      album_list_save();
       album_json_save();
+      album_list_save();
+      album_list_refresh();
 
-      lv_dropdown_add_option  (dropdown_list, text.c_str(), album_control.list_id);
+      lv_dropdown_set_options (dropdown_list, make_json_list().c_str());
       lv_dropdown_set_selected(dropdown_list, album_control.list_id);
     }
   }
 }
 
-static void keypad_click_cb(lv_event_t *e) {
+//--------------------------------------------------------------------------------
+// Keypad button event callback for handling textarea
+//--------------------------------------------------------------------------------
+static void keypad_event_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
+  DBG_ASSERT(album_control.list_id < album_control.list.size());
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
-  uint32_t id = lv_buttonmatrix_get_selected_button(obj);
+  lv_obj_t *ta  = lv_obj_get_child(keypad_panel, 1);
+  uint32_t id   = lv_buttonmatrix_get_selected_button(obj);
+
   switch (id) {
-    case 0: /* + */
+    case 0: /* LV_SYMBOL_KEYBOARD */
+      if (album_control.list_id == 0) {
+        lv_textarea_set_text(ta, "");
+      } else {
+        lv_textarea_set_text(ta, album_control.list[album_control.list_id].name.c_str());
+      }
       lv_obj_remove_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
       break;
-    case 1: /* keypad */
-      {
+    case 1: /* LV_SYMBOL_SAVE */
+      if (album_control.list_id > 0) {
         JsonDocument doc;
-        JsonTree::tree2json(album_control.root, doc); // A few milliseconds
+        JsonTree::tree2json(album_control.root, doc);
 
-        DBG_EXEC({
-          serializeJsonPretty(doc, Serial);
-          Serial.println();
-        });
+        std::hash<std::string> makeHash;
+        size_t hash = makeHash(doc.as<std::string>()); // 1.2[msec]
+        album_control.list[album_control.list_id].hash = hash;
 
-        toggle_state(TYPE_LEAF, LEAF_UNSELECTED);       // < 1[msec]
-        JsonTree::select_leaf(doc, album_control.root); // < 1[msec]
+        album_json_save();
+        album_list_save();
+        album_list_refresh();
       }
       break;
-    case 2: /* - */
+    case 2: /* LV_SYMBOL_TRASH */
+      if (album_control.list_id > 0) {
+        show_dialog_box(album_control.list_id);
+      }
       break;
     case LV_BUTTONMATRIX_BUTTON_NONE:
     default:
@@ -858,6 +979,7 @@ static void delete_cb(lv_event_t *e) {
     &album_info,
     &keypad_panel,
     &dropdown_list,
+    &keypad_buttons,
   };
 
   for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
@@ -880,59 +1002,15 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_GESTURE, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_LOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenAlbumList, ui_event_ScreenAlbumList, LV_EVENT_SCREEN_UNLOADED, NULL);
+  }
 
-    lv_obj_t *obj;
+  ///////////////////// Title Label /////////////////////
+  lv_obj_t *obj = lv_label_create(ui_ScreenAlbumList);
+  lv_obj_set_pos(obj, TITLE_LABEL_X, TITLE_LABEL_Y);
+  lv_label_set_text_static(obj, "Album List");
 
-#if SHOW_ARROW_BUTTON || true
-    //////////////////// Back to Main ////////////////////
-    static constexpr lv_style_const_prop_t style_prop_common[] = {
-      LV_STYLE_CONST_WIDTH(27),
-      LV_STYLE_CONST_HEIGHT(27),
-      LV_STYLE_CONST_X(BACK_TO_MAIN_X),
-      LV_STYLE_CONST_Y(BACK_TO_MAIN_Y),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_default[] = {
-      LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
-      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
-      LV_STYLE_CONST_BORDER_WIDTH(0),
-      LV_STYLE_CONST_PAD_TOP(8),
-      LV_STYLE_CONST_PAD_RIGHT(0),
-      LV_STYLE_CONST_PAD_BOTTOM(0),
-      LV_STYLE_CONST_PAD_LEFT(8),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
-      LV_STYLE_CONST_PAD_TOP(10),
-      LV_STYLE_CONST_PAD_LEFT(10),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_checked[] = {
-      LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
-      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static LV_STYLE_CONST_INIT(style_common,  (void*)(style_prop_common ));
-    static LV_STYLE_CONST_INIT(style_default, (void*)(style_prop_default));
-    static LV_STYLE_CONST_INIT(style_pressed, (void*)(style_prop_pressed));
-    static LV_STYLE_CONST_INIT(style_checked, (void*)(style_prop_checked));
-
-    obj = lv_checkbox_create(ui_ScreenAlbumList);
-    lv_checkbox_set_text_static(obj, "");
-    lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-    lv_obj_add_event_cb (obj, ui_event_ScreenAlbumList, LV_EVENT_CLICKED, NULL);
-#endif
-
-    ///////////////////// Title Label /////////////////////
-    obj = lv_label_create(ui_ScreenAlbumList);
-    lv_obj_set_pos(obj, TITLE_LABEL_X, TITLE_LABEL_Y);
-    lv_label_set_text_static(obj, "Album List");
-
-    //////////////////// Dropdown List ////////////////////
+  //////////////////// Dropdown List ////////////////////
+  if (dropdown_list == NULL) {
     static constexpr lv_style_const_prop_t style_prop_dropdown[] = {
       LV_STYLE_CONST_X(DROPDOWN_LIST_X),
       LV_STYLE_CONST_Y(DROPDOWN_LIST_Y),
@@ -943,78 +1021,73 @@ void ui_ScreenAlbumList_screen_init(void) {
     };
     static LV_STYLE_CONST_INIT(style_dropdown, (void*)(style_prop_dropdown));
 
-    if (dropdown_list == NULL) {
-      dropdown_list = lv_dropdown_create(ui_ScreenAlbumList);
-      String list;
-      for (auto &i : album_control.list) {
-        list += i.name + "\n";
-      }
-      list.trim();
-      lv_obj_add_style        (dropdown_list, &style_dropdown, 0);
-      lv_dropdown_set_options (dropdown_list, list.c_str());
-      lv_dropdown_set_selected(dropdown_list, album_control.list_id);
-      lv_obj_add_event_cb     (dropdown_list, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    }
+    dropdown_list = lv_dropdown_create(ui_ScreenAlbumList);
+    lv_obj_add_style        (dropdown_list, &style_dropdown, 0);
+    lv_dropdown_set_options (dropdown_list, make_json_list().c_str());
+    lv_dropdown_set_selected(dropdown_list, album_control.list_id);
+    lv_obj_add_event_cb     (dropdown_list, dropdown_cb, LV_EVENT_VALUE_CHANGED, NULL);
+  }
 
-    //////////////////// Button Matrix ////////////////////
-    static constexpr lv_style_const_prop_t style_prop_button_main[] = {
-      LV_STYLE_CONST_HEIGHT(30),
-      LV_STYLE_CONST_BG_OPA(0),
-      LV_STYLE_CONST_BORDER_WIDTH(0),
-      LV_STYLE_CONST_PAD_TOP(0),
-      LV_STYLE_CONST_PAD_LEFT(0),
-      LV_STYLE_CONST_PAD_RIGHT(0),
-      LV_STYLE_CONST_PAD_BOTTOM(0),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_button_item[] = {
-      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
-      LV_STYLE_CONST_BORDER_WIDTH(0),
-      LV_STYLE_CONST_SHADOW_WIDTH(0),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_toggle_main[] = {
-      LV_STYLE_CONST_X(TOGGLE_BUTTON_X),
-      LV_STYLE_CONST_Y(TOGGLE_BUTTON_Y),
-      LV_STYLE_CONST_WIDTH(68), // 34 * 2
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_keypad_main[] = {
-      LV_STYLE_CONST_X(KEYPAD_BUTTON_X),
-      LV_STYLE_CONST_Y(KEYPAD_BUTTON_Y),
-      LV_STYLE_CONST_WIDTH(102), // 34 * 3
-      LV_STYLE_CONST_PROPS_END
-    };
-    static LV_STYLE_CONST_INIT(style_button_main, (void*)(style_prop_button_main));
-    static LV_STYLE_CONST_INIT(style_button_item, (void*)(style_prop_button_item));
-    static LV_STYLE_CONST_INIT(style_toggle_main, (void*)(style_prop_toggle_main));
-    static LV_STYLE_CONST_INIT(style_keypad_main, (void*)(style_prop_keypad_main));
-    static constexpr lv_buttonmatrix_ctrl_t button_ctrl = (lv_buttonmatrix_ctrl_t)(
-      (uint32_t)LV_BUTTONMATRIX_CTRL_CLICK_TRIG |
-      (uint32_t)LV_BUTTONMATRIX_CTRL_NO_REPEAT
-    );
-    static constexpr const char* toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
-    static constexpr const char* keypad_map[] = { LV_SYMBOL_PLUS, LV_SYMBOL_KEYBOARD, LV_SYMBOL_MINUS, NULL };
+  //////////////////// Button Matrix ////////////////////
+  static constexpr lv_style_const_prop_t style_prop_button_main[] = {
+    LV_STYLE_CONST_HEIGHT(30),
+    LV_STYLE_CONST_BG_OPA(0),
+    LV_STYLE_CONST_BORDER_WIDTH(0),
+    LV_STYLE_CONST_PAD_TOP(0),
+    LV_STYLE_CONST_PAD_LEFT(0),
+    LV_STYLE_CONST_PAD_RIGHT(0),
+    LV_STYLE_CONST_PAD_BOTTOM(0),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static constexpr lv_style_const_prop_t style_prop_button_item[] = {
+    LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+    LV_STYLE_CONST_BORDER_WIDTH(0),
+    LV_STYLE_CONST_SHADOW_WIDTH(0),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static constexpr lv_style_const_prop_t style_prop_toggle_main[] = {
+    LV_STYLE_CONST_X(TOGGLE_BUTTON_X),
+    LV_STYLE_CONST_Y(TOGGLE_BUTTON_Y),
+    LV_STYLE_CONST_WIDTH(68), // 34 * 2
+    LV_STYLE_CONST_PROPS_END
+  };
+  static constexpr lv_style_const_prop_t style_prop_keypad_main[] = {
+    LV_STYLE_CONST_X(KEYPAD_BUTTON_X),
+    LV_STYLE_CONST_Y(KEYPAD_BUTTON_Y),
+    LV_STYLE_CONST_WIDTH(102), // 34 * 3
+    LV_STYLE_CONST_PROPS_END
+  };
+  static LV_STYLE_CONST_INIT(style_button_main, (void*)(style_prop_button_main));
+  static LV_STYLE_CONST_INIT(style_button_item, (void*)(style_prop_button_item));
+  static LV_STYLE_CONST_INIT(style_toggle_main, (void*)(style_prop_toggle_main));
+  static LV_STYLE_CONST_INIT(style_keypad_main, (void*)(style_prop_keypad_main));
+  static constexpr lv_buttonmatrix_ctrl_t button_ctrl = (lv_buttonmatrix_ctrl_t)(
+    (uint32_t)LV_BUTTONMATRIX_CTRL_CLICK_TRIG |
+    (uint32_t)LV_BUTTONMATRIX_CTRL_NO_REPEAT
+  );
+  static constexpr const char* toggle_map[] = { LV_SYMBOL_DIRECTORY, LV_SYMBOL_OK, NULL };
+  static constexpr const char* keypad_map[] = { LV_SYMBOL_KEYBOARD, LV_SYMBOL_SAVE, LV_SYMBOL_TRASH, NULL };
 
-    obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
-    lv_buttonmatrix_set_map             (obj, toggle_map );
-    lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
-    lv_obj_add_style                    (obj, &style_toggle_main, LV_PART_MAIN );
-    lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
-    lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
-    lv_obj_add_event_cb                 (obj, button_draw_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
-    lv_obj_add_event_cb                 (obj, toggle_click_cb, LV_EVENT_VALUE_CHANGED,   NULL);
-    lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+  obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
+  lv_buttonmatrix_set_map             (obj, toggle_map );
+  lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
+  lv_obj_add_style                    (obj, &style_toggle_main, LV_PART_MAIN );
+  lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
+  lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
+  lv_obj_add_event_cb                 (obj, draw_button_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
+  lv_obj_add_event_cb                 (obj, toggle_event_cb, LV_EVENT_VALUE_CHANGED,   NULL);
+  lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
 
-    obj = lv_buttonmatrix_create(ui_ScreenAlbumList);
-    lv_buttonmatrix_set_map             (obj, keypad_map);
-    lv_buttonmatrix_set_button_ctrl_all (obj, button_ctrl);
-    lv_obj_add_style                    (obj, &style_keypad_main, LV_PART_MAIN );
-    lv_obj_add_style                    (obj, &style_button_main, LV_PART_MAIN );
-    lv_obj_add_style                    (obj, &style_button_item, LV_PART_ITEMS);
-    lv_obj_add_event_cb                 (obj, button_draw_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
-    lv_obj_add_event_cb                 (obj, keypad_click_cb, LV_EVENT_VALUE_CHANGED,   NULL);
-    lv_obj_add_flag                     (obj, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+  if (keypad_buttons == NULL) {
+    keypad_buttons = lv_buttonmatrix_create(ui_ScreenAlbumList);
+    lv_buttonmatrix_set_map             (keypad_buttons, keypad_map);
+    lv_buttonmatrix_set_button_ctrl_all (keypad_buttons, button_ctrl);
+    lv_obj_add_style                    (keypad_buttons, &style_keypad_main, LV_PART_MAIN );
+    lv_obj_add_style                    (keypad_buttons, &style_button_main, LV_PART_MAIN );
+    lv_obj_add_style                    (keypad_buttons, &style_button_item, LV_PART_ITEMS);
+    lv_obj_add_event_cb                 (keypad_buttons, draw_button_cb,  LV_EVENT_DRAW_TASK_ADDED, NULL);
+    lv_obj_add_event_cb                 (keypad_buttons, keypad_event_cb, LV_EVENT_VALUE_CHANGED,   NULL);
+    lv_obj_add_flag                     (keypad_buttons, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
   }
 
   //////////////////// List Container ////////////////////
@@ -1095,8 +1168,7 @@ void ui_ScreenAlbumList_screen_init(void) {
     lv_textarea_set_one_line        (ta, true);
     lv_textarea_set_max_length      (ta, 32);
     lv_textarea_set_placeholder_text(ta, "List name");
-//  lv_textarea_set_text            (ta, "List1");
-    lv_obj_add_event_cb             (ta, keypad_event_cb, LV_EVENT_ALL, (void *)kb);
+    lv_obj_add_event_cb             (ta, keypad_button_cb, LV_EVENT_ALL, (void *)kb);
     lv_obj_send_event               (ta, LV_EVENT_FOCUSED, NULL);
   }
 
@@ -1105,12 +1177,58 @@ void ui_ScreenAlbumList_screen_init(void) {
   lv_obj_add_event_cb(album_list,         delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_list)        );
   lv_obj_add_event_cb(album_info,         delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&album_info)        );
   lv_obj_add_event_cb(keypad_panel,       delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&keypad_panel)      );
+  lv_obj_add_event_cb(keypad_buttons,     delete_cb, LV_EVENT_DELETE, reinterpret_cast<void*>(&keypad_buttons)    );
+
+#if SHOW_ARROW_BUTTON || true
+  //////////////////// Back to Main ////////////////////
+  static constexpr lv_style_const_prop_t style_prop_common[] = {
+    LV_STYLE_CONST_WIDTH(27),
+    LV_STYLE_CONST_HEIGHT(27),
+    LV_STYLE_CONST_X(BACK_TO_MAIN_X),
+    LV_STYLE_CONST_Y(BACK_TO_MAIN_Y),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static constexpr lv_style_const_prop_t style_prop_default[] = {
+    LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
+    LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+    LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+    LV_STYLE_CONST_BORDER_WIDTH(0),
+    LV_STYLE_CONST_PAD_TOP(8),
+    LV_STYLE_CONST_PAD_RIGHT(0),
+    LV_STYLE_CONST_PAD_BOTTOM(0),
+    LV_STYLE_CONST_PAD_LEFT(8),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static constexpr lv_style_const_prop_t style_prop_pressed[] = {
+    LV_STYLE_CONST_PAD_TOP(10),
+    LV_STYLE_CONST_PAD_LEFT(10),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static constexpr lv_style_const_prop_t style_prop_checked[] = {
+    LV_STYLE_CONST_BG_IMAGE_SRC(&img_menu_right),
+    LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static LV_STYLE_CONST_INIT(style_common,  (void*)(style_prop_common ));
+  static LV_STYLE_CONST_INIT(style_default, (void*)(style_prop_default));
+  static LV_STYLE_CONST_INIT(style_pressed, (void*)(style_prop_pressed));
+  static LV_STYLE_CONST_INIT(style_checked, (void*)(style_prop_checked));
+
+  obj = lv_checkbox_create(ui_ScreenAlbumList);
+  lv_checkbox_set_text_static(obj, "");
+  lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+  lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+  lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  lv_obj_add_event_cb (obj, ui_event_ScreenAlbumList, LV_EVENT_CLICKED, NULL);
+#endif
 }
 
 void ui_ScreenAlbumList_screen_deinit(void) {
   if (ui_ScreenAlbumList) {
     // Re-traverse node tree before making a new playlist
     if (album_control.root) {
+      album_list_save();
       album_control.root->traverse_node();
     }
 
@@ -1139,7 +1257,7 @@ void ui_ScreenAlbumList_create_list(void *root) {
     // Re-traverse node tree by preorder and initialize album list
     album_control.root = reinterpret_cast<Node*>(root);
     album_control.n_nodes = album_control.root->traverse_preorder();
-    init_album_list();
+    album_list_refresh();
   } else {
     // In case the SD card is not inserted
     memset((void*)&album_control, 0, sizeof(album_control));
