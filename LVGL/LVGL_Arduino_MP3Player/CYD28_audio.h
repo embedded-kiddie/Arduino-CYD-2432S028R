@@ -1,7 +1,7 @@
 #ifndef _CYD28_AUDIO_H_
 #define _CYD28_AUDIO_H_
 
-#include "CYD_Audio.h"
+#include "src/CYD_Audio/CYD_Audio.h"
 
 /**
  * @brief Audio taks commands

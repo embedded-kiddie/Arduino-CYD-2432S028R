@@ -102,15 +102,16 @@ void audioTask(void *parameter)
 					audioTxTaskMessage.ret = audio.setAudioPlayPosition(audioRxTaskMessage.value);
 					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
 					break;
-				case CONNECTTOHOST:
-					audioTxTaskMessage.cmd = CONNECTTOHOST;
-					audioTxTaskMessage.ret = audio.connecttohost(audioRxTaskMessage.txt1);
-					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
-					break;
 				case CONNECTTOSD:
 					audioTxTaskMessage.cmd = CONNECTTOSD;
 					log_i("msg: %s", audioRxTaskMessage.txt1);
 					audioTxTaskMessage.ret = audio.connecttoSD(audioRxTaskMessage.txt1);
+					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
+					break;
+#if __has_include(<WiFi.h>)
+				case CONNECTTOHOST:
+					audioTxTaskMessage.cmd = CONNECTTOHOST;
+					audioTxTaskMessage.ret = audio.connecttohost(audioRxTaskMessage.txt1);
 					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
 					break;
 				case CONNECTTOSPEECH:
@@ -118,6 +119,7 @@ void audioTask(void *parameter)
 					audioTxTaskMessage.ret = audio.connecttospeech(audioRxTaskMessage.txt1, audioRxTaskMessage.txt2);
 					xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
 					break;
+#endif
 				case AUDIO_STOP:
 					audioTxTaskMessage.cmd = AUDIO_STOP;
 					audio.stopSong();
