@@ -13,8 +13,9 @@ lv_obj_t *ui_ScreenOptions;
 //--------------------------------------------------------------------------------
 // Offset from the top / Roller width
 //--------------------------------------------------------------------------------
-#define OFFSET_TOP    0
-#define OPTIONS_WIDTH 100
+#define SHUFFLE_POS_Y 70
+#define TIMER_POS_Y   140
+#define TIMER_WIDTH   100
 
 //--------------------------------------------------------------------------------
 // Contents of dropdown list
@@ -94,6 +95,47 @@ static void delete_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
+// https://docs.lvgl.io/master/widgets/checkbox.html#checkboxes-as-radio-buttons
+//--------------------------------------------------------------------------------
+static void radio_event_handler(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  uint8_t  *active_id = (uint8_t *)lv_event_get_user_data(e);
+  lv_obj_t *container = (lv_obj_t*)lv_event_get_current_target(e);
+  lv_obj_t *act_cb = lv_event_get_target_obj(e);
+  lv_obj_t *old_cb = lv_obj_get_child(container, *active_id);
+
+  // Do nothing if the container was clicked
+  if (act_cb != container) {
+    lv_obj_remove_state(old_cb, LV_STATE_CHECKED);  // Uncheck the previous radio button*/
+    lv_obj_add_state   (act_cb, LV_STATE_CHECKED);  // Check the current radio button*/
+    *active_id = (uint8_t)lv_obj_get_index(act_cb);
+  }
+}
+
+//--------------------------------------------------------------------------------
+// https://docs.lvgl.io/master/widgets/switch.html#simple-switch
+//--------------------------------------------------------------------------------
+static void switch_event_handler(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_option.shuffle_mode = lv_obj_has_state(obj, LV_STATE_CHECKED);
+
+  lv_obj_t *parent = lv_obj_get_parent(obj);
+  lv_obj_t *container = lv_obj_get_child(parent, 1);
+
+  for (int i = 0; i <= ui_option.partition_num; i++) {
+    obj = lv_obj_get_child(container, i);
+    if (ui_option.shuffle_mode) {
+      lv_obj_add_state   (obj, LV_STATE_DISABLED);
+    } else {
+      lv_obj_remove_state(obj, LV_STATE_DISABLED);
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------
 // Initialize / Deinitialize widgets
 //--------------------------------------------------------------------------------
 void ui_ScreenOptions_screen_init(void) {
@@ -104,8 +146,105 @@ void ui_ScreenOptions_screen_init(void) {
     lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_ScreenOptions, LV_EVENT_SCREEN_UNLOADED, NULL);
     lv_obj_add_event_cb       (ui_ScreenOptions, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenOptions);
 
-#if SHOW_ARROW_BUTTON
-    //////////////////// Arrow Icon ////////////////////
+    ///////////////////////// Partition //////////////////////////
+    lv_obj_t *obj = lv_label_create(ui_ScreenOptions);
+    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
+    lv_label_set_text_static(obj, "Partition");
+
+    static constexpr lv_style_const_prop_t style_prop_container[] = {
+      LV_STYLE_CONST_X(LV_PCT_X(0)),
+      LV_STYLE_CONST_Y(LV_PCT_Y(10)),
+      LV_STYLE_CONST_HEIGHT(LV_SIZE_CONTENT),
+      LV_STYLE_CONST_WIDTH(LV_PCT_X(100)),
+      LV_STYLE_CONST_PAD_TOP(5),
+      LV_STYLE_CONST_PAD_LEFT(15),
+      LV_STYLE_CONST_PAD_RIGHT(0),
+      LV_STYLE_CONST_PAD_BOTTOM(5),
+      LV_STYLE_CONST_BORDER_WIDTH(0),
+      LV_STYLE_CONST_BG_OPA(0),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_container, (void*)style_prop_container);
+
+    lv_obj_t *container = lv_obj_create(ui_ScreenOptions);
+    lv_obj_set_flex_flow(container, LV_FLEX_FLOW_ROW);
+    lv_obj_add_style    (container, &style_container, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_event_cb (container, radio_event_handler, LV_EVENT_VALUE_CHANGED, (void*)&ui_option.partition_id);
+
+    static constexpr lv_style_const_prop_t style_prop_radio[] = {
+      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_radio_check[] = {
+      LV_STYLE_CONST_BG_IMAGE_SRC(NULL),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_radio,       (void*)style_prop_radio      );
+    static LV_STYLE_CONST_INIT(style_radio_check, (void*)style_prop_radio_check);
+
+    char buf[4];
+    for (int i = 0; i < 5; i++) {
+      obj = lv_checkbox_create(container);
+      lv_snprintf(buf, sizeof(buf), "%d", i + 1);
+      lv_checkbox_set_text(obj, buf);
+      lv_obj_add_flag     (obj, LV_OBJ_FLAG_EVENT_BUBBLE); // Propagate the events to the container
+      lv_obj_add_style    (obj, &style_radio,       (uint32_t)LV_PART_INDICATOR);
+      lv_obj_add_style    (obj, &style_radio_check, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+      if (i >= ui_option.partition_num) {
+        lv_obj_add_state  (obj, LV_STATE_DISABLED);
+      } else if (i == ui_option.partition_id) {
+        lv_obj_add_state  (obj, LV_STATE_CHECKED);
+      }
+    }
+
+    //////////////////////// Shuffle Mode ////////////////////////
+    obj = lv_label_create(ui_ScreenOptions);
+    lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(4) + SHUFFLE_POS_Y);
+    lv_label_set_text_static(obj, "Shuffle Mode");
+
+    obj = lv_label_create(ui_ScreenOptions);
+    lv_obj_set_pos          (obj, LV_PCT_X(10), LV_PCT_Y(12) + SHUFFLE_POS_Y);
+    lv_label_set_text_static(obj, "All Partitions :");
+
+    obj = lv_switch_create(ui_ScreenOptions);
+    lv_obj_set_pos          (obj, LV_PCT_X(60), LV_PCT_Y(12) - 6 + SHUFFLE_POS_Y);
+    lv_obj_remove_state     (obj, LV_STATE_CHECKED);
+    lv_obj_add_event_cb     (obj, &switch_event_handler, LV_EVENT_VALUE_CHANGED, NULL);
+    if (ui_option.partition_num == 0) {
+      lv_obj_add_state      (obj, LV_STATE_DISABLED);
+    }
+
+
+    ////////////////////// Backlight Label ///////////////////////
+    obj = lv_label_create(ui_ScreenOptions);
+    lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(4) + TIMER_POS_Y);
+    lv_label_set_text_static(obj, "Backlight Off");
+
+    ///////////////////// Backlight Dropdown /////////////////////
+    obj = lv_roller_create(ui_ScreenOptions);
+    lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(12) + TIMER_POS_Y);
+    lv_obj_set_style_width  (obj, TIMER_WIDTH, 0);
+    lv_obj_add_event_cb     (obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_roller_set_options   (obj, opts_backlight.options, LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_selected  (obj, ui_option.selectBacklight, LV_ANIM_ON);
+    lv_roller_set_visible_row_count(obj, 3);
+
+    ////////////////////// Sleep Timer Label /////////////////////
+    obj = lv_label_create(ui_ScreenOptions);
+    lv_obj_set_pos          (obj, LV_PCT_X(57), LV_PCT_Y(4) + TIMER_POS_Y);
+    lv_label_set_text_static(obj, "Sleep Timer");
+
+    //////////////////// Sleep Timer Dropdown ////////////////////
+    obj = lv_roller_create(ui_ScreenOptions);
+    lv_obj_set_pos          (obj, SCREEN_WIDTH - TIMER_WIDTH - LV_PCT_X(5), LV_PCT_Y(12) + TIMER_POS_Y);
+    lv_obj_set_style_width  (obj, TIMER_WIDTH, 0);
+    lv_obj_add_event_cb     (obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_roller_set_options   (obj, opts_sleeptime.options, LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_selected  (obj, ui_option.selectSleepTimer, LV_ANIM_ON);
+    lv_roller_set_visible_row_count(obj, 3);
+
+#if SHOW_ARROW_BUTTON || true
+    ///////////////////////// Arrow Icon /////////////////////////
     {
       static constexpr lv_style_const_prop_t style_prop_common[] = {
         LV_STYLE_CONST_WIDTH(27),
@@ -150,34 +289,6 @@ void ui_ScreenOptions_screen_init(void) {
       lv_obj_add_event_cb (obj, ui_event_ScreenOptions, LV_EVENT_CLICKED, NULL);
     }
 #endif
-
-    ////////////////////// Backlight Label ///////////////////////
-    lv_obj_t *obj = lv_label_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4) + OFFSET_TOP);
-    lv_label_set_text_static(obj, "Backlight Off");
-
-    ///////////////////// Backlight Dropdown /////////////////////
-    obj = lv_roller_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(11) + OFFSET_TOP);
-    lv_obj_set_style_width(obj, OPTIONS_WIDTH, 0);
-    lv_obj_add_event_cb(obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_roller_set_options(obj, opts_backlight.options, LV_ROLLER_MODE_NORMAL);
-    lv_roller_set_selected(obj, ui_option.selectBacklight, LV_ANIM_ON);
-    lv_roller_set_visible_row_count(obj, 3);
-
-    ////////////////////// Sleep Timer Label /////////////////////
-    obj = lv_label_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, LV_PCT_X(57), LV_PCT_Y(4) + OFFSET_TOP);
-    lv_label_set_text_static(obj, "Sleep Timer");
-
-    //////////////////// Sleep Timer Dropdown ////////////////////
-    obj = lv_roller_create(ui_ScreenOptions);
-    lv_obj_set_pos(obj, SCREEN_WIDTH - OPTIONS_WIDTH - LV_PCT_X(5), LV_PCT_Y(11) + OFFSET_TOP);
-    lv_obj_set_style_width(obj, OPTIONS_WIDTH, 0);
-    lv_obj_add_event_cb(obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_roller_set_options(obj, opts_sleeptime.options, LV_ROLLER_MODE_NORMAL);
-    lv_roller_set_selected(obj, ui_option.selectSleepTimer, LV_ANIM_ON);
-    lv_roller_set_visible_row_count(obj, 3);
   }
 }
 
