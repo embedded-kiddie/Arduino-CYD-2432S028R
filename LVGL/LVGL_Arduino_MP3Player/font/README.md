@@ -18,17 +18,24 @@
   - lv_font_montserrat_12
   - lv_font_montserrat_14
 
+#### Output format
+  - C file
+
 #### TTF/WOFF font
   - [NotoSansJP-Regular.ttf][2]
 
 #### Range
-  - `0x00A1-0x27A1,0x3041-0x30FF,0xFF01-0xFF9F`
+  - Symbols, Hiragana, Katakana
+    - `0x00A1-0x27A1,0x3001-0x30FF,0xFF01-0xFF9F`
 
 #### Symbols (additional)
-  - `栞騙`
-  - `Λ∞ô♭☆★` (0x00A1-0x27A1)
+  - Level 1 Kanji
+  - Level 2 Kanji
+    - `栞騙彗翳蜃`
 
 ### Optimize font height
+
+Fix the font size and compatibility.
 
 #### `noto_sans_jp_4bit_jis1_12.c`
 ```

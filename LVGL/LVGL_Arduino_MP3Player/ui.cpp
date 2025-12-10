@@ -336,7 +336,8 @@ static void update_metadata(void) {
     bool update = false;
 
     // update the playback duration at the end of file
-    if (meta.duration < id3tags.meta.duration) {
+    // Note: When the Elapse bar is operated by hand, the elapsed time will be shifted.
+    if (abs(meta.duration - id3tags.meta.duration) >= 3) {
       meta.duration = id3tags.meta.duration;
       ui_list_update_duration(playNo, meta.duration);
       update = true;

@@ -123,11 +123,12 @@ static void count_checked(Node *node, AlbumInfo_t *info) {
   }
 }
 
-static void get_album_info(AlbumInfo_t *info) {
-  *info = {0,};
+static AlbumInfo_t get_album_info(void) {
+  AlbumInfo_t info = {0,};
   for (auto &n : album_control.root->children) {
-    count_checked(n, info);
+    count_checked(n, &info);
   }
+  return info;
 }
 
 //--------------------------------------------------------------------------------
@@ -144,8 +145,7 @@ static inline void update_album_control(lv_obj_t *list) {
 // Update status label and keypad buttons
 //--------------------------------------------------------------------------------
 static void update_album_info(lv_obj_t *label) {
-  AlbumInfo_t info;
-  get_album_info(&info);
+  AlbumInfo_t info = get_album_info();
   lv_label_set_text_fmt(label, "Selected album: %d, files: %d", info.n_selected, info.n_files);
 
   if (album_control.list_id == 0) {
@@ -642,8 +642,8 @@ static bool album_json_save(void) {
 
 static bool album_json_load(void) {
   if (album_control.list_id == 0) {
-    toggle_cell_state(TYPE_LEAF, LEAF_SELECTED);
-    return true;
+    AlbumInfo_t info = get_album_info();
+    return info.n_selected ? true : false;
   }
 
   else if (album_control.list.size()) {
@@ -833,8 +833,7 @@ static void toggle_event_cb(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(event_code == LV_EVENT_VALUE_CHANGED);
 
-  AlbumInfo_t info;
-  get_album_info(&info);
+  AlbumInfo_t info = get_album_info();
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
   uint32_t id = lv_buttonmatrix_get_selected_button(obj);
@@ -1359,8 +1358,7 @@ void show_album_list(void) {
     album_control.count, lv_obj_get_child_count(album_list)
   );
 #else
-  AlbumInfo_t info;
-  get_album_info(&info);
+  AlbumInfo_t info = get_album_info();
   printf("n_nodes: %d, n_leafs: %d, n_folded: %d, n_selected: %d, n_files: %d\n",
     album_control.n_nodes, album_control.root->get_n_leafs(), info.n_folded, info.n_selected, info.n_files
   );
