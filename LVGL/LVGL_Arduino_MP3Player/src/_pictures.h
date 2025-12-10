@@ -1,73 +1,20 @@
 #ifndef _PICTURES_H_
 #define _PICTURES_H_
 
-LV_IMAGE_DECLARE(DETOX);
-LV_IMAGE_DECLARE(Eye_of_the_Storm);
-LV_IMAGE_DECLARE(Gravity);
-LV_IMAGE_DECLARE(Niche);
-LV_IMAGE_DECLARE(Past_Lives);
-LV_IMAGE_DECLARE(SUPER_EUROBEAT);
-LV_IMAGE_DECLARE(a_nation_vol2);
-LV_IMAGE_DECLARE(Amazing);
-LV_IMAGE_DECLARE(MF_GHOST);
-LV_IMAGE_DECLARE(Avril_Lavigne_Greatest_Hits);
-LV_IMAGE_DECLARE(ballads);
-LV_IMAGE_DECLARE(globe_cruise_record_1995_2000);
-LV_IMAGE_DECLARE(delicious_way);
-LV_IMAGE_DECLARE(DEEP_RIVER);
-LV_IMAGE_DECLARE(HEART_STATION);
-LV_IMAGE_DECLARE(Mrs10);
-LV_IMAGE_DECLARE(Winter_Into_Spring);
-LV_IMAGE_DECLARE(BEST_OF_SOUL);
-LV_IMAGE_DECLARE(Twilight);
-LV_IMAGE_DECLARE(Autumn);
-LV_IMAGE_DECLARE(Eastern_Montana);
-LV_IMAGE_DECLARE(First_Message);
-LV_IMAGE_DECLARE(Summer);
-LV_IMAGE_DECLARE(December);
-LV_IMAGE_DECLARE(_35xxxv);
-LV_IMAGE_DECLARE(Luxury_Disease);
-LV_IMAGE_DECLARE(Jinsei_Kakeru_Boku);
-LV_IMAGE_DECLARE(Zankyou_Reference);
-LV_IMAGE_DECLARE(Hybrid_Theory);
-LV_IMAGE_DECLARE(Umino_Yeah);
-LV_IMAGE_DECLARE(Ballad3);
-LV_IMAGE_DECLARE(Ember);
+LV_IMAGE_DECLARE(img_album);
+LV_IMAGE_DECLARE(jess_bailey);
+LV_IMAGE_DECLARE(jim_luo);
+LV_IMAGE_DECLARE(majed_swan);
+LV_IMAGE_DECLARE(steve_busch);
+LV_IMAGE_DECLARE(zoshua_colah);
 
 const lv_image_dsc_t *pictures[] = {
   /*  0 */  & img_album,
-  /*  1 */  & DETOX,
-  /*  2 */  & Eye_of_the_Storm,
-  /*  3 */  & Gravity,
-  /*  4 */  & Niche,
-  /*  5 */  & Past_Lives,
-  /*  6 */  & SUPER_EUROBEAT,
-  /*  7 */  & a_nation_vol2,
-  /*  8 */  & Amazing,
-  /*  9 */  & MF_GHOST,
-  /* 10 */  & Avril_Lavigne_Greatest_Hits,
-  /* 11 */  & ballads,
-  /* 12 */  & globe_cruise_record_1995_2000,
-  /* 13 */  & delicious_way,
-  /* 14 */  & DEEP_RIVER,
-  /* 15 */  & HEART_STATION,
-  /* 16 */  & Mrs10,
-  /* 17 */  & Winter_Into_Spring,
-  /* 18 */  & BEST_OF_SOUL,
-  /* 19 */  & Twilight,
-  /* 20 */  & Autumn,
-  /* 21 */  & Eastern_Montana,
-  /* 22 */  & First_Message,
-  /* 23 */  & Summer,
-  /* 24 */  & December,
-  /* 25 */  & _35xxxv,
-  /* 26 */  & Luxury_Disease,
-  /* 27 */  & Jinsei_Kakeru_Boku,
-  /* 28 */  & Zankyou_Reference,
-  /* 29 */  & Hybrid_Theory,
-  /* 30 */  & Umino_Yeah,
-  /* 31 */  & Ballad3,
-  /* 32 */  & Ember,
+  /*  1 */  & jess_bailey,
+  /*  2 */  & jim_luo,
+  /*  3 */  & majed_swan,
+  /*  4 */  & steve_busch,
+  /*  5 */  & zoshua_colah,
 };
 
 #define N_PICTURES  (sizeof(pictures) / sizeof(lv_image_dsc_t *))

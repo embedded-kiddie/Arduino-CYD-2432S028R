@@ -22,6 +22,9 @@ static bool saveID3tags;
 static ID3Tags_t id3tags;
 static UI_State_t nextState;
 
+/////////////////////////// IMAGES //////////////////////////
+#include "src/_pictures.h"
+
 ////////////////////////// UI LOOP //////////////////////////
 // https://embedded-kiddie.github.io/2024/07/22/
 #define DO_EVERY(period, prev) \
@@ -38,11 +41,6 @@ static constexpr lv_style_const_prop_t style_prop_picture[] = {
   LV_STYLE_CONST_PROPS_END
 };
 static LV_STYLE_CONST_INIT(style_picture, (void*)style_prop_picture);
-
-/////////////////////////// IMAGES //////////////////////////
-#if (LV_USE_FS_ARDUINO_SD == 0) && (MY_USE_FS_ARDUINO_SD == 0)
-#include "_pictures.h"
-#endif
 
 ////////////////////// HELPER FUNCTION //////////////////////
 static void change_screen(lv_obj_t ** target, lv_screen_load_anim_t fademode, void (*target_init)(void)) {
@@ -359,8 +357,6 @@ static void update_metadata(void) {
 // Display a covoer picture on SD or flash
 //--------------------------------------------------------------------------------
 static void display_picture(uint32_t playNo) {
-#if (LV_USE_FS_ARDUINO_SD != 0) || (MY_USE_FS_ARDUINO_SD != 0)
-
   // displaying an image file on SD card
   char buf[BUF_SIZE], *ptr;
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
@@ -371,7 +367,7 @@ static void display_picture(uint32_t playNo) {
   strncpy(&buf[2], dir.c_str(), sizeof(buf) - 2);
   buf[sizeof(buf) - 1] = '\0';
 
-  // title.[bmp|jpg]
+  // title.jpg
   if (ptr = strrchr(buf, '.')) {
     strcpy(ptr + 1, PICTURE_EXT);
     if (SD.exists(buf + 2)) {
@@ -381,7 +377,7 @@ static void display_picture(uint32_t playNo) {
     }
   }
 
-  // @picture.[bmp|jpg]
+  // @picture.jpg
   if (ptr = strrchr(buf, '/')) {
     strcpy(ptr + 1, PICTURE_BASE PICTURE_EXT);
     if (SD.exists(buf + 2)) {
@@ -391,22 +387,11 @@ static void display_picture(uint32_t playNo) {
     }
   }
 
-  lv_image_set_src    (ui_AlbumImage, &img_album);
-  lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
-
-#else // MY_USE_FS_ARDUINO_SD == 0
-
+#ifdef _PICTURES_H_
   // displaying an image file on flash ROM
-  int pictNo = player.GetPictureNo(playNo);
-
-  if (0 < pictNo && pictNo < N_PICTURES) {
-    lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
-    lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
-  } else {
-    lv_image_set_src    (ui_AlbumImage, &img_album);
-    lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
-  }
-
+  int pictNo = millis() / (N_PICTURES - 1) + 1;
+  lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
+  lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
 #endif
 }
 
