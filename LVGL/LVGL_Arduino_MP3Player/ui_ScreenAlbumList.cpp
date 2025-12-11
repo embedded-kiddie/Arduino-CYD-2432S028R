@@ -1220,7 +1220,7 @@ void ui_ScreenAlbumList_screen_init(void) {
   lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
   lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   lv_obj_add_event_cb (obj, ui_event_ScreenAlbumList, LV_EVENT_CLICKED, NULL);
-#endif
+#endif // SHOW_ARROW_BUTTON
 }
 
 void ui_ScreenAlbumList_screen_deinit(void) {

@@ -87,18 +87,20 @@ public:
   }
 
 private:
-  std::string m_error = "";
+  std::string m_base = "/";
   std::string m_root = "/";
+  std::string m_error = "";
 
   MP3List_t*  GetPlayList (uint32_t playNo);
   bool        SaveMetaData(uint32_t playNo, MetaData_t *meta);
 
 public:
   Node *      m_tree = NULL;
-  PlayList_t  m_list = {};
   uint32_t    m_playNo = 0;
+  PlayList_t  m_list = {};
 
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
+  void        SetSubDir(const char* name) { m_root = m_base + name; }
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_list.size(); }
   uint32_t    ScanPlayList(void);

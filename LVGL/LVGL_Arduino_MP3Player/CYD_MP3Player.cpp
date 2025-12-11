@@ -17,10 +17,12 @@
 //--------------------------------------------------------------------------------
 bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   // Set root path
-  m_root = root;
-  if (m_root.back() != '/') {
-    m_root.append("/");
+  m_base = root;
+  if (m_base.back() != '/') {
+    m_base.append("/");
   }
+
+  m_root = m_base; // mainly m_root is used
 
   // Initialize SD card
   if (!SD.begin(SD_CONFIG)) {
@@ -30,7 +32,8 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
   }
 
 #if MY_USE_FS_ARDUINO_SD
-  lv_fs_arduino_sd_init(); // Arduino SD File System for image
+  // LVGL SD File System for displaying cover pictures
+  lv_fs_arduino_sd_init();
 #endif
 
   SetVolume(volume);

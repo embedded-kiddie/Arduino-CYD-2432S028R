@@ -6,6 +6,11 @@
 #include "json.hpp"
 #include <string.h> // for strncpy(), strrchr()
 
+///////////////////// PARTITION SETTINGS ////////////////////
+#define PARTITION_DAT "@partition.dat"
+#define PARTITION_FMT "%d/"
+#define PARTITION_MAX 5
+
 ////////////////////// GLOBAL VARIABLES /////////////////////
 UI_State_t ui_state;
 UI_Control_t ui_control;
@@ -32,15 +37,6 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 
 #define PERIOD_TAKS1 1000 // [msec]
 #define PERIOD_TAKS2 100  // [msec]
-
-/////////////////////////// STYLES //////////////////////////
-static constexpr lv_style_const_prop_t style_prop_picture[] = {
-  LV_STYLE_CONST_SHADOW_WIDTH(10),
-  LV_STYLE_CONST_SHADOW_OFFSET_Y(5),
-  LV_STYLE_CONST_SHADOW_OPA(LV_OPA_40),
-  LV_STYLE_CONST_PROPS_END
-};
-static LV_STYLE_CONST_INIT(style_picture, (void*)style_prop_picture);
 
 ////////////////////// HELPER FUNCTION //////////////////////
 static void change_screen(lv_obj_t ** target, lv_screen_load_anim_t fademode, void (*target_init)(void)) {
@@ -335,7 +331,7 @@ static void update_metadata(void) {
 
     // update the playback duration at the end of file
     // Note: When the Elapse bar is operated by hand, the elapsed time will be shifted.
-    if (abs(meta.duration - id3tags.meta.duration) >= 3) {
+    if (abs(meta.duration - id3tags.meta.duration) >= 3 /* [sec] */) {
       meta.duration = id3tags.meta.duration;
       ui_list_update_duration(playNo, meta.duration);
       update = true;
@@ -357,6 +353,14 @@ static void update_metadata(void) {
 // Display a covoer picture on SD or flash
 //--------------------------------------------------------------------------------
 static void display_picture(uint32_t playNo) {
+  static constexpr lv_style_const_prop_t style_prop_picture[] = {
+    LV_STYLE_CONST_SHADOW_WIDTH(10),
+    LV_STYLE_CONST_SHADOW_OFFSET_Y(5),
+    LV_STYLE_CONST_SHADOW_OPA(LV_OPA_40),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static LV_STYLE_CONST_INIT(style_picture, (void*)style_prop_picture);
+
   // displaying an image file on SD card
   char buf[BUF_SIZE], *ptr;
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
@@ -389,9 +393,22 @@ static void display_picture(uint32_t playNo) {
 
 #ifdef _PICTURES_H_
   // displaying an image file on flash ROM
-  int pictNo = millis() / (N_PICTURES - 1) + 1;
-  lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
-  lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
+  #if true
+    // display picture at random
+    int pictNo = millis() / (N_PICTURES - 1) + 1;
+    lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
+    lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
+  #else
+    // displays the image specified by the number in @picture.txt
+    int pictNo = player.GetPictureNo(playNo);
+    if (0 < pictNo && pictNo < N_PICTURES) {
+      lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
+      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
+    } else {
+      lv_image_set_src    (ui_AlbumImage, &img_album);
+      lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
+    }
+  #endif
 #endif
 }
 
@@ -515,17 +532,46 @@ void audio_eof_mp3(const char *info) {
 //--------------------------------------------------------------------------------
 // Load / Save options in SD
 //--------------------------------------------------------------------------------
-void ui_options_load(void) {
+void ui_option_load(void) {
+  // Check if the partition exists
+  char buf[BUF_SIZE];
+  for (int i = 1; i <= PARTITION_MAX; i++) {
+    snprintf(buf, sizeof(buf), MP3_PATH_ROOT PARTITION_FMT, i);
+    buf[sizeof(buf) - 1] = '\0';
+    if (SD.exists(buf)) {
+      ui_option.partition_max = i;
+    } else {
+      break;
+    }
+  }
+
+  // Get the current partition
+  if (ui_option.partition_max) {
+    File fd = SD.open(MP3_PATH_ROOT PARTITION_DAT, FILE_READ);
+    if (fd) {
+      fd.read((uint8_t *)&ui_option.partition_id, sizeof(ui_option.partition_id));
+    } else {
+      ui_option.partition_id = 0;
+    }
+  }
+
+  // Update the root folder with the current partition
+  if (ui_option.partition_max) {
+    snprintf(buf, sizeof(buf), PARTITION_FMT, ui_option.partition_id);
+    buf[sizeof(buf) - 1] = '\0';
+    player.SetSubDir(buf);
+  }
+
   ui_option_set_backlight();
   ui_option_set_sleeptime();
 }
 
-void ui_options_save(void) {
+void ui_option_save(void) {
 }
 
 ///////////////////// SCREENS ////////////////////
 void ui_init(void) {
-  ui_options_load();
+  ui_option_load();
   ui_ScreenMain_screen_init();
   lv_screen_load(ui_ScreenMain);
 
@@ -543,21 +589,20 @@ UI_State_t ui_loop(void) {
     case UI_STATE_INIT:
       if (player.begin(MP3_PATH_ROOT, MP3_VOLUME_INI)) {
         lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
+        ui_option_load();
         ui_state = UI_STATE_START;
       } else {
         ui_state = UI_STATE_ERROR;
       }
       break;
     case UI_STATE_START:
+      ui_state = UI_STATE_ERROR;
       if (player.ScanPlayList()) {
         ui_ScreenAlbumList_screen_load((void*)player.m_tree);
         if (player.ScanAudioFiles(ui_option.shuffle)) {
           ui_set_playNo(ui_control.playNo);
           ui_state = UI_STATE_PLAY;
         }
-      }
-      if (ui_state != UI_STATE_PLAY) {
-        ui_state = UI_STATE_ERROR;
       }
       break;
     case UI_STATE_PLAY:

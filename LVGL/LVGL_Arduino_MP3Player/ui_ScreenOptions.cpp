@@ -125,7 +125,7 @@ static void switch_event_handler(lv_event_t *e) {
   lv_obj_t *parent = lv_obj_get_parent(obj);
   lv_obj_t *container = lv_obj_get_child(parent, 1);
 
-  for (int i = 0; i <= ui_option.partition_num; i++) {
+  for (int i = 0; i <= ui_option.partition_max; i++) {
     obj = lv_obj_get_child(container, i);
     if (ui_option.shuffle_mode) {
       lv_obj_add_state   (obj, LV_STATE_DISABLED);
@@ -190,7 +190,8 @@ void ui_ScreenOptions_screen_init(void) {
       lv_obj_add_flag     (obj, LV_OBJ_FLAG_EVENT_BUBBLE); // Propagate the events to the container
       lv_obj_add_style    (obj, &style_radio,       (uint32_t)LV_PART_INDICATOR);
       lv_obj_add_style    (obj, &style_radio_check, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-      if (i >= ui_option.partition_num) {
+
+      if (i >= ui_option.partition_max) {
         lv_obj_add_state  (obj, LV_STATE_DISABLED);
       } else if (i == ui_option.partition_id) {
         lv_obj_add_state  (obj, LV_STATE_CHECKED);
@@ -210,7 +211,7 @@ void ui_ScreenOptions_screen_init(void) {
     lv_obj_set_pos          (obj, LV_PCT_X(60), LV_PCT_Y(12) - 6 + SHUFFLE_POS_Y);
     lv_obj_remove_state     (obj, LV_STATE_CHECKED);
     lv_obj_add_event_cb     (obj, &switch_event_handler, LV_EVENT_VALUE_CHANGED, NULL);
-    if (ui_option.partition_num == 0) {
+    if (ui_option.partition_max == 0) {
       lv_obj_add_state      (obj, LV_STATE_DISABLED);
     }
 
@@ -288,7 +289,7 @@ void ui_ScreenOptions_screen_init(void) {
       lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
       lv_obj_add_event_cb (obj, ui_event_ScreenOptions, LV_EVENT_CLICKED, NULL);
     }
-#endif
+#endif // SHOW_ARROW_BUTTON
   }
 }
 

@@ -53,8 +53,8 @@ typedef struct {
   bool      favorite;         // true: a heart mark
   bool      shuffle;          // true: shuffle, false: in sequence
   bool      shuffle_mode;     // true: all partitions, false: each partition
-  uint8_t   partition_num;    // number of partitions (0: none, ...)
-  uint8_t   partition_id;     // partition number (0 - 4)
+  uint8_t   partition_max;    // maximum  number of partitions (0: none, ...)
+  uint8_t   partition_id;     // partition identification number (0 - 4)
   uint8_t   selectBacklight;  // 30sec, 1min, ...
   uint8_t   selectSleepTimer; // 30min, 1hour, ...
 } UI_Option_t;
