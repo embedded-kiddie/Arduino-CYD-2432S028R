@@ -8,10 +8,10 @@
 #include "debug.h"
 #include <lvgl.h>
 
-// Arrow buttons to navigate to each screen
+/////////// ARROW BUTTONS TO NAVIGATE TO SCREENS ////////////
 #define SHOW_ARROW_BUTTON false
 
-// Screen size / coordinate / color / font
+///////// SCREEN SIZE / COORDINATE / COLOR / FONT ///////////
 #define SCREEN_WIDTH      240
 #define SCREEN_HEIGHT     320
 #define LV_PCT_X(x)       (SCREEN_WIDTH  * (x) / 100) // for LV_STYLE_CONST_X
@@ -28,7 +28,7 @@
 #define UI_COLOR_LIST_ARTIST  { .blue = 0xbe, .green = 0xb0, .red = 0xb1 }  // lv_color_hex(0xb1b0be)
 #define UI_COLOR_LIST_SLIDER  { .blue = 0xee, .green = 0xee, .red = 0xee }  // lv_color_hex(0xeeeeee)
 
-// UI STATE
+////////////////////////// UI STATE /////////////////////////
 typedef enum {
   UI_STATE_INIT,
   UI_STATE_START,
@@ -47,7 +47,7 @@ typedef enum {
   UI_STATE_ERROR,
 } UI_State_t;
 
-// Variables
+//////////////////// OPTION / CONTROLLER ////////////////////
 typedef struct {
   uint8_t   repeat;           // true: repeat
   bool      favorite;         // true: a heart mark
@@ -73,7 +73,7 @@ extern UI_State_t ui_state;
 extern UI_Option_t ui_option;
 extern UI_Control_t ui_control;
 
-////////// SCREEN: ui_ScreenMain //////////
+/////////////////// SCREEN: ui_ScreenMain ///////////////////
 extern lv_obj_t *ui_ScreenMain;
 extern lv_obj_t *ui_MusicTitle;
 extern lv_obj_t *ui_ElapsedStart;
@@ -105,7 +105,7 @@ void ui_set_playNo(uint32_t playNo);
 const uint32_t ui_get_playNo(void);
 const uint32_t ui_get_counts(void);
 
-////////// SCREEN: ui_ScreenAlbumList //////////
+//////////////// SCREEN: ui_ScreenAlbumList /////////////////
 extern lv_obj_t *ui_ScreenAlbumList;
 void ui_event_ScreenAlbumList(lv_event_t *e);
 void ui_ScreenAlbumList_screen_init  (void);
@@ -120,7 +120,7 @@ extern __attribute__((weak)) void show_album_list(void);
 extern __attribute__((weak)) void dump_album_list(void);
 extern __attribute__((weak)) void dump_preorder(void);
 
-////////// SCREEN: ui_ScreenPlayList //////////
+///////////////// SCREEN: ui_ScreenPlayList /////////////////
 extern lv_obj_t *ui_ScreenPlayList;
 void ui_ScreenPlayList_screen_init  (void);
 void ui_ScreenPlayList_screen_deinit(void);
@@ -139,7 +139,7 @@ extern __attribute__((weak)) size_t get_cell_count(void);
 extern __attribute__((weak)) void show_ui_control(void);
 extern __attribute__((weak)) void dump_play_list(void);
 
-////////// SCREEN: ui_ScreenOptions //////////
+///////////////// SCREEN: ui_ScreenOptions //////////////////
 extern lv_obj_t *ui_ScreenOptions;
 void ui_event_ScreenOptions(lv_event_t *e);
 void ui_ScreenOptions_screen_init  (void);
@@ -147,7 +147,7 @@ void ui_ScreenOptions_screen_deinit(void);
 void ui_option_set_backlight(void);
 void ui_option_set_sleeptime(void);
 
-// FONTS & IMAGES
+////////////////////// FONTS & IMAGES ///////////////////////
 #define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
 #define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
 LV_FONT_DECLARE(CUSTOM_FONT_SMALL);

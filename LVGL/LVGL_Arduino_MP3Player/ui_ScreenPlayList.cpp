@@ -483,7 +483,7 @@ void ui_ScreenPlayList_screen_init(void) {
     lv_obj_set_style_bg_color   (slider, UI_COLOR_LIST_SLIDER, (uint32_t)LV_STATE_DEFAULT | (uint32_t)LV_PART_INDICATOR);
     lv_bar_set_mode             (slider, LV_BAR_MODE_RANGE);
     lv_bar_set_orientation      (slider, LV_BAR_ORIENTATION_VERTICAL);
-    lv_bar_set_range            (slider, ((int32_t)ui_get_counts() - 1) * LIST_SLIDER_SCALE, 0);
+    lv_bar_set_range            (slider, ((int32_t)ui_get_counts() - 1) * LIST_SLIDER_SCALE, -1);
   }
 
   // Add a callback when an object is deleted

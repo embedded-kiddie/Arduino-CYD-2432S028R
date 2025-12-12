@@ -101,12 +101,12 @@ public:
 
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
   void        SetSubDir(const char* name) { m_root = m_base + name; }
+  const char* GetSubDir(void) { return m_root.c_str(); }
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_list.size(); }
   uint32_t    ScanPlayList(void);
   uint32_t    ScanAudioFiles(bool shuffle = true);
   void        ShuffleAudioFiles(void);
-  void        ClearAudioFiles(void);
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
   uint32_t    GetPictureNo(uint32_t playNo);
@@ -114,6 +114,8 @@ public:
   void        GetMetaData (uint32_t playNo, MetaData_t *meta);
   bool        PutMetaData (uint32_t playNo, MetaData_t *meta);
   bool        UpdateMetaData(void);
+  void        DeleteNodeTree(void) { if (m_tree) { delete m_tree; m_tree = NULL; } }
+  void        ClearAudioFiles(void);
   const char* GetError(void);
 
   void        SetVolume(uint8_t vol);

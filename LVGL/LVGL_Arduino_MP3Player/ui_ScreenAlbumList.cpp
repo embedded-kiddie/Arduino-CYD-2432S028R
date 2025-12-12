@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "tree.hpp"
 #include "json.hpp"
+#include <stdlib.h>   // strtoul()
 #include <functional> // std::hash
 
 //--------------------------------------------------------------------------------
@@ -266,24 +267,28 @@ static void update_close_cb(lv_anim_t* a) {
 }
 
 static void update_open_cb(lv_anim_t* a) {
-  lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
-  lv_obj_t *cell = lv_obj_get_child(list, -1);
+  if (album_control.count > CELL_VISIBLE_MAX + CELL_VISIBLE_SPARE) {
+    lv_obj_t *list = (lv_obj_t*)lv_anim_get_user_data(a);
+    lv_obj_t *cell = lv_obj_get_child(list, -1);
 
-  // Scroll to make it visible, then delete the appropriate cell
-  if (a->var != cell) {
-    lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_ON);
-    delete_cell(list, cell); // delete the last cell
-  } else {
+    // Scroll to make it visible, then delete the appropriate cell
+    if (a->var != cell) {
+      lv_obj_scroll_to_view((lv_obj_t*)a->var, LV_ANIM_ON);
+      delete_cell(list, cell); // delete the last cell
+    }
+
     // Apply an open-to-close animation to the top cell
-    lv_anim_t b;
-    lv_anim_init            (&b);
-    lv_anim_set_exec_cb     (&b, (lv_anim_exec_xcb_t)lv_obj_set_height);
-    lv_anim_set_duration    (&b, FOLDING_DURATION);
-    lv_anim_set_user_data   (&b, reinterpret_cast<void*>(list));
-    lv_anim_set_values      (&b, CELL_HEIGHT_SMALL, 0);
-    lv_anim_set_completed_cb(&b, update_close_cb);            // delete the top cell
-    lv_anim_set_var         (&b, lv_obj_get_child(list, 0));  // after an animation
-    lv_anim_start           (&b);
+    else {
+      lv_anim_t b;
+      lv_anim_init            (&b);
+      lv_anim_set_exec_cb     (&b, (lv_anim_exec_xcb_t)lv_obj_set_height);
+      lv_anim_set_duration    (&b, FOLDING_DURATION);
+      lv_anim_set_user_data   (&b, reinterpret_cast<void*>(list));
+      lv_anim_set_values      (&b, CELL_HEIGHT_SMALL, 0);
+      lv_anim_set_completed_cb(&b, update_close_cb);            // delete the top cell
+      lv_anim_set_var         (&b, lv_obj_get_child(list, 0));  // after an animation
+      lv_anim_start           (&b);
+    }
   }
 }
 
@@ -369,20 +374,23 @@ static void update_close(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *
       cell = lv_obj_get_child(list, 0);
       node = get_node(cell);
       node = find_before(node->key);
-      cell = append_cell(list, node);
-      lv_obj_move_to_index(cell, 0);
-      update_album_control(list);
-      ++index;
 
-      // Apply a close-to-open animation to the top cell
-      lv_anim_t b;
-      lv_anim_init          (&b);
-      lv_anim_set_exec_cb   (&b, (lv_anim_exec_xcb_t)lv_obj_set_height);
-      lv_anim_set_duration  (&b, FOLDING_DURATION);
-      lv_anim_set_user_data (&b, reinterpret_cast<void*>(list));
-      lv_anim_set_values    (&b, 0, CELL_HEIGHT_SMALL);
-      lv_anim_set_var       (&b, cell);
-      lv_anim_start         (&b);
+      if (node) {
+        cell = append_cell(list, node);
+        lv_obj_move_to_index(cell, 0);
+        update_album_control(list);
+        ++index;
+
+        // Apply a close-to-open animation to the top cell
+        lv_anim_t b;
+        lv_anim_init          (&b);
+        lv_anim_set_exec_cb   (&b, (lv_anim_exec_xcb_t)lv_obj_set_height);
+        lv_anim_set_duration  (&b, FOLDING_DURATION);
+        lv_anim_set_user_data (&b, reinterpret_cast<void*>(list));
+        lv_anim_set_values    (&b, 0, CELL_HEIGHT_SMALL);
+        lv_anim_set_var       (&b, cell);
+        lv_anim_start         (&b);
+      }
     }
   }
 }
@@ -558,15 +566,16 @@ static void album_list_refresh(int key = 0) {
 
     while (top++ < end) {
       Node *node = find_after(album_control.end);
-      DBG_ASSERT(node);
-      DBG_EXEC({
-        NodeMeta_t *meta = &node->meta;
-        printf("No.%3d, key: %3d, type: %d, depth: %d, hidden: %d, checked: %d, name: %s\n",
-          top, node->key, meta->type, meta->depth, meta->hidden, meta->checked, node->name.c_str()
-        );
-      });
-      append_cell(album_list, node);
-      update_album_control(album_list);
+      if (node) {
+        DBG_EXEC({
+          NodeMeta_t *meta = &node->meta;
+          printf("No.%3d, key: %3d, type: %d, depth: %d, hidden: %d, checked: %d, name: %s\n",
+            top, node->key, meta->type, meta->depth, meta->hidden, meta->checked, node->name.c_str()
+          );
+        });
+        append_cell(album_list, node);
+        update_album_control(album_list);
+      }
     }
   }
 
@@ -675,9 +684,7 @@ static bool album_list_save(void) {
   if (fd) {
     fd.println(album_control.list_id);
     for (auto &i : album_control.list) {
-      fd.print(i.name);
-      fd.print("\t");
-      fd.println(i.hash);
+      fd.printf("%s\t%lu\n", i.name.c_str(), i.hash);
     }
     fd.close();
     return true;
@@ -700,7 +707,7 @@ static void album_list_load(void) {
       if (index > 0) {
         album_control.list.push_back({
           /* .name = */ buf.substring(0, index++),
-          /* .hash = */ (size_t)buf.substring(index).toInt()
+          /* .hash = */ (size_t)strtoul(buf.substring(index).c_str(), NULL, 10)
         });
       }
     }
@@ -709,7 +716,7 @@ static void album_list_load(void) {
     DBG_EXEC({
       printf("list_id: %d\n", album_control.list_id);
       for (auto &i : album_control.list) {
-        printf("name: %s, hash: %d\n", i.name.c_str(), i.hash);
+        printf("name: %s, hash: 0x%x\n", i.name.c_str(), i.hash);
       }
     })
 
@@ -782,9 +789,17 @@ static void dropdown_cb(lv_event_t *e) {
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
   album_control.list_id = lv_dropdown_get_selected(obj);
+
+  // Just in case
   if (album_control.list_id >= album_control.list.size()) {
     album_control.list_id = 0;
   }
+
+  // Select "All"
+  if (album_control.list_id == 0) {
+    toggle_cell_state(TYPE_LEAF, LEAF_SELECTED);
+  }
+
   album_json_load();
   album_list_refresh();
 }
@@ -934,12 +949,16 @@ static void keypad_event_cb(lv_event_t *e) {
 
   switch (id) {
     case 0: /* LV_SYMBOL_KEYBOARD */
-      if (album_control.list_id == 0) {
-        lv_textarea_set_text(ta, "");
+      if (lv_obj_has_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN)) {
+        if (album_control.list_id == 0) {
+          lv_textarea_set_text(ta, ""); // Create a new list
+        } else {
+          lv_textarea_set_text(ta, album_control.list[album_control.list_id].name.c_str()); // Edit an exsisting list
+        }
+        lv_obj_remove_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
       } else {
-        lv_textarea_set_text(ta, album_control.list[album_control.list_id].name.c_str());
+        lv_obj_add_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
       }
-      lv_obj_remove_flag(keypad_panel, LV_OBJ_FLAG_HIDDEN);
       break;
     case 1: /* LV_SYMBOL_SAVE */
       if (album_control.list_id > 0) {
