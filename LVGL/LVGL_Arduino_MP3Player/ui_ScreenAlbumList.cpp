@@ -801,6 +801,7 @@ static void dropdown_cb(lv_event_t *e) {
   }
 
   album_json_load();
+  album_list_save();
   album_list_refresh();
 }
 
@@ -893,9 +894,10 @@ static void keypad_button_cb(lv_event_t *e) {
     name.trim();
 
     if (name != "") {
-      // Check the text is already in the array
+      // Check if the "name" is already in the array
       int n = album_control.list.size();
       for (int i = 1; i < n; i++) {
+        // Move upward in order
         if (album_control.list[i].name == name) {
           if (album_control.list_id == i) {
             album_json_save();
@@ -1246,7 +1248,6 @@ void ui_ScreenAlbumList_screen_deinit(void) {
   if (ui_ScreenAlbumList) {
     // Re-traverse node tree before making a new playlist
     if (album_control.root) {
-      album_list_save();
       album_control.root->traverse_node();
     }
 

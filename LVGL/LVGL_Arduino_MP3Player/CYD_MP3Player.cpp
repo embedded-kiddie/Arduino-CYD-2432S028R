@@ -9,7 +9,7 @@
 #include <string.h>   // strncpy(), strtok_r(), strrchr()
 #include <string>     // std::string
 #include <random>     // std::mt19937
-#include <algorithm>  // std::shuffle
+#include <algorithm>  // std::shuffle, std::sort
 #include <functional> // std::hash
 
 //--------------------------------------------------------------------------------

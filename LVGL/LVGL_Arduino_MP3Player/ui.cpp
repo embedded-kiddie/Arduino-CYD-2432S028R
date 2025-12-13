@@ -343,6 +343,9 @@ void ui_event_Shuffle(lv_event_t *e) {
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
   ui_option.shuffle = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
+  player.StopPlay();
+  player.ClearAudioFiles();
+  ui_state = UI_STATE_START;
 }
 
 void ui_event_ButtonPlay(lv_event_t *e) {
@@ -417,9 +420,12 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_GESTURE) {
+    lv_obj_t *obj = lv_event_get_current_target_obj(e);
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
-    lv_screen_load_anim_t anim = (dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT);
-    change_screen(&ui_ScreenMain, anim, &ui_ScreenMain_screen_init);
+    if (dir == LV_DIR_RIGHT || dir == LV_DIR_LEFT) {
+      lv_screen_load_anim_t anim = (dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT);
+      change_screen(&ui_ScreenMain, anim, &ui_ScreenMain_screen_init);
+    }
   }
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
@@ -438,9 +444,8 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
     // Make album list and playlist clean
     ui_ScreenAlbumList_screen_deinit();
+    player.StopPlay();
     player.ClearAudioFiles();
-
-    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
     ui_state = UI_STATE_START;
   }
 }
