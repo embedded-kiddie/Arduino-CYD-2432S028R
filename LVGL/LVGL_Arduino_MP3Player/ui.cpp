@@ -87,7 +87,7 @@ static void ui_option_save(void) {
     const char *dir = player.GetSubDir();
     if (strcmp(&dir[strlen(dir) - strlen(buf)], buf) != 0) {
       if (player.IsPlaying()) {
-        player.PauseResume();
+        player.StopPlay();
       }
 
       // Save partition
@@ -435,7 +435,7 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
     // stop playing to avoid conflict with image loading
     if (ui_state != UI_STATE_IDLE) {
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
-      ui_state = UI_STATE_PAUSE;
+      ui_state = UI_STATE_STOP;
     }
 
     ui_ScreenAlbumList_create_list((void*)player.m_tree);
@@ -647,7 +647,9 @@ UI_State_t ui_loop(void) {
       break;
     case UI_STATE_STOP:
       lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
-      // no break
+      player.StopPlay();
+      ui_state = UI_STATE_IDLE;
+      break;
     case UI_STATE_PAUSE:
       player.PauseResume();
       ui_state = UI_STATE_IDLE;
