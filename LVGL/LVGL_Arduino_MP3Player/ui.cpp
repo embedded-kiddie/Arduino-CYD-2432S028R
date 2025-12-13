@@ -133,14 +133,14 @@ static void update_metadata(void) {
   player.GetMetaData(playNo, &meta);
 
   if (meta.duration < id3tags.meta.duration || saveID3tags == true) {
-    // prevent input while saving metadata to SD card
+    // Prevent input while saving metadata to SD card
     lv_indev_enable(NULL, false);
 
     if (player.IsPlaying()) {
       player.PauseResume();
     }
 
-    // update all Favorites that have been modified during playback
+    // Update all Favorites that have been modified during playback
     if (saveID3tags == true) {
       if (player.UpdateMetaData()) {
         saveID3tags = false;
@@ -149,7 +149,7 @@ static void update_metadata(void) {
 
     bool update = false;
 
-    // update the playback duration at the end of file
+    // Update the playback duration at the end of file
     // Note: When the Elapse bar is operated by hand, the elapsed time will be shifted.
     if (abs(meta.duration - id3tags.meta.duration) >= 3 /* [sec] */) {
       meta.duration = id3tags.meta.duration;
@@ -181,12 +181,12 @@ static void display_picture(uint32_t playNo) {
   };
   static LV_STYLE_CONST_INIT(style_picture, (void*)style_prop_picture);
 
-  // displaying an image file on SD card
+  // Displaying an image file on SD card
   char buf[BUF_SIZE], *ptr;
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
   buf[1] = ':';
 
-  // skip drive letter "S:"
+  // Skip drive letter "S:"
   std::string dir = player.GetFilePath(playNo);
   strncpy(&buf[2], dir.c_str(), sizeof(buf) - 2);
   buf[sizeof(buf) - 1] = '\0';
@@ -212,14 +212,14 @@ static void display_picture(uint32_t playNo) {
   }
 
 #ifdef _PICTURES_H_
-  // displaying an image file on flash ROM
+  // Displaying an image file on flash ROM
   #if true
-    // display picture at random
+    // Display picture at random
     int pictNo = millis() / (N_PICTURES - 1) + 1;
     lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
     lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
   #else
-    // displays the image specified by the number in @picture.txt
+    // Display the image specified by the number in @picture.txt
     int pictNo = player.GetPictureNo(playNo);
     if (0 < pictNo && pictNo < N_PICTURES) {
       lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
@@ -257,7 +257,7 @@ static bool play_next(bool next) {
   ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
   display_picture(ui_control.playNo);
 
-  // update ui_control and look of the play button
+  // Update ui_control and look of the play button
   lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
 
   if (ui_ScreenPlayList) {
@@ -272,6 +272,13 @@ static bool play_next(bool next) {
 //--------------------------------------------------------------------------------
 static bool check_favorite(void) {
   return !ui_option.favorite || player.IsPlaying() || player.IsSelected();
+}
+
+static void async_stop(void *user_data) {
+  if (ui_state != UI_STATE_IDLE) {
+    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
+    ui_state = UI_STATE_STOP;
+  }
 }
 
 ////////////////////// HELPER FUNCTION //////////////////////
@@ -359,14 +366,14 @@ void ui_event_ButtonNext(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   ui_state = UI_STATE_NEXT;
-  bitSet(ui_option.repeat, 7); // force to set the bit temporarily
+  bitSet(ui_option.repeat, 7); // Force to set the bit temporarily
 }
 
 void ui_event_ButtonPrev(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   ui_state = UI_STATE_PREV;
-  bitSet(ui_option.repeat, 7); // force to set the bit temporarily
+  bitSet(ui_option.repeat, 7); // Force to set the bit temporarily
 }
 
 void ui_event_VolumeMax(lv_event_t *e) {
@@ -420,7 +427,6 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_GESTURE) {
-    lv_obj_t *obj = lv_event_get_current_target_obj(e);
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
     if (dir == LV_DIR_RIGHT || dir == LV_DIR_LEFT) {
       lv_screen_load_anim_t anim = (dir == LV_DIR_RIGHT ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT);
@@ -429,15 +435,13 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_SCREEN_LOADED) {
-    // increase free memory
+    // Increase free memory
     // lv_fs_clear_cache(); // sdfs.{h|cpp}
 
-    // stop playing to avoid conflict with image loading
-    if (ui_state != UI_STATE_IDLE) {
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
-      ui_state = UI_STATE_STOP;
-    }
+    // Stop playing to avoid conflict with SD access
+    lv_async_call(async_stop, NULL);
 
+    // Load album list
     ui_ScreenAlbumList_create_list((void*)player.m_tree);
   }
 
