@@ -7,9 +7,9 @@
 #include <string.h> // for strncpy(), strrchr()
 
 ///////////////////// PARTITION SETTINGS ////////////////////
-#define PARTITION_DAT "@partition.dat"
-#define PARTITION_FMT "%d/"
-#define PARTITION_MAX 5
+#define PARTITION_MAX   5
+#define PARTITION_PATH  "%d/"
+#define PARTITION_FILE  "@partition.dat"
 
 ////////////////////// GLOBAL VARIABLES /////////////////////
 UI_State_t ui_state;
@@ -39,72 +39,112 @@ static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; pr
 #define PERIOD_TAKS2 100  // [msec]
 
 ////////////////////// LOCAL FUNCTIONS //////////////////////
+
 //--------------------------------------------------------------------------------
-// Load / Save options in SD
+// Display a covoer picture on SD or flash
 //--------------------------------------------------------------------------------
-static void ui_option_load(void) {
-  // Check if the partition exists
-  char buf[BUF_SIZE];
-  for (int i = 1; i <= PARTITION_MAX; i++) {
-    snprintf(buf, sizeof(buf), MP3_PATH_ROOT PARTITION_FMT, i);
-    buf[sizeof(buf) - 1] = '\0';
-    if (SD.exists(buf)) {
-      ui_option.partition_max = i;
-    } else {
-      break;
+static void display_picture(uint32_t playNo) {
+  static constexpr lv_style_const_prop_t style_prop_picture[] = {
+    LV_STYLE_CONST_SHADOW_WIDTH(10),
+    LV_STYLE_CONST_SHADOW_OFFSET_Y(5),
+    LV_STYLE_CONST_SHADOW_OPA(LV_OPA_40),
+    LV_STYLE_CONST_PROPS_END
+  };
+  static LV_STYLE_CONST_INIT(style_picture, (void*)style_prop_picture);
+
+  // Display an image file on SD card
+  char buf[BUF_SIZE], *ptr;
+  buf[0] = MY_FS_ARDUINO_SD_LETTER;
+  buf[1] = ':';
+
+  // Skip drive letter "S:"
+  std::string dir = player.GetFilePath(playNo);
+  strncpy(&buf[2], dir.c_str(), sizeof(buf) - 2);
+  buf[sizeof(buf) - 1] = '\0';
+
+  // @picture.{jpg|bmp}
+  if (ptr = strrchr(buf, '/')) {
+    strcpy(ptr + 1, PICTURE_BASE PICTURE_EXT);
+    if (SD.exists(buf + 2)) {
+      lv_image_set_src(ui_AlbumImage, buf);
+      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
+      return;
     }
   }
 
-  // Get the current partition
-  if (ui_option.partition_max) {
-    File fd = SD.open(MP3_PATH_ROOT PARTITION_DAT, FILE_READ);
-    if (fd) {
-      fd.read((uint8_t *)&ui_option.partition_id, sizeof(ui_option.partition_id));
-    } else {
-      ui_option.partition_id = 0;
+  // title.{jpg|bmp}
+  if (ptr = strrchr(buf, '.')) {
+    strcpy(ptr + 1, PICTURE_EXT);
+    if (SD.exists(buf + 2)) {
+      lv_image_set_src(ui_AlbumImage, buf);
+      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
+      return;
     }
   }
 
-  // Update the root folder with the current partition
-  if (ui_option.partition_max) {
-    snprintf(buf, sizeof(buf), PARTITION_FMT, ui_option.partition_id + 1);
-    buf[sizeof(buf) - 1] = '\0';
-    player.SetSubDir(buf);
-  }
-
-  // Rewind
-  ui_control.playNo = ui_control.focusNo = 0;
+#ifdef _PICTURES_H_
+  #if true
+    // Display an image file on flash ROM at random
+    int pictNo = millis() % (N_PICTURES - 1) + 1;
+    lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
+    lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
+  #else
+    // Display an image specified by the number in @picture.txt
+    int pictNo = player.GetPictureNo(playNo);
+    if (0 < pictNo && pictNo < N_PICTURES) {
+      lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
+      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
+    } else {
+      lv_image_set_src    (ui_AlbumImage, &img_album);
+      lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
+    }
+  #endif
+#endif
 }
 
-static void ui_option_save(void) {
-  if (ui_option.partition_max) {
-    // Create a sub-directory string
-    char buf[BUF_SIZE];
-    snprintf(buf, sizeof(buf), PARTITION_FMT, ui_option.partition_id + 1);
-    buf[sizeof(buf) - 1] = '\0';
+//--------------------------------------------------------------------------------
+// Control next/previous play or stop/continuous play
+//--------------------------------------------------------------------------------
+static bool play_next(bool next) {
+  if (ui_ScreenPlayList) {
+    ui_list_update_cell(ui_control.focusNo, false);
+    ui_list_update_icon(ui_control.playNo,  false);
+  }
 
-    // Restart if the end of the string is different
-    const char *dir = player.GetSubDir();
-    if (strcmp(&dir[strlen(dir) - strlen(buf)], buf) != 0) {
-      if (player.IsPlaying()) {
-        player.StopPlay();
-      }
-
-      // Save partition
-      File fd = SD.open(MP3_PATH_ROOT PARTITION_DAT, FILE_WRITE);
-      if (fd) {
-        fd.write((uint8_t *)&ui_option.partition_id, sizeof(ui_option.partition_id));
-        fd.close();
-      }
-
-      // Restart playing
-      player.DeleteNodeTree();
-      player.ClearAudioFiles();
-      ui_state = UI_STATE_START;
+  bool ret = true;
+  if (ui_option.favorite) {
+    ret = player.NextSelected(next, (ui_option.repeat ? true : false));
+  } else {
+    if (next) {
+      player.PlayNext();
+    } else {
+      player.PlayPrev();
     }
   }
+
+  bitClear(ui_option.repeat, 7); // clear the bit that has been temporarily forced set
+
+  ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
+  display_picture(ui_control.playNo);
+
+  // Update ui_control and look of the play button
+  lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
+
+  if (ui_ScreenPlayList) {
+    ui_list_update_play(ui_control.playNo, true);
+  }
+
+  return ret;
 }
 
+static void play_stop(void) {
+  lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
+  player.StopPlay();
+}
+
+//--------------------------------------------------------------------------------
+// Update bar and label according to elapsed time
+//--------------------------------------------------------------------------------
 static void update_elapsed_time(void) {
   uint32_t duration = audioGetDuration();
   uint32_t elapsed  = audioGetElapsedTime();
@@ -170,118 +210,92 @@ static void update_metadata(void) {
 }
 
 //--------------------------------------------------------------------------------
-// Display a covoer picture on SD or flash
-//--------------------------------------------------------------------------------
-static void display_picture(uint32_t playNo) {
-  static constexpr lv_style_const_prop_t style_prop_picture[] = {
-    LV_STYLE_CONST_SHADOW_WIDTH(10),
-    LV_STYLE_CONST_SHADOW_OFFSET_Y(5),
-    LV_STYLE_CONST_SHADOW_OPA(LV_OPA_40),
-    LV_STYLE_CONST_PROPS_END
-  };
-  static LV_STYLE_CONST_INIT(style_picture, (void*)style_prop_picture);
-
-  // Displaying an image file on SD card
-  char buf[BUF_SIZE], *ptr;
-  buf[0] = MY_FS_ARDUINO_SD_LETTER;
-  buf[1] = ':';
-
-  // Skip drive letter "S:"
-  std::string dir = player.GetFilePath(playNo);
-  strncpy(&buf[2], dir.c_str(), sizeof(buf) - 2);
-  buf[sizeof(buf) - 1] = '\0';
-
-  // @picture.jpg
-  if (ptr = strrchr(buf, '/')) {
-    strcpy(ptr + 1, PICTURE_BASE PICTURE_EXT);
-    if (SD.exists(buf + 2)) {
-      lv_image_set_src(ui_AlbumImage, buf);
-      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
-      return;
-    }
-  }
-
-  // title.jpg
-  if (ptr = strrchr(buf, '.')) {
-    strcpy(ptr + 1, PICTURE_EXT);
-    if (SD.exists(buf + 2)) {
-      lv_image_set_src(ui_AlbumImage, buf);
-      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
-      return;
-    }
-  }
-
-#ifdef _PICTURES_H_
-  // Displaying an image file on flash ROM
-  #if true
-    // Display picture at random
-    int pictNo = millis() / (N_PICTURES - 1) + 1;
-    lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
-    lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
-  #else
-    // Display the image specified by the number in @picture.txt
-    int pictNo = player.GetPictureNo(playNo);
-    if (0 < pictNo && pictNo < N_PICTURES) {
-      lv_image_set_src(ui_AlbumImage, pictures[pictNo]);
-      lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
-    } else {
-      lv_image_set_src    (ui_AlbumImage, &img_album);
-      lv_obj_remove_style (ui_AlbumImage, &style_picture, 0);
-    }
-  #endif
-#endif
-}
-
-//--------------------------------------------------------------------------------
-// Control next/previous play or stop/continuous play
-//--------------------------------------------------------------------------------
-static bool play_next(bool next) {
-  if (ui_ScreenPlayList) {
-    ui_list_update_cell(ui_control.focusNo, false);
-    ui_list_update_icon(ui_control.playNo,  false);
-  }
-
-  bool ret = true;
-  if (ui_option.favorite) {
-    ret = player.NextSelected(next, (ui_option.repeat ? true : false));
-  } else {
-    if (next) {
-      player.PlayNext();
-    } else {
-      player.PlayPrev();
-    }
-  }
-
-  bitClear(ui_option.repeat, 7); // clear the bit that has been temporarily forced set
-
-  ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
-  display_picture(ui_control.playNo);
-
-  // Update ui_control and look of the play button
-  lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
-
-  if (ui_ScreenPlayList) {
-    ui_list_update_play(ui_control.playNo, true);
-  }
-
-  return ret;
-}
-
-//--------------------------------------------------------------------------------
 // Check out the favorite playlists
 //--------------------------------------------------------------------------------
 static bool check_favorite(void) {
   return !ui_option.favorite || player.IsPlaying() || player.IsSelected();
 }
 
+//--------------------------------------------------------------------------------
+// Load / Save options in SD
+//--------------------------------------------------------------------------------
+static void option_load(void) {
+  // Check if the partition exists
+  char buf[BUF_SIZE];
+  for (int i = 1; i <= PARTITION_MAX; i++) {
+    snprintf(buf, sizeof(buf), MP3_ROOT_PATH PARTITION_PATH, i);
+    buf[sizeof(buf) - 1] = '\0';
+    if (SD.exists(buf)) {
+      ui_option.partition_max = i;
+    } else {
+      break;
+    }
+  }
+
+  // Get the current partition
+  if (ui_option.partition_max) {
+    File fd = SD.open(MP3_ROOT_PATH PARTITION_FILE, FILE_READ);
+    if (fd) {
+      fd.read((uint8_t *)&ui_option.partition_id, sizeof(ui_option.partition_id));
+      fd.close();
+    } else {
+      ui_option.partition_id = 0;
+    }
+  }
+
+  // Just in case
+  if (ui_option.partition_id >= ui_option.partition_max) {
+    ui_option.partition_id = 0;
+  }
+
+  // Update the root folder with the current partition
+  if (ui_option.partition_max) {
+    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_option.partition_id + 1);
+    buf[sizeof(buf) - 1] = '\0';
+    player.SetSubDir(buf);
+  }
+
+  // Rewind
+  ui_control.playNo = ui_control.focusNo = 0;
+}
+
+static bool option_save(void) {
+  if (ui_option.partition_max) {
+    // Create a sub-directory string
+    char buf[BUF_SIZE];
+    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_option.partition_id + 1);
+    buf[sizeof(buf) - 1] = '\0';
+
+    // Restart if the end of the string is different
+    const char *dir = player.GetSubDir();
+    if (strcmp(&dir[strlen(dir) - strlen(buf)], buf) != 0) {
+      // Avoid conflict with SD access
+      play_stop();
+
+      // Save partition
+      File fd = SD.open(MP3_ROOT_PATH PARTITION_FILE, FILE_WRITE);
+      if (fd) {
+        fd.write((uint8_t *)&ui_option.partition_id, sizeof(ui_option.partition_id));
+        fd.close();
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+//--------------------------------------------------------------------------------
+// Asynchronous function to reduce delays during screen transitions
+//--------------------------------------------------------------------------------
 static void async_stop(void *user_data) {
   if (ui_state != UI_STATE_IDLE) {
-    lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
     ui_state = UI_STATE_STOP;
   }
 }
 
-////////////////////// HELPER FUNCTION //////////////////////
+//--------------------------------------------------------------------------------
+// Helper function for screen transition
+//--------------------------------------------------------------------------------
 static void change_screen(lv_obj_t ** target, lv_screen_load_anim_t fademode, void (*target_init)(void)) {
   if(*target == NULL) {
     target_init();
@@ -405,8 +419,7 @@ void ui_event_ElapsedBar(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   if (player.IsPlaying()) {
-    uint32_t elapsed = lv_slider_get_value(ui_ElapsedBar);
-    audioSetElapsedTime(elapsed);
+    audioSetElapsedTime(lv_slider_get_value(ui_ElapsedBar));
   }
 }
 
@@ -438,19 +451,16 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
     // Increase free memory
     // lv_fs_clear_cache(); // sdfs.{h|cpp}
 
-    // Stop playing to avoid conflict with SD access
-    lv_async_call(async_stop, NULL);
+    // Create album list (No need to access SD card)
+    ui_ScreenAlbumList_album_create((void*)player.m_tree);
 
-    // Load album list
-    ui_ScreenAlbumList_create_list((void*)player.m_tree);
+    // Stop playback to avoid conflict with SD access (async required)
+    lv_async_call(async_stop, NULL);
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
-    // Make album list and playlist clean
     ui_ScreenAlbumList_screen_deinit();
-    player.StopPlay();
-    player.ClearAudioFiles();
-    ui_state = UI_STATE_START;
+    ui_state = UI_STATE_CLEAR;
   }
 }
 
@@ -525,8 +535,9 @@ void ui_event_ScreenOptions(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
+    // Stop playback before saving options
     ui_ScreenOptions_screen_deinit();
-    ui_option_save();
+    ui_state = UI_STATE_SAVE;
   }
 }
 
@@ -624,7 +635,7 @@ void ui_init(void) {
 UI_State_t ui_loop(void) {
   switch (ui_state) {
     case UI_STATE_INIT:
-      if (player.begin(MP3_PATH_ROOT, MP3_VOLUME_INI)) {
+      if (player.begin(MP3_ROOT_PATH, MP3_VOLUME_INI)) {
         lv_slider_set_value(ui_Volume, MP3_VOLUME_INI, LV_ANIM_OFF);
         ui_state = UI_STATE_START;
       } else {
@@ -633,9 +644,9 @@ UI_State_t ui_loop(void) {
       break;
     case UI_STATE_START:
       ui_state = UI_STATE_ERROR;
-      ui_option_load();
+      option_load();
       if (player.ScanPlayList()) {
-        ui_ScreenAlbumList_screen_load((void*)player.m_tree);
+        ui_ScreenAlbumList_album_load((void*)player.m_tree);
         if (player.ScanAudioFiles(ui_option.shuffle)) {
           ui_set_playNo(ui_control.playNo);
           ui_state = UI_STATE_PLAY;
@@ -650,8 +661,7 @@ UI_State_t ui_loop(void) {
       }
       break;
     case UI_STATE_STOP:
-      lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
-      player.StopPlay();
+      play_stop();
       ui_state = UI_STATE_IDLE;
       break;
     case UI_STATE_PAUSE:
@@ -663,18 +673,10 @@ UI_State_t ui_loop(void) {
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_NEXT:
-      if (play_next(true)) {
-        ui_state = UI_STATE_PLAY;
-      } else {
-        ui_state = UI_STATE_STOP;
-      }
+      ui_state = play_next(true)  ? UI_STATE_PLAY : UI_STATE_STOP;
       break;
     case UI_STATE_PREV:
-      if (play_next(false)) {
-        ui_state = UI_STATE_PLAY;
-      } else {
-        ui_state = UI_STATE_STOP;
-      }
+      ui_state = play_next(false) ? UI_STATE_PLAY : UI_STATE_STOP;
       break;
     case UI_STATE_ID3:
       lv_label_set_text_fmt(ui_MusicTitle, "%s %s / %s / %s",
@@ -685,6 +687,20 @@ UI_State_t ui_loop(void) {
     case UI_STATE_EOF:
       update_metadata();
       ui_state = nextState;
+      break;
+    case UI_STATE_SAVE:
+      if (option_save()) {
+        player.DeleteNodeTree();
+        player.ClearAudioFiles();
+        ui_state = UI_STATE_START;
+      } else {
+        ui_state = UI_STATE_PLAY;
+      }
+      break;
+    case UI_STATE_CLEAR:
+      play_stop();
+      player.ClearAudioFiles();
+      ui_state = UI_STATE_START;
       break;
     case UI_STATE_ERROR:
       lv_label_set_text_fmt(ui_MusicTitle, "%s %s", LV_SYMBOL_WARNING, player.GetError());

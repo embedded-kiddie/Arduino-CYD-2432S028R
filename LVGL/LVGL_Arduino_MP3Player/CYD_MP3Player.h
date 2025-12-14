@@ -11,25 +11,17 @@
 //--------------------------------------------------------------------------------
 // Audio file root folder
 //--------------------------------------------------------------------------------
-#define MP3_PATH_ROOT "/MP3/"
-
-//--------------------------------------------------------------------------------
-// Possible values for `SetVolume()`
-//--------------------------------------------------------------------------------
-#define MP3_VOLUME_MIN  0
-#define MP3_VOLUME_INI  6
-#define MP3_VOLUME_MAX  21
+#define MP3_ROOT_PATH   "/MP3/"
 
 //--------------------------------------------------------------------------------
 // Metadata file
 //--------------------------------------------------------------------------------
-#define META_DATA_PREFIX  "@meta"
-#define META_DATA_SUFFIX  ".dat"
+#define META_DATA_FILE  "@meta.dat"
 
 //--------------------------------------------------------------------------------
 // Thumnail of album picure
 //--------------------------------------------------------------------------------
-#define PICTURE_BASE  "@picture."
+#define PICTURE_BASE    "@picture."
 #if MY_USE_FS_ARDUINO_SD
   #if LV_USE_BMP
     #define PICTURE_EXT "bmp" // 96x96 (must be RGB565)
@@ -41,6 +33,13 @@
 #else
   #define PICTURE_EXT "txt" // A text file containing the id on the flash
 #endif
+
+//--------------------------------------------------------------------------------
+// Possible values for `SetVolume()`
+//--------------------------------------------------------------------------------
+#define MP3_VOLUME_MIN  0
+#define MP3_VOLUME_INI  6
+#define MP3_VOLUME_MAX  21
 
 //--------------------------------------------------------------------------------
 // Meta data for MP3 audio file

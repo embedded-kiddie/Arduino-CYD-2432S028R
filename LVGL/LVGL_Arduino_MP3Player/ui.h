@@ -44,6 +44,8 @@ typedef enum {
   UI_STATE_BLOFF,
   UI_STATE_ID3,
   UI_STATE_EOF,
+  UI_STATE_SAVE,
+  UI_STATE_CLEAR,
   UI_STATE_ERROR,
 } UI_State_t;
 
@@ -83,24 +85,24 @@ extern lv_obj_t *ui_ElapsedBar;
 extern lv_obj_t *ui_Volume;
 extern lv_obj_t *ui_AlbumImage;
 void ui_ScreenMain_screen_init(void);
-void ui_event_ScreenMain  (lv_event_t *e);
-void ui_event_ButtonPlay  (lv_event_t *e);
-void ui_event_Volume      (lv_event_t *e);
-void ui_event_ElapsedBar  (lv_event_t *e);
+void ui_event_ScreenMain    (lv_event_t *e);
+void ui_event_ButtonPlay    (lv_event_t *e);
+void ui_event_Volume        (lv_event_t *e);
+void ui_event_ElapsedBar    (lv_event_t *e);
 void ui_event_GoToAlbumList (lv_event_t *e);
 void ui_event_GoToPlayList  (lv_event_t *e);
 void ui_event_GoToOptions   (lv_event_t *e);
-void ui_event_Favorite    (lv_event_t *e);
-void ui_event_Repeat      (lv_event_t *e);
-void ui_event_Shuffle     (lv_event_t *e);
-void ui_event_ButtonNext  (lv_event_t *e);
-void ui_event_ButtonPrev  (lv_event_t *e);
-void ui_event_VolumeMax   (lv_event_t *e);
-void ui_event_VolumeMin   (lv_event_t *e);
+void ui_event_Favorite      (lv_event_t *e);
+void ui_event_Repeat        (lv_event_t *e);
+void ui_event_Shuffle       (lv_event_t *e);
+void ui_event_ButtonNext    (lv_event_t *e);
+void ui_event_ButtonPrev    (lv_event_t *e);
+void ui_event_VolumeMax     (lv_event_t *e);
+void ui_event_VolumeMin     (lv_event_t *e);
 
 void ui_init(void);
 UI_State_t ui_loop(void);
-void ui_redisplay(void);
+void ui_redisplay (void);
 void ui_set_playNo(uint32_t playNo);
 const uint32_t ui_get_playNo(void);
 const uint32_t ui_get_counts(void);
@@ -110,8 +112,8 @@ extern lv_obj_t *ui_ScreenAlbumList;
 void ui_event_ScreenAlbumList(lv_event_t *e);
 void ui_ScreenAlbumList_screen_init  (void);
 void ui_ScreenAlbumList_screen_deinit(void);
-void ui_ScreenAlbumList_screen_load  (void *root);
-void ui_ScreenAlbumList_create_list  (void *root);
+void ui_ScreenAlbumList_album_load   (void *root);
+void ui_ScreenAlbumList_album_create (void *root);
 
 // Debug functions
 extern __attribute__((weak)) size_t count_exposed_nodes(void);

@@ -8,6 +8,11 @@
 #include <stdlib.h>   // strtoul()
 #include <functional> // std::hash
 
+/////////// Folder and file for saving album list ///////////
+#define CONFIG_DIR_PATH "@conf/"
+#define ALBUM_LIST_FILE "@album.txt"
+#define ALBUM_LIST_PATH CONFIG_DIR_PATH ALBUM_LIST_FILE
+
 //--------------------------------------------------------------------------------
 // Instance of the screen widget
 //--------------------------------------------------------------------------------
@@ -52,15 +57,10 @@ lv_obj_t *ui_ScreenAlbumList;
 #define KEYPAD_BUTTON_Y     LV_PCT_Y(3)     // Button Matrix
 #endif
 
-#define ALBUM_LIST_X      LV_PCT_X(5)     // List Container
-#define ALBUM_LIST_Y      LV_PCT_Y(24)    // List Container
-#define BACK_TO_MAIN_X    LV_PCT_X(87)    // Back to Main
-#define BACK_TO_MAIN_Y    LV_PCT_Y(4)     // Back to Main
-
-/////////// Folder and file for saving album list ///////////
-#define CONFIG_DIR_NAME "@conf/"
-#define ALBUM_LIST_FILE "@album.txt"
-#define PATH_ALBUM_LIST CONFIG_DIR_NAME ALBUM_LIST_FILE
+#define ALBUM_LIST_X        LV_PCT_X(5)     // List Container
+#define ALBUM_LIST_Y        LV_PCT_Y(24)    // List Container
+#define BACK_TO_MAIN_X      LV_PCT_X(87)    // Back to Main
+#define BACK_TO_MAIN_Y      LV_PCT_Y(4)     // Back to Main
 
 typedef struct {
   String    name; // name in dropdown list
@@ -623,7 +623,7 @@ static inline String make_json_list(void) {
 }
 
 static inline String make_json_path(int id) {
-  return String(album_control.root->name.c_str()) + CONFIG_DIR_NAME + String(id) + ".json";
+  return String(album_control.root->name.c_str()) + CONFIG_DIR_PATH + String(id) + ".json";
 }
 
 static bool album_json_save(void) {
@@ -674,7 +674,7 @@ static bool album_json_load(void) {
 }
 
 static bool album_list_save(void) {
-  std::string path = album_control.root->name + CONFIG_DIR_NAME;
+  std::string path = album_control.root->name + CONFIG_DIR_PATH;
   if (!SD.exists(path.c_str())) {
     SD.mkdir(path.c_str());
   }
@@ -694,7 +694,7 @@ static bool album_list_save(void) {
 }
 
 static void album_list_load(void) {
-  const char *path = (album_control.root->name + PATH_ALBUM_LIST).c_str();
+  const char *path = (album_control.root->name + ALBUM_LIST_PATH).c_str();
   File fd = SD.open(path, FILE_READ);
 
   // Read data from an existing file
@@ -1259,7 +1259,7 @@ void ui_ScreenAlbumList_screen_deinit(void) {
 //--------------------------------------------------------------------------------
 // Create selectable playlist
 //--------------------------------------------------------------------------------
-void ui_ScreenAlbumList_screen_load(void *root) {
+void ui_ScreenAlbumList_album_load(void *root) {
   if (root) {
     // Once traverse node tree by preorder and load album list
     album_control.root = reinterpret_cast<Node*>(root);
@@ -1271,7 +1271,7 @@ void ui_ScreenAlbumList_screen_load(void *root) {
   }
 }
 
-void ui_ScreenAlbumList_create_list(void *root) {
+void ui_ScreenAlbumList_album_create(void *root) {
   if (root) {
     // Re-traverse node tree by preorder and initialize album list
     album_control.root = reinterpret_cast<Node*>(root);
