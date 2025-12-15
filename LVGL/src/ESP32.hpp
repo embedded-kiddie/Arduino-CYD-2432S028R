@@ -109,8 +109,9 @@ public:
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
     // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/freertos_stats.h
     // https://forum.arduino.cc/t/how-to-make-tasks-and-determine-stack-size-in-freertos/978325/29
-    // uxTaskGetStackHighWaterMark()
     printRunningTasks(Serial);
+#else
+    printf("Loop Task Stack High Water Mark: %d/%d bytes\n", uxTaskGetStackHighWaterMark(NULL), CONFIG_ARDUINO_LOOP_STACK_SIZE);
 #endif
   }
 
