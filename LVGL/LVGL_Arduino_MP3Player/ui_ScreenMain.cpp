@@ -135,7 +135,7 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style    (obj, &style_pressed,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
     lv_obj_add_event_cb (obj, ui_event_GoToAlbumList, LV_EVENT_CLICKED, NULL);
 
-    ////////////////////// Move to Options /////////////////////
+    //////////////////// Move to Settings /////////////////////
     obj = lv_checkbox_create(ui_ScreenMain);
     lv_checkbox_set_text_static(obj, "");
     lv_obj_set_style_x  (obj, 0,                (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
@@ -144,7 +144,7 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style    (obj, &style_default_U, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style    (obj, &style_checked_U, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
     lv_obj_add_style    (obj, &style_pressed,   (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_add_event_cb (obj, ui_event_GoToOptions, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb (obj, ui_event_GoToSettings, LV_EVENT_CLICKED, NULL);
   }
 #endif // SHOW_ARROW_BUTTON
 
@@ -294,7 +294,7 @@ void ui_ScreenMain_screen_init(void) {
   /////////////////////// Repeat Icon ///////////////////////
   lv_obj_t *ui_Repeat = lv_checkbox_create(ui_ScreenMain);
   lv_checkbox_set_text_static (ui_Repeat, "");
-  lv_obj_add_state            (ui_Repeat, ui_option.repeat ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
+  lv_obj_add_state            (ui_Repeat, ui_setting.repeat ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
   {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(25),
@@ -341,7 +341,7 @@ void ui_ScreenMain_screen_init(void) {
   ////////////////////// Shuffle Icon ///////////////////////
   lv_obj_t *ui_Shuffle = lv_checkbox_create(ui_ScreenMain);
   lv_checkbox_set_text_static (ui_Shuffle, "");
-  lv_obj_add_state            (ui_Shuffle, ui_option.shuffle ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
+  lv_obj_add_state            (ui_Shuffle, ui_setting.shuffle ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
   {
     static constexpr lv_style_const_prop_t style_prop_common[] = {
       LV_STYLE_CONST_WIDTH(25),

@@ -8,6 +8,19 @@
 #include "debug.h"
 #include <lvgl.h>
 
+#define USE_CUSTOM_FONT 1
+
+/////////////////////// CUSTOM FONTS ////////////////////////
+#if USE_CUSTOM_FONT
+#define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
+#define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
+#else
+#define CUSTOM_FONT_SMALL   lv_font_montserrat_12
+#define CUSTOM_FONT_MEDIUM  lv_font_montserrat_14
+#endif
+LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
+LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
+
 /////////// ARROW BUTTONS TO NAVIGATE TO SCREENS ////////////
 #define SHOW_ARROW_BUTTON false
 
@@ -49,7 +62,7 @@ typedef enum {
   UI_STATE_ERROR,
 } UI_State_t;
 
-//////////////////// OPTION / CONTROLLER ////////////////////
+//////////////////// SETTINGS / CONTROLL ////////////////////
 typedef struct {
   uint8_t   repeat;           // true: repeat
   bool      favorite;         // true: a heart mark
@@ -59,7 +72,7 @@ typedef struct {
   uint8_t   partition_id;     // partition identification number (0 - 4)
   uint8_t   selectBacklight;  // 30sec, 1min, ...
   uint8_t   selectSleepTimer; // 30min, 1hour, ...
-} UI_Option_t;
+} UI_Setting_t;
 
 typedef struct {
   uint32_t  top;
@@ -71,8 +84,8 @@ typedef struct {
   uint32_t  sleepTimer;
 } UI_Control_t;
 
-extern UI_State_t ui_state;
-extern UI_Option_t ui_option;
+extern UI_State_t   ui_state;
+extern UI_Setting_t ui_setting;
 extern UI_Control_t ui_control;
 
 /////////////////// SCREEN: ui_ScreenMain ///////////////////
@@ -91,7 +104,7 @@ void ui_event_Volume        (lv_event_t *e);
 void ui_event_ElapsedBar    (lv_event_t *e);
 void ui_event_GoToAlbumList (lv_event_t *e);
 void ui_event_GoToPlayList  (lv_event_t *e);
-void ui_event_GoToOptions   (lv_event_t *e);
+void ui_event_GoToSettings  (lv_event_t *e);
 void ui_event_Favorite      (lv_event_t *e);
 void ui_event_Repeat        (lv_event_t *e);
 void ui_event_Shuffle       (lv_event_t *e);
@@ -141,20 +154,15 @@ extern __attribute__((weak)) size_t get_cell_count(void);
 extern __attribute__((weak)) void show_ui_control(void);
 extern __attribute__((weak)) void dump_play_list(void);
 
-///////////////// SCREEN: ui_ScreenOptions //////////////////
-extern lv_obj_t *ui_ScreenOptions;
-void ui_event_ScreenOptions(lv_event_t *e);
-void ui_ScreenOptions_screen_init  (void);
-void ui_ScreenOptions_screen_deinit(void);
-void ui_option_set_backlight(void);
-void ui_option_set_sleeptime(void);
+///////////////// SCREEN: ui_ScreenSettings /////////////////
+extern lv_obj_t *ui_ScreenSettings;
+void ui_event_ScreenSettings(lv_event_t *e);
+void ui_ScreenSettings_screen_init  (void);
+void ui_ScreenSettings_screen_deinit(void);
+void ui_setting_set_backlight(void);
+void ui_setting_set_sleeptime(void);
 
-////////////////////// FONTS & IMAGES ///////////////////////
-#define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
-#define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
-LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
-LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
-
+////////////////////////// IMAGES ///////////////////////////
 LV_IMAGE_DECLARE(img_album);            // assets/icons/img_album.png
 LV_IMAGE_DECLARE(img_heart_off);        // assets/icons/img_heart_off.png
 LV_IMAGE_DECLARE(img_heart_on);         // assets/icons/img_heart_on.png

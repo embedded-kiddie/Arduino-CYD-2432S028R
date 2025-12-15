@@ -12,9 +12,9 @@
 #define PARTITION_FILE  "@partition.dat"
 
 ////////////////////// GLOBAL VARIABLES /////////////////////
-UI_State_t ui_state;
+UI_State_t   ui_state;
 UI_Control_t ui_control;
-UI_Option_t ui_option = {
+UI_Setting_t ui_setting = {
   .shuffle = true,
   .selectBacklight = 1,
 };
@@ -23,8 +23,8 @@ UI_Option_t ui_option = {
 #include "CYD_MP3Player.h"
 static CYD_MP3Player player;
 
-static bool saveID3tags;
-static ID3Tags_t id3tags;
+static bool       id3tagsSave;
+static ID3Tags_t  id3tags;
 static UI_State_t nextState;
 
 /////////////////////////// IMAGES //////////////////////////
@@ -112,8 +112,8 @@ static bool play_next(bool next) {
   }
 
   bool ret = true;
-  if (ui_option.favorite) {
-    ret = player.NextSelected(next, (ui_option.repeat ? true : false));
+  if (ui_setting.favorite) {
+    ret = player.NextSelected(next, (ui_setting.repeat ? true : false));
   } else {
     if (next) {
       player.PlayNext();
@@ -122,7 +122,7 @@ static bool play_next(bool next) {
     }
   }
 
-  bitClear(ui_option.repeat, 7); // clear the bit that has been temporarily forced set
+  bitClear(ui_setting.repeat, 7); // clear the bit that has been temporarily forced set
 
   ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
   display_picture(ui_control.playNo);
@@ -172,7 +172,7 @@ static void update_metadata(void) {
   uint32_t playNo = player.GetPlayNo();
   player.GetMetaData(playNo, &meta);
 
-  if (meta.duration < id3tags.meta.duration || saveID3tags == true) {
+  if (meta.duration < id3tags.meta.duration || id3tagsSave == true) {
     // Prevent input while saving metadata to SD card
     lv_indev_enable(NULL, false);
 
@@ -181,9 +181,9 @@ static void update_metadata(void) {
     }
 
     // Update all Favorites that have been modified during playback
-    if (saveID3tags == true) {
+    if (id3tagsSave == true) {
       if (player.UpdateMetaData()) {
-        saveID3tags = false;
+        id3tagsSave = false;
       }
     }
 
@@ -213,44 +213,44 @@ static void update_metadata(void) {
 // Check out the favorite playlists
 //--------------------------------------------------------------------------------
 static bool check_favorite(void) {
-  return !ui_option.favorite || player.IsPlaying() || player.IsSelected();
+  return !ui_setting.favorite || player.IsPlaying() || player.IsSelected();
 }
 
 //--------------------------------------------------------------------------------
-// Load / Save options in SD
+// Load / Save settings in SD
 //--------------------------------------------------------------------------------
-static void option_load(void) {
+static void partition_load(void) {
   // Check if the partition exists
   char buf[BUF_SIZE];
   for (int i = 1; i <= PARTITION_MAX; i++) {
     snprintf(buf, sizeof(buf), MP3_ROOT_PATH PARTITION_PATH, i);
     buf[sizeof(buf) - 1] = '\0';
     if (SD.exists(buf)) {
-      ui_option.partition_max = i;
+      ui_setting.partition_max = i;
     } else {
       break;
     }
   }
 
   // Get the current partition
-  if (ui_option.partition_max) {
+  if (ui_setting.partition_max) {
     File fd = SD.open(MP3_ROOT_PATH PARTITION_FILE, FILE_READ);
     if (fd) {
-      fd.read((uint8_t *)&ui_option.partition_id, sizeof(ui_option.partition_id));
+      fd.read((uint8_t *)&ui_setting.partition_id, sizeof(ui_setting.partition_id));
       fd.close();
     } else {
-      ui_option.partition_id = 0;
+      ui_setting.partition_id = 0;
     }
   }
 
   // Just in case
-  if (ui_option.partition_id >= ui_option.partition_max) {
-    ui_option.partition_id = 0;
+  if (ui_setting.partition_id >= ui_setting.partition_max) {
+    ui_setting.partition_id = 0;
   }
 
   // Update the root folder with the current partition
-  if (ui_option.partition_max) {
-    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_option.partition_id + 1);
+  if (ui_setting.partition_max) {
+    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_setting.partition_id + 1);
     buf[sizeof(buf) - 1] = '\0';
     player.SetSubDir(buf);
   }
@@ -259,11 +259,11 @@ static void option_load(void) {
   ui_control.playNo = ui_control.focusNo = 0;
 }
 
-static bool option_save(void) {
-  if (ui_option.partition_max) {
+static bool partition_save(void) {
+  if (ui_setting.partition_max) {
     // Create a sub-directory string
     char buf[BUF_SIZE];
-    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_option.partition_id + 1);
+    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_setting.partition_id + 1);
     buf[sizeof(buf) - 1] = '\0';
 
     // Restart if the end of the string is different
@@ -275,7 +275,7 @@ static bool option_save(void) {
       // Save partition
       File fd = SD.open(MP3_ROOT_PATH PARTITION_FILE, FILE_WRITE);
       if (fd) {
-        fd.write((uint8_t *)&ui_option.partition_id, sizeof(ui_option.partition_id));
+        fd.write((uint8_t *)&ui_setting.partition_id, sizeof(ui_setting.partition_id));
         fd.close();
       }
       return true;
@@ -323,7 +323,7 @@ void ui_event_ScreenMain(lv_event_t *e) {
 
   else if (dir == LV_DIR_TOP || dir == LV_DIR_BOTTOM) {
     lv_screen_load_anim_t anim = (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM);
-    change_screen(&ui_ScreenOptions, anim, &ui_ScreenOptions_screen_init);
+    change_screen(&ui_ScreenSettings, anim, &ui_ScreenSettings_screen_init);
   }
 }
 
@@ -339,31 +339,31 @@ void ui_event_GoToPlayList(lv_event_t *e) {
   change_screen(&ui_ScreenPlayList, LV_SCR_LOAD_ANIM_MOVE_LEFT, &ui_ScreenPlayList_screen_init);
 }
 
-void ui_event_GoToOptions(lv_event_t *e) {
+void ui_event_GoToSettings(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  change_screen(&ui_ScreenOptions, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, &ui_ScreenOptions_screen_init);
+  change_screen(&ui_ScreenSettings, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, &ui_ScreenSettings_screen_init);
 }
 
 void ui_event_Favorite(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
-  ui_option.favorite = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
+  ui_setting.favorite = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
 }
 
 void ui_event_Repeat(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
-  ui_option.repeat = (uint8_t)(lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
+  ui_setting.repeat = (uint8_t)(lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
 }
 
 void ui_event_Shuffle(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
-  ui_option.shuffle = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
+  ui_setting.shuffle = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
   player.StopPlay();
   player.ClearAudioFiles();
   ui_state = UI_STATE_START;
@@ -380,14 +380,14 @@ void ui_event_ButtonNext(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   ui_state = UI_STATE_NEXT;
-  bitSet(ui_option.repeat, 7); // Force to set the bit temporarily
+  bitSet(ui_setting.repeat, 7); // Force to set the bit temporarily
 }
 
 void ui_event_ButtonPrev(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
   ui_state = UI_STATE_PREV;
-  bitSet(ui_option.repeat, 7); // Force to set the bit temporarily
+  bitSet(ui_setting.repeat, 7); // Force to set the bit temporarily
 }
 
 void ui_event_VolumeMax(lv_event_t *e) {
@@ -424,7 +424,7 @@ void ui_event_ElapsedBar(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-// Event handlers for Screen Option
+// Event handlers for Screen Album List
 //--------------------------------------------------------------------------------
 void ui_event_ScreenAlbumList(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
@@ -509,14 +509,14 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
 
   // in case the metadata file cannot be saved, save it separately
   if (!saved) {
-    saveID3tags = true;
+    id3tagsSave = true;
   }
 }
 
 //--------------------------------------------------------------------------------
-// Event handlers for Screen Options
+// Event handlers for Screen Settings
 //--------------------------------------------------------------------------------
-void ui_event_ScreenOptions(lv_event_t *e) {
+void ui_event_ScreenSettings(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(
     event_code == LV_EVENT_CLICKED ||
@@ -535,8 +535,8 @@ void ui_event_ScreenOptions(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
-    // Stop playback before saving options
-    ui_ScreenOptions_screen_deinit();
+    // Stop playback before saving settings
+    ui_ScreenSettings_screen_deinit();
     ui_state = UI_STATE_SAVE;
   }
 }
@@ -609,7 +609,7 @@ void audio_id3data(const char *info) {
 
 void audio_eof_mp3(const char *info) {
   ui_state = UI_STATE_EOF;
-  if (!player.IsLastSong(ui_option.favorite) || ui_option.repeat) {
+  if (!player.IsLastSong(ui_setting.favorite) || ui_setting.repeat) {
     nextState = UI_STATE_NEXT;
   } else {
     nextState = UI_STATE_STOP;
@@ -618,8 +618,8 @@ void audio_eof_mp3(const char *info) {
 
 //////////////////// UI STATE CONTROLLER ////////////////////
 void ui_init(void) {
-  ui_option_set_backlight();
-  ui_option_set_sleeptime();
+  ui_setting_set_backlight();
+  ui_setting_set_sleeptime();
   ui_ScreenMain_screen_init();
   lv_screen_load(ui_ScreenMain);
 
@@ -644,10 +644,10 @@ UI_State_t ui_loop(void) {
       break;
     case UI_STATE_START:
       ui_state = UI_STATE_ERROR;
-      option_load();
+      partition_load();
       if (player.ScanPlayList()) {
         ui_ScreenAlbumList_album_load((void*)player.m_tree);
-        if (player.ScanAudioFiles(ui_option.shuffle)) {
+        if (player.ScanAudioFiles(ui_setting.shuffle)) {
           ui_set_playNo(ui_control.playNo);
           ui_state = UI_STATE_PLAY;
         }
@@ -689,7 +689,7 @@ UI_State_t ui_loop(void) {
       ui_state = nextState;
       break;
     case UI_STATE_SAVE:
-      if (option_save()) {
+      if (partition_save()) {
         player.DeleteNodeTree();
         player.ClearAudioFiles();
         ui_state = UI_STATE_START;
@@ -720,14 +720,14 @@ UI_State_t ui_loop(void) {
     }
 
     // deep sleep
-    if (ui_option.selectSleepTimer) {
+    if (ui_setting.selectSleepTimer) {
       if (millis() - ui_control.sleepStart > ui_control.sleepTimer) {
         ret = ui_state = UI_STATE_SLEEP; // enter deep sleep
       }
     }
 
     // Backlight control according to the duration of non-operation
-    if (ui_option.selectBacklight && ret == UI_STATE_AWAKE) {
+    if (ui_setting.selectBacklight && ret == UI_STATE_AWAKE) {
       if (lv_disp_get_inactive_time(NULL) > ui_control.backlightTimer) {
         ret = UI_STATE_BLOFF; // turn backlight off
       }

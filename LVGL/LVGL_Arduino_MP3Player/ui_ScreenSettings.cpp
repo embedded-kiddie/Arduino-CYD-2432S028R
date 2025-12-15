@@ -1,5 +1,5 @@
 //================================================================================
-// MP3 Music Player for CYD - Option Screen
+// MP3 Music Player for CYD - Settings Screen
 // LVGL version: 9.2.2 and up
 //================================================================================
 #include "ui.h"
@@ -8,7 +8,7 @@
 //--------------------------------------------------------------------------------
 // Instance of the screen widget
 //--------------------------------------------------------------------------------
-lv_obj_t *ui_ScreenOptions;
+lv_obj_t *ui_ScreenSettings;
 
 //--------------------------------------------------------------------------------
 // Offset from the top / Roller width
@@ -21,11 +21,11 @@ lv_obj_t *ui_ScreenOptions;
 // Contents of dropdown list
 //--------------------------------------------------------------------------------
 typedef struct {
-  const char      *options;
+  const char      *text;
   const uint32_t  time[];
-} DropdownOpts_t;
+} DropdownTime_t;
 
-static const DropdownOpts_t opts_backlight = {
+static const DropdownTime_t backlight = {
   "Disable\n30 sec\n1 min\n2 min\n5 min",
   {
     0,              // Disable
@@ -36,7 +36,7 @@ static const DropdownOpts_t opts_backlight = {
   }
 };
 
-static const DropdownOpts_t opts_sleeptime = {
+static const DropdownTime_t sleeptime = {
   "Disable\n30 min\n60 min\n90 min\n120 min",
   {
     0,                // Disable
@@ -47,32 +47,32 @@ static const DropdownOpts_t opts_sleeptime = {
   }
 };
 
-void ui_option_set_backlight(void) {
-  ui_control.backlightTimer = opts_backlight.time[ui_option.selectBacklight];
+void ui_setting_set_backlight(void) {
+  ui_control.backlightTimer = backlight.time[ui_setting.selectBacklight];
 }
 
-void ui_option_set_sleeptime(void) {
-  ui_control.sleepTimer = opts_sleeptime.time[ui_option.selectSleepTimer];
+void ui_setting_set_sleeptime(void) {
+  ui_control.sleepTimer = sleeptime.time[ui_setting.selectSleepTimer];
 }
 
 //--------------------------------------------------------------------------------
-// Event handlers for UI Options
+// Event handlers for UI Settings
 //--------------------------------------------------------------------------------
 static void backlight_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectBacklight = lv_roller_get_selected(obj);
-  ui_option_set_backlight();
+  ui_setting.selectBacklight = lv_roller_get_selected(obj);
+  ui_setting_set_backlight();
 }
 
 static void sleeptimer_cb(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.selectSleepTimer = lv_roller_get_selected(obj);
+  ui_setting.selectSleepTimer = lv_roller_get_selected(obj);
   ui_control.sleepStart = millis();
-  ui_option_set_sleeptime();
+  ui_setting_set_sleeptime();
 }
 
 //--------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ static void sleeptimer_cb(lv_event_t *e) {
 static void delete_cb(lv_event_t *e) {
   lv_obj_t **obj = (lv_obj_t **)lv_event_get_user_data(e);
   static constexpr lv_obj_t ** const adrs[] = {
-    &ui_ScreenOptions,
+    &ui_ScreenSettings,
   };
 
   for (int i = 0; i < sizeof(adrs) / sizeof(adrs[0]); i++) {
@@ -109,7 +109,7 @@ static void radio_event_handler(lv_event_t *e) {
   if (act_cb != container) {
     lv_obj_remove_state(old_cb, LV_STATE_CHECKED);  // Uncheck the previous radio button
     lv_obj_add_state   (act_cb, LV_STATE_CHECKED);  // Check the current radio button
-    *active_id = (uint8_t)lv_obj_get_index(act_cb); // Update ui_option.partition_id
+    *active_id = (uint8_t)lv_obj_get_index(act_cb); // Update ui_setting.partition_id
   }
 }
 
@@ -120,14 +120,14 @@ static void switch_event_handler(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
 
   lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_option.shuffle_mode = lv_obj_has_state(obj, LV_STATE_CHECKED);
+  ui_setting.shuffle_mode = lv_obj_has_state(obj, LV_STATE_CHECKED);
 
   lv_obj_t *parent = lv_obj_get_parent(obj);
   lv_obj_t *container = lv_obj_get_child(parent, 1);
 
-  for (int i = 0; i <= ui_option.partition_max; i++) {
+  for (int i = 0; i <= ui_setting.partition_max; i++) {
     obj = lv_obj_get_child(container, i);
-    if (ui_option.shuffle_mode) {
+    if (ui_setting.shuffle_mode) {
       lv_obj_add_state   (obj, LV_STATE_DISABLED);
     } else {
       lv_obj_remove_state(obj, LV_STATE_DISABLED);
@@ -138,16 +138,16 @@ static void switch_event_handler(lv_event_t *e) {
 //--------------------------------------------------------------------------------
 // Initialize / Deinitialize widgets
 //--------------------------------------------------------------------------------
-void ui_ScreenOptions_screen_init(void) {
-  if (ui_ScreenOptions == NULL) {
-    ui_ScreenOptions = lv_obj_create(NULL);
-    lv_obj_set_style_bg_color (ui_ScreenOptions, UI_COLOR_BACKGROUND, 0);
-    lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_ScreenOptions, LV_EVENT_GESTURE, NULL);
-    lv_obj_add_event_cb       (ui_ScreenOptions, ui_event_ScreenOptions, LV_EVENT_SCREEN_UNLOADED, NULL);
-    lv_obj_add_event_cb       (ui_ScreenOptions, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenOptions);
+void ui_ScreenSettings_screen_init(void) {
+  if (ui_ScreenSettings == NULL) {
+    ui_ScreenSettings = lv_obj_create(NULL);
+    lv_obj_set_style_bg_color (ui_ScreenSettings, UI_COLOR_BACKGROUND, 0);
+    lv_obj_add_event_cb       (ui_ScreenSettings, ui_event_ScreenSettings, LV_EVENT_GESTURE, NULL);
+    lv_obj_add_event_cb       (ui_ScreenSettings, ui_event_ScreenSettings, LV_EVENT_SCREEN_UNLOADED, NULL);
+    lv_obj_add_event_cb       (ui_ScreenSettings, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenSettings);
 
     ///////////////////////// Partition //////////////////////////
-    lv_obj_t *obj = lv_label_create(ui_ScreenOptions);
+    lv_obj_t *obj = lv_label_create(ui_ScreenSettings);
     lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
     lv_label_set_text_static(obj, "Partition");
 
@@ -166,10 +166,10 @@ void ui_ScreenOptions_screen_init(void) {
     };
     static LV_STYLE_CONST_INIT(style_container, (void*)style_prop_container);
 
-    lv_obj_t *container = lv_obj_create(ui_ScreenOptions);
+    lv_obj_t *container = lv_obj_create(ui_ScreenSettings);
     lv_obj_set_flex_flow(container, LV_FLEX_FLOW_ROW);
     lv_obj_add_style    (container, &style_container, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_event_cb (container, radio_event_handler, LV_EVENT_VALUE_CHANGED, (void*)&ui_option.partition_id);
+    lv_obj_add_event_cb (container, radio_event_handler, LV_EVENT_VALUE_CHANGED, (void*)&ui_setting.partition_id);
 
     static constexpr lv_style_const_prop_t style_prop_radio[] = {
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
@@ -191,57 +191,57 @@ void ui_ScreenOptions_screen_init(void) {
       lv_obj_add_style    (obj, &style_radio,       (uint32_t)LV_PART_INDICATOR);
       lv_obj_add_style    (obj, &style_radio_check, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
-      if (i >= ui_option.partition_max) {
+      if (i >= ui_setting.partition_max) {
         lv_obj_add_state  (obj, LV_STATE_DISABLED);
-      } else if (i == ui_option.partition_id) {
+      } else if (i == ui_setting.partition_id) {
         lv_obj_add_state  (obj, LV_STATE_CHECKED);
       }
     }
 
     //////////////////////// Shuffle Mode ////////////////////////
-    obj = lv_label_create(ui_ScreenOptions);
+    obj = lv_label_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(4) + SHUFFLE_POS_Y);
     lv_label_set_text_static(obj, "Shuffle Mode");
 
-    obj = lv_label_create(ui_ScreenOptions);
+    obj = lv_label_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(10), LV_PCT_Y(12) + SHUFFLE_POS_Y);
     lv_label_set_text_static(obj, "All Partitions :");
 
-    obj = lv_switch_create(ui_ScreenOptions);
+    obj = lv_switch_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(60), LV_PCT_Y(12) - 6 + SHUFFLE_POS_Y);
     lv_obj_remove_state     (obj, LV_STATE_CHECKED);
     lv_obj_add_event_cb     (obj, &switch_event_handler, LV_EVENT_VALUE_CHANGED, NULL);
-    if (ui_option.partition_max == 0) {
+    if (ui_setting.partition_max == 0) {
       lv_obj_add_state      (obj, LV_STATE_DISABLED);
     }
 
 
     ////////////////////// Backlight Label ///////////////////////
-    obj = lv_label_create(ui_ScreenOptions);
+    obj = lv_label_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(4) + TIMER_POS_Y);
     lv_label_set_text_static(obj, "Backlight Off");
 
     ///////////////////// Backlight Dropdown /////////////////////
-    obj = lv_roller_create(ui_ScreenOptions);
+    obj = lv_roller_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(12) + TIMER_POS_Y);
     lv_obj_set_style_width  (obj, TIMER_WIDTH, 0);
     lv_obj_add_event_cb     (obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_roller_set_options   (obj, opts_backlight.options, LV_ROLLER_MODE_NORMAL);
-    lv_roller_set_selected  (obj, ui_option.selectBacklight, LV_ANIM_ON);
+    lv_roller_set_options   (obj, backlight.text, LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_selected  (obj, ui_setting.selectBacklight, LV_ANIM_ON);
     lv_roller_set_visible_row_count(obj, 3);
 
     ////////////////////// Sleep Timer Label /////////////////////
-    obj = lv_label_create(ui_ScreenOptions);
+    obj = lv_label_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(57), LV_PCT_Y(4) + TIMER_POS_Y);
     lv_label_set_text_static(obj, "Sleep Timer");
 
     //////////////////// Sleep Timer Dropdown ////////////////////
-    obj = lv_roller_create(ui_ScreenOptions);
+    obj = lv_roller_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, SCREEN_WIDTH - TIMER_WIDTH - LV_PCT_X(5), LV_PCT_Y(12) + TIMER_POS_Y);
     lv_obj_set_style_width  (obj, TIMER_WIDTH, 0);
     lv_obj_add_event_cb     (obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_roller_set_options   (obj, opts_sleeptime.options, LV_ROLLER_MODE_NORMAL);
-    lv_roller_set_selected  (obj, ui_option.selectSleepTimer, LV_ANIM_ON);
+    lv_roller_set_options   (obj, sleeptime.text, LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_selected  (obj, ui_setting.selectSleepTimer, LV_ANIM_ON);
     lv_roller_set_visible_row_count(obj, 3);
 
 #if SHOW_ARROW_BUTTON || true
@@ -281,20 +281,20 @@ void ui_ScreenOptions_screen_init(void) {
       static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
       static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
 
-      lv_obj_t *obj = lv_checkbox_create(ui_ScreenOptions);
+      lv_obj_t *obj = lv_checkbox_create(ui_ScreenSettings);
       lv_checkbox_set_text_static(obj, "");
       lv_obj_add_style    (obj, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
       lv_obj_add_style    (obj, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
       lv_obj_add_style    (obj, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
       lv_obj_add_style    (obj, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-      lv_obj_add_event_cb (obj, ui_event_ScreenOptions, LV_EVENT_CLICKED, NULL);
+      lv_obj_add_event_cb (obj, ui_event_ScreenSettings, LV_EVENT_CLICKED, NULL);
     }
 #endif // SHOW_ARROW_BUTTON
   }
 }
 
-void ui_ScreenOptions_screen_deinit(void) {
-  if (ui_ScreenOptions) {
-    lv_obj_delete_async(ui_ScreenOptions);
+void ui_ScreenSettings_screen_deinit(void) {
+  if (ui_ScreenSettings) {
+    lv_obj_delete_async(ui_ScreenSettings);
   }
 }
