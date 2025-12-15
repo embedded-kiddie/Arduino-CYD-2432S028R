@@ -446,8 +446,8 @@ void ui_ScreenMain_screen_init(void) {
       LV_STYLE_CONST_PROPS_END
     };
     static constexpr lv_style_const_prop_t style_prop_pressed[] = {
-      LV_STYLE_CONST_PAD_LEFT(24),
-      LV_STYLE_CONST_PAD_TOP(24),
+      LV_STYLE_CONST_PAD_LEFT(26),
+      LV_STYLE_CONST_PAD_TOP(26),
       LV_STYLE_CONST_PROPS_END
     };
     static constexpr lv_style_const_prop_t style_prop_checked[] = {
