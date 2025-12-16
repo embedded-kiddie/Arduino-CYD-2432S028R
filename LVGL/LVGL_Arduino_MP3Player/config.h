@@ -71,14 +71,14 @@
 //--------------------------------------------------------------------------------
 #define PARTITION_MAX     5                 // Maximum number of partitions
 #define PARTITION_PATH    "%d/"             // Partition folder name ("%d" : 1, 2, ... 5)
-#define PARTITION_FILE    "@partition.dat"  // Partition configuration file (binary data)
+#define PARTITION_FILE    "@part.dat"       // Partition configuration file (binary data)
 
 //================================================================================
 // Here're examples of folders/files structure on an SD card.
 //
 // [WITHOUT PARTITION]            [WIDTH PARTITION]
 // /MP3/                          /MP3/
-// ├── @conf/                     ├── @partition.dat
+// ├── @conf/                     ├── @part.dat
 // │   ├── @album.txt             ├── 1/
 // │   ├── 1.json                 │   ├── @conf/
 // │   ├── 2.json                 │   │   ├── @album.txt

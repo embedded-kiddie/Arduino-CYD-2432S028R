@@ -14,6 +14,7 @@
 // SdFat library
 // https://github.com/greiman/SdFat
 //--------------------------------------------------------------------------------
+#define DISABLE_FS_H_WARNING
 #include <SdFat.h>
 
 // extern SdFat SD;

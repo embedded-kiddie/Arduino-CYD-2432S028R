@@ -17,6 +17,13 @@
 //    - SdFat by Bill Greiman (version 2.3.0)
 //    - ArduinoJson by Benoit Blanchon (version 7.4.2)
 //
+//  ### Important Notice
+//  If the folder/file name contains multi-byte characters, define the symbol
+//  "USE_UTF8_LONG_NAMES" to 1 in "libraries/SdFat/src/SdFatConfig.h" as below:
+//
+//    // To try UTF-8 encoded filenames.
+//    #define USE_UTF8_LONG_NAMES 1
+//
 //  3. Configuring LVGL
 //    - To configure "lv_conf.h" for this application, see "./lv_conf/README.md".
 //
@@ -26,7 +33,7 @@
 //  ## Harcware Requiremtnt
 //  This software is optimized for "ESP32-2432S028R" (aka Cheap Yellow Display).
 //  Connect a speaker, or an external DAC via the connector(s) on this board.
-//  For detail, see the follwing resource:
+//  For detail, see the follwing resources:
 //  - https://github.com/hexeguitar/ESP32_TFT_PIO#audio-amp-gain-mod
 //  - https://macsbug.wordpress.com/2022/08/20/web-radio-esp32-2432s028-i2s/
 //================================================================================
