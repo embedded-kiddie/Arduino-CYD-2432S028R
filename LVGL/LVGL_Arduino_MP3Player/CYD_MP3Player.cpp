@@ -79,7 +79,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
 
   MP3List_t *list = GetPlayList(playNo); // Never NULL
   std::string path = m_tree->find_path(list->parent);
-  std::string data = path + "/" META_DATA_FILE;
+  std::string data = path + "/" ALBUM_META_FILE;
 
   File fd = SD.open(data.c_str(), FILE_READ);
   if (fd) {
@@ -246,7 +246,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       // Read an existing meta data file
       int counts = 0;
       size_t dst = 0;
-      std::string meta = path + "/" META_DATA_FILE;
+      std::string meta = path + "/" ALBUM_META_FILE;
       fd = SD.open(meta.c_str(), FILE_READ);
 
       if (fd) {
@@ -340,7 +340,7 @@ uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
 
   // Gets the picture number recorded in PICTURE_FILE.
   std::string path = GetDirPath(playNo);
-  path.append(PICTURE_BASE "txt");
+  path.append(ALBUM_PHOTO_FILE "txt");
 
   File fd = SD.open(path.c_str(), FILE_READ);
   if (fd) {

@@ -11,14 +11,12 @@
 //----------------------------------------------------------------------
 #include "sdfs.h"
 #include "debug.h"
+#include "config.h"
 #include <string>
 #include <vector>
 #include <exception>
 #include <assert.h>
 #include <string.h>
-
-#define AUDIO_FILE_EXT  {".m4a", ".mp3", ".wav"}
-#define IsValidFile(f)  ((f)[0] != '@' && (f)[0] != '.')
 
 //----------------------------------------------------------------------
 // Meta information for Node class
@@ -104,7 +102,7 @@ public:
 private:
   // check the file extension
   bool check_ext(const char *path) {
-    const char* ext[] = AUDIO_FILE_EXT;
+    const char* ext[] = MP3_FILE_EXT;
     for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
       if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
         return true;
@@ -123,7 +121,7 @@ private:
 #else
       const char *name = entry.name();
 #endif
-      if (IsValidFile(name)) {
+      if (IS_VALID_FILE(name)) {
         if (entry.isDirectory()) {
           scan_node(entry, node->append(name), scan_file);
         }

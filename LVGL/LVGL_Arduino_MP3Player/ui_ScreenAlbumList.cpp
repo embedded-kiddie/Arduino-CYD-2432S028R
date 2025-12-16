@@ -9,9 +9,7 @@
 #include <functional> // std::hash
 
 /////////// Folder and file for saving album list ///////////
-#define CONFIG_DIR_PATH "@conf/"
-#define ALBUM_LIST_FILE "@album.txt"
-#define ALBUM_LIST_PATH CONFIG_DIR_PATH ALBUM_LIST_FILE
+#define ALBUM_LIST_PATH ALBUM_CONF_PATH ALBUM_LIST_FILE
 
 //--------------------------------------------------------------------------------
 // Instance of the screen widget
@@ -623,7 +621,7 @@ static inline String make_json_list(void) {
 }
 
 static inline String make_json_path(int id) {
-  return String(album_control.root->name.c_str()) + CONFIG_DIR_PATH + String(id) + ".json";
+  return String(album_control.root->name.c_str()) + ALBUM_CONF_PATH + String(id) + ALBUM_LIST_JSON;
 }
 
 static bool album_json_save(void) {
@@ -674,7 +672,7 @@ static bool album_json_load(void) {
 }
 
 static bool album_list_save(void) {
-  std::string path = album_control.root->name + CONFIG_DIR_PATH;
+  std::string path = album_control.root->name + ALBUM_CONF_PATH;
   if (!SD.exists(path.c_str())) {
     SD.mkdir(path.c_str());
   }

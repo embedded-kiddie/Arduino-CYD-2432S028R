@@ -4,35 +4,10 @@
 #ifndef _CYD_MP3PLAYER_H_
 #define _CYD_MP3PLAYER_H_
 
+#include "config.h"
 #include "tree.hpp"
 #include <string>
 #include <vector>
-
-//--------------------------------------------------------------------------------
-// Audio file root folder
-//--------------------------------------------------------------------------------
-#define MP3_ROOT_PATH   "/MP3/"
-
-//--------------------------------------------------------------------------------
-// Metadata file
-//--------------------------------------------------------------------------------
-#define META_DATA_FILE  "@meta.dat"
-
-//--------------------------------------------------------------------------------
-// Thumnail of album picure
-//--------------------------------------------------------------------------------
-#define PICTURE_BASE    "@picture."
-#if MY_USE_FS_ARDUINO_SD
-  #if LV_USE_BMP
-    #define PICTURE_EXT "bmp" // 96x96 (must be RGB565)
-  #elif LV_USE_TJPGD || MY_USE_TJPGD
-    #define PICTURE_EXT "jpg" // 96x96
-  #else
-    #error "LV_USE_BMP or LV_USE_TJPGD should be enabled."
-  #endif
-#else
-  #define PICTURE_EXT "txt" // A text file containing the id on the flash
-#endif
 
 //--------------------------------------------------------------------------------
 // Possible values for `SetVolume()`
@@ -151,8 +126,8 @@ private:
   // Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
   //--------------------------------------------------------------------------------
   bool check_mp3(const char *path) {
-    if (IsValidFile(path)) {
-      const char* ext[] = AUDIO_FILE_EXT;
+    if (IS_VALID_FILE(path)) {
+      const char* ext[] = MP3_FILE_EXT;
       for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
         if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
           return true;

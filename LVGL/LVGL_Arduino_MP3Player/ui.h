@@ -5,13 +5,16 @@
 #ifndef _UI_H_
 #define _UI_H_
 
-#include "debug.h"
 #include <lvgl.h>
+#include "config.h"
+#include "debug.h"
 
-#define USE_CUSTOM_FONT 1
+#if LV_COLOR_DEPTH != 16
+#error "LV_COLOR_DEPTH in lv_conf.h should be 16bit"
+#endif
 
 /////////////////////// CUSTOM FONTS ////////////////////////
-#if USE_CUSTOM_FONT
+#if USE_CUSTOM_FONTS
 #define CUSTOM_FONT_SMALL   noto_sans_jp_4bit_jis1_12
 #define CUSTOM_FONT_MEDIUM  noto_sans_jp_4bit_jis1_14
 #else
@@ -25,8 +28,8 @@ LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 #define SHOW_ARROW_BUTTON false
 
 ///////// SCREEN SIZE / COORDINATE / COLOR / FONT ///////////
-#define SCREEN_WIDTH      240
-#define SCREEN_HEIGHT     320
+#define SCREEN_WIDTH      TFT_WIDTH
+#define SCREEN_HEIGHT     TFT_HEIGHT
 #define LV_PCT_X(x)       (SCREEN_WIDTH  * (x) / 100) // for LV_STYLE_CONST_X
 #define LV_PCT_Y(y)       (SCREEN_HEIGHT * (y) / 100) // for LV_STYLE_CONST_Y
 #define ICON_OFFSET_R     (SCREEN_WIDTH / 2 - 24) // need LV_ALIGN_CENTER

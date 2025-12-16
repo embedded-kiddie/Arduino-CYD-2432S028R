@@ -6,11 +6,6 @@
 #include "json.hpp"
 #include <string.h> // for strncpy(), strrchr()
 
-///////////////////// PARTITION SETTINGS ////////////////////
-#define PARTITION_MAX   5
-#define PARTITION_PATH  "%d/"
-#define PARTITION_FILE  "@partition.dat"
-
 ////////////////////// GLOBAL VARIABLES /////////////////////
 UI_State_t   ui_state;
 UI_Control_t ui_control;
@@ -62,9 +57,9 @@ static void display_picture(uint32_t playNo) {
   strncpy(&buf[2], dir.c_str(), sizeof(buf) - 2);
   buf[sizeof(buf) - 1] = '\0';
 
-  // @picture.{jpg|bmp}
+  // @photo.jpg
   if (ptr = strrchr(buf, '/')) {
-    strcpy(ptr + 1, PICTURE_BASE PICTURE_EXT);
+    strcpy(ptr + 1, ALBUM_PHOTO_FILE ALBUM_PHOTO_EXT);
     if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
       lv_obj_add_style(ui_AlbumImage, &style_picture, 0);
@@ -72,9 +67,9 @@ static void display_picture(uint32_t playNo) {
     }
   }
 
-  // title.{jpg|bmp}
+  // title.jpg
   if (ptr = strrchr(buf, '.')) {
-    strcpy(ptr + 1, PICTURE_EXT);
+    strncpy(ptr, ALBUM_PHOTO_EXT, sizeof(ALBUM_PHOTO_EXT));
     if (SD.exists(buf + 2)) {
       lv_image_set_src(ui_AlbumImage, buf);
       lv_obj_add_style(ui_AlbumImage, &style_picture, 0);

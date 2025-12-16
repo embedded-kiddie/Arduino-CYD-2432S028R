@@ -33,7 +33,7 @@ typedef struct {
 // https://github.com/espressif/esp-idf/blob/master/components/heap/heap_caps.c#L408-L427
 
 //--------------------------------------------------------------------------------
-// MALLOC_CAP_INTERNAL or MALLOC_CAP_DEFAULT
+// MALLOC_CAP_DEFAULT
 //--------------------------------------------------------------------------------
 #define HEAP_MEM_CAPS (MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
 
@@ -55,6 +55,7 @@ private:
   }
 
   static void print_mem_info(ESP32MemInfo_t *mem) {
+    printf("============ Memory Usage =============\n");
     printf("Sketch space        :%7d\n", mem->sketch_space);
     printf("Sketch size         :%7d\n", mem->sketch_size);
     printf("Heap total size     :%7d\n", mem->total);
@@ -74,7 +75,6 @@ private:
 
 public:
   static void print_heap(void) {
-    printf("============ Memory Usage =============\n");
     ESP32MemInfo_t mem;
     get_mem_info(&mem);
     print_mem_info(&mem);
@@ -82,16 +82,19 @@ public:
     // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/heap_debug.html
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/mem_alloc.html
     if (psramFound()) {
-      printf("PSRAM total :%7d\n", ESP.getPsramSize());     // heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
-      printf("PSRAM free  :%7d\n", ESP.getFreePsram());     // heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
-      printf("PSRAM lowest:%7d\n", ESP.getMinFreePsram());  // heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM);
+      printf("PSRAM total         :%7d\n", ESP.getPsramSize());     // heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
+      printf("PSRAM free          :%7d\n", ESP.getFreePsram());     // heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+      printf("PSRAM free minimum  :%7d\n", ESP.getMinFreePsram());  // heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM);
     }
 
-#ifdef LVGL_H
+#if __has_include(<lvgl.h>)
     // LVGL memory usage
     lv_mem_monitor_t mon;
     lv_mem_monitor(&mon);
-    printf("LVGL memory usage   : Watermark (max): %d, Free: %d, Used: %d %%\n", mon.total_size - mon.max_used, mon.free_size, mon.used_pct);
+    uint32_t watermark = mon.total_size - mon.max_used;
+    printf("LVGL memory usage   : Free: %d, Used: %d %%, High watermark: %d (%d %%)\n",
+      mon.free_size, mon.used_pct, watermark, (100 * watermark) / mon.total_size
+    );
 #endif
   }
 
@@ -212,10 +215,12 @@ public:
       "ESP_SLEEP_WAKEUP_VAD",
       "ESP_SLEEP_WAKEUP_VBAT_UNDER_VOLT",
     };
-    uint32_t X = esp_reset_reason();          // overall
-    uint32_t Y = esp_rom_get_reset_reason(0); // core0
-    uint32_t Z = esp_rom_get_reset_reason(1); // core1
-    uint32_t W = esp_sleep_get_wakeup_cause();
+
+    uint32_t X = esp_reset_reason();            // overall
+    uint32_t Y = esp_rom_get_reset_reason(0);   // core0
+    uint32_t Z = esp_rom_get_reset_reason(1);   // core1
+    uint32_t W = esp_sleep_get_wakeup_cause();  // overall
+
     if (X != 1 /* "board power-on" */) {
       printf("============ Reset Reason =============\n");
       printf("Reset reason (overall): %2d (%s)\n", X, reset_reason_all [X]);
