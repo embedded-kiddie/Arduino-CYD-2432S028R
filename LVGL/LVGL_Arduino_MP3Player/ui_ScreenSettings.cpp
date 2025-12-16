@@ -13,7 +13,7 @@ lv_obj_t *ui_ScreenSettings;
 //--------------------------------------------------------------------------------
 // Offset from the top / Roller width
 //--------------------------------------------------------------------------------
-#define SHUFFLE_POS_Y 70
+#define SHUFFLE_POS_Y 72
 #define TIMER_POS_Y   140
 #define TIMER_WIDTH   100
 
@@ -208,7 +208,7 @@ void ui_ScreenSettings_screen_init(void) {
     lv_label_set_text_static(obj, "All Partitions :");
 
     obj = lv_switch_create(ui_ScreenSettings);
-    lv_obj_set_pos          (obj, LV_PCT_X(60), LV_PCT_Y(12) - 6 + SHUFFLE_POS_Y);
+    lv_obj_set_pos          (obj, LV_PCT_X(60), LV_PCT_Y(10) + SHUFFLE_POS_Y);
     lv_obj_remove_state     (obj, LV_STATE_CHECKED);
     lv_obj_add_event_cb     (obj, &switch_event_handler, LV_EVENT_VALUE_CHANGED, NULL);
     if (ui_setting.partition_max == 0) {
