@@ -20,10 +20,11 @@
 // | Bmp from SD with cache |       0      |       0      |      1     |
 // | Binary from Flash      |       0      |       0      |      0     |
 //
-// Note: In either case, LV_USE_FS_ARDUINO_SD must be set to 0.
+// Note: In either case, "LV_USE_FS_ARDUINO_SD" in lv_conf.h  must be set to 0.
 //--------------------------------------------------------------------------------
 #include <lvgl.h>
 
+// JPEG decoder with cache
 #define MY_USE_TJPGD  1
 
 #if (MY_USE_TJPGD || LV_USE_TJPGD || LV_USE_BMP)

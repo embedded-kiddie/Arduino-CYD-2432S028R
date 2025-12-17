@@ -83,11 +83,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
 
   File fd = SD.open(data.c_str(), FILE_READ);
   if (fd) {
-#ifdef USE_SDFAT
-    const size_t size = fd.fileSize();
-#else
-    const size_t size = fd.size();
-#endif
+    const size_t size = fd.FS_SIZE();
     const size_t n = size / sizeof(MetaHash_t);
     MetaHash_t *album = new MetaHash_t[n];
     if (!album) {
@@ -250,21 +246,13 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       fd = SD.open(meta.c_str(), FILE_READ);
 
       if (fd) {
-#ifdef USE_SDFAT
-        dst = fd.fileSize();
-#else
-        dst = fd.size();
-#endif
+        dst = fd.FS_SIZE();
         const int m = dst / sizeof(MetaHash_t);
         MetaHash_t *album_dst = new MetaHash_t[m];
         DBG_ASSERT(album_dst); // Out of memory
 
         if (album_dst) {
-#ifdef USE_SDFAT
-          dst = fd.read((void*)album_dst, dst);
-#else
-          dst = fd.read((uint8_t*)album_dst, dst);
-#endif
+          dst = fd.read((FS_VOID*)album_dst, dst);
 
           // Find a matching hash and update meta data
           for (int i = 0; i < n; i++) {
@@ -287,11 +275,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       if (src != dst || n != counts) {
         if (fd = SD.open(meta.c_str(), FILE_WRITE)) {
           fd.seek(0);
-#ifdef USE_SDFAT
-          fd.write((void*)album_src, src);
-#else
-          fd.write((uint8_t*)album_src, src);
-#endif
+          fd.write((FS_VOID*)album_src, src);
           fd.close();
         }
       }

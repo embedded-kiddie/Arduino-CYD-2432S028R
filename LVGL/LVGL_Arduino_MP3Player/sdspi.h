@@ -29,9 +29,12 @@
 #define SD_CONFIG SD_CS, SD_SPI_CLOCK
 #endif
 
-// alternatives to FS.h definitions
+// Alternatives to FS.h definitions
+// File fd = SD.open((FS_VOID*)path, (FS_MODE)FILE_READ);
+// size_t size = fd.FS_SIZE();
 #define FS_MODE int
 #define FS_VOID void
+#define FS_SIZE fileSize
 
 #undef  FILE_READ
 #undef  FILE_WRITE
@@ -60,9 +63,11 @@ enum SeekMode {
 #define SD_CONFIG
 #endif
 
-// FILE_READ, FILE_WRITE, ...
+// File fd = SD.open((FS_VOID*)path, (FS_MODE)FILE_READ);
+// size_t size = fd.FS_SIZE();
 #define FS_MODE const char *
 #define FS_VOID uint8_t
+#define FS_SIZE size
 
 #endif // SdFat or SD
 

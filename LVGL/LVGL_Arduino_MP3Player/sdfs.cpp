@@ -101,11 +101,7 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode) {
     fs_cache.id = id;
 
     File file = SD.open(path, FILE_READ);
-#ifdef USE_SDFAT
-    size_t size = file.fileSize();
-#else
-    size_t size = file.size();
-#endif
+    const size_t size = file.FS_SIZE();
     fs_cache.buffer = (char *)MY_MALLOC(size);
     DBG_ASSERT(fs_cache.buffer);
 
