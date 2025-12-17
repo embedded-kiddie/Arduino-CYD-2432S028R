@@ -6,7 +6,7 @@ This application has been tested on LVGL versions 9.2.2, 9.3.0, and 9.4.0.
 After installing LVGL, please refer to [Configure LVGL][1] and place lv_conf.h in the library folder.
 
 ### 2. Configuring lv_conf.h
-Define the "Setting value" for the "Symbol" as follows:
+Define the following "Symbol" as "Setting Value":
 
 | Symbol                | Setting value | Default value |
 | --------------------- | ------------- | ------------- |
