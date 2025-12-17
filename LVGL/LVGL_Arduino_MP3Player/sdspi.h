@@ -31,10 +31,10 @@
 
 // Alternatives to FS.h definitions
 // File fd = SD.open((FS_VOID*)path, (FS_MODE)FILE_READ);
-// size_t size = fd.FS_SIZE();
+// size_t size = fd.FS_FSIZ();
 #define FS_MODE int
 #define FS_VOID void
-#define FS_SIZE fileSize
+#define FS_FSIZ fileSize
 
 #undef  FILE_READ
 #undef  FILE_WRITE
@@ -64,10 +64,10 @@ enum SeekMode {
 #endif
 
 // File fd = SD.open((FS_VOID*)path, (FS_MODE)FILE_READ);
-// size_t size = fd.FS_SIZE();
+// size_t size = fd.FS_FSIZ();
 #define FS_MODE const char *
 #define FS_VOID uint8_t
-#define FS_SIZE size
+#define FS_FSIZ size
 
 #endif // SdFat or SD
 

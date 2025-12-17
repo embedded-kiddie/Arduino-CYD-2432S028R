@@ -201,7 +201,7 @@ void ui_ScreenSettings_screen_init(void) {
     //////////////////////// Shuffle Mode ////////////////////////
     obj = lv_label_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(4) + SHUFFLE_POS_Y);
-    lv_label_set_text_static(obj, "Shuffle Mode");
+    lv_label_set_text_static(obj, "Shuffle Mode (N/A)");
 
     obj = lv_label_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(10), LV_PCT_Y(12) + SHUFFLE_POS_Y);
@@ -211,10 +211,9 @@ void ui_ScreenSettings_screen_init(void) {
     lv_obj_set_pos          (obj, LV_PCT_X(60), LV_PCT_Y(10) + SHUFFLE_POS_Y);
     lv_obj_remove_state     (obj, LV_STATE_CHECKED);
     lv_obj_add_event_cb     (obj, &switch_event_handler, LV_EVENT_VALUE_CHANGED, NULL);
-    if (ui_setting.partition_max == 0) {
-      lv_obj_add_state      (obj, LV_STATE_DISABLED);
-    }
-
+//  if (ui_setting.partition_max == 0) {
+      lv_obj_add_state      (obj, LV_STATE_DISABLED); // Not Available
+//  }
 
     ////////////////////// Backlight Label ///////////////////////
     obj = lv_label_create(ui_ScreenSettings);

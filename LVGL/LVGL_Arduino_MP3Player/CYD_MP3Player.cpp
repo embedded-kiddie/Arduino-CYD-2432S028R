@@ -83,7 +83,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
 
   File fd = SD.open(data.c_str(), FILE_READ);
   if (fd) {
-    const size_t size = fd.FS_SIZE();
+    const size_t size = fd.FS_FSIZ();
     const size_t n = size / sizeof(MetaHash_t);
     MetaHash_t *album = new MetaHash_t[n];
     if (!album) {
@@ -246,7 +246,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       fd = SD.open(meta.c_str(), FILE_READ);
 
       if (fd) {
-        dst = fd.FS_SIZE();
+        dst = fd.FS_FSIZ();
         const int m = dst / sizeof(MetaHash_t);
         MetaHash_t *album_dst = new MetaHash_t[m];
         DBG_ASSERT(album_dst); // Out of memory

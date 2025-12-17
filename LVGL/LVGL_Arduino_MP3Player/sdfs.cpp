@@ -101,7 +101,7 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode) {
     fs_cache.id = id;
 
     File file = SD.open(path, FILE_READ);
-    const size_t size = file.FS_SIZE();
+    const size_t size = file.FS_FSIZ();
     fs_cache.buffer = (char *)MY_MALLOC(size);
     DBG_ASSERT(fs_cache.buffer);
 

@@ -532,6 +532,7 @@ void ui_event_ScreenSettings(lv_event_t *e) {
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
     // Stop playback before saving settings
     ui_ScreenSettings_screen_deinit();
+    nextState = ui_state;
     ui_state = UI_STATE_SAVE;
   }
 }
@@ -689,7 +690,7 @@ UI_State_t ui_loop(void) {
         player.ClearAudioFiles();
         ui_state = UI_STATE_START;
       } else {
-        ui_state = UI_STATE_PLAY;
+        ui_state = nextState;
       }
       break;
     case UI_STATE_CLEAR:

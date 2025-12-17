@@ -24,22 +24,17 @@
 //--------------------------------------------------------------------------------
 #include <lvgl.h>
 
-// JPEG decoder with cache
+// JPEG decoder / SD file system with cache
 #define MY_USE_TJPGD  1
+#define MY_USE_FS_ARDUINO_SD  1
+#define MY_FS_ARDUINO_SD_LETTER 'S'
 
-#if (MY_USE_TJPGD || LV_USE_TJPGD || LV_USE_BMP)
-  #define MY_USE_FS_ARDUINO_SD 1
-  #define MY_FS_ARDUINO_SD_LETTER 'S'
-  void lv_fs_arduino_sd_init(void);
-  void lv_fs_clear_cache(void);
-  #if (MY_USE_TJPGD)
-    void lv_tjpgd_init(void);
-    #if (LV_USE_TJPGD != 0) || (LV_USE_BMP != 0)
-      #error LV_USE_TJPGD and LV_USE_BMP should be 0
-    #endif
-  #endif
-#else
-  #define MY_USE_FS_ARDUINO_SD 0 // Load images in flash
+void lv_tjpgd_init(void);
+void lv_fs_clear_cache(void);
+void lv_fs_arduino_sd_init(void);
+
+#if (LV_USE_TJPGD != 0 || LV_USE_FS_ARDUINO_SD != 0)
+  #error LV_USE_TJPGD and LV_USE_FS_ARDUINO_SD in lv_conf.h must be 0.
 #endif
 
 #endif // _SDFS_H_
