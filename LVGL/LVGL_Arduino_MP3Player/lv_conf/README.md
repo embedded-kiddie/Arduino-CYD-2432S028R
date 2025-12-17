@@ -6,22 +6,22 @@ This application has been tested on LVGL versions 9.2.2, 9.3.0, and 9.4.0.
 After installing LVGL, please refer to [Configure LVGL][1] and place lv_conf.h in the library folder.
 
 ### 2. Configuring lv_conf.h
-Define the "Value" for the "Symbol" as follows:
+Define the "Setting value" for the "Symbol" as follows:
 
-| Symbol                | Value        | Default Value |
-| --------------------- | ------------ | ------------- |
-| LV_MEM_SIZE           | (40 * 1024U) | (64 * 1024U)  |
-| LV_FONT_MONTSERRAT_12 | 1            | 0             |
-| LV_USE_FS_ARDUINO_SD  | 0            | 0             |
-| LV_USE_TJPGD          | 0            | 0             |
-| LV_USE_ST7789         | 1            | 0             |
-| LV_USE_ILI9341        | 1            | 0             |
+| Symbol                | Setting value | Default value |
+| --------------------- | ------------- | ------------- |
+| LV_MEM_SIZE           | (40 * 1024U)  | (64 * 1024U)  |
+| LV_FONT_MONTSERRAT_12 | 1             | 0             |
+| LV_USE_FS_ARDUINO_SD  | 0             | 0             |
+| LV_USE_TJPGD          | 0             | 0             |
+| LV_USE_ST7789         | 1             | 0             |
+| LV_USE_ILI9341        | 1             | 0             |
 
-In particular, `LV_USE_FS_ARDUINO_SD` and `LV_USE_TJPGD` conflict with this application, so those must be defined as 0.
+In particular, `LV_USE_FS_ARDUINO_SD` and `LV_USE_TJPGD` must be defined to 0 to prevent conflicts with this application.
 
-It's recommended that the following symbols are defined as 0 to reduce compilation time:
+To improve compilation times, it is recommended that the following symbols are defined to 0:
 
-| Symbol            | Value                        |
+| Symbol            | Setting value                |
 | ----------------- | ---------------------------- |
 | LV_BUILD_EXAMPLES | 0                            |
 | LV_BUILD_DEMOS    | 0 (for version 9.3.0, 9.4.0) |
