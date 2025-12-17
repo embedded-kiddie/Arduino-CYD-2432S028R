@@ -87,7 +87,7 @@ void lv_fs_arduino_sd_init(void) {
  * Open a file
  * @param drv       pointer to a driver where this function belongs
  * @param path      path to the file beginning with the driver letter (e.g. S:/folder/file.txt)
- * @param mode      read: FS_MODE_RD, write: FS_MODE_WR, both: FS_MODE_RD | FS_MODE_WR
+ * @param mode      read: SDFS_MODE_RD, write: SDFS_MODE_WR, both: SDFS_MODE_RD | SDFS_MODE_WR
  * @return          a file descriptor or NULL on error
  */
 static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode) {
@@ -101,7 +101,7 @@ static void *fs_open(lv_fs_drv_t *drv, const char *path, lv_fs_mode_t mode) {
     fs_cache.id = id;
 
     File file = SD.open(path, FILE_READ);
-    const size_t size = file.FS_FSIZ();
+    const size_t size = file.SDFS_SIZE();
     fs_cache.buffer = (char *)MY_MALLOC(size);
     DBG_ASSERT(fs_cache.buffer);
 
