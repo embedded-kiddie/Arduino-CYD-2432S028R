@@ -95,7 +95,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
       return false;
     }
 
-    fd.read((void*)album, size);
+    fd.read((FS_VOID*)album, size);
     fd.close();
 
     // Functional object to make a hash
@@ -114,7 +114,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
     fd = SD.open(data.c_str(), FILE_WRITE);
     if (fd) {
       fd.seek(0);
-      fd.write((void*)album, size); // should check return value!
+      fd.write((FS_VOID*)album, size); // should check return value!
       fd.close();
     }
 

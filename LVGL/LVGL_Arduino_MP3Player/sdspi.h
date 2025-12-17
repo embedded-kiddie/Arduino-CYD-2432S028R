@@ -31,6 +31,7 @@
 
 // alternatives to FS.h definitions
 #define FS_MODE int
+#define FS_VOID void
 
 #undef  FILE_READ
 #undef  FILE_WRITE
@@ -61,6 +62,7 @@ enum SeekMode {
 
 // FILE_READ, FILE_WRITE, ...
 #define FS_MODE const char *
+#define FS_VOID uint8_t
 
 #endif // SdFat or SD
 

@@ -692,15 +692,15 @@ static bool album_list_save(void) {
 }
 
 static void album_list_load(void) {
-  const char *path = (album_control.root->name + ALBUM_LIST_PATH).c_str();
-  File fd = SD.open(path, FILE_READ);
+  String buf = (album_control.root->name + ALBUM_LIST_PATH).c_str();
+  File fd = SD.open(buf.c_str(), FILE_READ);
 
   // Read data from an existing file
   if (fd) {
     album_control.list.clear();
     album_control.list_id = fd.readStringUntil('\n').toInt();
     while (fd.available()) {
-      String buf = fd.readStringUntil('\n');
+      buf = fd.readStringUntil('\n');
       int index = buf.indexOf('\t');
       if (index > 0) {
         album_control.list.push_back({
