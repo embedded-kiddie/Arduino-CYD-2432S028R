@@ -180,6 +180,50 @@ uint32_t CYD_MP3Player::ScanPlayList(void) {
 }
 
 //--------------------------------------------------------------------------------
+// Randomly scan a specified number of audio files
+//--------------------------------------------------------------------------------
+uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
+  DBG_ASSERT(m_tree && m_list.size() == 0);
+
+  std::random_device seed_gen;
+  std::mt19937 engine(seed_gen());
+
+  const size_t n = m_tree->get_n_leafs();
+  #define MIN(a, b) ((a) < (b) ? (a) : (b))
+  max_files = MIN(max_files, n);
+
+  while (max_files-- > 0) {
+    uint32_t R = engine() % n;
+    std::string path = m_tree->find_path(R);
+    Node *node = m_tree->get_node();
+    DBG_ASSERT(node);
+
+    // Read audio files in specified album folder
+    std::vector<std::string> names;
+    File fd, dir = SD.open(path.c_str());
+    while (fd = dir.openNextFile()) {
+      std::string name;
+      if (check_mp3(fd, name)) {
+        names.push_back(name);
+      }
+      fd.close();
+    }
+    dir.close();
+
+    if (names.size()) {
+      uint32_t r = engine() % names.size();
+      append(names[r].c_str(), R);
+    }
+  }
+
+  DBG_EXEC({
+    dump_files();
+  });
+
+  return m_list.size();
+}
+
+//--------------------------------------------------------------------------------
 // Scan audio files and make a play list
 //--------------------------------------------------------------------------------
 uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
@@ -198,23 +242,13 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
 
     File fd, dir = SD.open(path.c_str());
     while (fd = dir.openNextFile()) {
-#ifdef USE_SDFAT
-      char buf[BUF_SIZE];
-      fd.getName(buf, sizeof(buf));
-      if (check_mp3(buf)) {
+      std::string name;
+      if (check_mp3(fd, name)) {
         ++node->n_files; // count audio files
         if (node->meta.checked == LEAF_SELECTED) {
-          append(buf, parent);
+          append(name.c_str(), parent);
         }
       }
-#else
-      if (check_mp3(fd.name())) {
-        ++node->n_files; // count audio files
-        if (node->meta.checked == LEAF_SELECTED) {
-          append(fd.name(), parent);
-        }
-      }
-#endif
       fd.close();
     }
     dir.close();

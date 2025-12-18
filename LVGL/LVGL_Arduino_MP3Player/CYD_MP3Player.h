@@ -80,6 +80,7 @@ public:
   uint32_t    GetCounts(void) { return m_list.size(); }
   uint32_t    ScanPlayList(void);
   uint32_t    ScanAudioFiles(bool shuffle = true);
+  uint32_t    ScanAudioRandom(uint32_t max_files);
   void        ShuffleAudioFiles(void);
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
@@ -125,7 +126,7 @@ private:
   //--------------------------------------------------------------------------------
   // Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
   //--------------------------------------------------------------------------------
-  bool check_mp3(const char *path) {
+  bool check_ext(const char *path) {
     if (IS_VALID_FILE(path)) {
       const char* ext[] = MP3_FILE_EXT;
       for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
@@ -134,6 +135,23 @@ private:
         }
       }
     }
+    return false;
+  }
+
+  bool check_mp3(File &fd, std::string &name) {
+#ifdef USE_SDFAT
+    char buf[BUF_SIZE];
+    fd.getName(buf, sizeof(buf));
+    if (check_ext(buf)) {
+      name = buf;
+      return true;
+    }
+#else
+    if (check_ext(fd.name())) {
+      name = fd.name();
+      return true;
+    }
+#endif
     return false;
   }
 
