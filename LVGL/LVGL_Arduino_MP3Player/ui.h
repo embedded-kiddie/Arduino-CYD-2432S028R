@@ -72,7 +72,7 @@ typedef struct {
   bool      shuffle;          // true: shuffle, false: in sequence
   bool      shuffle_mode;     // true: all partitions, false: each partition
   uint8_t   partition_max;    // maximum partitions   (0, ...PARTITION_MAX)
-  uint8_t   partition_backup; // backup  partition ID (0, ...PARTITION_MAX)
+  uint8_t   partition_backup; // backup  partition ID (1, ...partition_max)
   uint8_t   partition_id;     // current partition ID (0, ...partition_max)
   uint8_t   selectBacklight;  // 0: 30sec, 1: 1min, ...
   uint8_t   selectSleepTimer; // 0: 30min, 1: 1hour, ...
