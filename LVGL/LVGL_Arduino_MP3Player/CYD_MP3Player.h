@@ -81,7 +81,6 @@ public:
   uint32_t    ScanPlayList(void);
   uint32_t    ScanAudioFiles(bool shuffle = true);
   uint32_t    ScanAudioRandom(uint32_t max_files);
-  void        ShuffleAudioFiles(void);
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
   uint32_t    GetPictureNo(uint32_t playNo);

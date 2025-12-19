@@ -6,19 +6,18 @@
 
 #define DEBUG   0
 
-#if (DEBUG == 0)
-#define DBG_EXEC(x)
-#define DBG_ASSERT(x)
-#endif
-
 #if (DEBUG & 1)
 #include <stdio.h>
 #define DBG_EXEC(x)   x
+#else
+#define DBG_EXEC(x)
 #endif
 
 #if (DEBUG & 2)
 #include <assert.h>
 #define DBG_ASSERT(x) assert(x)
+#else
+#define DBG_ASSERT(x)
 #endif
 
 #endif // _DEBUG_H_

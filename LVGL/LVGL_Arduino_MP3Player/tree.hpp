@@ -73,7 +73,6 @@ public:
     this->name.clear();
   }
 
-  // number of nodes / leaf nodes / depth
   const uint32_t get_n_nodes(void) {
     return n_nodes;
   }
@@ -82,6 +81,9 @@ public:
   }
   const uint32_t get_n_depth(void) {
     return n_depth;
+  }
+  const char * get_path(void) {
+    return m_path.c_str();
   }
   Node * get_node(void) {
     return m_found_node;
@@ -289,9 +291,9 @@ public:
   }
 
   void print_node(Node *node) {
-    Serial.printf("key:%3d, size:%2d, depth:%d, type:%d, hidden:%d, checked:%d %s (%d/%d)\n",
-                  node->key, node->children.size(), node->meta.depth, node->meta.type, node->meta.hidden,
-                  node->meta.checked, node->name.c_str(), node->name.size(), node->name.capacity());
+    Serial.printf("key:%3d, children:%2d, n_files:%2d, depth:%d, type:%d, hidden:%d, checked:%d %s (%d/%d)\n",
+                  node->key, node->children.size(), node->n_files, node->meta.depth, node->meta.type,
+                  node->meta.hidden, node->meta.checked, node->name.c_str(), node->name.size(), node->name.capacity());
   }
 
   void print_nodes(Node * node, int indent = 0) {

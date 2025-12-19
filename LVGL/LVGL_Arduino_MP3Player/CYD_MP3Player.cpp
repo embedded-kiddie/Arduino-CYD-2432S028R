@@ -193,14 +193,14 @@ uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
   max_files = MIN(max_files, n);
 
   while (max_files-- > 0) {
-    uint32_t R = engine() % n;
-    std::string path = m_tree->find_path(R);
-    Node *node = m_tree->get_node();
+    uint32_t parent = engine() % n;
+    Node *node = m_tree->find_node(parent);
     DBG_ASSERT(node);
 
     // Read audio files in specified album folder
+    const char *path = m_tree->get_path();
     std::vector<std::string> names;
-    File fd, dir = SD.open(path.c_str());
+    File fd, dir = SD.open(path);
     while (fd = dir.openNextFile()) {
       std::string name;
       if (check_mp3(fd, name)) {
@@ -212,7 +212,7 @@ uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
 
     if (names.size()) {
       uint32_t r = engine() % names.size();
-      append(names[r].c_str(), R);
+      append(names[r].c_str(), parent);
     }
   }
 
@@ -235,12 +235,11 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
   // Extract audio files in the parents directory
   const size_t n = m_tree->get_n_leafs();
   for (int p = 0, parent = 0; parent < n; parent++) {
-    std::string path = m_tree->find_path(parent);
-    Node *node = m_tree->get_node();
+    Node *node = m_tree->find_node(parent);
     DBG_ASSERT(node);
-    node->n_files = 0;
 
-    File fd, dir = SD.open(path.c_str());
+    const char *path = m_tree->get_path();
+    File fd, dir = SD.open(path);
     while (fd = dir.openNextFile()) {
       std::string name;
       if (check_mp3(fd, name)) {
@@ -258,6 +257,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       continue;
     }
 
+    // Sort the list in order to arrange metadata in order
     std::sort(m_list.begin() + p, m_list.end(), [](MP3List_t &a, MP3List_t &b) {
       return a.name.compare(b.name) < 0 ? true : false; // Ascending order
     });
@@ -276,7 +276,8 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       // Read an existing meta data file
       int counts = 0;
       size_t dst = 0;
-      std::string meta = path + "/" ALBUM_META_FILE;
+      std::string meta = path;
+      meta += "/" ALBUM_META_FILE;
       fd = SD.open(meta.c_str(), FILE_READ);
 
       if (fd) {
@@ -325,7 +326,8 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
   }
 
   else if (shuffle) {
-    ShuffleAudioFiles();
+    std::mt19937 engine(esp_random());
+    std::shuffle(m_list.begin(), m_list.end(), engine);
   }
 
   DBG_EXEC({
@@ -333,14 +335,6 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
   });
 
   return m_list.size();
-}
-
-//--------------------------------------------------------------------------------
-// Sort file list
-//--------------------------------------------------------------------------------
-void CYD_MP3Player::ShuffleAudioFiles(void) {
-  std::mt19937 engine(esp_random());
-  std::shuffle(m_list.begin(), m_list.end(), engine);
 }
 
 //--------------------------------------------------------------------------------

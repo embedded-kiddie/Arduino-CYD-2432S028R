@@ -274,7 +274,6 @@ static bool partition_save(void) {
 
     // Restart if the partition string has changed
     const char *dir = player.GetSubDir();
-    printf("buf: %s, dir: %s --> %s\n", buf, dir, &dir[strlen(dir) - strlen(buf)]);
     if (strcmp(&dir[strlen(dir) - strlen(buf)], buf) != 0) {
       // Avoid conflict with SD access
       play_stop();
