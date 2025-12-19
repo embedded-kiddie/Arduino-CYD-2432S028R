@@ -238,16 +238,23 @@ static void partition_load(void) {
     }
   }
 
-  // Just in case
-  if (ui_setting.partition_id >= ui_setting.partition_max) {
+  // Conditions to reset partition
+  if (ui_setting.shuffle_mode || ui_setting.partition_id > ui_setting.partition_max) {
     ui_setting.partition_id = 0;
   }
 
-  // Update the root folder with the current partition
-  if (ui_setting.partition_max) {
-    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_setting.partition_id + 1);
+  // Update backup partition number
+  if (ui_setting.partition_id) {
+    ui_setting.partition_backup = ui_setting.partition_id;
+  }
+
+  // Change the root folder with the current partition
+  if (ui_setting.partition_max && ui_setting.partition_id) {
+    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_setting.partition_id);
     buf[sizeof(buf) - 1] = '\0';
     player.SetSubDir(buf);
+  } else {
+    player.SetSubDir("");
   }
 
   // Rewind
@@ -258,11 +265,16 @@ static bool partition_save(void) {
   if (ui_setting.partition_max) {
     // Create a sub-directory string
     char buf[BUF_SIZE];
-    snprintf(buf, sizeof(buf), PARTITION_PATH, ui_setting.partition_id + 1);
+    if (ui_setting.partition_id) {
+      snprintf(buf, sizeof(buf), PARTITION_PATH, ui_setting.partition_id);
+    } else {
+      snprintf(buf, sizeof(buf), MP3_ROOT_PATH);
+    }
     buf[sizeof(buf) - 1] = '\0';
 
-    // Restart if the end of the string is different
+    // Restart if the partition string has changed
     const char *dir = player.GetSubDir();
+    printf("buf: %s, dir: %s --> %s\n", buf, dir, &dir[strlen(dir) - strlen(buf)]);
     if (strcmp(&dir[strlen(dir) - strlen(buf)], buf) != 0) {
       // Avoid conflict with SD access
       play_stop();
@@ -272,11 +284,14 @@ static bool partition_save(void) {
       if (fd) {
         fd.write((uint8_t *)&ui_setting.partition_id, sizeof(ui_setting.partition_id));
         fd.close();
+        if (ui_setting.partition_id) {
+          ui_setting.partition_backup = ui_setting.partition_id;
+        }
       }
-      return true;
+      return true; // Restart
     }
   }
-  return false;
+  return false; // Continue
 }
 
 //--------------------------------------------------------------------------------

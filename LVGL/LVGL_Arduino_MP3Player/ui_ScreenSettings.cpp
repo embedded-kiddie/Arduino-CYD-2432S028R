@@ -103,13 +103,13 @@ static void radio_event_handler(lv_event_t *e) {
   uint8_t  *active_id = (uint8_t *)lv_event_get_user_data(e);
   lv_obj_t *container = (lv_obj_t*)lv_event_get_current_target(e);
   lv_obj_t *act_cb = lv_event_get_target_obj(e);
-  lv_obj_t *old_cb = lv_obj_get_child(container, *active_id);
+  lv_obj_t *old_cb = lv_obj_get_child(container, *active_id - 1);
 
   // Do nothing if the container was clicked
   if (act_cb != container) {
-    lv_obj_remove_state(old_cb, LV_STATE_CHECKED);  // Uncheck the previous radio button
-    lv_obj_add_state   (act_cb, LV_STATE_CHECKED);  // Check the current radio button
-    *active_id = (uint8_t)lv_obj_get_index(act_cb); // Update ui_setting.partition_id
+    lv_obj_remove_state(old_cb, LV_STATE_CHECKED);      // Uncheck the previous radio button
+    lv_obj_add_state   (act_cb, LV_STATE_CHECKED);      // Check the current radio button
+    *active_id = (uint8_t)lv_obj_get_index(act_cb) + 1; // Update ui_setting.partition_id
   }
 }
 
@@ -125,9 +125,15 @@ static void switch_event_handler(lv_event_t *e) {
   lv_obj_t *parent = lv_obj_get_parent(obj);
   lv_obj_t *container = lv_obj_get_child(parent, 1);
 
-  for (int i = 0; i <= ui_setting.partition_max; i++) {
+  if (ui_setting.shuffle_mode) {
+    ui_setting.partition_id = 0;
+  } else {
+    ui_setting.partition_id = ui_setting.partition_backup;
+  }
+
+  for (int i = 0; i < PARTITION_MAX; i++) {
     obj = lv_obj_get_child(container, i);
-    if (ui_setting.shuffle_mode) {
+    if (ui_setting.shuffle_mode || i >= ui_setting.partition_max) {
       lv_obj_add_state   (obj, LV_STATE_DISABLED);
     } else {
       lv_obj_remove_state(obj, LV_STATE_DISABLED);
@@ -183,7 +189,7 @@ void ui_ScreenSettings_screen_init(void) {
     static LV_STYLE_CONST_INIT(style_radio_check, (void*)style_prop_radio_check);
 
     char buf[4];
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < PARTITION_MAX; i++) {
       obj = lv_checkbox_create(container);
       lv_snprintf(buf, sizeof(buf), "%d", i + 1);
       lv_checkbox_set_text(obj, buf);
@@ -191,9 +197,10 @@ void ui_ScreenSettings_screen_init(void) {
       lv_obj_add_style    (obj, &style_radio,       (uint32_t)LV_PART_INDICATOR);
       lv_obj_add_style    (obj, &style_radio_check, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
-      if (i >= ui_setting.partition_max) {
+      if (i >= ui_setting.partition_max || ui_setting.shuffle_mode) {
         lv_obj_add_state  (obj, LV_STATE_DISABLED);
-      } else if (i == ui_setting.partition_id) {
+      }
+      if (i + 1 == ui_setting.partition_backup) {
         lv_obj_add_state  (obj, LV_STATE_CHECKED);
       }
     }
@@ -211,8 +218,13 @@ void ui_ScreenSettings_screen_init(void) {
     lv_obj_set_pos          (obj, LV_PCT_X(60), LV_PCT_Y(10) + SHUFFLE_POS_Y);
     lv_obj_remove_state     (obj, LV_STATE_CHECKED);
     lv_obj_add_event_cb     (obj, &switch_event_handler, LV_EVENT_VALUE_CHANGED, NULL);
+
     if (ui_setting.partition_max == 0) {
-      lv_obj_add_state      (obj, LV_STATE_DISABLED); // Not Available
+      lv_obj_add_state      (obj, LV_STATE_DISABLED);
+    } else if (ui_setting.shuffle_mode) {
+      lv_obj_add_state      (obj, LV_STATE_CHECKED);
+    } else {
+      lv_obj_remove_state   (obj, LV_STATE_CHECKED);
     }
 
     ////////////////////// Backlight Label ///////////////////////
