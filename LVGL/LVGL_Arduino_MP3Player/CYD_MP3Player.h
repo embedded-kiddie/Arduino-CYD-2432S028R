@@ -42,9 +42,9 @@ typedef struct {
 // Play list for MP3 audio file
 //--------------------------------------------------------------------------------
 typedef struct {
-  MetaData_t meta;
-  uint16_t parent;
-  std::string name;
+  uint16_t key;     // The key of the node in the tree
+  MetaData_t meta;  // Meta data for audio file
+  std::string name; // Audio file name
 } MP3List_t;
 
 typedef std::vector<MP3List_t> PlayList_t;
@@ -110,12 +110,12 @@ private:
   //--------------------------------------------------------------------------------
   // Add audio file at the end of the play list
   //--------------------------------------------------------------------------------
-  void append(const char * name, uint16_t parent) {
+  void append(const char * name, uint16_t key) {
     try {
       m_list.push_back({
-        .meta   = {},
-        .parent = parent, 
-        .name   = name
+        .key  = key,
+        .meta = {},
+        .name = name
       });
     } catch (const std::exception &e) {
       assert(false); //  e.what()
@@ -157,7 +157,7 @@ private:
   void dump_files(void) {
     int i = 0; 
     for (auto &f : m_list) {
-      std::string path = m_tree->find_path(f.parent);
+      std::string path = m_tree->find_path(f.key);
       printf("No %3d: %d/%d, %3d, %s/%s (%d/%d)\n", i++,
             f.meta.saved, f.meta.selected, f.meta.duration, path.c_str(),
             f.name.c_str(), f.name.size(), f.name.capacity());

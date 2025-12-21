@@ -57,7 +57,7 @@ MP3List_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
 std::string CYD_MP3Player::GetDirPath(uint32_t playNo) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
-    return m_tree->find_path(list->parent) + "/";
+    return m_tree->find_path(list->key) + "/";
   } else {
     return "";
   }
@@ -66,7 +66,7 @@ std::string CYD_MP3Player::GetDirPath(uint32_t playNo) {
 std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
-    return m_tree->find_path(list->parent) + "/" + list->name;
+    return m_tree->find_path(list->key) + "/" + list->name;
   } else {
     return "";
   }
@@ -78,7 +78,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
   }
 
   MP3List_t *list = GetPlayList(playNo); // Never NULL
-  std::string path = m_tree->find_path(list->parent);
+  std::string path = m_tree->find_path(list->key);
   std::string data = path + "/" ALBUM_META_FILE;
 
   File fd = SD.open(data.c_str(), FILE_READ);
@@ -188,10 +188,10 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
   // Functional object to make a hash
   std::hash<std::string> MakeHash;
 
-  // Extract audio files in the parents directory
+  // Extract audio files in the album directory
   const size_t n = m_tree->get_n_leafs();
-  for (int p = 0, parent = 0; parent < n; parent++) {
-    Node *node = m_tree->find_node(parent);
+  for (int k = 0, key = 0; key < n; key++) {
+    Node *node = m_tree->find_node(key);
     DBG_ASSERT(node);
 
     const char *path = m_tree->get_path();
@@ -201,7 +201,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       if (check_mp3(fd, name)) {
         ++node->n_files; // count audio files
         if (node->meta.checked == LEAF_SELECTED) {
-          append(name.c_str(), parent);
+          append(name.c_str(), key);
         }
       }
       fd.close();
@@ -214,12 +214,12 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
     }
 
     // Sort the list in order to arrange metadata in order
-    std::sort(m_list.begin() + p, m_list.end(), [](MP3List_t &a, MP3List_t &b) {
+    std::sort(m_list.begin() + k, m_list.end(), [](MP3List_t &a, MP3List_t &b) {
       return a.name.compare(b.name) < 0 ? true : false; // Ascending order
     });
 
     // Check and fix album metadata integrity
-    const int n = m_list.size() - p;
+    const int n = m_list.size() - k;
     MetaHash_t *meta_src = new MetaHash_t[n];
     DBG_ASSERT(meta_src); // Out of memory
 
@@ -227,7 +227,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       size_t src = sizeof(MetaHash_t) * n;
       memset((void*)meta_src, 0, src);
       for (int i = 0; i < n; i++) {
-        meta_src[i].hash = MakeHash(m_list[p + i].name);
+        meta_src[i].hash = MakeHash(m_list[k + i].name);
       }
 
       // Read an existing meta data file
@@ -250,7 +250,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
           for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
               if (meta_src[i].hash == meta_dst[j].hash) {
-                m_list[p + i].meta = meta_src[i].meta = meta_dst[j].meta;
+                m_list[k + i].meta = meta_src[i].meta = meta_dst[j].meta;
                 ++counts;
                 break;
               }
@@ -275,7 +275,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       delete[] meta_src;
     }
 
-    p = m_list.size();
+    k = m_list.size();
   }
 
   if (m_list.size() == 0) {
@@ -308,8 +308,8 @@ uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
   max_files = MIN(max_files, n);
 
   while (max_files-- > 0) {
-    uint32_t parent = engine() % n;
-    Node *node = m_tree->find_node(parent);
+    uint32_t key = engine() % n;
+    Node *node = m_tree->find_node(key);
     DBG_ASSERT(node);
 
     // Read audio files in specified album folder
@@ -327,7 +327,7 @@ uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
 
     if (names.size()) {
       uint32_t r = engine() % names.size();
-      append(names[r].c_str(), parent);
+      append(names[r].c_str(), key);
     }
   }
 

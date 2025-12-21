@@ -166,7 +166,7 @@ private:
       }
     }
 
-    // set the leaf node number to the parent
+    // set the key of the leaf node into the parent
     node->key = n_leafs - 1;
     return depth;
   }
@@ -330,7 +330,7 @@ public:
       Node *n = find_preorder(i);
       Node *p = m_found_node; // parent node
       DBG_ASSERT(n);
-      if (all || p->meta.checked == false) {
+      if (all || p->meta.checked == NODE_UNFOLDED) {
         print_node(n);
       }
     }
