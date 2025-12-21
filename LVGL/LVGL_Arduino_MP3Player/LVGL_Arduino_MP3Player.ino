@@ -87,7 +87,7 @@ static char fname[16];
 #endif
 
 #ifndef _SDCARD_HPP_
-//#include "ESP32.hpp"
+#include "ESP32.hpp"
 #endif
 
 //----------------------------------------------------------------------
@@ -271,7 +271,7 @@ static uint32_t my_tick(void) {
 void setup() {
 #if DEBUG || defined(_ESP32_HPP_)
   Serial.begin(115200);
-  while (millis() < 500);
+  delay(1000);
 #endif
 
   RGB_LED_OFF();

@@ -98,11 +98,18 @@ public:
 #endif
   }
 
+  //--------------------------------------------------------------------------------
+  // Usage:
+  //  static ESP32MemInfo_t heap;
+  //  ESP32Info::heap_begin(&heap);
+  //  ...
+  //  ESP32Info::heap_end(&heap);
+  //--------------------------------------------------------------------------------
   static void heap_begin(ESP32MemInfo_t *start) {
     get_mem_info(start);
   }
-
-  static void heap_usage(ESP32MemInfo_t *start) {
+  
+  static void heap_end(ESP32MemInfo_t *start) {
     ESP32MemInfo_t end;
     get_mem_info(&end);
     print_diff(start, &end);
@@ -220,7 +227,6 @@ public:
     uint32_t Y = esp_rom_get_reset_reason(0);   // core0
     uint32_t Z = esp_rom_get_reset_reason(1);   // core1
     uint32_t W = esp_sleep_get_wakeup_cause();  // overall
-
     if (X != 1 /* "board power-on" */) {
       printf("============ Reset Reason =============\n");
       printf("Reset reason (overall): %2d (%s)\n", X, reset_reason_all [X]);

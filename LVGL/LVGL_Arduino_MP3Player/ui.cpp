@@ -636,7 +636,8 @@ void ui_init(void) {
   audioInit();
   ui_state = UI_STATE_INIT;
 }
-
+#include "ESP32.hpp"
+static ESP32MemInfo_t heap;
 //--------------------------------------------------------------------------------
 // A finite state machine that controls the overall operation
 // The steady state can be either "UI_STATE_PLAY" or "UI_STATE_IDLE", 
@@ -654,8 +655,8 @@ UI_State_t ui_loop(void) {
       break;
     case UI_STATE_START:
       ui_state = UI_STATE_ERROR;
-      partition_load();
-      if (player.ScanPlayList()) {
+      partition_load();ESP32Info::heap_begin(&heap);
+      if (player.ScanPlayList()) {ESP32Info::heap_end(&heap);
         ui_ScreenAlbumList_album_load((void*)player.m_tree);
         if (player.ScanAudioFiles(ui_setting.shuffle)) {
           ui_set_playNo(ui_control.playNo);

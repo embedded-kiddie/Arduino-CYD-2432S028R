@@ -52,9 +52,9 @@ private:
   static uint32_t n_leafs;      // number of leaf nodes
   static uint32_t n_depth;      // depth of tree
 public:
-  uint8_t key;                  // a key assigned to each node
-  NodeMeta_t meta;              // information for album list
+  uint16_t key;                 // a key assigned to each node
   uint16_t n_files;             // number of audio files
+  NodeMeta_t meta;              // information for album list
   std::string name;             // folder name or file name
   std::vector<Node*> children;  // a set of child nodes
 

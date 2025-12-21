@@ -180,50 +180,6 @@ uint32_t CYD_MP3Player::ScanPlayList(void) {
 }
 
 //--------------------------------------------------------------------------------
-// Randomly scan a specified number of audio files
-//--------------------------------------------------------------------------------
-uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
-  DBG_ASSERT(m_tree && m_list.size() == 0);
-
-  std::random_device seed_gen;
-  std::mt19937 engine(seed_gen());
-
-  const size_t n = m_tree->get_n_leafs();
-  #define MIN(a, b) ((a) < (b) ? (a) : (b))
-  max_files = MIN(max_files, n);
-
-  while (max_files-- > 0) {
-    uint32_t parent = engine() % n;
-    Node *node = m_tree->find_node(parent);
-    DBG_ASSERT(node);
-
-    // Read audio files in specified album folder
-    const char *path = m_tree->get_path();
-    std::vector<std::string> names;
-    File fd, dir = SD.open(path);
-    while (fd = dir.openNextFile()) {
-      std::string name;
-      if (check_mp3(fd, name)) {
-        names.push_back(name);
-      }
-      fd.close();
-    }
-    dir.close();
-
-    if (names.size()) {
-      uint32_t r = engine() % names.size();
-      append(names[r].c_str(), parent);
-    }
-  }
-
-  DBG_EXEC({
-    dump_files();
-  });
-
-  return m_list.size();
-}
-
-//--------------------------------------------------------------------------------
 // Scan audio files and make a play list
 //--------------------------------------------------------------------------------
 uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
@@ -262,45 +218,46 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
       return a.name.compare(b.name) < 0 ? true : false; // Ascending order
     });
 
+    // Check and fix album metadata integrity
     const int n = m_list.size() - p;
-    MetaHash_t *album_src = new MetaHash_t[n];
-    DBG_ASSERT(album_src); // Out of memory
+    MetaHash_t *meta_src = new MetaHash_t[n];
+    DBG_ASSERT(meta_src); // Out of memory
 
-    if (album_src) {
+    if (meta_src) {
       size_t src = sizeof(MetaHash_t) * n;
-      memset((void*)album_src, 0, src);
+      memset((void*)meta_src, 0, src);
       for (int i = 0; i < n; i++) {
-        album_src[i].hash = MakeHash(m_list[p + i].name);
+        meta_src[i].hash = MakeHash(m_list[p + i].name);
       }
 
       // Read an existing meta data file
       int counts = 0;
       size_t dst = 0;
-      std::string meta = path;
-      meta += "/" ALBUM_META_FILE;
-      fd = SD.open(meta.c_str(), FILE_READ);
+      std::string file = path;
+      file += "/" ALBUM_META_FILE;
+      fd = SD.open(file.c_str(), FILE_READ);
 
       if (fd) {
         dst = fd.SDFS_SIZE();
         const int m = dst / sizeof(MetaHash_t);
-        MetaHash_t *album_dst = new MetaHash_t[m];
-        DBG_ASSERT(album_dst); // Out of memory
+        MetaHash_t *meta_dst = new MetaHash_t[m];
+        DBG_ASSERT(meta_dst); // Out of memory
 
-        if (album_dst) {
-          dst = fd.read((SDFS_VOID*)album_dst, dst);
+        if (meta_dst) {
+          dst = fd.read((SDFS_VOID*)meta_dst, dst);
 
           // Find a matching hash and update meta data
           for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-              if (album_src[i].hash == album_dst[j].hash) {
-                m_list[p + i].meta = album_src[i].meta = album_dst[j].meta;
+              if (meta_src[i].hash == meta_dst[j].hash) {
+                m_list[p + i].meta = meta_src[i].meta = meta_dst[j].meta;
                 ++counts;
                 break;
               }
             }
           }
 
-          delete[] album_dst;
+          delete[] meta_dst;
         }
 
         fd.close();
@@ -308,14 +265,14 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
 
       // Update if mismatched
       if (src != dst || n != counts) {
-        if (fd = SD.open(meta.c_str(), FILE_WRITE)) {
+        if (fd = SD.open(file.c_str(), FILE_WRITE)) {
           fd.seek(0);
-          fd.write((SDFS_VOID*)album_src, src);
+          fd.write((SDFS_VOID*)meta_src, src);
           fd.close();
         }
       }
 
-      delete[] album_src;
+      delete[] meta_src;
     }
 
     p = m_list.size();
@@ -328,6 +285,50 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
   else if (shuffle) {
     std::mt19937 engine(esp_random());
     std::shuffle(m_list.begin(), m_list.end(), engine);
+  }
+
+  DBG_EXEC({
+    dump_files();
+  });
+
+  return m_list.size();
+}
+
+//--------------------------------------------------------------------------------
+// Randomly scan a specified number of audio files
+//--------------------------------------------------------------------------------
+uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
+  DBG_ASSERT(m_tree && m_list.size() == 0);
+
+  std::random_device seed_gen;
+  std::mt19937 engine(seed_gen());
+
+  const size_t n = m_tree->get_n_leafs();
+  #define MIN(a, b) ((a) < (b) ? (a) : (b))
+  max_files = MIN(max_files, n);
+
+  while (max_files-- > 0) {
+    uint32_t parent = engine() % n;
+    Node *node = m_tree->find_node(parent);
+    DBG_ASSERT(node);
+
+    // Read audio files in specified album folder
+    const char *path = m_tree->get_path();
+    std::vector<std::string> names;
+    File fd, dir = SD.open(path);
+    while (fd = dir.openNextFile()) {
+      std::string name;
+      if (check_mp3(fd, name)) {
+        names.push_back(name);
+      }
+      fd.close();
+    }
+    dir.close();
+
+    if (names.size()) {
+      uint32_t r = engine() % names.size();
+      append(names[r].c_str(), parent);
+    }
   }
 
   DBG_EXEC({
