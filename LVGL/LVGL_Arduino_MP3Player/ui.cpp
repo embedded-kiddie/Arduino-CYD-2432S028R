@@ -19,7 +19,7 @@ UI_Setting_t ui_setting = {
 static CYD_MP3Player player;
 
 static bool       id3tagsSave;
-static ID3Tags_t  id3tags;
+static MP3Tags_t  id3tags;
 static UI_State_t nextState;
 
 /////////////////////////// IMAGES //////////////////////////
@@ -163,7 +163,7 @@ static void update_elapsed_time(void) {
 // Check and update the metadata when playback finishes
 //--------------------------------------------------------------------------------
 static void update_metadata(void) {
-  MetaData_t meta;
+  MP3Meta_t meta;
   uint32_t playNo = player.GetPlayNo();
   player.GetMetaData(playNo, &meta);
 
@@ -504,7 +504,7 @@ void ui_event_PlayList_Play(lv_event_t *e) {
 void ui_event_PlayList_Heart(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  MetaData_t meta;
+  MP3Meta_t meta;
   uint32_t track_id = (uint32_t)lv_event_get_user_data(e);
   player.GetMetaData(track_id, &meta);
 
@@ -592,7 +592,7 @@ const uint32_t ui_get_counts(void) {
 //--------------------------------------------------------------------------------
 // Get ID3 tags (title, album, artist) from the file specified by id
 //--------------------------------------------------------------------------------
-void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags) {
+void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags) {
   player.GetID3Tags(track_id, tags);
 }
 
@@ -643,6 +643,7 @@ void ui_init(void) {
 // anything else is just a transient state that works as a command.
 //--------------------------------------------------------------------------------
 UI_State_t ui_loop(void) {
+  uint32_t time;
   switch (ui_state) {
     case UI_STATE_INIT:
       if (player.begin(MP3_ROOT_PATH, MP3_VOLUME_INI)) {
@@ -654,10 +655,10 @@ UI_State_t ui_loop(void) {
       break;
     case UI_STATE_START:
       ui_state = UI_STATE_ERROR;
-      partition_load();
-      if (player.ScanPlayList()) {
+      partition_load();time = lv_tick_get();
+      if (player.ScanPlayList()) {printf("ScanPlayList: %lu\n", lv_tick_elaps(time));time = lv_tick_get();
         ui_ScreenAlbumList_album_load((void*)player.m_tree);
-        if (player.ScanAudioFiles(ui_setting.shuffle)) {
+        if (player.ScanAudioFiles(ui_setting.shuffle)) {printf("ScanAudioFiles: %lu\n", lv_tick_elaps(time));
           ui_set_playNo(ui_control.playNo);
           ui_state = UI_STATE_PLAY;
         }

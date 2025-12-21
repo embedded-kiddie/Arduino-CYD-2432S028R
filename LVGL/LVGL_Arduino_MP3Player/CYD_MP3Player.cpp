@@ -72,7 +72,7 @@ std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
   }
 }
 
-bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
+bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MP3Meta_t *meta) {
   if (audioIsPlaying()) {
     return false;
   }
@@ -84,8 +84,8 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
   File fd = SD.open(data.c_str(), FILE_READ);
   if (fd) {
     const size_t size = fd.SDFS_SIZE();
-    const size_t n = size / sizeof(MetaHash_t);
-    MetaHash_t *album = new MetaHash_t[n];
+    const size_t n = size / sizeof(MP3Hash_t);
+    MP3Hash_t *album = new MP3Hash_t[n];
     if (!album) {
       fd.close();
       return false;
@@ -126,7 +126,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MetaData_t *meta) {
 //--------------------------------------------------------------------------------
 // Get metadata from play list and save it to a dedicated file
 //--------------------------------------------------------------------------------
-void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
+void CYD_MP3Player::GetMetaData(uint32_t playNo, MP3Meta_t *meta) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
     *meta = list->meta;
@@ -135,7 +135,7 @@ void CYD_MP3Player::GetMetaData(uint32_t playNo, MetaData_t *meta) {
   }
 }
 
-bool CYD_MP3Player::PutMetaData(uint32_t playNo, MetaData_t *meta) {
+bool CYD_MP3Player::PutMetaData(uint32_t playNo, MP3Meta_t *meta) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
     list->meta = *meta;
@@ -220,11 +220,11 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
 
     // Check and fix album metadata integrity
     const int n = m_list.size() - k;
-    MetaHash_t *meta_src = new MetaHash_t[n];
+    MP3Hash_t *meta_src = new MP3Hash_t[n];
     DBG_ASSERT(meta_src); // Out of memory
 
     if (meta_src) {
-      size_t src = sizeof(MetaHash_t) * n;
+      size_t src = sizeof(MP3Hash_t) * n;
       memset((void*)meta_src, 0, src);
       for (int i = 0; i < n; i++) {
         meta_src[i].hash = MakeHash(m_list[k + i].name);
@@ -239,8 +239,8 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
 
       if (fd) {
         dst = fd.SDFS_SIZE();
-        const int m = dst / sizeof(MetaHash_t);
-        MetaHash_t *meta_dst = new MetaHash_t[m];
+        const int m = dst / sizeof(MP3Hash_t);
+        MP3Hash_t *meta_dst = new MP3Hash_t[m];
         DBG_ASSERT(meta_dst); // Out of memory
 
         if (meta_dst) {
@@ -383,7 +383,7 @@ uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
 //--------------------------------------------------------------------------------
 // Get ID3 tags (title, album, artist) from the play list
 //--------------------------------------------------------------------------------
-void CYD_MP3Player::GetID3Tags(uint32_t playNo, ID3Tags_t &tags) {
+void CYD_MP3Player::GetID3Tags(uint32_t playNo, MP3Tags_t &tags) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
     tags.meta = list->meta;

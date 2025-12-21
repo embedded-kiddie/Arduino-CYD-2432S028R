@@ -23,27 +23,28 @@ typedef struct {
   uint16_t saved    : 1;
   uint16_t selected : 1;
   uint16_t duration : 14;
-} MetaData_t;
+} MP3Meta_t;
 
 // Metadata about the file stored in an album folder
 typedef struct {
-  size_t      hash; // A hash representing the file name
-  MetaData_t  meta; // A data set that may change dynamically
-} MetaHash_t;
+  size_t    hash;   // A hash representing the file name
+  MP3Meta_t meta;   // A data set that may change dynamically
+} MP3Hash_t;
 
+// https://en.wikipedia.org/wiki/ID3
 typedef struct {
-  MetaData_t meta;
+  MP3Meta_t meta;
   std::string title;
   std::string artist;
   std::string album;
-} ID3Tags_t;
+} MP3Tags_t;
 
 //--------------------------------------------------------------------------------
 // Play list for MP3 audio file
 //--------------------------------------------------------------------------------
 typedef struct {
   uint16_t key;     // The key of the node in the tree
-  MetaData_t meta;  // Meta data for audio file
+  MP3Meta_t meta;   // Meta data for audio file
   std::string name; // Audio file name
 } MP3List_t;
 
@@ -66,7 +67,7 @@ private:
   std::string m_error = "";
 
   MP3List_t*  GetPlayList (uint32_t playNo);
-  bool        SaveMetaData(uint32_t playNo, MetaData_t *meta);
+  bool        SaveMetaData(uint32_t playNo, MP3Meta_t *meta);
 
 public:
   Node *      m_tree = NULL;
@@ -84,9 +85,9 @@ public:
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
   uint32_t    GetPictureNo(uint32_t playNo);
-  void        GetID3Tags  (uint32_t playNo, ID3Tags_t &tags);
-  void        GetMetaData (uint32_t playNo, MetaData_t *meta);
-  bool        PutMetaData (uint32_t playNo, MetaData_t *meta);
+  void        GetID3Tags  (uint32_t playNo, MP3Tags_t &tags);
+  void        GetMetaData (uint32_t playNo, MP3Meta_t *meta);
+  bool        PutMetaData (uint32_t playNo, MP3Meta_t *meta);
   bool        UpdateMetaData(void);
   void        DeleteNodeTree(void) { if (m_tree) { delete m_tree; m_tree = NULL; } }
   void        ClearAudioFiles(void);

@@ -10,7 +10,7 @@
 lv_obj_t *ui_ScreenPlayList;
 
 #include "CYD_MP3Player.h"
-extern void ui_get_id3tags(uint32_t track_id, ID3Tags_t &tags); // Defined in ui.cpp (it needs CYD_MP3Player.h)
+extern void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags); // Defined in ui.cpp (it needs CYD_MP3Player.h)
 
 /////////////////////////// MACROS //////////////////////////
 #define LIST_FONT_SMALL_HEIGHT    17  // For font size: 12px
@@ -165,7 +165,7 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
   lv_obj_add_event_cb           (cell, event_handler, LV_EVENT_CLICKED, (void*)track_id);
   lv_obj_remove_flag            (cell, LV_OBJ_FLAG_SCROLLABLE); // Stop sliding horizontally
 
-  ID3Tags_t tags;
+  MP3Tags_t tags;
   ui_get_id3tags(track_id, tags);
 
   ///////////////////// 0: Play Button //////////////////////
@@ -205,7 +205,7 @@ static lv_obj_t *add_list_cell(lv_obj_t* parent, uint32_t track_id) {
 // Overwrite the existing cell data
 //--------------------------------------------------------------------------------
 static void put_list_cell(lv_obj_t* obj, uint32_t track_id) {
-  ID3Tags_t tags;
+  MP3Tags_t tags;
   ui_get_id3tags(track_id, tags);
 
   lv_image_set_src      (lv_obj_get_child(obj, 0), &img_list_play);
@@ -511,7 +511,7 @@ size_t get_cell_count(void) {
 
 void show_ui_control(void) {
   if (play_list) {
-    ID3Tags_t tags[2];
+    MP3Tags_t tags[2];
     ui_get_id3tags(ui_control.top, tags[0]);
     ui_get_id3tags(ui_control.end, tags[1]);
 
@@ -527,7 +527,7 @@ void dump_play_list(void) {
   if (play_list) {
     const int n = lv_obj_get_child_count(play_list);
     for (int i = 0; i < n; i++) {
-      ID3Tags_t tags;
+      MP3Tags_t tags;
       ui_get_id3tags(ui_control.top + i, tags);
 
       printf("key: %3d, saved: %d, selected: %d, duration: %3d, artist: %s, album: %s, title: %s\n",
