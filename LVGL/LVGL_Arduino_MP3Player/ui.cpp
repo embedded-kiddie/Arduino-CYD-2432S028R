@@ -15,8 +15,8 @@ UI_Setting_t ui_setting = {
 };
 
 ////////////////////// LOCAL VARIABLES //////////////////////
-#include "CYD_MP3Player.h"
-static CYD_MP3Player player;
+#include "MP3Player.h"
+static MP3Player player;
 
 static bool       id3tagsSave;
 static MP3Tags_t  id3tags;

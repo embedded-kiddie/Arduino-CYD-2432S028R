@@ -113,6 +113,23 @@ private:
     return false;
   }
 
+  uint16_t count_files(File &dir) {
+    uint16_t n = 1;
+    for (File entry = dir.openNextFile(); entry; entry = dir.openNextFile()) {
+#ifdef USE_SDFAT
+      char buf[BUF_SIZE];
+      entry.getName(buf, sizeof(buf));
+      const char *name = buf;
+#else
+      const char *name = entry.name();
+#endif
+      if (check_ext(name)) {
+        n++;
+      }
+    }
+    return n;
+  }
+
   // traversing the file system
   void scan_node(File &dir, Node *node, bool scan_file) {
     for (File entry = dir.openNextFile(); entry; entry = dir.openNextFile()) {
@@ -127,8 +144,13 @@ private:
         if (entry.isDirectory()) {
           scan_node(entry, node->append(name), scan_file);
         }
-        else if (scan_file && check_ext(name)) {
-          node->append(name);
+        else if (check_ext(name)) {
+          if (!scan_file) {
+            node->n_files = count_files(dir);
+          } else {
+            node->n_files++;
+            node->append(name);
+          }
         }
       }
       entry.close();

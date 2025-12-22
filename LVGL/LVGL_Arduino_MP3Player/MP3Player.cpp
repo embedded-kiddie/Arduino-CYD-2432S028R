@@ -1,8 +1,8 @@
 //================================================================================
-// CYD_MP3Player class definition
+// MP3Player class definition
 //================================================================================
 #include "CYD28_audio.h"
-#include "CYD_MP3Player.h"
+#include "MP3Player.h"
 
 #include <ctype.h>    // isdigit(), isprint()
 #include <stdlib.h>   // atoi()
@@ -15,7 +15,7 @@
 //--------------------------------------------------------------------------------
 // Begin with SD or SdFat
 //--------------------------------------------------------------------------------
-bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
+bool MP3Player::begin(const char *root, uint8_t volume) {
   // Set root path
   m_base = root;
   if (m_base.back() != '/') {
@@ -43,7 +43,7 @@ bool CYD_MP3Player::begin(const char *root, uint8_t volume) {
 //--------------------------------------------------------------------------------
 // Get the play list for a specified track
 //--------------------------------------------------------------------------------
-MP3List_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
+MP3List_t* MP3Player::GetPlayList(uint32_t playNo) {
   if (m_list.size()) {
     return & m_list[playNo];
   } else {
@@ -54,7 +54,7 @@ MP3List_t* CYD_MP3Player::GetPlayList(uint32_t playNo) {
 //--------------------------------------------------------------------------------
 // Get path to the audio file
 //--------------------------------------------------------------------------------
-std::string CYD_MP3Player::GetDirPath(uint32_t playNo) {
+std::string MP3Player::GetDirPath(uint32_t playNo) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
     return m_tree->find_path(list->key) + "/";
@@ -63,7 +63,7 @@ std::string CYD_MP3Player::GetDirPath(uint32_t playNo) {
   }
 }
 
-std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
+std::string MP3Player::GetFilePath(uint32_t playNo) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
     return m_tree->find_path(list->key) + "/" + list->name;
@@ -72,7 +72,7 @@ std::string CYD_MP3Player::GetFilePath(uint32_t playNo) {
   }
 }
 
-bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MP3Meta_t *meta) {
+bool MP3Player::SaveMetaData(uint32_t playNo, MP3Meta_t *meta) {
   if (audioIsPlaying()) {
     return false;
   }
@@ -126,7 +126,7 @@ bool CYD_MP3Player::SaveMetaData(uint32_t playNo, MP3Meta_t *meta) {
 //--------------------------------------------------------------------------------
 // Get metadata from play list and save it to a dedicated file
 //--------------------------------------------------------------------------------
-void CYD_MP3Player::GetMetaData(uint32_t playNo, MP3Meta_t *meta) {
+void MP3Player::GetMetaData(uint32_t playNo, MP3Meta_t *meta) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
     *meta = list->meta;
@@ -135,7 +135,7 @@ void CYD_MP3Player::GetMetaData(uint32_t playNo, MP3Meta_t *meta) {
   }
 }
 
-bool CYD_MP3Player::PutMetaData(uint32_t playNo, MP3Meta_t *meta) {
+bool MP3Player::PutMetaData(uint32_t playNo, MP3Meta_t *meta) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
     list->meta = *meta;
@@ -144,7 +144,7 @@ bool CYD_MP3Player::PutMetaData(uint32_t playNo, MP3Meta_t *meta) {
   return false; // Never get here
 }
 
-bool CYD_MP3Player::UpdateMetaData(void) {
+bool MP3Player::UpdateMetaData(void) {
   bool ret = true;
   int i = 0;
   for (auto& list : m_list) {
@@ -159,7 +159,7 @@ bool CYD_MP3Player::UpdateMetaData(void) {
 //--------------------------------------------------------------------------------
 // Scan and create a list of audio m_list in a specified directory.
 //--------------------------------------------------------------------------------
-uint32_t CYD_MP3Player::ScanPlayList(void) {
+uint32_t MP3Player::ScanPlayList(void) {
   if (m_tree == NULL) {
     File dir = SD.open(m_root.c_str());
     if (!dir) {
@@ -182,7 +182,7 @@ uint32_t CYD_MP3Player::ScanPlayList(void) {
 //--------------------------------------------------------------------------------
 // Scan audio files and make a play list
 //--------------------------------------------------------------------------------
-uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
+uint32_t MP3Player::ScanAudioFiles(bool shuffle) {
   DBG_ASSERT(m_tree && m_list.size() == 0);
 
   // Functional object to make a hash
@@ -199,7 +199,6 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
     while (fd = dir.openNextFile()) {
       std::string name;
       if (check_mp3(fd, name)) {
-        ++node->n_files; // count audio files
         if (node->meta.checked == LEAF_SELECTED) {
           append(name.c_str(), key);
         }
@@ -297,7 +296,7 @@ uint32_t CYD_MP3Player::ScanAudioFiles(bool shuffle) {
 //--------------------------------------------------------------------------------
 // Randomly scan a specified number of audio files
 //--------------------------------------------------------------------------------
-uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
+uint32_t MP3Player::ScanAudioRandom(uint32_t max_files) {
   DBG_ASSERT(m_tree && m_list.size() == 0);
 
   std::random_device seed_gen;
@@ -341,14 +340,14 @@ uint32_t CYD_MP3Player::ScanAudioRandom(uint32_t max_files) {
 //--------------------------------------------------------------------------------
 // Clear all the nodes in tree
 //--------------------------------------------------------------------------------
-void CYD_MP3Player::ClearAudioFiles(void) {
+void MP3Player::ClearAudioFiles(void) {
   m_list.clear();
 }
 
 //--------------------------------------------------------------------------------
 // Load the picture number stored in the metadata on the SD card
 //--------------------------------------------------------------------------------
-uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
+uint32_t MP3Player::GetPictureNo(uint32_t playNo) {
   uint32_t pictNo = 0;
 
   // Gets the picture number recorded in PICTURE_FILE.
@@ -383,7 +382,7 @@ uint32_t CYD_MP3Player::GetPictureNo(uint32_t playNo) {
 //--------------------------------------------------------------------------------
 // Get ID3 tags (title, album, artist) from the play list
 //--------------------------------------------------------------------------------
-void CYD_MP3Player::GetID3Tags(uint32_t playNo, MP3Tags_t &tags) {
+void MP3Player::GetID3Tags(uint32_t playNo, MP3Tags_t &tags) {
   MP3List_t *list = GetPlayList(playNo);
   if (list) {
     tags.meta = list->meta;
@@ -429,26 +428,26 @@ void CYD_MP3Player::GetID3Tags(uint32_t playNo, MP3Tags_t &tags) {
 //--------------------------------------------------------------------------------
 // Get error message
 //--------------------------------------------------------------------------------
-const char* CYD_MP3Player::GetError(void) {
+const char* MP3Player::GetError(void) {
   return m_error.c_str();
 }
 
 //--------------------------------------------------------------------------------
 // Operation
 //--------------------------------------------------------------------------------
-void CYD_MP3Player::SetVolume(uint8_t vol) {
+void MP3Player::SetVolume(uint8_t vol) {
   audioSetVolume(vol);
 }
 
-uint8_t CYD_MP3Player::GetVolumePerCent(void) {
+uint8_t MP3Player::GetVolumePerCent(void) {
   return audioGetVolumePerCent();
 }
 
-bool CYD_MP3Player::IsPlaying(void) {
+bool MP3Player::IsPlaying(void) {
   return audioIsPlaying();
 }
 
-bool CYD_MP3Player::IsLastSong(bool selected) {
+bool MP3Player::IsLastSong(bool selected) {
   const int n = m_list.size();
   if (selected) {
     for (int i = m_playNo + 1; i < n; i++) {
@@ -463,7 +462,7 @@ bool CYD_MP3Player::IsLastSong(bool selected) {
   }
 }
 
-bool CYD_MP3Player::FilePlay(const char* path) {
+bool MP3Player::FilePlay(const char* path) {
   audioStopSong();
   if (audioConnecttoSD(path)) {
     return true;
@@ -473,15 +472,15 @@ bool CYD_MP3Player::FilePlay(const char* path) {
   }
 }
 
-void CYD_MP3Player::StopPlay(void) {
+void MP3Player::StopPlay(void) {
   audioStopSong();
 }
 
-void CYD_MP3Player::PauseResume(void) {
+void MP3Player::PauseResume(void) {
   audioPauseResume();
 }
 
-void CYD_MP3Player::SetPlayNo(uint32_t playNo, bool stop) {
+void MP3Player::SetPlayNo(uint32_t playNo, bool stop) {
   if (stop) {
     audioStopSong();
   }
@@ -491,15 +490,15 @@ void CYD_MP3Player::SetPlayNo(uint32_t playNo, bool stop) {
   }
 }
 
-void CYD_MP3Player::PlayNext(bool stop) {
+void MP3Player::PlayNext(bool stop) {
   SetPlayNo(m_playNo + 1, stop);
 }
 
-void CYD_MP3Player::PlayPrev(bool stop) {
+void MP3Player::PlayPrev(bool stop) {
   SetPlayNo(m_playNo - 1, stop);
 }
 
-bool CYD_MP3Player::IsSelected(void) {
+bool MP3Player::IsSelected(void) {
   if (m_list.size()) {
     return m_list[m_playNo].meta.selected;
   } else {
@@ -510,7 +509,7 @@ bool CYD_MP3Player::IsSelected(void) {
 //--------------------------------------------------------------------------------
 // Check if the next song is selected
 //--------------------------------------------------------------------------------
-bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
+bool MP3Player::NextSelected(bool next, bool loop, bool stop) {
   const int N = m_list.size();
   const int m = (m_playNo + (next ? 1 : -1) + N) % N;
   const int n = N - (loop ? 0 : m);
@@ -526,7 +525,7 @@ bool CYD_MP3Player::NextSelected(bool next, bool loop, bool stop) {
   return false;
 }
 
-bool CYD_MP3Player::AutoPlay(void) {
+bool MP3Player::AutoPlay(void) {
   if (!audioIsPlaying()) {
     std::string path = GetFilePath(m_playNo);
     if (!audioConnecttoSD(path.c_str())) {

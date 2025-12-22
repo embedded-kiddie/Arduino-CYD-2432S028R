@@ -1,8 +1,8 @@
 //================================================================================
-// CYD_MP3Player class definition
+// MP3Player class definition
 //================================================================================
-#ifndef _CYD_MP3PLAYER_H_
-#define _CYD_MP3PLAYER_H_
+#ifndef _MP3PLAYER_H_
+#define _MP3PLAYER_H_
 
 #include "config.h"
 #include "tree.hpp"
@@ -50,10 +50,10 @@ typedef struct {
 
 typedef std::vector<MP3List_t> PlayList_t;
 
-class CYD_MP3Player {
+class MP3Player {
 public:
-  CYD_MP3Player() {}
-  ~CYD_MP3Player() {
+  MP3Player() {}
+  ~MP3Player() {
     m_list.clear();
     if (m_tree) {
       delete m_tree;
@@ -177,4 +177,4 @@ void audio_commercial(const char *info);
 void audio_icyurl(const char *info);
 void audio_lasthost(const char *info);
 */
-#endif // _CYD_MP3PLAYER_H_
+#endif // _MP3PLAYER_H_

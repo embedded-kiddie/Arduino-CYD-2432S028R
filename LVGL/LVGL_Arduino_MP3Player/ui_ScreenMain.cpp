@@ -600,7 +600,7 @@ void ui_ScreenMain_screen_init(void) {
 
   ////////////////////// Volume Slider //////////////////////
   ui_Volume = lv_slider_create(ui_ScreenMain);
-  lv_slider_set_range(ui_Volume, 0, 21); // MP3_VOLUME_MAX (21) is defined in CYD_MP3Player.h
+  lv_slider_set_range(ui_Volume, 0, 21); // MP3_VOLUME_MAX (21) is defined in MP3Player.h
   lv_slider_set_value(ui_Volume, 0, LV_ANIM_OFF);
   lv_obj_remove_flag (ui_Volume, LV_OBJ_FLAG_GESTURE_BUBBLE);
   {

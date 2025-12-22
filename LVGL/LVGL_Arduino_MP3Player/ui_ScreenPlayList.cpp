@@ -9,8 +9,8 @@
 //--------------------------------------------------------------------------------
 lv_obj_t *ui_ScreenPlayList;
 
-#include "CYD_MP3Player.h"
-extern void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags); // Defined in ui.cpp (it needs CYD_MP3Player.h)
+#include "MP3Player.h"
+extern void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags); // Defined in ui.cpp (it needs MP3Player.h)
 
 /////////////////////////// MACROS //////////////////////////
 #define LIST_FONT_SMALL_HEIGHT    17  // For font size: 12px

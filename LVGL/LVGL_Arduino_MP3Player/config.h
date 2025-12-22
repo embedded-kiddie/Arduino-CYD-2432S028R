@@ -1,5 +1,5 @@
 //================================================================================
-// CYD_MP3Player Configration
+// MP3Player Configration
 //================================================================================
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
@@ -29,9 +29,9 @@
 //--------------------------------------------------------------------------------
 // 3. Touch panel calibration
 // If there's some slippage with the default parameters, execute calibration and
-// embed the results displayed on the serial monitor into "CYD_MP3Player.ino".
+// embed the results displayed on the serial monitor into "MP3Player.ino".
 //--------------------------------------------------------------------------------
-// true  : Use embedded data in "CYD_MP3Player.ino"
+// true  : Use embedded data in "MP3Player.ino"
 // false : Execute touch calibration at power-on
 #define USE_CALIBRATED    true
 

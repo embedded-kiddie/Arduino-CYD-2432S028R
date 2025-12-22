@@ -1,11 +1,11 @@
 //================================================================================
-// MP3 Music Player for CYD
+// MP3 Music Player for CYD using LVGL
 //
 // # README FIRST
 //  ## Software Requirement
 //  1. Required platform package
 //    - esp32 by Espressif Systems version 2.0.17
-//      Note that version 3.x deprecates I2S audio and produces a clicking noise.
+//      - Note that version 3.x deprecates I2S audio and produces a clicking noise.
 //    - Select "ESP32 Dev Module" as a board package
 //    - In the "Tools" menu, select the following:
 //      - Partition Scheme: "Huge APP (3MB No OTA/1MB SPIFFS)"
@@ -27,7 +27,7 @@
 //  3. Configuring LVGL
 //    - To configure "lv_conf.h" for this application, see "./lv_conf/README.md".
 //
-//  4. Configuring CYD_MP3Player
+//  4. Configuring MP3Player
 //    - Open "./config.h" and define symbols from 1. to 7. as you wish.
 //
 //  ## Harcware Requiremtnt
