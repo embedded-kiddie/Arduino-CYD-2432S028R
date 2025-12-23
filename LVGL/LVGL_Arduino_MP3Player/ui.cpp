@@ -294,6 +294,27 @@ static bool partition_save(void) {
 }
 
 //--------------------------------------------------------------------------------
+// Scan SD card for audio files and create a playlist
+//--------------------------------------------------------------------------------
+static bool create_playlist(void) {
+  // Setup partition
+  partition_load();
+
+  // Scan SD card for album folders
+  if (player.ScanPlayList()) {
+    // Load album list
+    ui_album_load((void*)player.m_tree);
+
+    // Scan audio files base on album list
+    if (player.ScanAudioFiles(ui_setting.partition_id, ui_setting.shuffle)) {
+      ui_set_playNo(ui_control.playNo);
+      return true;
+    }
+  }
+  return false;
+}
+
+//--------------------------------------------------------------------------------
 // Asynchronous function to reduce delays during screen transitions
 //--------------------------------------------------------------------------------
 static void async_stop(void *user_data) {
@@ -461,7 +482,7 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
     // lv_fs_clear_cache(); // sdfs.{h|cpp}
 
     // Create album list (No need to access SD card)
-    ui_ScreenAlbumList_album_create((void*)player.m_tree);
+    ui_album_create((void*)player.m_tree);
 
     // Stop playback to avoid conflict with SD access (async required)
     lv_async_call(async_stop, NULL);
@@ -643,7 +664,6 @@ void ui_init(void) {
 // anything else is just a transient state that works as a command.
 //--------------------------------------------------------------------------------
 UI_State_t ui_loop(void) {
-  uint32_t time;
   switch (ui_state) {
     case UI_STATE_INIT:
       if (player.begin(MP3_ROOT_PATH, MP3_VOLUME_INI)) {
@@ -654,14 +674,10 @@ UI_State_t ui_loop(void) {
       }
       break;
     case UI_STATE_START:
-      ui_state = UI_STATE_ERROR;
-      partition_load();time = lv_tick_get();
-      if (player.ScanPlayList()) {printf("ScanPlayList: %lu\n", lv_tick_elaps(time));time = lv_tick_get();
-        ui_ScreenAlbumList_album_load((void*)player.m_tree);
-        if (player.ScanAudioFiles(ui_setting.shuffle)) {printf("ScanAudioFiles: %lu\n", lv_tick_elaps(time));
-          ui_set_playNo(ui_control.playNo);
-          ui_state = UI_STATE_PLAY;
-        }
+      if (create_playlist()) {
+        ui_state = UI_STATE_PLAY;
+      } else {
+        ui_state = UI_STATE_ERROR;
       }
       break;
     case UI_STATE_PLAY:

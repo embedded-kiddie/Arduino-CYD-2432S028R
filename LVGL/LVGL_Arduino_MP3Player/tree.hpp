@@ -51,6 +51,7 @@ private:
   static uint32_t n_nodes;      // number of nodes
   static uint32_t n_leafs;      // number of leaf nodes
   static uint32_t n_depth;      // depth of tree
+  static uint32_t n_audio;      // number of files under the leaf nodes
 public:
   uint16_t key;                 // a key assigned to each node
   uint16_t n_files;             // number of audio files
@@ -81,6 +82,9 @@ public:
   }
   const uint32_t get_n_depth(void) {
     return n_depth;
+  }
+  const uint32_t get_n_audio(void) {
+    return n_audio;
   }
   const char * get_path(void) {
     return m_path.c_str();
@@ -115,45 +119,44 @@ private:
 
   uint16_t count_files(File &dir) {
     uint16_t n = 1;
-    for (File entry = dir.openNextFile(); entry; entry = dir.openNextFile()) {
+    for (File fd = dir.openNextFile(); fd; fd = dir.openNextFile()) {
 #ifdef USE_SDFAT
       char buf[BUF_SIZE];
-      entry.getName(buf, sizeof(buf));
+      fd.getName(buf, sizeof(buf));
       const char *name = buf;
 #else
-      const char *name = entry.name();
+      const char *name = fd.name();
 #endif
-      if (check_ext(name)) {
-        n++;
-      }
+      check_ext(name) && ++n;
+      fd.close();
     }
     return n;
   }
 
   // traversing the file system
   void scan_node(File &dir, Node *node, bool scan_file) {
-    for (File entry = dir.openNextFile(); entry; entry = dir.openNextFile()) {
+    for (File fd = dir.openNextFile(); fd; fd = dir.openNextFile()) {
 #ifdef USE_SDFAT
       char buf[BUF_SIZE];
-      entry.getName(buf, sizeof(buf));
+      fd.getName(buf, sizeof(buf));
       const char *name = buf;
 #else
-      const char *name = entry.name();
+      const char *name = fd.name();
 #endif
       if (IS_VALID_FILE(name)) {
-        if (entry.isDirectory()) {
-          scan_node(entry, node->append(name), scan_file);
+        if (fd.isDirectory()) {
+          scan_node(fd, node->append(name), scan_file);
         }
         else if (check_ext(name)) {
           if (!scan_file) {
-            node->n_files = count_files(dir);
+            n_audio += node->n_files = count_files(dir);
           } else {
-            node->n_files++;
             node->append(name);
+            n_audio += node->n_files++;
           }
         }
       }
-      entry.close();
+      fd.close();
     }
 
     // Sort child nodes in ascending order
@@ -223,7 +226,7 @@ public:
 
   // create a file tree
   void scan_file(File &dir) {
-    n_nodes = n_leafs = n_depth = 0;
+    n_nodes = n_leafs = n_depth = n_audio = 0;
 
     scan_node(dir, this, true);
     traverse_node(this);
@@ -234,7 +237,7 @@ public:
 
   // create a directory tree
   void scan_dir(File &dir) {
-    n_nodes = n_leafs = n_depth = 0;
+    n_nodes = n_leafs = n_depth = n_audio = 0;
 
     scan_node(dir, this, false);
     traverse_node(this);

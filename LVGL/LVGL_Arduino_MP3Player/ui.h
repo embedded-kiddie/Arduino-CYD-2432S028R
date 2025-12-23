@@ -129,8 +129,8 @@ extern lv_obj_t *ui_ScreenAlbumList;
 void ui_event_ScreenAlbumList(lv_event_t *e);
 void ui_ScreenAlbumList_screen_init  (void);
 void ui_ScreenAlbumList_screen_deinit(void);
-void ui_ScreenAlbumList_album_load   (void *root);
-void ui_ScreenAlbumList_album_create (void *root);
+void ui_album_create(void *root);
+void ui_album_load  (void *root);
 
 // Debug functions
 extern __attribute__((weak)) size_t count_exposed_nodes(void);

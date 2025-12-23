@@ -548,7 +548,7 @@ static void scroll_cb(lv_event_t *e) {
 }
 
 //--------------------------------------------------------------------------------
-// Initialize the album list with a specified number of cells
+// Initialize the album list widgets with a specified number of cells
 //--------------------------------------------------------------------------------
 static void album_list_refresh(int key = 0) {
   update_scroll_running = true;   // Disable 'update_scroll()' once
@@ -1255,29 +1255,32 @@ void ui_ScreenAlbumList_screen_deinit(void) {
 }
 
 //--------------------------------------------------------------------------------
-// Create selectable playlist
+// Create selectable album list widgets
 //--------------------------------------------------------------------------------
-void ui_ScreenAlbumList_album_load(void *root) {
-  if (root) {
-    // Once traverse node tree by preorder and load album list
-    album_control.root = reinterpret_cast<Node*>(root);
-    album_control.n_nodes = album_control.root->traverse_preorder();
-    album_list_load();
-
-    // Then traverse again to scan audio files
-    album_control.root->traverse_node();
-  }
-}
-
-void ui_ScreenAlbumList_album_create(void *root) {
+void ui_album_create(void *root) {
   if (root) {
     // Re-traverse node tree by preorder and initialize album list
     album_control.root = reinterpret_cast<Node*>(root);
     album_control.n_nodes = album_control.root->traverse_preorder();
-    album_list_refresh();
+    album_list_refresh(); // Initialize album list widgets
   } else {
     // In case the SD card is not inserted
     memset((void*)&album_control, 0, sizeof(album_control));
+  }
+}
+
+//--------------------------------------------------------------------------------
+// Load album list data
+//--------------------------------------------------------------------------------
+void ui_album_load(void *root) {
+  if (root) {
+    // Once traverse node tree by preorder and load album list
+    album_control.root = reinterpret_cast<Node*>(root);
+    album_control.n_nodes = album_control.root->traverse_preorder();
+    album_list_load(); // Load album list data
+
+    // Then traverse again to scan audio files
+    album_control.root->traverse_node();
   }
 }
 

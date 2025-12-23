@@ -41,6 +41,81 @@ bool MP3Player::begin(const char *root, uint8_t volume) {
 }
 
 //--------------------------------------------------------------------------------
+// Scan and create a list of audio m_list in a specified directory.
+//--------------------------------------------------------------------------------
+uint32_t MP3Player::ScanPlayList(void) {
+  if (m_tree == NULL) {
+    File dir = SD.open(m_root.c_str());
+    if (!dir) {
+      m_error = "Can't open " + m_root;
+      return 0;
+    }
+
+    m_tree = new Node(m_root.c_str());
+    m_tree->scan_dir(dir);
+    dir.close();
+  }
+
+  DBG_EXEC({
+    m_tree->dump_tree();
+  });
+
+  return m_tree->get_n_leafs();
+}
+
+//--------------------------------------------------------------------------------
+// Randomly scan a specified number of audio files
+//--------------------------------------------------------------------------------
+uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
+  DBG_ASSERT(m_tree && m_list.size() == 0);
+
+  std::mt19937 engine(esp_random());
+
+  size_t heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT); // MP3_HEAP_MEM_MARGIN
+  DBG_EXEC(printf("Heap free: %lu\n", heap));
+
+  const size_t m = m_tree->get_n_leafs(); // Number of albums
+  const size_t n = m_tree->get_n_audio(); // Number of audio files
+  #define MIN(a, b) ((a) < (b) ? (a) : (b))
+  uint32_t max_files = MIN(MP3_MAX_AUDIO_FILES, n);
+
+  if (partition) {
+    for (int k = 0, key = 0; max_files > k && key < n; key++) {
+      k = scan_files(key);
+    }
+  }
+
+  else {
+    std::vector<uint16_t> pot;
+    for (int i = 0; i < m; i++) {
+      pot.push_back(i);
+    }
+
+    // Prevent multiple selections of the same album
+    for (int k = 0, m = pot.size(); m && max_files > k; m = pot.size()) {
+      uint32_t key = engine() % m;
+      k = scan_files(pot[key]);
+      pot.erase(pot.begin() + key);
+    }
+  }
+
+  if (m_list.size() == 0) {
+    m_error = "No music to play";
+  }
+
+  else if (shuffle) {
+    std::shuffle(m_list.begin(), m_list.end(), engine);
+  }
+
+  DBG_EXEC({
+    //dump_files();
+    printf("ScanAudioFiles: %d\n", m_list.size());
+  });
+
+  return m_list.size();
+}
+
+//--------------------------------------------------------------------------------
 // Get the play list for a specified track
 //--------------------------------------------------------------------------------
 MP3List_t* MP3Player::GetPlayList(uint32_t playNo) {
@@ -79,44 +154,44 @@ bool MP3Player::SaveMetaData(uint32_t playNo, MP3Meta_t *meta) {
 
   MP3List_t *list = GetPlayList(playNo); // Never NULL
   std::string path = m_tree->find_path(list->key);
-  std::string data = path + "/" ALBUM_META_FILE;
+  std::string file = path + "/" ALBUM_META_FILE;
 
-  File fd = SD.open(data.c_str(), FILE_READ);
+  File fd = SD.open(file.c_str(), FILE_READ);
   if (fd) {
     const size_t size = fd.SDFS_SIZE();
     const size_t n = size / sizeof(MP3Hash_t);
-    MP3Hash_t *album = new MP3Hash_t[n];
-    if (!album) {
+    MP3Hash_t *meta_hash = new MP3Hash_t[n];
+    DBG_ASSERT(meta_hash);
+
+    if (!meta_hash) {
       fd.close();
       return false;
     }
 
-    fd.read((SDFS_VOID*)album, size);
+    fd.read((SDFS_VOID*)meta_hash, size);
     fd.close();
 
-    // Functional object to make a hash
-    std::hash<std::string> MakeHash;
-
     // Search for meta data with matching hash
+    std::hash<std::string> MakeHash;
     size_t hash = MakeHash(list->name);
     for (int i = 0; i < n; i++) {
-      if (hash == album[i].hash) {
+      if (meta_hash[i].hash == hash) {
         meta->saved = meta->selected; // Mark 'selected' as saved
-        album[i].meta = *meta;
+        meta_hash[i].meta = *meta;
         break;
       }
     }
 
-    fd = SD.open(data.c_str(), FILE_WRITE);
+    fd = SD.open(file.c_str(), FILE_WRITE);
     if (fd) {
       fd.seek(0);
-      fd.write((SDFS_VOID*)album, size); // should check return value!
+      fd.write((SDFS_VOID*)meta_hash, size); // should check return value!
       fd.close();
     }
 
     DBG_EXEC(printf("SaveMetaData: %s\n", list->name.c_str()));
 
-    delete[] album;
+    delete[] meta_hash;
     return true;
   }
 
@@ -157,187 +232,6 @@ bool MP3Player::UpdateMetaData(void) {
 }
 
 //--------------------------------------------------------------------------------
-// Scan and create a list of audio m_list in a specified directory.
-//--------------------------------------------------------------------------------
-uint32_t MP3Player::ScanPlayList(void) {
-  if (m_tree == NULL) {
-    File dir = SD.open(m_root.c_str());
-    if (!dir) {
-      m_error = "Can't open " + m_root;
-      return 0;
-    }
-
-    m_tree = new Node(m_root.c_str());
-    m_tree->scan_dir(dir);
-    dir.close();
-  }
-
-  DBG_EXEC({
-    m_tree->dump_tree();
-  });
-
-  return m_tree->get_n_leafs();
-}
-
-//--------------------------------------------------------------------------------
-// Scan audio files and make a play list
-//--------------------------------------------------------------------------------
-uint32_t MP3Player::ScanAudioFiles(bool shuffle) {
-  DBG_ASSERT(m_tree && m_list.size() == 0);
-
-  // Functional object to make a hash
-  std::hash<std::string> MakeHash;
-
-  // Extract audio files in the album directory
-  const size_t n = m_tree->get_n_leafs();
-  for (int k = 0, key = 0; key < n; key++) {
-    Node *node = m_tree->find_node(key);
-    DBG_ASSERT(node);
-
-    const char *path = m_tree->get_path();
-    File fd, dir = SD.open(path);
-    while (fd = dir.openNextFile()) {
-      std::string name;
-      if (check_mp3(fd, name)) {
-        if (node->meta.checked == LEAF_SELECTED) {
-          append(name.c_str(), key);
-        }
-      }
-      fd.close();
-    }
-    dir.close();
-
-    // If the album is not selected then proceed next
-    if (node->meta.checked != LEAF_SELECTED) {
-      continue;
-    }
-
-    // Sort the list in order to arrange metadata in order
-    std::sort(m_list.begin() + k, m_list.end(), [](MP3List_t &a, MP3List_t &b) {
-      return a.name.compare(b.name) < 0 ? true : false; // Ascending order
-    });
-
-    // Check and fix album metadata integrity
-    const int n = m_list.size() - k;
-    MP3Hash_t *meta_src = new MP3Hash_t[n];
-    DBG_ASSERT(meta_src); // Out of memory
-
-    if (meta_src) {
-      size_t src = sizeof(MP3Hash_t) * n;
-      memset((void*)meta_src, 0, src);
-      for (int i = 0; i < n; i++) {
-        meta_src[i].hash = MakeHash(m_list[k + i].name);
-      }
-
-      // Read an existing meta data file
-      int counts = 0;
-      size_t dst = 0;
-      std::string file = path;
-      file += "/" ALBUM_META_FILE;
-      fd = SD.open(file.c_str(), FILE_READ);
-
-      if (fd) {
-        dst = fd.SDFS_SIZE();
-        const int m = dst / sizeof(MP3Hash_t);
-        MP3Hash_t *meta_dst = new MP3Hash_t[m];
-        DBG_ASSERT(meta_dst); // Out of memory
-
-        if (meta_dst) {
-          dst = fd.read((SDFS_VOID*)meta_dst, dst);
-
-          // Find a matching hash and update meta data
-          for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-              if (meta_src[i].hash == meta_dst[j].hash) {
-                m_list[k + i].meta = meta_src[i].meta = meta_dst[j].meta;
-                ++counts;
-                break;
-              }
-            }
-          }
-
-          delete[] meta_dst;
-        }
-
-        fd.close();
-      }
-
-      // Update if mismatched
-      if (src != dst || n != counts) {
-        if (fd = SD.open(file.c_str(), FILE_WRITE)) {
-          fd.seek(0);
-          fd.write((SDFS_VOID*)meta_src, src);
-          fd.close();
-        }
-      }
-
-      delete[] meta_src;
-    }
-
-    k = m_list.size();
-  }
-
-  if (m_list.size() == 0) {
-    m_error = "No music to play";
-  }
-
-  else if (shuffle) {
-    std::mt19937 engine(esp_random());
-    std::shuffle(m_list.begin(), m_list.end(), engine);
-  }
-
-  DBG_EXEC({
-    dump_files();
-  });
-
-  return m_list.size();
-}
-
-//--------------------------------------------------------------------------------
-// Randomly scan a specified number of audio files
-//--------------------------------------------------------------------------------
-uint32_t MP3Player::ScanAudioRandom(uint32_t max_files) {
-  DBG_ASSERT(m_tree && m_list.size() == 0);
-
-  std::random_device seed_gen;
-  std::mt19937 engine(seed_gen());
-
-  const size_t n = m_tree->get_n_leafs();
-  #define MIN(a, b) ((a) < (b) ? (a) : (b))
-  max_files = MIN(max_files, n);
-
-  while (max_files-- > 0) {
-    uint32_t key = engine() % n;
-    Node *node = m_tree->find_node(key);
-    DBG_ASSERT(node);
-
-    // Read audio files in specified album folder
-    const char *path = m_tree->get_path();
-    std::vector<std::string> names;
-    File fd, dir = SD.open(path);
-    while (fd = dir.openNextFile()) {
-      std::string name;
-      if (check_mp3(fd, name)) {
-        names.push_back(name);
-      }
-      fd.close();
-    }
-    dir.close();
-
-    if (names.size()) {
-      uint32_t r = engine() % names.size();
-      append(names[r].c_str(), key);
-    }
-  }
-
-  DBG_EXEC({
-    dump_files();
-  });
-
-  return m_list.size();
-}
-
-//--------------------------------------------------------------------------------
 // Clear all the nodes in tree
 //--------------------------------------------------------------------------------
 void MP3Player::ClearAudioFiles(void) {
@@ -357,13 +251,13 @@ uint32_t MP3Player::GetPictureNo(uint32_t playNo) {
   File fd = SD.open(path.c_str(), FILE_READ);
   if (fd) {
 #ifdef  SDFATFS_USED
-    String n = "";
+    String buf = "";
     while (fd.available()) {
-      n += fd.readString();
+      buf += fd.readString();
     }
     fd.close();
-    if (isdigit(n[0])) {
-      pictNo = atoi(n.c_str());
+    if (isdigit(buf[0])) {
+      pictNo = atoi(buf.c_str());
     }
 #else // SD
     char buf[BUF_SIZE];

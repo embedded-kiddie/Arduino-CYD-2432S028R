@@ -6,8 +6,9 @@
 
 #include "config.h"
 #include "tree.hpp"
-#include <string>
-#include <vector>
+#include <string>     // std::string
+#include <vector>     // std::vector
+#include <functional> // std::hash
 
 //--------------------------------------------------------------------------------
 // Possible values for `SetVolume()`
@@ -15,6 +16,12 @@
 #define MP3_VOLUME_MIN  0
 #define MP3_VOLUME_INI  6
 #define MP3_VOLUME_MAX  21
+
+//--------------------------------------------------------------------------------
+// Audio file selection settings
+//--------------------------------------------------------------------------------
+#define MP3_HEAP_MEM_MARGIN (10 * 1024U)  // Heap memory margin
+#define MP3_MAX_AUDIO_FILES 750
 
 //--------------------------------------------------------------------------------
 // Meta data for MP3 audio file
@@ -75,13 +82,12 @@ public:
   PlayList_t  m_list = {};
 
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
+  uint32_t    ScanPlayList(void);
+  uint32_t    ScanAudioFiles(uint8_t partition, bool shuffle = true);
   void        SetSubDir(const char* name) { m_root = m_base + name; }
   const char* GetSubDir(void) { return m_root.c_str(); }
   uint32_t    GetPlayNo(void) { return m_playNo; }
   uint32_t    GetCounts(void) { return m_list.size(); }
-  uint32_t    ScanPlayList(void);
-  uint32_t    ScanAudioFiles(bool shuffle = true);
-  uint32_t    ScanAudioRandom(uint32_t max_files);
   std::string GetDirPath  (uint32_t playNo);
   std::string GetFilePath (uint32_t playNo);
   uint32_t    GetPictureNo(uint32_t playNo);
@@ -164,6 +170,94 @@ private:
             f.name.c_str(), f.name.size(), f.name.capacity());
     }
     printf("Total: %d\n", m_list.size());
+  }
+
+  //--------------------------------------------------------------------------------
+  // Scan audio files and make a play list
+  //--------------------------------------------------------------------------------
+  uint32_t scan_files(uint32_t key) {
+    std::hash<std::string> MakeHash;
+
+    Node *node = m_tree->find_node(key);
+    DBG_ASSERT(node);
+
+    if (node->meta.checked == LEAF_SELECTED) {
+      uint32_t k = m_list.size();
+      const char *path = m_tree->get_path();
+      File fd, dir = SD.open(path);
+      while (fd = dir.openNextFile()) {
+        std::string name;
+        if (check_mp3(fd, name)) {
+          append(name.c_str(), key);
+        }
+        fd.close();
+      }
+      dir.close();
+
+      // Sort the list in order to arrange metadata in order
+      std::sort(m_list.begin() + k, m_list.end(), [](MP3List_t &a, MP3List_t &b) {
+        return a.name.compare(b.name) < 0 ? true : false; // Ascending order
+      });
+
+      // Check and fix album metadata integrity
+      const int n = m_list.size() - k;
+      MP3Hash_t *meta_src = new MP3Hash_t[n];
+      DBG_ASSERT(meta_src); // Out of memory
+
+      if (meta_src) {
+        size_t src = sizeof(MP3Hash_t) * n;
+        memset((void*)meta_src, 0, src);
+        for (int i = 0; i < n; i++) {
+          meta_src[i].hash = MakeHash(m_list[k + i].name);
+        }
+
+        // Read an existing meta data file
+        int counts = 0;
+        size_t dst = 0;
+        std::string file = path;
+        file += "/" ALBUM_META_FILE;
+        fd = SD.open(file.c_str(), FILE_READ);
+
+        if (fd) {
+          dst = fd.SDFS_SIZE();
+          const int m = dst / sizeof(MP3Hash_t);
+          MP3Hash_t *meta_dst = new MP3Hash_t[m];
+          DBG_ASSERT(meta_dst); // Out of memory
+
+          if (meta_dst) {
+            dst = fd.read((SDFS_VOID*)meta_dst, dst);
+
+            // Find a matching hash and update meta data
+            for (int i = 0; i < n; i++) {
+              for (int j = 0; j < m; j++) {
+                if (meta_src[i].hash == meta_dst[j].hash) {
+                  m_list[k + i].meta = meta_src[i].meta = meta_dst[j].meta;
+                  ++counts;
+                  break;
+                }
+              }
+            }
+
+            delete[] meta_dst;
+          }
+
+          fd.close();
+        }
+
+        // Update if mismatched
+        if (src != dst || n != counts) {
+          if (fd = SD.open(file.c_str(), FILE_WRITE)) {
+            fd.seek(0);
+            fd.write((SDFS_VOID*)meta_src, src);
+            fd.close();
+          }
+        }
+
+        delete[] meta_src;
+      }
+    }
+
+    return m_list.size();
   }
 };
 /*
