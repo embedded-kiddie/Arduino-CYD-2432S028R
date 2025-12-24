@@ -44,6 +44,11 @@ bool MP3Player::begin(const char *root, uint8_t volume) {
 // Scan and create a list of audio m_list in a specified directory.
 //--------------------------------------------------------------------------------
 uint32_t MP3Player::ScanPlayList(void) {
+//DBG_EXEC({
+    size_t heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT); // MP3_HEAP_MEM_MARGIN
+    printf("%s: Free heap %lu bytes\n", __func__, heap);
+//});
+
   if (m_tree == NULL) {
     File dir = SD.open(m_root.c_str());
     if (!dir) {
@@ -71,31 +76,33 @@ uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
 
   std::mt19937 engine(esp_random());
 
-  size_t heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT); // MP3_HEAP_MEM_MARGIN
-  DBG_EXEC(printf("Heap free: %lu\n", heap));
+//DBG_EXEC({
+    size_t heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT); // MP3_HEAP_MEM_MARGIN
+    printf("%s: Free heap %lu bytes\n", __func__, heap);
+//});
 
-  const size_t m = m_tree->get_n_leafs(); // Number of albums
-  const size_t n = m_tree->get_n_audio(); // Number of audio files
+  const size_t n_leafs = m_tree->get_n_leafs(); // Number of albums
+  const size_t n_audio = m_tree->get_n_audio(); // Number of audio files
   #define MIN(a, b) ((a) < (b) ? (a) : (b))
-  uint32_t max_files = MIN(MP3_MAX_AUDIO_FILES, n);
+  uint32_t max_files = MIN(MP3_MAX_AUDIO_FILES, n_audio);
 
   if (partition) {
-    for (int k = 0, key = 0; max_files > k && key < n; key++) {
-      k = scan_files(key);
+    for (int i = 0, key = 0; max_files > i && key < n_leafs; key++) {
+      i = scan_files(key);
     }
   }
 
   else {
     std::vector<uint16_t> pot;
-    for (int i = 0; i < m; i++) {
+    for (int i = 0; i < n_leafs; i++) {
       pot.push_back(i);
     }
 
     // Prevent multiple selections of the same album
-    for (int k = 0, m = pot.size(); m && max_files > k; m = pot.size()) {
-      uint32_t key = engine() % m;
-      k = scan_files(pot[key]);
-      pot.erase(pot.begin() + key);
+    for (int i = 0, n_leafs = pot.size(); max_files > i && n_leafs; n_leafs = pot.size()) {
+      uint32_t key = engine() % n_leafs;
+      i = scan_files(pot[key]);
+      pot.erase(pot.begin() + key); // Delete the key-th element
     }
   }
 
@@ -107,10 +114,12 @@ uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
     std::shuffle(m_list.begin(), m_list.end(), engine);
   }
 
-  DBG_EXEC({
+//DBG_EXEC({
     //dump_files();
-    printf("ScanAudioFiles: %d\n", m_list.size());
-  });
+    heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT); // MP3_HEAP_MEM_MARGIN
+    printf("%s: Free heap %lu bytes\n", __func__, heap);
+    printf("%s: %d files\n", __func__, m_list.size());
+//});
 
   return m_list.size();
 }

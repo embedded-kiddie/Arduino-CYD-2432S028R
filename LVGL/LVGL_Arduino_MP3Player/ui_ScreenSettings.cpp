@@ -13,9 +13,12 @@ lv_obj_t *ui_ScreenSettings;
 //--------------------------------------------------------------------------------
 // Offset from the top / Roller width
 //--------------------------------------------------------------------------------
-#define SHUFFLE_POS_Y 72
-#define TIMER_POS_Y   140
+#define TITLE_POS_Y   12
+#define RADIO_POS_Y   24
+#define TIMER_POS_Y   78
 #define TIMER_WIDTH   100
+#define TIMER_VISIBLE 3   // 3 or 2
+#define BLTOOTH_POS_Y (108 + TIMER_VISIBLE * (CUSTOM_FONT_MEDIUM_HEIGHT * 1.2))
 
 //--------------------------------------------------------------------------------
 // Contents of dropdown list
@@ -103,41 +106,13 @@ static void radio_event_handler(lv_event_t *e) {
   uint8_t  *active_id = (uint8_t *)lv_event_get_user_data(e);
   lv_obj_t *container = (lv_obj_t*)lv_event_get_current_target(e);
   lv_obj_t *act_cb = lv_event_get_target_obj(e);
-  lv_obj_t *old_cb = lv_obj_get_child(container, *active_id - 1);
+  lv_obj_t *old_cb = lv_obj_get_child(container, *active_id);
 
   // Do nothing if the container was clicked
   if (act_cb != container) {
-    lv_obj_remove_state(old_cb, LV_STATE_CHECKED);      // Uncheck the previous radio button
-    lv_obj_add_state   (act_cb, LV_STATE_CHECKED);      // Check the current radio button
-    *active_id = (uint8_t)lv_obj_get_index(act_cb) + 1; // Update ui_setting.partition_id
-  }
-}
-
-//--------------------------------------------------------------------------------
-// https://docs.lvgl.io/master/widgets/switch.html#simple-switch
-//--------------------------------------------------------------------------------
-static void switch_event_handler(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-
-  lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_setting.shuffle_mode = lv_obj_has_state(obj, LV_STATE_CHECKED);
-
-  lv_obj_t *parent = lv_obj_get_parent(obj);
-  lv_obj_t *container = lv_obj_get_child(parent, 1);
-
-  if (ui_setting.shuffle_mode) {
-    ui_setting.partition_id = 0;
-  } else {
-    ui_setting.partition_id = ui_setting.partition_backup;
-  }
-
-  for (int i = 0; i < PARTITION_MAX; i++) {
-    obj = lv_obj_get_child(container, i);
-    if (ui_setting.shuffle_mode || i >= ui_setting.partition_max) {
-      lv_obj_add_state   (obj, LV_STATE_DISABLED);
-    } else {
-      lv_obj_remove_state(obj, LV_STATE_DISABLED);
-    }
+    lv_obj_remove_state(old_cb, LV_STATE_CHECKED);  // Uncheck the previous radio button
+    lv_obj_add_state   (act_cb, LV_STATE_CHECKED);  // Check the current radio button
+    *active_id = (uint8_t)lv_obj_get_index(act_cb); // Update ui_setting.partition_id
   }
 }
 
@@ -154,16 +129,16 @@ void ui_ScreenSettings_screen_init(void) {
 
     ///////////////////////// Partition //////////////////////////
     lv_obj_t *obj = lv_label_create(ui_ScreenSettings);
-    lv_obj_set_pos(obj, LV_PCT_X(5), LV_PCT_Y(4));
+    lv_obj_set_pos(obj, LV_PCT_X(5), TITLE_POS_Y),
     lv_label_set_text_static(obj, "Partition");
 
     static constexpr lv_style_const_prop_t style_prop_container[] = {
       LV_STYLE_CONST_X(LV_PCT_X(0)),
-      LV_STYLE_CONST_Y(LV_PCT_Y(10)),
+      LV_STYLE_CONST_Y(RADIO_POS_Y + 26),
       LV_STYLE_CONST_HEIGHT(LV_SIZE_CONTENT),
       LV_STYLE_CONST_WIDTH(LV_PCT_X(100)),
       LV_STYLE_CONST_PAD_TOP(5),
-      LV_STYLE_CONST_PAD_LEFT(15),
+      LV_STYLE_CONST_PAD_LEFT(20),
       LV_STYLE_CONST_PAD_RIGHT(0),
       LV_STYLE_CONST_PAD_BOTTOM(5),
       LV_STYLE_CONST_BORDER_WIDTH(0),
@@ -188,43 +163,32 @@ void ui_ScreenSettings_screen_init(void) {
     static LV_STYLE_CONST_INIT(style_radio,       (void*)style_prop_radio      );
     static LV_STYLE_CONST_INIT(style_radio_check, (void*)style_prop_radio_check);
 
-    char buf[4];
-    for (int i = 0; i < PARTITION_MAX; i++) {
+    for (int i = 0; i <= PARTITION_MAX; i++) {
       obj = lv_checkbox_create(container);
-      lv_snprintf(buf, sizeof(buf), "%d", i + 1);
-      lv_checkbox_set_text(obj, buf);
-      lv_obj_add_flag     (obj, LV_OBJ_FLAG_EVENT_BUBBLE); // Propagate the events to the container
-      lv_obj_add_style    (obj, &style_radio,       (uint32_t)LV_PART_INDICATOR);
-      lv_obj_add_style    (obj, &style_radio_check, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+      lv_checkbox_set_text_static (obj, "");
+      lv_obj_add_flag             (obj, LV_OBJ_FLAG_EVENT_BUBBLE); // Propagate the events to the container
+      lv_obj_add_style            (obj, &style_radio,       (uint32_t)LV_PART_INDICATOR);
+      lv_obj_add_style            (obj, &style_radio_check, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
 
-      if (i >= ui_setting.partition_max || ui_setting.shuffle_mode) {
-        lv_obj_add_state  (obj, LV_STATE_DISABLED);
+      if (i == ui_setting.partition_id) {
+        lv_obj_add_state          (obj, LV_STATE_CHECKED);
+      } else {
+        lv_obj_remove_state       (obj, LV_STATE_CHECKED);
       }
-      if (i + 1 == ui_setting.partition_backup) {
-        lv_obj_add_state  (obj, LV_STATE_CHECKED);
+      if (i > ui_setting.partition_max) {
+        lv_obj_add_state          (obj, LV_STATE_DISABLED);
+      } else {
+        lv_obj_remove_state       (obj, LV_STATE_DISABLED);
       }
     }
 
-    //////////////////////// Shuffle Mode ////////////////////////
-    obj = lv_label_create(ui_ScreenSettings);
-    lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(4) + SHUFFLE_POS_Y);
-    lv_label_set_text_static(obj, "Shuffle Mode");
-
-    obj = lv_label_create(ui_ScreenSettings);
-    lv_obj_set_pos          (obj, LV_PCT_X(10), LV_PCT_Y(12) + SHUFFLE_POS_Y);
-    lv_label_set_text_static(obj, "All Partitions :");
-
-    obj = lv_switch_create(ui_ScreenSettings);
-    lv_obj_set_pos          (obj, LV_PCT_X(60), LV_PCT_Y(10) + SHUFFLE_POS_Y);
-    lv_obj_remove_state     (obj, LV_STATE_CHECKED);
-    lv_obj_add_event_cb     (obj, &switch_event_handler, LV_EVENT_VALUE_CHANGED, NULL);
-
-    if (ui_setting.partition_max == 0) {
-      lv_obj_add_state      (obj, LV_STATE_DISABLED);
-    } else if (ui_setting.shuffle_mode) {
-      lv_obj_add_state      (obj, LV_STATE_CHECKED);
-    } else {
-      lv_obj_remove_state   (obj, LV_STATE_CHECKED);
+    // Positions should be set individually due to the proportional fonts
+    static const char *label[] = {"All", "1", "2", "3", "4", "5"};
+    static const uint32_t px[] = {   21,  64,  99, 135, 169, 207};
+    for (int i = 0; i <= PARTITION_MAX; i++) {
+      obj = lv_label_create(ui_ScreenSettings);
+      lv_obj_set_pos          (obj, px[i], LV_PCT_Y(4) + RADIO_POS_Y);
+      lv_label_set_text_static(obj, label[i]);
     }
 
     ////////////////////// Backlight Label ///////////////////////
@@ -239,7 +203,7 @@ void ui_ScreenSettings_screen_init(void) {
     lv_obj_add_event_cb     (obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_roller_set_options   (obj, backlight.text, LV_ROLLER_MODE_NORMAL);
     lv_roller_set_selected  (obj, ui_setting.selectBacklight, LV_ANIM_ON);
-    lv_roller_set_visible_row_count(obj, 3);
+    lv_roller_set_visible_row_count(obj, TIMER_VISIBLE);
 
     ////////////////////// Sleep Timer Label /////////////////////
     obj = lv_label_create(ui_ScreenSettings);
@@ -253,8 +217,13 @@ void ui_ScreenSettings_screen_init(void) {
     lv_obj_add_event_cb     (obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_roller_set_options   (obj, sleeptime.text, LV_ROLLER_MODE_NORMAL);
     lv_roller_set_selected  (obj, ui_setting.selectSleepTimer, LV_ANIM_ON);
-    lv_roller_set_visible_row_count(obj, 3);
-
+    lv_roller_set_visible_row_count(obj, TIMER_VISIBLE);
+#if   false
+    //////////////////// Bluetooth Devices ///////////////////////
+    obj = lv_label_create(ui_ScreenSettings);
+    lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(12) + BLTOOTH_POS_Y);
+    lv_label_set_text_static(obj, "Bluetooth Devices");
+#endif
 #if SHOW_ARROW_BUTTON || true
     ///////////////////////// Arrow Icon /////////////////////////
     {

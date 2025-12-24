@@ -20,8 +20,9 @@
 //--------------------------------------------------------------------------------
 // Audio file selection settings
 //--------------------------------------------------------------------------------
-#define MP3_HEAP_MEM_MARGIN (10 * 1024U)  // Heap memory margin
-#define MP3_MAX_AUDIO_FILES 750
+#define MP3_HEAP_INI_CAPACITY (150 * 1024U) // Estimated initial heap memory capacity
+#define MP3_HEAP_MIN_MARGIN   ( 10 * 1024U) // Minimum remaining heap memory margin
+#define MP3_MAX_AUDIO_FILES   750
 
 //--------------------------------------------------------------------------------
 // Meta data for MP3 audio file

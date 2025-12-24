@@ -13,8 +13,6 @@ lv_obj_t *ui_ScreenPlayList;
 extern void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags); // Defined in ui.cpp (it needs MP3Player.h)
 
 /////////////////////////// MACROS //////////////////////////
-#define LIST_FONT_SMALL_HEIGHT    17  // For font size: 12px
-#define LIST_FONT_MEDIUM_HEIGHT   22  // For font size: 14px
 #define LIST_LABEL_MARGIN         100 // Left(50) + Right(50)
 #define LIST_SLIDER_PADDING       3   // Slider Padding: 4px
 #define LIST_SLIDER_WIDTH         5   // Slider Width: 5px
@@ -59,14 +57,14 @@ static constexpr lv_style_const_prop_t style_cell_checked_prop[] = {
 };
 static constexpr lv_style_const_prop_t style_title_prop[] = {
   LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LIST_LABEL_MARGIN),
-  LV_STYLE_CONST_HEIGHT(LIST_FONT_MEDIUM_HEIGHT),
+  LV_STYLE_CONST_HEIGHT(CUSTOM_FONT_MEDIUM_HEIGHT),
   LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_MEDIUM),
   LV_STYLE_CONST_TEXT_COLOR(UI_COLOR_BACKGROUND),
   LV_STYLE_CONST_PROPS_END
 };
 static constexpr lv_style_const_prop_t style_artist_prop[] = {
   LV_STYLE_CONST_WIDTH(SCREEN_WIDTH - LIST_LABEL_MARGIN),
-  LV_STYLE_CONST_HEIGHT(LIST_FONT_SMALL_HEIGHT),
+  LV_STYLE_CONST_HEIGHT(CUSTOM_FONT_SMALL_HEIGHT),
   LV_STYLE_CONST_PAD_RIGHT(5),
   LV_STYLE_CONST_TEXT_FONT(&CUSTOM_FONT_SMALL),
   LV_STYLE_CONST_TEXT_COLOR(UI_COLOR_LIST_ARTIST),
@@ -85,7 +83,7 @@ static LV_STYLE_CONST_INIT(style_artist,        (void*)style_artist_prop);
 static LV_STYLE_CONST_INIT(style_time,          (void*)style_time_prop);
 
 static constexpr int32_t col_dsc[] = { LV_GRID_CONTENT, LV_GRID_FR(1), CELL_HEART_SIZE, LV_GRID_TEMPLATE_LAST };
-static constexpr int32_t row_dsc[] = { LIST_FONT_MEDIUM_HEIGHT, LIST_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
+static constexpr int32_t row_dsc[] = { CUSTOM_FONT_MEDIUM_HEIGHT, CUSTOM_FONT_SMALL_HEIGHT, LV_GRID_TEMPLATE_LAST };
 
 ////////////////////// STATIC FUNCTIONS /////////////////////
 //--------------------------------------------------------------------------------

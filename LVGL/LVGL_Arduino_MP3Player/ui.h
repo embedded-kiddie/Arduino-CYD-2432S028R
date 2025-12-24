@@ -21,6 +21,8 @@
 #define CUSTOM_FONT_SMALL   lv_font_montserrat_12
 #define CUSTOM_FONT_MEDIUM  lv_font_montserrat_14
 #endif
+#define CUSTOM_FONT_SMALL_HEIGHT  17  // For font size: 12px
+#define CUSTOM_FONT_MEDIUM_HEIGHT 22  // For font size: 14px
 LV_FONT_DECLARE(CUSTOM_FONT_SMALL);
 LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 
@@ -66,13 +68,12 @@ typedef enum {
 } UI_State_t;
 
 //////////////////// SETTINGS / CONTROLL ////////////////////
+#define PARTITION_MAX 5       // Maximum # of partitions (must be 5 or less)
 typedef struct {
   uint8_t   repeat;           // true: repeat
   bool      favorite;         // true: a heart mark
   bool      shuffle;          // true: shuffle, false: in sequence
-  bool      shuffle_mode;     // true: all partitions, false: each partition
   uint8_t   partition_max;    // maximum partitions   (0, ...PARTITION_MAX)
-  uint8_t   partition_backup; // backup  partition ID (1, ...partition_max)
   uint8_t   partition_id;     // current partition ID (0, ...partition_max)
   uint8_t   selectBacklight;  // 0: 30sec, 1: 1min, ...
   uint8_t   selectSleepTimer; // 0: 30min, 1: 1hour, ...

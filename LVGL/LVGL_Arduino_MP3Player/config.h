@@ -59,9 +59,9 @@
 // The list to classify albums is saved under "PARTITION_PATH" as a text file.
 // Also the configuration for each classification is saved as a JSON file.
 //--------------------------------------------------------------------------------
-#define ALBUM_CONF_PATH   "@conf/"          // Album list configuration folder
-#define ALBUM_LIST_FILE   "@album.txt"      // Album list configuration file
-#define ALBUM_LIST_JSON   ".json"           // Album list JSON file extension
+#define ALBUM_CONF_PATH   "@conf/"      // Album list configuration folder
+#define ALBUM_LIST_FILE   "@album.txt"  // Album list configuration file
+#define ALBUM_LIST_JSON   ".json"       // Album list JSON file extension
 
 //--------------------------------------------------------------------------------
 // 7. Partitions under "MP3_ROOT_PATH"
@@ -69,9 +69,8 @@
 // So you can make full use of your SD card capacity by creating subfolders
 // (called partitions) under "MP3_ROOT_PATH". (e.g. "/MP3/1/", "/MP3/2/", ...)
 //--------------------------------------------------------------------------------
-#define PARTITION_MAX     5                 // Maximum number of partitions
-#define PARTITION_PATH    "%d/"             // Partition folder name ("%d" : 1, 2, ... 5)
-#define PARTITION_FILE    "@part.dat"       // Partition configuration file (binary data)
+#define PARTITION_PATH    "%d/"         // Partition folder name ("%d" : 1, 2, ... 5)
+#define PARTITION_FILE    "@part.dat"   // Partition configuration file (binary data)
 
 //================================================================================
 // Here're examples of folders/files structure on an SD card.

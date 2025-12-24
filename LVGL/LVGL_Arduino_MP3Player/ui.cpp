@@ -238,14 +238,9 @@ static void partition_load(void) {
     }
   }
 
-  // Conditions to reset partition
-  if (ui_setting.shuffle_mode || ui_setting.partition_id > ui_setting.partition_max) {
+  // Just in case
+  if (ui_setting.partition_id > ui_setting.partition_max) {
     ui_setting.partition_id = 0;
-  }
-
-  // Update backup partition number
-  if (ui_setting.partition_id) {
-    ui_setting.partition_backup = ui_setting.partition_id;
   }
 
   // Change the root folder with the current partition
@@ -283,9 +278,6 @@ static bool partition_save(void) {
       if (fd) {
         fd.write((uint8_t *)&ui_setting.partition_id, sizeof(ui_setting.partition_id));
         fd.close();
-        if (ui_setting.partition_id) {
-          ui_setting.partition_backup = ui_setting.partition_id;
-        }
       }
       return true; // Restart
     }
@@ -300,13 +292,22 @@ static bool create_playlist(void) {
   // Setup partition
   partition_load();
 
+  uint32_t time = lv_tick_get();
+
   // Scan SD card for album folders
   if (player.ScanPlayList()) {
+
+    printf("ScanPlayList: %lu [msec]\n", lv_tick_elaps(time));
+    time = lv_tick_get();
+
     // Load album list
     ui_album_load((void*)player.m_tree);
 
     // Scan audio files base on album list
     if (player.ScanAudioFiles(ui_setting.partition_id, ui_setting.shuffle)) {
+
+      printf("ScanAudioFiles: %lu [msec]\n", lv_tick_elaps(time));
+
       ui_set_playNo(ui_control.playNo);
       return true;
     }
@@ -317,7 +318,7 @@ static bool create_playlist(void) {
 //--------------------------------------------------------------------------------
 // Asynchronous function to reduce delays during screen transitions
 //--------------------------------------------------------------------------------
-static void async_stop(void *user_data) {
+static void stop_async(void *user_data) {
   if (ui_state != UI_STATE_IDLE) {
     ui_state = UI_STATE_STOP;
   }
@@ -485,7 +486,7 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
     ui_album_create((void*)player.m_tree);
 
     // Stop playback to avoid conflict with SD access (async required)
-    lv_async_call(async_stop, NULL);
+    lv_async_call(stop_async, NULL);
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
