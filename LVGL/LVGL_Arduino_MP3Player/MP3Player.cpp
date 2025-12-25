@@ -45,8 +45,9 @@ bool MP3Player::begin(const char *root, uint8_t volume) {
 //--------------------------------------------------------------------------------
 uint32_t MP3Player::ScanPlayList(void) {
 //DBG_EXEC({
-    size_t heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT); // MP3_HEAP_MEM_MARGIN
-    printf("%s: Free heap %lu bytes\n", __func__, heap);
+    printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
+      heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
+      heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
 //});
 
   if (m_tree == NULL) {
@@ -77,8 +78,9 @@ uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
   std::mt19937 engine(esp_random());
 
 //DBG_EXEC({
-    size_t heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT); // MP3_HEAP_MEM_MARGIN
-    printf("%s: Free heap %lu bytes\n", __func__, heap);
+    printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
+      heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
+      heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
 //});
 
   const size_t n_leafs = m_tree->get_n_leafs(); // Number of albums
@@ -116,8 +118,9 @@ uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
 
 //DBG_EXEC({
     //dump_files();
-    heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT); // MP3_HEAP_MEM_MARGIN
-    printf("%s: Free heap %lu bytes\n", __func__, heap);
+    printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
+      heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
+      heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
     printf("%s: %d files\n", __func__, m_list.size());
 //});
 

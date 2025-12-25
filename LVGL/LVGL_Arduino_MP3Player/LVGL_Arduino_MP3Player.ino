@@ -269,7 +269,7 @@ static uint32_t my_tick(void) {
 }
 
 void setup() {
-#if (DEBUG & 1) || defined(_ESP32_HPP_)
+#if (DEBUG & 2) || defined(_ESP32_HPP_)
   Serial.begin(115200);
   delay(1000);
 #endif

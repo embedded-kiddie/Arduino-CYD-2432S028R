@@ -48,9 +48,9 @@ private:
   static bool m_found;          // node search flag
   static Node *m_found_node;    // node search result
   static std::string m_path;    // file path search result
-  static uint32_t n_nodes;      // number of nodes
-  static uint32_t n_leafs;      // number of leaf nodes
   static uint32_t n_depth;      // depth of tree
+  static uint32_t n_nodes;      // number of all nodes
+  static uint32_t n_leafs;      // number of leaf nodes
   static uint32_t n_audio;      // number of files under the leaf nodes
 public:
   uint16_t key;                 // a key assigned to each node

@@ -20,9 +20,10 @@
 //--------------------------------------------------------------------------------
 // Audio file selection settings
 //--------------------------------------------------------------------------------
-#define MP3_HEAP_INI_CAPACITY (150 * 1024U) // Estimated initial heap memory capacity
-#define MP3_HEAP_MIN_MARGIN   ( 10 * 1024U) // Minimum remaining heap memory margin
-#define MP3_MAX_AUDIO_FILES   750
+#define MP3_HEAP_INI_SIZE     (150 * 1024U) // Estimated initial heap memory size
+#define MP3_HEAP_AVE_NODE     150           // Averary memory consumption per node
+#define MP3_HEAP_AVE_FILE     100           // Averary memory consumption per file
+#define MP3_MAX_AUDIO_FILES   750           // Maximum number of files in a playlist
 
 //--------------------------------------------------------------------------------
 // Meta data for MP3 audio file
