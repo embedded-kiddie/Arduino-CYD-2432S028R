@@ -295,9 +295,9 @@ static bool create_playlist(void) {
   uint32_t time = lv_tick_get();
 
   // Scan SD card for album folders
-  if (player.ScanPlayList()) {
+  if (player.ScanAlbumDirs()) {
 
-    printf("ScanPlayList: %lu [msec]\n", lv_tick_elaps(time));
+    printf("ScanAlbumDirs: %lu [msec]\n", lv_tick_elaps(time));
     time = lv_tick_get();
 
     // Load album list

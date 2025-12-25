@@ -41,9 +41,9 @@ bool MP3Player::begin(const char *root, uint8_t volume) {
 }
 
 //--------------------------------------------------------------------------------
-// Scan and create a list of audio m_list in a specified directory.
+// Scan and create an album list (node tree) in a specified directory.
 //--------------------------------------------------------------------------------
-uint32_t MP3Player::ScanPlayList(void) {
+uint32_t MP3Player::ScanAlbumDirs(void) {
 //DBG_EXEC({
     printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
       heap_caps_get_free_size(MALLOC_CAP_DEFAULT),

@@ -84,7 +84,7 @@ public:
   PlayList_t  m_list = {};
 
   bool        begin(const char *root, uint8_t vol = MP3_VOLUME_INI);
-  uint32_t    ScanPlayList(void);
+  uint32_t    ScanAlbumDirs(void);
   uint32_t    ScanAudioFiles(uint8_t partition, bool shuffle = true);
   void        SetSubDir(const char* name) { m_root = m_base + name; }
   const char* GetSubDir(void) { return m_root.c_str(); }
