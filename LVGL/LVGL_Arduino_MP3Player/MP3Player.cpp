@@ -41,7 +41,7 @@ bool MP3Player::begin(const char *root, uint8_t volume) {
 }
 
 //--------------------------------------------------------------------------------
-// Scan and create an album list (node tree) in a specified directory.
+// Scan the SD card and create an album list (i.e. a node tree)
 //--------------------------------------------------------------------------------
 uint32_t MP3Player::ScanAlbumDirs(void) {
 //DBG_EXEC({

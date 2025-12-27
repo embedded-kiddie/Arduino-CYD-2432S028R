@@ -62,13 +62,11 @@ typedef enum {
   UI_STATE_BLOFF,
   UI_STATE_ID3,
   UI_STATE_EOF,
-  UI_STATE_SAVE,
   UI_STATE_CLEAR,
   UI_STATE_ERROR,
 } UI_State_t;
 
 //////////////////// SETTINGS / CONTROLL ////////////////////
-#define PARTITION_MAX 5       // Maximum # of partitions (must be 5 or less)
 typedef struct {
   uint8_t   repeat;           // true: repeat
   bool      favorite;         // true: a heart mark
@@ -77,6 +75,7 @@ typedef struct {
   uint8_t   partition_id;     // current partition ID (0, ...partition_max)
   uint8_t   selectBacklight;  // 0: 30sec, 1: 1min, ...
   uint8_t   selectSleepTimer; // 0: 30min, 1: 1hour, ...
+//uint8_t   spare;
 } UI_Setting_t;
 
 typedef struct {
@@ -102,6 +101,7 @@ extern lv_obj_t *ui_ButtonPlay;
 extern lv_obj_t *ui_ElapsedBar;
 extern lv_obj_t *ui_Volume;
 extern lv_obj_t *ui_AlbumImage;
+extern lv_obj_t *ui_Shuffle;
 void ui_ScreenMain_screen_init(void);
 void ui_event_ScreenMain    (lv_event_t *e);
 void ui_event_ButtonPlay    (lv_event_t *e);

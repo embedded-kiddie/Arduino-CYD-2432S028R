@@ -18,7 +18,7 @@
 //--------------------------------------------------------------------------------
 // true  : Use the LGFX auto-detect feature
 // false : Define the appropriate LCD panel driver type to "DISPLAY_CYD_2USB"
-#define USE_AUTODETECT  false
+#define USE_AUTODETECT  true
 
 #if (USE_AUTODETECT == false)
 // false: Panel driver: ILI9341 (micro-USB x 1 type)
@@ -43,63 +43,70 @@
 #define USE_CUSTOM_FONTS  true
 
 //--------------------------------------------------------------------------------
-// 5. MP3 files in SD card
-// Album cover photo files (e.g. "@photo.jpg") should preferably be 96x96,
-// compress the file by 50-75%, and keep the file size to 5KB or less.
+// 5. Path to the folder where MP3 audio files are saved
 //--------------------------------------------------------------------------------
 #define MP3_ROOT_PATH     "/MP3/"                       // Root folder for storing music files
 #define MP3_FILE_EXT      {".m4a", ".mp3", ".wav"}      // Define the preferred extension first
-#define ALBUM_PHOTO_EXT   ".jpg"                        // Album cover photo file name extension
-#define ALBUM_PHOTO_FILE  "@photo"                      // Album cover photo file name body
-#define ALBUM_META_FILE   "@meta.dat"                   // Album meta information file (binary data)
 #define IS_VALID_FILE(f)  (*(f) != '@' && *(f) != '.')  // Folder/file name prefix (1 char) to exclude
 
 //--------------------------------------------------------------------------------
-// 6. Album list configuration under "PARTITION_PATH"
-// The list to classify albums is saved under "PARTITION_PATH" as a text file.
-// Also the configuration for each classification is saved as a JSON file.
+// 6. File that stores settings related to the operation of this player
 //--------------------------------------------------------------------------------
-#define ALBUM_CONF_PATH   "@conf/"      // Album list configuration folder
-#define ALBUM_LIST_FILE   "@album.txt"  // Album list configuration file
-#define ALBUM_LIST_JSON   ".json"       // Album list JSON file extension
+#define MP3_SETTING_FILE  "@setting.dat"  // Save `UI_Setting_t` structure as binary
 
 //--------------------------------------------------------------------------------
 // 7. Partitions under "MP3_ROOT_PATH"
-// Please limit the number of songs in your playlist to a maximum of around 750.
-// So you can make full use of your SD card capacity by creating subfolders
+// Limit the # of audio files in your playlist to a maximum of around 750.
+// You can make full use of your SD card capacity by creating subfolders
 // (called partitions) under "MP3_ROOT_PATH". (e.g. "/MP3/1/", "/MP3/2/", ...)
 //--------------------------------------------------------------------------------
-#define PARTITION_PATH    "%d/"         // Partition folder name ("%d" : 1, 2, ... 5)
-#define PARTITION_FILE    "@part.dat"   // Partition configuration file (binary data)
+#define PARTITION_MAX     5               // Maximum # of partitions (must be 5 or less)
+#define PARTITION_PATH    "%d/"           // Partition folder name ("%d" : 1, 2, ... 5)
+
+//--------------------------------------------------------------------------------
+// 8. Album list configuration under "PARTITION_PATH"
+// The list to classify albums is saved under "PARTITION_PATH" as a text file.
+// Also the configuration for each classification is saved as a JSON file.
+//--------------------------------------------------------------------------------
+#define ALBUM_CONF_PATH   "@album/"       // Album list configuration folder
+#define ALBUM_LIST_FILE   "@list.txt"     // Album list configuration file
+#define ALBUM_LIST_JSON   ".json"         // Album list JSON file extension
+
+// Album cover photo files (e.g. "@photo.jpg") may preferably be 96x96,
+// compress the jpeg file by 50-75%, and keep the file size to 6KB or less.
+#define ALBUM_META_FILE   "@meta.dat"     // Album meta information file (binary data)
+#define ALBUM_PHOTO_FILE  "@photo"        // Album cover photo file name body
+#define ALBUM_PHOTO_EXT   ".jpg"          // Album cover photo file name extension
 
 //================================================================================
 // Here're examples of folders/files structure on an SD card.
 //
 // [WITHOUT PARTITION]            [WIDTH PARTITION]
 // /MP3/                          /MP3/
-// ├── @conf/                     ├── @part.dat
-// │   ├── @album.txt             ├── 1/
-// │   ├── 1.json                 │   ├── @conf/
-// │   ├── 2.json                 │   │   ├── @album.txt
-// │   └── ...                    │   │   ├── 1.json
-// ├── Artist1/                   │   │   ├── 2.json
-// │   ├── Arbum1.1/              │   │   └── ...
-// │   │   ├── @meta.dat          │   ├── Artist1/
-// │   │   ├── @photo.jpg         │   │   ├── Arbum1.1/
-// │   │   ├── 01 title01.m4a     │   │   │   ├── @meta.dat
-// │   │   ├── 02 title02.m4a     │   │   │   ├── @photo.jpg
-// │   │   └── ...                │   │   │   ├── 01 title01.m4a
-// │   ├── Arbum1.2/              │   │   │   ├── 02 title02.m4a
-// │   │   └── ...                │   │   │   └── ...
-// │   └── ...                    │   │   ├── Arbum1.2/
-// ├── Artist2/                   │   │   │   └── ...
-// │   ├── Arbum2.1               │   │   └── ...
-// │   └──...                     │   ├── Artist2/
-// └── ...                        │   │   ├── Arbum2.1/
-//                                │   │   └── ...
+// ├── @setting.dat               ├── @setting.dat
+// ├── @album/                    ├── 1/
+// │   ├── @list.txt              │   ├── @album/
+// │   ├── 1.json                 │   │   ├── @list.txt
+// │   ├── 2.json                 │   │   ├── 1.json
+// │   └── ...                    │   │   ├── 2.json
+// ├── Artist1/                   │   │   └── ...
+// │   ├── Arbum1.1/              │   ├── Artist1/
+// │   │   ├── @meta.dat          │   │   ├── Arbum1.1/
+// │   │   ├── @photo.jpg         │   │   │   ├── @meta.dat
+// │   │   ├── 01 title01.m4a     │   │   │   ├── @photo.jpg
+// │   │   ├── 02 title02.m4a     │   │   ├── 01 title01.m4a
+// │   │   └── ...                │   │   │   ├── 02 title02.m4a
+// │   ├── Arbum1.2/              │   │   │   └── ...
+// │   │   └── ...                │   │   ├── Arbum1.2/
+// │   └── ...                    │   │   │   └── ...
+// ├── Artist2/                   │   │   └── ...
+// │   ├── Arbum2.1               │   ├── Artist2/
+// │   └──...                     │   │   ├── Arbum2.1/
+// └── ...                        │   │   └── ...
 //                                │   └── ...
 //                                ├── 2/
-//                                │   ├── ...
+//                                │   ├── @album/
+//                                │   │   ├── ...
 //================================================================================
 
 #endif // _CONFIG_H_

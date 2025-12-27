@@ -166,7 +166,7 @@ public:
 #endif
 
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
-    static const char* reset_reason_all[] = {
+    static constexpr char* const reset_reason_all[] = {
       "reason can not be determined",
       "board power-on",
       "external (pin) reset",
@@ -185,7 +185,7 @@ public:
       "CPU lock up (double exception)",
     };
     // https://github.com/espressif/esp-idf/blob/master/components/soc/esp32/include/soc/reset_reasons.h
-    static const char* reset_reason_core[] = {
+    static constexpr char* const reset_reason_core[] = {
       "",
       "Power on reset",
       "",
@@ -205,7 +205,7 @@ public:
       "RTC watch dog resets digital core and RTC module",
     };
     // https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32/api-reference/system/sleep_modes.html
-    static const char* wakeup_cause[] = {
+    static constexpr char* const wakeup_cause[] = {
       "ESP_SLEEP_WAKEUP_UNDEFINED",
       "ESP_SLEEP_WAKEUP_ALL",
       "ESP_SLEEP_WAKEUP_EXT0",

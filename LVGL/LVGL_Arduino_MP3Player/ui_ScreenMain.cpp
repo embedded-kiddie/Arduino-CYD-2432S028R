@@ -15,6 +15,7 @@ lv_obj_t *ui_ButtonPlay;
 lv_obj_t *ui_ElapsedBar;
 lv_obj_t *ui_Volume;
 lv_obj_t *ui_AlbumImage;
+lv_obj_t *ui_Shuffle;
 
 //--------------------------------------------------------------------------------
 // Initialize screen
@@ -339,7 +340,7 @@ void ui_ScreenMain_screen_init(void) {
   }
 
   ////////////////////// Shuffle Icon ///////////////////////
-  lv_obj_t *ui_Shuffle = lv_checkbox_create(ui_ScreenMain);
+  ui_Shuffle = lv_checkbox_create(ui_ScreenMain);
   lv_checkbox_set_text_static (ui_Shuffle, "");
   lv_obj_add_state            (ui_Shuffle, ui_setting.shuffle ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
   {
