@@ -912,7 +912,7 @@ static void keypad_button_cb(lv_event_t *e) {
 
       if (album_control.list_id == 0) {
         // Creating JSON with all selected will result in high memory consumption
-        toggle_cell_state(TYPE_LEAF, LEAF_UNSELECTED);
+        // toggle_cell_state(TYPE_LEAF, LEAF_UNSELECTED);
 
         // Create a new empty entry
         album_control.list_id = album_control.list.size();
