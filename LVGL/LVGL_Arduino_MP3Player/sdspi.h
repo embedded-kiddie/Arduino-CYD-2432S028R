@@ -81,6 +81,6 @@ enum SeekMode {
 // Temporary buffer size for file path
 // title(30) + "/" + artist(30) + "/" + album(30) + ".mp3" + '\0'
 //--------------------------------------------------------------------------------
-#define BUF_SIZE 256
+#define BUF_SIZE 512
 
 #endif // _SDSPI_H_

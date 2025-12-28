@@ -563,21 +563,13 @@ void ui_event_ScreenSettings(lv_event_t *e) {
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
     ui_ScreenSettings_screen_deinit();
 
-    // Stop playback before saving settings
     if (ui_setting.partition_max) {
-      // Create a sub-directory string
-      char buf[BUF_SIZE];
-      if (ui_setting.partition_id) {
-        snprintf(buf, sizeof(buf), PARTITION_PATH, ui_setting.partition_id);
-      } else {
-        snprintf(buf, sizeof(buf), MP3_ROOT_PATH);
-      }
-      buf[sizeof(buf) - 1] = '\0';
+      // Update the partition ID if a different ID is selected
+      uint32_t partition_id = *(uint32_t*)lv_event_get_user_data(e);
+      if (ui_setting.partition_id != partition_id) {
+        ui_setting.partition_id = partition_id;
 
-      // Restart if the partition string has changed
-      const char *dir = player.GetSubDir();
-      if (strcmp(&dir[strlen(dir) - strlen(buf)], buf) != 0) {
-        // Avoid conflict with SD access
+        // Stop playback before saving settings to avoid conflict with SD access
         play_stop();
 
         save_setting();

@@ -120,11 +120,14 @@ static void radio_event_handler(lv_event_t *e) {
 // Initialize / Deinitialize widgets
 //--------------------------------------------------------------------------------
 void ui_ScreenSettings_screen_init(void) {
+  static uint32_t partition_id; // Return value when LV_EVENT_SCREEN_UNLOADED is fired
+
   if (ui_ScreenSettings == NULL) {
+    partition_id = ui_setting.partition_id;
     ui_ScreenSettings = lv_obj_create(NULL);
     lv_obj_set_style_bg_color (ui_ScreenSettings, UI_COLOR_BACKGROUND, 0);
     lv_obj_add_event_cb       (ui_ScreenSettings, ui_event_ScreenSettings, LV_EVENT_GESTURE, NULL);
-    lv_obj_add_event_cb       (ui_ScreenSettings, ui_event_ScreenSettings, LV_EVENT_SCREEN_UNLOADED, NULL);
+    lv_obj_add_event_cb       (ui_ScreenSettings, ui_event_ScreenSettings, LV_EVENT_SCREEN_UNLOADED, (void*)&partition_id);
     lv_obj_add_event_cb       (ui_ScreenSettings, delete_cb, LV_EVENT_DELETE, (void*)&ui_ScreenSettings);
 
     ///////////////////////// Partition //////////////////////////
@@ -150,7 +153,7 @@ void ui_ScreenSettings_screen_init(void) {
     lv_obj_t *container = lv_obj_create(ui_ScreenSettings);
     lv_obj_set_flex_flow(container, LV_FLEX_FLOW_ROW);
     lv_obj_add_style    (container, &style_container, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_event_cb (container, radio_event_handler, LV_EVENT_VALUE_CHANGED, (void*)&ui_setting.partition_id);
+    lv_obj_add_event_cb (container, radio_event_handler, LV_EVENT_VALUE_CHANGED, (void*)&partition_id);
 
     static constexpr lv_style_const_prop_t style_prop_radio[] = {
       LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
