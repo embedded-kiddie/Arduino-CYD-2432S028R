@@ -44,10 +44,12 @@ bool MP3Player::begin(const char *root, uint8_t volume) {
 // Scan the SD card and create an album list (i.e. a node tree)
 //--------------------------------------------------------------------------------
 uint32_t MP3Player::ScanAlbumDirs(void) {
+  uint32_t time;
 //DBG_EXEC({
     printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
       heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
       heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
+    time = lv_tick_get();
 //});
 
   if (m_tree == NULL) {
@@ -62,9 +64,10 @@ uint32_t MP3Player::ScanAlbumDirs(void) {
     dir.close();
   }
 
-  DBG_EXEC({
-    m_tree->dump_tree();
-  });
+//DBG_EXEC({
+    //m_tree->dump_tree();
+    printf("%s: %lu [msec]\n", __func__, lv_tick_elaps(time));
+//});
 
   return m_tree->get_n_leafs();
 }
@@ -74,14 +77,15 @@ uint32_t MP3Player::ScanAlbumDirs(void) {
 //--------------------------------------------------------------------------------
 uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
   DBG_ASSERT(m_tree && m_list.size() == 0);
-
-  std::mt19937 engine(esp_random());
-
+  uint32_t time;
 //DBG_EXEC({
     printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
       heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
       heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
+    time = lv_tick_get();
 //});
+
+  std::mt19937 engine(esp_random());
 
   const size_t n_leafs = m_tree->get_n_leafs(); // Number of albums
   const size_t n_audio = m_tree->get_n_audio(); // Number of audio files
@@ -118,6 +122,7 @@ uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
 
 //DBG_EXEC({
     //dump_files();
+    printf("%s: %lu [msec]\n", __func__, lv_tick_elaps(time));
     printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
       heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
       heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
@@ -201,7 +206,7 @@ bool MP3Player::SaveMetaData(uint32_t playNo, MP3Meta_t *meta) {
       fd.close();
     }
 
-    DBG_EXEC(printf("SaveMetaData: %s\n", list->name.c_str()));
+    DBG_EXEC(printf("%s: %s\n", __func__, list->name.c_str()));
 
     delete[] meta_hash;
     return true;

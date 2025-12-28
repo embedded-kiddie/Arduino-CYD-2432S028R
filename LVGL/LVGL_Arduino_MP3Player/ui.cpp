@@ -303,26 +303,18 @@ static bool create_playlist(void) {
     return false;
   }
 
-  uint32_t time = lv_tick_get();
-
   // Scan SD card for album folders
   if (player.ScanAlbumDirs()) {
-
-    printf("ScanAlbumDirs: %lu [msec]\n", lv_tick_elaps(time));
-    time = lv_tick_get();
-
     // Load album list
     ui_album_load((void*)player.m_tree);
 
     // Scan audio files base on album list
     if (player.ScanAudioFiles(ui_setting.partition_id, ui_setting.shuffle)) {
-
-      printf("ScanAudioFiles: %lu [msec]\n", lv_tick_elaps(time));
-
       ui_set_playNo(ui_control.playNo);
       return true;
     }
   }
+
   return false;
 }
 
