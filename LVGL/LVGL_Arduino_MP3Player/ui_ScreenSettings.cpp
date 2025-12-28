@@ -120,7 +120,7 @@ static void radio_event_handler(lv_event_t *e) {
 // Initialize / Deinitialize widgets
 //--------------------------------------------------------------------------------
 void ui_ScreenSettings_screen_init(void) {
-  static uint32_t partition_id; // Return value when LV_EVENT_SCREEN_UNLOADED is fired
+  static uint8_t partition_id; // Return value when LV_EVENT_SCREEN_UNLOADED is fired
 
   if (ui_ScreenSettings == NULL) {
     partition_id = ui_setting.partition_id;

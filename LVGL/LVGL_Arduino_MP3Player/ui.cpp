@@ -222,18 +222,20 @@ static bool save_setting(void) {
     fd.close();
     return true;
   } else {
+    player.SetError("can't save " MP3_ROOT_PATH MP3_SETTING_FILE);
     return false;
   }
 }
 
-static void load_setting(void) {
+static bool load_setting(void) {
   File fd = SD.open(MP3_ROOT_PATH MP3_SETTING_FILE, FILE_READ);
-  if (fd) {
-    fd.read((uint8_t *)&ui_setting, sizeof(ui_setting));
-    fd.close();
+  if (!fd) {
+    player.SetError("can't load " MP3_ROOT_PATH MP3_SETTING_FILE);
+    return false;
   }
 
-  bool save = false;
+  fd.read((uint8_t *)&ui_setting, sizeof(ui_setting));
+  fd.close();
 
   // Check if the partition exists
   char buf[BUF_SIZE];
@@ -248,6 +250,8 @@ static void load_setting(void) {
     }
   }
 
+  bool save = false;
+
   if (ui_setting.partition_max != partition_max) {
     ui_setting.partition_max = partition_max;
     save = true;
@@ -259,8 +263,8 @@ static void load_setting(void) {
     save = true;
   }
 
-  if (save) {
-    save_setting();
+  if (save && save_setting() == false) {
+    return false;
   }
 
   // Change the root folder with the current partition
@@ -277,6 +281,17 @@ static void load_setting(void) {
 
   // Rewind
   ui_control.playNo = ui_control.focusNo = 0;
+
+  return true;
+}
+
+static bool update_setting(void) {
+  // Stop playback before saving settings to avoid conflict with SD access
+  play_stop();
+  player.DeleteNodeTree();
+  player.ClearAudioFiles();
+
+  return save_setting();
 }
 
 //--------------------------------------------------------------------------------
@@ -284,7 +299,9 @@ static void load_setting(void) {
 //--------------------------------------------------------------------------------
 static bool create_playlist(void) {
   // Setup UI setting
-  load_setting();
+  if (load_setting() == false) {
+    return false;
+  }
 
   uint32_t time = lv_tick_get();
 
@@ -391,8 +408,12 @@ void ui_event_Shuffle(lv_event_t *e) {
   ui_setting.shuffle = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
   player.StopPlay();
   player.ClearAudioFiles();
-  save_setting();
-  ui_state = UI_STATE_START;
+
+  if (save_setting()) {
+    ui_state = UI_STATE_START;
+  } else {
+    ui_state = UI_STATE_ERROR;
+  }
 }
 
 void ui_event_ButtonPlay(lv_event_t *e) {
@@ -565,17 +586,12 @@ void ui_event_ScreenSettings(lv_event_t *e) {
 
     if (ui_setting.partition_max) {
       // Update the partition ID if a different ID is selected
-      uint32_t partition_id = *(uint32_t*)lv_event_get_user_data(e);
+      uint8_t partition_id = *(uint8_t*)lv_event_get_user_data(e);
       if (ui_setting.partition_id != partition_id) {
         ui_setting.partition_id = partition_id;
 
-        // Stop playback before saving settings to avoid conflict with SD access
-        play_stop();
-
-        save_setting();
-        player.DeleteNodeTree();
-        player.ClearAudioFiles();
-        ui_state = UI_STATE_START;
+        // Stop playback before saving settings
+        ui_state = UI_STATE_SAVE;
       }
     }
   }
@@ -723,6 +739,13 @@ UI_State_t ui_loop(void) {
     case UI_STATE_EOF:
       update_metadata();
       ui_state = nextState;
+      break;
+    case UI_STATE_SAVE:
+      if (update_setting()) {
+        ui_state = UI_STATE_START;
+      } else {
+        ui_state = UI_STATE_ERROR;
+      }
       break;
     case UI_STATE_CLEAR:
       play_stop();

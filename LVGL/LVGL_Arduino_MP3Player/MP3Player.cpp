@@ -332,8 +332,12 @@ void MP3Player::GetID3Tags(uint32_t playNo, MP3Tags_t &tags) {
 }
 
 //--------------------------------------------------------------------------------
-// Get error message
+// Set / Get error message
 //--------------------------------------------------------------------------------
+void MP3Player::SetError(const char* msg) {
+  m_error = msg;
+}
+
 const char* MP3Player::GetError(void) {
   return m_error.c_str();
 }

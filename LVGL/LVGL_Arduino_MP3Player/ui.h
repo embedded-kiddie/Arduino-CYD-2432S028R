@@ -62,6 +62,7 @@ typedef enum {
   UI_STATE_BLOFF,
   UI_STATE_ID3,
   UI_STATE_EOF,
+  UI_STATE_SAVE,
   UI_STATE_CLEAR,
   UI_STATE_ERROR,
 } UI_State_t;

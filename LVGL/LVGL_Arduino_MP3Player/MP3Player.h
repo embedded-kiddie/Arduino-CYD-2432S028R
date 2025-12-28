@@ -99,6 +99,7 @@ public:
   bool        UpdateMetaData(void);
   void        DeleteNodeTree(void) { if (m_tree) { delete m_tree; m_tree = NULL; } }
   void        ClearAudioFiles(void);
+  void        SetError(const char* msg);
   const char* GetError(void);
 
   void        SetVolume(uint8_t vol);
