@@ -15,8 +15,8 @@
 //
 //--------------------------------------------------------------------------------
 typedef struct {
-  size_t sketch_space;
-  size_t sketch_size;
+//size_t sketch_space;
+//size_t sketch_size;
   size_t total;
   size_t free;
   size_t allocated;
@@ -45,8 +45,8 @@ private:
   static void get_mem_info(ESP32MemInfo_t *mem) {
     multi_heap_info_t info;
     heap_caps_get_info(&info, HEAP_MEM_CAPS);
-    mem->sketch_space = ESP.getFreeSketchSpace();
-    mem->sketch_size  = ESP.getSketchSize();
+//  mem->sketch_space = ESP.getFreeSketchSpace();
+//  mem->sketch_size  = ESP.getSketchSize();
     mem->total        = heap_caps_get_total_size(HEAP_MEM_CAPS);
     mem->free         = info.total_free_bytes;
     mem->allocated    = info.total_allocated_bytes;
@@ -56,21 +56,21 @@ private:
 
   static void print_mem_info(ESP32MemInfo_t *mem) {
     printf("============ Memory Usage =============\n");
-    printf("Sketch space        :%7lu\n", mem->sketch_space);
-    printf("Sketch size         :%7lu\n", mem->sketch_size);
-    printf("Heap total size     :%7lu\n", mem->total);
-    printf("Heap total free     :%7lu\n", mem->free);
-    printf("Heap total allocated:%7lu\n", mem->allocated);
-    printf("Heap free minimum   :%7lu\n", mem->minimum);
-    printf("Heap free largest   :%7lu\n", mem->largest);
+//  printf("Sketch space           :%7lu\n", mem->sketch_space);
+//  printf("Sketch size            :%7lu\n", mem->sketch_size);
+    printf("Heap total size        :%7lu\n", mem->total);
+    printf("Heap total free        :%7lu\n", mem->free);
+    printf("Heap total allocated   :%7lu\n", mem->allocated);
+    printf("Heap free minimum      :%7lu\n", mem->minimum);
+    printf("Heap free largest block:%7lu\n", mem->largest);
   }
 
   static void print_diff(ESP32MemInfo_t *start, ESP32MemInfo_t *end) {
-    printf("Heap total size     :%7lu (%7lu ==> %7lu)\n", end->total     - start->total,     start->total,     end->total    );
-    printf("Heap total free     :%7lu (%7lu ==> %7lu)\n", end->free      - start->free,      start->free,      end->free     );
-    printf("Heap total allocated:%7lu (%7lu ==> %7lu)\n", end->allocated - start->allocated, start->allocated, end->allocated);
-    printf("Heap free minimum   :%7lu (%7lu ==> %7lu)\n", end->minimum   - start->minimum,   start->minimum,   end->minimum  );
-    printf("Heap free largest   :%7lu (%7lu ==> %7lu)\n", end->largest   - start->largest,   start->largest,   end->largest  );
+    printf("Heap total size        :%7lu (%7lu ==> %7lu)\n", end->total     - start->total,     start->total,     end->total    );
+    printf("Heap total free        :%7lu (%7lu ==> %7lu)\n", end->free      - start->free,      start->free,      end->free     );
+    printf("Heap total allocated   :%7lu (%7lu ==> %7lu)\n", end->allocated - start->allocated, start->allocated, end->allocated);
+    printf("Heap free minimum      :%7lu (%7lu ==> %7lu)\n", end->minimum   - start->minimum,   start->minimum,   end->minimum  );
+    printf("Heap free largest block:%7lu (%7lu ==> %7lu)\n", end->largest   - start->largest,   start->largest,   end->largest  );
   }
 
 public:
@@ -82,19 +82,18 @@ public:
     // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/heap_debug.html
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/mem_alloc.html
     if (psramFound()) {
-      printf("PSRAM total         :%7lu\n", ESP.getPsramSize());     // heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
-      printf("PSRAM free          :%7lu\n", ESP.getFreePsram());     // heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
-      printf("PSRAM free minimum  :%7lu\n", ESP.getMinFreePsram());  // heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM);
+      printf("PSRAM total size       :%7lu\n", ESP.getPsramSize());     // heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
+      printf("PSRAM free  size       :%7lu\n", ESP.getFreePsram());     // heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+      printf("PSRAM free  minimum    :%7lu\n", ESP.getMinFreePsram());  // heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM);
     }
 
 #if __has_include(<lvgl.h>)
     // LVGL memory usage
     lv_mem_monitor_t mon;
     lv_mem_monitor(&mon);
-    uint32_t watermark = mon.total_size - mon.max_used;
-    printf("LVGL memory usage   : Free: %lu (Used: %lu %%), High watermark: %lu (Rest: %lu %%)\n",
-      mon.free_size, mon.used_pct, watermark, (100 * watermark) / mon.total_size
-    );
+    uint32_t used = mon.total_size - mon.max_used;
+    printf("LVGL free size         :%7lu (Used: %lu %%)\n", mon.free_size, mon.used_pct);
+    printf("LVGL maximum used size :%7lu (Rest: %lu %%)\n", used, (100 * used) / mon.total_size);
 #endif
   }
 
