@@ -135,7 +135,7 @@ void ui_ScreenSettings_screen_init(void) {
     lv_obj_set_pos(obj, LV_PCT_X(5), TITLE_POS_Y),
     lv_label_set_text_static(obj, "Partition");
 
-    static constexpr lv_style_const_prop_t style_prop_container[] = {
+    static constexpr lv_style_const_prop_t style_prop_partition[] = {
       LV_STYLE_CONST_X(LV_PCT_X(0)),
       LV_STYLE_CONST_Y(RADIO_POS_Y + 26),
       LV_STYLE_CONST_HEIGHT(LV_SIZE_CONTENT),
@@ -148,11 +148,11 @@ void ui_ScreenSettings_screen_init(void) {
       LV_STYLE_CONST_BG_OPA(0),
       LV_STYLE_CONST_PROPS_END
     };
-    static LV_STYLE_CONST_INIT(style_container, (void*)style_prop_container);
+    static LV_STYLE_CONST_INIT(style_partition, (void*)style_prop_partition);
 
     lv_obj_t *container = lv_obj_create(ui_ScreenSettings);
     lv_obj_set_flex_flow(container, LV_FLEX_FLOW_ROW);
-    lv_obj_add_style    (container, &style_container, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style    (container, &style_partition, (uint32_t)LV_PART_MAIN | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_event_cb (container, radio_event_handler, LV_EVENT_VALUE_CHANGED, (void*)&partition_id);
 
     static constexpr lv_style_const_prop_t style_prop_radio[] = {
@@ -221,12 +221,14 @@ void ui_ScreenSettings_screen_init(void) {
     lv_roller_set_options   (obj, sleeptime.text, LV_ROLLER_MODE_NORMAL);
     lv_roller_set_selected  (obj, ui_setting.selectSleepTimer, LV_ANIM_ON);
     lv_roller_set_visible_row_count(obj, TIMER_VISIBLE);
+
 #if   false
     //////////////////// Bluetooth Devices ///////////////////////
     obj = lv_label_create(ui_ScreenSettings);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(12) + BLTOOTH_POS_Y);
     lv_label_set_text_static(obj, "Bluetooth Devices");
 #endif
+
 #if SHOW_ARROW_BUTTON || true
     ///////////////////////// Arrow Icon /////////////////////////
     {

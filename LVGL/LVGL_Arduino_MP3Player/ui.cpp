@@ -10,8 +10,7 @@
 UI_State_t   ui_state;
 UI_Control_t ui_control;
 UI_Setting_t ui_setting = {
-  .shuffle = true,
-  .selectBacklight = 1,
+  .selectBacklight = 1, // 30 sec
 };
 
 ////////////////////// LOCAL VARIABLES //////////////////////
@@ -26,15 +25,11 @@ static UI_State_t nextState;
 #include "src/_pictures.h"
 
 ////////////////////////// UI LOOP //////////////////////////
-// https://embedded-kiddie.github.io/2024/07/22/
+#define ADDITIONAL_TASK_PERIOD 1000 // [msec]
 #define DO_EVERY(period, prev) \
 static uint32_t prev = 0; for (uint32_t now = millis(); now - prev >= period; prev = now)
 
-#define PERIOD_TAKS1 1000 // [msec]
-#define PERIOD_TAKS2 100  // [msec]
-
 ////////////////////// LOCAL FUNCTIONS //////////////////////
-
 //--------------------------------------------------------------------------------
 // Display a covoer picture on SD or flash
 //--------------------------------------------------------------------------------
@@ -212,7 +207,7 @@ static bool check_favorite(void) {
 }
 
 //--------------------------------------------------------------------------------
-// Save / Load settings in SD
+// Save / Load / Reset settings in SD
 //--------------------------------------------------------------------------------
 static bool save_setting(void) {
   // Save partition
@@ -285,12 +280,11 @@ static bool load_setting(void) {
   return true;
 }
 
-static bool update_setting(void) {
+static bool reset_setting(void) {
   // Stop playback before saving settings to avoid conflict with SD access
   play_stop();
   player.DeleteNodeTree();
   player.ClearAudioFiles();
-
   return save_setting();
 }
 
@@ -541,12 +535,12 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
   lv_obj_t *obj = (lv_obj_t*)lv_event_get_current_target(e);
   meta.selected = ui_list_get_heart_state(track_id);
 
-  // prevent input while saving metadata to SD card
+  // Prevent input while saving metadata to SD card
   lv_indev_enable(NULL, false);
   bool saved = player.PutMetaData(track_id, &meta);
   lv_indev_enable(NULL, true);
 
-  // in case the metadata file cannot be saved, save it separately
+  // In case the metadata file cannot be saved, save it separately
   if (!saved) {
     id3tagsSave = true;
   }
@@ -583,7 +577,7 @@ void ui_event_ScreenSettings(lv_event_t *e) {
         ui_setting.partition_id = partition_id;
 
         // Stop playback before saving settings
-        ui_state = UI_STATE_SAVE;
+        ui_state = UI_STATE_RESET;
       }
     }
   }
@@ -732,8 +726,8 @@ UI_State_t ui_loop(void) {
       update_metadata();
       ui_state = nextState;
       break;
-    case UI_STATE_SAVE:
-      if (update_setting()) {
+    case UI_STATE_RESET:
+      if (reset_setting()) {
         ui_state = UI_STATE_START;
       } else {
         ui_state = UI_STATE_ERROR;
@@ -755,7 +749,7 @@ UI_State_t ui_loop(void) {
   UI_State_t ret = UI_STATE_AWAKE;
 
   // Periodical task
-  DO_EVERY(PERIOD_TAKS1, task1Time) {
+  DO_EVERY(ADDITIONAL_TASK_PERIOD, task1Time) {
     // update elapsed time
     if (player.IsPlaying()) {
       update_elapsed_time();
