@@ -324,11 +324,11 @@ static void stop_async(void *user_data) {
 //--------------------------------------------------------------------------------
 // Helper function for screen transition
 //--------------------------------------------------------------------------------
-static void change_screen(lv_obj_t ** target, lv_screen_load_anim_t fademode, void (*target_init)(void)) {
-  if(*target == NULL) {
-    target_init();
+static void change_screen(lv_obj_t ** screen, lv_screen_load_anim_t fademode, void (*screen_init)(void)) {
+  if(*screen == NULL) {
+    screen_init();
   }
-  lv_screen_load_anim(*target, fademode, 500, 0, false);
+  lv_screen_load_anim(*screen, fademode, 500, 0, false);
 }
 
 ///////////////////// CALLBACK FUNCTIONS ////////////////////
@@ -351,7 +351,7 @@ void ui_event_ScreenMain(lv_event_t *e) {
 
   else if (dir == LV_DIR_TOP || dir == LV_DIR_BOTTOM) {
     lv_screen_load_anim_t anim = (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM);
-    change_screen(&ui_ScreenSettings, anim, &ui_ScreenSettings_screen_init);
+    change_screen(&ui_ScreenSetting, anim, &ui_ScreenSetting_screen_init);
   }
 }
 
@@ -370,7 +370,7 @@ void ui_event_GoToPlayList(lv_event_t *e) {
 void ui_event_GoToSettings(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_CLICKED);
 
-  change_screen(&ui_ScreenSettings, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, &ui_ScreenSettings_screen_init);
+  change_screen(&ui_ScreenSetting, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, &ui_ScreenSetting_screen_init);
 }
 
 void ui_event_Favorite(lv_event_t *e) {
@@ -549,7 +549,7 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
 //--------------------------------------------------------------------------------
 // Event handlers for Screen Settings
 //--------------------------------------------------------------------------------
-void ui_event_ScreenSettings(lv_event_t *e) {
+void ui_event_ScreenSetting(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(
     event_code == LV_EVENT_CLICKED ||
@@ -568,7 +568,7 @@ void ui_event_ScreenSettings(lv_event_t *e) {
   }
 
   else if (event_code == LV_EVENT_SCREEN_UNLOADED) {
-    ui_ScreenSettings_screen_deinit();
+    ui_ScreenSetting_screen_deinit();
 
     if (ui_setting.partition_max) {
       // Update the partition ID if a different ID is selected

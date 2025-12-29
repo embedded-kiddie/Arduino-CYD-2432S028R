@@ -90,7 +90,7 @@ uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
   const size_t n_leafs = m_tree->get_n_leafs(); // Number of albums
   const size_t n_audio = m_tree->get_n_audio(); // Number of audio files
   #define MIN(a, b) ((a) < (b) ? (a) : (b))
-  uint32_t max_files = MIN(MP3_MAX_AUDIO_FILES, n_audio);
+  uint32_t max_files = MIN(MP3_PERTITION_FILES, n_audio);
 
   if (partition) {
     for (int i = 0, key = 0; max_files > i && key < n_leafs; key++) {

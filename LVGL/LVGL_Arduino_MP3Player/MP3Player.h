@@ -18,12 +18,15 @@
 #define MP3_VOLUME_MAX  21
 
 //--------------------------------------------------------------------------------
-// Audio file selection settings
+// Estimated number of albums/audio files and memory consumption
+// Note: Bluetooth requires at least an additional 56K bytes of RAM
 //--------------------------------------------------------------------------------
-#define MP3_HEAP_INI_SIZE     (150 * 1024U) // Estimated initial heap memory size
-#define MP3_HEAP_AVE_NODE     150           // Averary memory consumption per node
-#define MP3_HEAP_AVE_FILE     100           // Averary memory consumption per file
-#define MP3_MAX_AUDIO_FILES   750           // Maximum number of files in a playlist
+#define MP3_PERTITION_ALBUMS   50           // Number of albums per partition
+#define MP3_PERTITION_FILES   750           // Number of audio files per partition
+#define MP3_HEAP_SIZE_ALBUM   150           // Averary memory consumption per album
+#define MP3_HEAP_SIZE_FILE    100           // Averary memory consumption per audio file
+#define MP3_HEAP_MAX_FREE     (150 * 1024U) // Estimated maximum free heap memory size
+#define MP3_HEAP_MIN_FREE     ( 94 * 1024U) // (MP3_PERTITION_ALBUMS * MP3_HEAP_SIZE_ALBUM + MP3_PERTITION_FILES * MP3_HEAP_SIZE_FILE) * FoS
 
 //--------------------------------------------------------------------------------
 // Meta data for MP3 audio file

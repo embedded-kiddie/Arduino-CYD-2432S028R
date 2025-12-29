@@ -80,10 +80,10 @@ typedef struct {
 } UI_Setting_t;
 
 typedef struct {
-  uint32_t  top;
-  uint32_t  end;
-  uint32_t  playNo;
-  uint32_t  focusNo;
+  uint16_t  top;
+  uint16_t  end;
+  uint16_t  playNo;
+  uint16_t  focusNo;
   uint32_t  backlightTimer;
   uint32_t  sleepStart;
   uint32_t  sleepTimer;
@@ -160,11 +160,11 @@ extern __attribute__((weak)) size_t get_cell_count(void);
 extern __attribute__((weak)) void show_ui_control(void);
 extern __attribute__((weak)) void dump_play_list(void);
 
-///////////////// SCREEN: ui_ScreenSettings /////////////////
-extern lv_obj_t *ui_ScreenSettings;
-void ui_event_ScreenSettings(lv_event_t *e);
-void ui_ScreenSettings_screen_init  (void);
-void ui_ScreenSettings_screen_deinit(void);
+///////////////// SCREEN: ui_ScreenSetting //////////////////
+extern lv_obj_t *ui_ScreenSetting;
+void ui_event_ScreenSetting(lv_event_t *e);
+void ui_ScreenSetting_screen_init  (void);
+void ui_ScreenSetting_screen_deinit(void);
 void ui_setting_set_backlight(void);
 void ui_setting_set_sleeptime(void);
 
