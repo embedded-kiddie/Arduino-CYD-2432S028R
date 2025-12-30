@@ -50,7 +50,6 @@ LV_FONT_DECLARE(CUSTOM_FONT_MEDIUM);
 typedef enum {
   UI_STATE_INIT,
   UI_STATE_START,
-  UI_STATE_IDLE,
   UI_STATE_PLAY,
   UI_STATE_STOP,
   UI_STATE_PAUSE,
@@ -64,6 +63,7 @@ typedef enum {
   UI_STATE_EOF,
   UI_STATE_RESET,
   UI_STATE_CLEAR,
+  UI_STATE_IDLE,
   UI_STATE_ERROR,
 } UI_State_t;
 
@@ -76,7 +76,7 @@ typedef struct {
   uint8_t   partition_id;     // current partition ID (0, ...partition_max)
   uint8_t   selectBacklight;  // 0: 30sec, 1: 1min, ...
   uint8_t   selectSleepTimer; // 0: 30min, 1: 1hour, ...
-//uint8_t   spare;
+  uint8_t   spare;
 } UI_Setting_t;
 
 typedef struct {
@@ -167,6 +167,8 @@ extern lv_obj_t *ui_ScreenSetting;
 void ui_event_ScreenSetting(lv_event_t *e);
 void ui_ScreenSetting_screen_init  (void);
 void ui_ScreenSetting_screen_deinit(void);
+void ui_event_Setting_Backlight (lv_event_t *e);
+void ui_event_Setting_SleepTimer(lv_event_t *e);
 void ui_setting_set_backlight(void);
 void ui_setting_set_sleeptime(void);
 

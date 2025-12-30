@@ -59,26 +59,6 @@ void ui_setting_set_sleeptime(void) {
 }
 
 //--------------------------------------------------------------------------------
-// Event handlers for UI Settings
-//--------------------------------------------------------------------------------
-static void backlight_cb(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-
-  lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_setting.selectBacklight = lv_roller_get_selected(obj);
-  ui_setting_set_backlight();
-}
-
-static void sleeptimer_cb(lv_event_t *e) {
-  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-
-  lv_obj_t * obj = lv_event_get_target_obj(e);
-  ui_setting.selectSleepTimer = lv_roller_get_selected(obj);
-  ui_setting_set_sleeptime();
-  ui_control.sleepStart = millis();
-}
-
-//--------------------------------------------------------------------------------
 // Set the pointer to the widget to NULL when its object is deleted
 //--------------------------------------------------------------------------------
 static void delete_cb(lv_event_t *e) {
@@ -203,7 +183,7 @@ void ui_ScreenSetting_screen_init(void) {
     obj = lv_roller_create(ui_ScreenSetting);
     lv_obj_set_pos          (obj, LV_PCT_X(5), LV_PCT_Y(12) + TIMER_POS_Y);
     lv_obj_set_style_width  (obj, TIMER_WIDTH, 0);
-    lv_obj_add_event_cb     (obj, backlight_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb     (obj, ui_event_Setting_Backlight, LV_EVENT_VALUE_CHANGED, NULL);
     lv_roller_set_options   (obj, backlight.text, LV_ROLLER_MODE_NORMAL);
     lv_roller_set_selected  (obj, ui_setting.selectBacklight, LV_ANIM_OFF);
     lv_roller_set_visible_row_count(obj, TIMER_VISIBLE);
@@ -217,7 +197,7 @@ void ui_ScreenSetting_screen_init(void) {
     obj = lv_roller_create(ui_ScreenSetting);
     lv_obj_set_pos          (obj, SCREEN_WIDTH - TIMER_WIDTH - LV_PCT_X(5), LV_PCT_Y(12) + TIMER_POS_Y);
     lv_obj_set_style_width  (obj, TIMER_WIDTH, 0);
-    lv_obj_add_event_cb     (obj, sleeptimer_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb     (obj, ui_event_Setting_SleepTimer, LV_EVENT_VALUE_CHANGED, NULL);
     lv_roller_set_options   (obj, sleeptime.text, LV_ROLLER_MODE_NORMAL);
     lv_roller_set_selected  (obj, ui_setting.selectSleepTimer, LV_ANIM_OFF);
     lv_roller_set_visible_row_count(obj, TIMER_VISIBLE);

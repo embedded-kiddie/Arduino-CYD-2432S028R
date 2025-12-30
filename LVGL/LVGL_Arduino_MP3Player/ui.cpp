@@ -15,11 +15,17 @@ UI_Setting_t ui_setting = {
 
 ////////////////////// LOCAL VARIABLES //////////////////////
 #include "MP3Player.h"
-static MP3Player player;
-
-static bool       id3tagsSave;
+static MP3Player  player;
 static MP3Tags_t  id3tags;
 static UI_State_t nextState;
+
+//--------------------------------------------------------------------------------
+// Auto saving flag
+//--------------------------------------------------------------------------------
+#define SAVE_SETTING   1
+#define SAVE_DURATION  2
+#define SAVE_FAVORITE  4
+static uint8_t autoSaving = 0;
 
 /////////////////////////// IMAGES //////////////////////////
 #include "src/_pictures.h"
@@ -155,58 +161,6 @@ static void update_elapsed_time(void) {
 }
 
 //--------------------------------------------------------------------------------
-// Check and update the metadata when playback finishes
-//--------------------------------------------------------------------------------
-static void update_metadata(void) {
-  MP3Meta_t meta;
-  uint32_t playNo = player.GetPlayNo();
-  player.GetMetaData(playNo, &meta);
-
-  if (meta.duration < id3tags.meta.duration || id3tagsSave == true) {
-    // Prevent input while saving metadata to SD card
-    lv_indev_enable(NULL, false);
-
-    if (player.IsPlaying()) {
-      player.PauseResume();
-    }
-
-    // Update all Favorites that have been modified during playback
-    if (id3tagsSave == true) {
-      if (player.UpdateMetaData()) {
-        id3tagsSave = false;
-      }
-    }
-
-    bool update = false;
-
-    // Update the playback duration at the end of file
-    // Note: When the Elapse bar is operated by hand, the elapsed time will be shifted.
-    if (abs(meta.duration - id3tags.meta.duration) >= 3 /* [sec] */) {
-      meta.duration = id3tags.meta.duration;
-      ui_list_update_duration(playNo, meta.duration);
-      update = true;
-    }
-
-    if (update) {
-      player.PutMetaData(playNo, &meta);
-    }
-
-    if (!player.IsPlaying()) {
-      player.PauseResume();
-    }
-
-    lv_indev_enable(NULL, true);
-  }
-}
-
-//--------------------------------------------------------------------------------
-// Check out the favorite playlists
-//--------------------------------------------------------------------------------
-static bool check_favorite(void) {
-  return !ui_setting.favorite || player.IsPlaying() || player.IsSelected();
-}
-
-//--------------------------------------------------------------------------------
 // Save / Load / Reset settings in SD
 //--------------------------------------------------------------------------------
 static bool save_setting(void) {
@@ -229,8 +183,14 @@ static bool load_setting(void) {
     return false;
   }
 
+  // Save the sleep timer setting
+  uint8_t sleepTimer = ui_setting.selectSleepTimer;
+
   fd.read((uint8_t *)&ui_setting, sizeof(ui_setting));
   fd.close();
+
+  // Update the saved sleep timer setting
+  ui_setting.selectSleepTimer = sleepTimer;
 
   // Check if the partition exists
   char buf[BUF_SIZE];
@@ -291,6 +251,53 @@ static bool reset_setting(void) {
 }
 
 //--------------------------------------------------------------------------------
+// Update data to be automatically saved when playback reaches the end of file
+//--------------------------------------------------------------------------------
+static bool auto_saving(void) {
+  if (autoSaving) {
+    bool pause = false;
+    if (player.IsPlaying()) {
+      pause = true;
+      player.PauseResume();
+    }
+
+    // Update the playback duration at the end of file
+    if (autoSaving & SAVE_DURATION) {
+      uint32_t playNo = player.GetPlayNo();
+      ui_list_update_duration(playNo, id3tags.meta.duration);
+      if (player.PutMetaData(playNo, &id3tags.meta)) {
+        autoSaving ^= SAVE_DURATION;
+      }
+    }
+
+    // Update all favorites that have been modified during playback
+    if (autoSaving & SAVE_FAVORITE) {
+      if (player.UpdateMetaData()) {
+        autoSaving ^= SAVE_FAVORITE;
+      }
+    }
+
+    // Update favorite and repeat when they are changed during playback
+    if (autoSaving & SAVE_SETTING) {
+      if (save_setting()) {
+        autoSaving ^= SAVE_SETTING;
+      }
+    }
+
+    if (pause) {
+      player.PauseResume();
+    }
+
+    if (autoSaving) {
+      autoSaving = 0; // Avoid infinite loop
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//--------------------------------------------------------------------------------
 // Scan SD card for audio files and create a playlist
 //--------------------------------------------------------------------------------
 static bool create_playlist(void) {
@@ -315,6 +322,13 @@ static bool create_playlist(void) {
 }
 
 //--------------------------------------------------------------------------------
+// Check if the currently playing audio file is favorite
+//--------------------------------------------------------------------------------
+static bool check_favorite(void) {
+  return !ui_setting.favorite || player.IsPlaying() || player.IsSelected();
+}
+
+//--------------------------------------------------------------------------------
 // Asynchronous function to reduce delays during screen transitions
 //--------------------------------------------------------------------------------
 static void stop_async(void *user_data) {
@@ -333,10 +347,10 @@ static void change_screen(lv_obj_t ** screen, lv_screen_load_anim_t fademode, vo
   lv_screen_load_anim(*screen, fademode, 500, 0, false);
 }
 
-///////////////////// CALLBACK FUNCTIONS ////////////////////
-//--------------------------------------------------------------------------------
-// Event handlers for Screen Main
-//--------------------------------------------------------------------------------
+////////////////////// GLOBAL FUNCTIONS /////////////////////
+//********************************************************************************
+// SCREEN: ui_ScreenMain event handlers
+//********************************************************************************
 void ui_event_ScreenMain(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_GESTURE);
 
@@ -380,6 +394,13 @@ void ui_event_Favorite(lv_event_t *e) {
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
   ui_setting.favorite = (lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
+
+  // If unable to save, save at idle state
+  if (player.IsPlaying()) {
+    autoSaving |= SAVE_SETTING;
+  } else if (save_setting() == false) {
+    ui_state = UI_STATE_ERROR;
+  }
 }
 
 void ui_event_Repeat(lv_event_t *e) {
@@ -387,6 +408,13 @@ void ui_event_Repeat(lv_event_t *e) {
 
   lv_obj_t *obj = lv_event_get_target_obj(e);
   ui_setting.repeat = (uint8_t)(lv_obj_get_state(obj) & LV_STATE_CHECKED ? true : false);
+
+  // If unable to save, save at idle state
+  if (player.IsPlaying()) {
+    autoSaving |= SAVE_SETTING;
+  } else if (save_setting() == false) {
+    ui_state = UI_STATE_ERROR;
+  }
 }
 
 void ui_event_Shuffle(lv_event_t *e) {
@@ -458,9 +486,9 @@ void ui_event_ElapsedBar(lv_event_t *e) {
   }
 }
 
-//--------------------------------------------------------------------------------
-// Event handlers for Screen Album List
-//--------------------------------------------------------------------------------
+//********************************************************************************
+// SCREEN: ui_ScreenAlbumList event handlers
+//********************************************************************************
 void ui_event_ScreenAlbumList(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(
@@ -499,9 +527,9 @@ void ui_event_ScreenAlbumList(lv_event_t *e) {
   }
 }
 
-//--------------------------------------------------------------------------------
-// Event handlers for Screen Playlist
-//--------------------------------------------------------------------------------
+//********************************************************************************
+// SCREEN: ui_ScreenPlayList event handlers
+//********************************************************************************
 void ui_event_ScreenPlayList(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(
@@ -537,20 +565,15 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
   lv_obj_t *obj = (lv_obj_t*)lv_event_get_current_target(e);
   meta.selected = ui_list_get_heart_state(track_id);
 
-  // Prevent input while saving metadata to SD card
-  lv_indev_enable(NULL, false);
-  bool saved = player.PutMetaData(track_id, &meta);
-  lv_indev_enable(NULL, true);
-
-  // In case the metadata file cannot be saved, save it separately
-  if (!saved) {
-    id3tagsSave = true;
+  // If unable to save, save at idle state
+  if (!player.PutMetaData(track_id, &meta)) {
+    autoSaving |= SAVE_FAVORITE;
   }
 }
 
-//--------------------------------------------------------------------------------
-// Event handlers for Screen Settings
-//--------------------------------------------------------------------------------
+//********************************************************************************
+// SCREEN: ui_ScreenSetting event handlers
+//********************************************************************************
 void ui_event_ScreenSetting(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   DBG_ASSERT(
@@ -585,7 +608,30 @@ void ui_event_ScreenSetting(lv_event_t *e) {
   }
 }
 
-////////////////////// GLOBAL FUNCTIONS /////////////////////
+void ui_event_Setting_Backlight(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_setting.selectBacklight = lv_roller_get_selected(obj);
+  ui_setting_set_backlight();
+
+  // If unable to save, save at idle state
+  if (player.IsPlaying()) {
+    autoSaving |= SAVE_SETTING;
+  } else if (save_setting() == false) {
+    ui_state = UI_STATE_ERROR;
+  }
+}
+
+void ui_event_Setting_SleepTimer(lv_event_t *e) {
+  DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
+
+  lv_obj_t * obj = lv_event_get_target_obj(e);
+  ui_setting.selectSleepTimer = lv_roller_get_selected(obj);
+  ui_setting_set_sleeptime();
+  ui_control.sleepStart = millis();
+}
+
 //--------------------------------------------------------------------------------
 // Redraw the display panel when waking up from sleep
 //--------------------------------------------------------------------------------
@@ -598,14 +644,14 @@ void ui_redisplay(void) {
 // Start to play with the specified track
 //--------------------------------------------------------------------------------
 void ui_set_playNo(uint32_t track_id) {
-  // start the specified track to play
+  // Start the specified track to play
   player.SetPlayNo(track_id);
 
-  // update ui_control
+  // Update ui_control
   ui_control.playNo = ui_control.focusNo = track_id;
   display_picture(track_id);
 
-  // update the look of the play button
+  // Update the look of the play button
   if (ui_state != UI_STATE_PLAY) {
     lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
     ui_state = UI_STATE_PLAY;
@@ -652,7 +698,17 @@ void audio_id3data(const char *info) {
 }
 
 void audio_eof_mp3(const char *info) {
+  // Note: When the Elapse bar is operated by hand, it will be shifted.
+  MP3Meta_t meta;
+  player.GetMetaData(player.GetPlayNo(), &meta);
+  if (meta.duration == 0 || abs(meta.duration - id3tags.meta.duration) >= 5 /* [sec] */) {
+    autoSaving |= SAVE_DURATION;
+  }
+
+  // Transition to UI_STATE_EOF once
   ui_state = UI_STATE_EOF;
+
+  // Determine the next state
   if (!player.IsLastSong(ui_setting.favorite) || ui_setting.repeat) {
     nextState = UI_STATE_NEXT;
   } else {
@@ -725,15 +781,10 @@ UI_State_t ui_loop(void) {
       ui_state = UI_STATE_PLAY;
       break;
     case UI_STATE_EOF:
-      update_metadata();
-      ui_state = nextState;
+      ui_state = auto_saving() ? nextState : UI_STATE_ERROR;
       break;
     case UI_STATE_RESET:
-      if (reset_setting()) {
-        ui_state = UI_STATE_START;
-      } else {
-        ui_state = UI_STATE_ERROR;
-      }
+      ui_state = reset_setting() ? UI_STATE_START : UI_STATE_ERROR;
       break;
     case UI_STATE_CLEAR:
       play_stop();
@@ -745,12 +796,15 @@ UI_State_t ui_loop(void) {
       ui_state = UI_STATE_IDLE;
     case UI_STATE_IDLE:
     default:
+      if (!auto_saving()) {
+        ui_state = UI_STATE_ERROR;
+      }
       break;
   }
 
   UI_State_t ret = UI_STATE_AWAKE;
 
-  // Periodical task
+  // Additional periodic task
   DO_EVERY(ADDITIONAL_TASK_PERIOD, task1Time) {
     // update elapsed time
     if (player.IsPlaying()) {
