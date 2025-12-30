@@ -37,7 +37,7 @@ typedef struct {
   uint16_t duration : 14;
 } MP3Meta_t;
 
-// Metadata about the file stored in an album folder
+// Metadata paired with a hash of the file name
 typedef struct {
   size_t    hash;   // A hash representing the file name
   MP3Meta_t meta;   // A data set that may change dynamically
