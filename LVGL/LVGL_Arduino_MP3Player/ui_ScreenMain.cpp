@@ -15,7 +15,9 @@ lv_obj_t *ui_ButtonPlay;
 lv_obj_t *ui_ElapsedBar;
 lv_obj_t *ui_Volume;
 lv_obj_t *ui_AlbumImage;
+lv_obj_t *ui_Repeat;
 lv_obj_t *ui_Shuffle;
+lv_obj_t *ui_Favorite;
 
 //--------------------------------------------------------------------------------
 // Initialize screen
@@ -248,52 +250,8 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style(obj, &style_common, 0);
   }
 
-  /////////////////////// Heart Icon ////////////////////////
-  lv_obj_t *ui_Favorite = lv_checkbox_create(ui_ScreenMain);
-  lv_checkbox_set_text_static(ui_Favorite, "");
-  {
-    static constexpr lv_style_const_prop_t style_prop_common[] = {
-      LV_STYLE_CONST_WIDTH(25),
-      LV_STYLE_CONST_HEIGHT(25),
-      LV_STYLE_CONST_X(ICON_OFFSET_R),
-      LV_STYLE_CONST_Y(LV_PCT_Y(-44)),
-      LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_default[] = {
-      LV_STYLE_CONST_BG_IMAGE_SRC(&img_heart_off),
-      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
-      LV_STYLE_CONST_BORDER_WIDTH(0),
-      LV_STYLE_CONST_PAD_LEFT(8),
-      LV_STYLE_CONST_PAD_TOP(8),
-      LV_STYLE_CONST_PAD_RIGHT(0),
-      LV_STYLE_CONST_PAD_BOTTOM(0),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
-      LV_STYLE_CONST_PAD_LEFT(10),
-      LV_STYLE_CONST_PAD_TOP(10),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static constexpr lv_style_const_prop_t style_prop_checked[] = {
-      LV_STYLE_CONST_BG_IMAGE_SRC(&img_heart_on),
-      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
-      LV_STYLE_CONST_PROPS_END
-    };
-    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
-    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
-    static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
-    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
-
-    lv_obj_add_style(ui_Favorite, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style(ui_Favorite, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
-    lv_obj_add_style(ui_Favorite, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
-    lv_obj_add_style(ui_Favorite, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
-  }
-
   /////////////////////// Repeat Icon ///////////////////////
-  lv_obj_t *ui_Repeat = lv_checkbox_create(ui_ScreenMain);
+  ui_Repeat = lv_checkbox_create(ui_ScreenMain);
   lv_checkbox_set_text_static (ui_Repeat, "");
   lv_obj_add_state            (ui_Repeat, ui_setting.repeat ? LV_STATE_CHECKED : LV_STATE_DEFAULT);
   {
@@ -384,6 +342,50 @@ void ui_ScreenMain_screen_init(void) {
     lv_obj_add_style(ui_Shuffle, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
     lv_obj_add_style(ui_Shuffle, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
     lv_obj_add_style(ui_Shuffle, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
+  }
+
+  ////////////////// Favorite (Heart) Icon //////////////////
+  ui_Favorite = lv_checkbox_create(ui_ScreenMain);
+  lv_checkbox_set_text_static(ui_Favorite, "");
+  {
+    static constexpr lv_style_const_prop_t style_prop_common[] = {
+      LV_STYLE_CONST_WIDTH(25),
+      LV_STYLE_CONST_HEIGHT(25),
+      LV_STYLE_CONST_X(ICON_OFFSET_R),
+      LV_STYLE_CONST_Y(LV_PCT_Y(-44)),
+      LV_STYLE_CONST_ALIGN(LV_ALIGN_CENTER),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_default[] = {
+      LV_STYLE_CONST_BG_IMAGE_SRC(&img_heart_off),
+      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+      LV_STYLE_CONST_RADIUS(LV_RADIUS_CIRCLE),
+      LV_STYLE_CONST_BORDER_WIDTH(0),
+      LV_STYLE_CONST_PAD_LEFT(8),
+      LV_STYLE_CONST_PAD_TOP(8),
+      LV_STYLE_CONST_PAD_RIGHT(0),
+      LV_STYLE_CONST_PAD_BOTTOM(0),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_pressed[] = {
+      LV_STYLE_CONST_PAD_LEFT(10),
+      LV_STYLE_CONST_PAD_TOP(10),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static constexpr lv_style_const_prop_t style_prop_checked[] = {
+      LV_STYLE_CONST_BG_IMAGE_SRC(&img_heart_on),
+      LV_STYLE_CONST_BG_COLOR(UI_COLOR_BACKGROUND),
+      LV_STYLE_CONST_PROPS_END
+    };
+    static LV_STYLE_CONST_INIT(style_common,  (void*)style_prop_common );
+    static LV_STYLE_CONST_INIT(style_default, (void*)style_prop_default);
+    static LV_STYLE_CONST_INIT(style_pressed, (void*)style_prop_pressed);
+    static LV_STYLE_CONST_INIT(style_checked, (void*)style_prop_checked);
+
+    lv_obj_add_style(ui_Favorite, &style_common,  (uint32_t)LV_PART_MAIN      | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style(ui_Favorite, &style_default, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_DEFAULT);
+    lv_obj_add_style(ui_Favorite, &style_pressed, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_PRESSED);
+    lv_obj_add_style(ui_Favorite, &style_checked, (uint32_t)LV_PART_INDICATOR | (uint32_t)LV_STATE_CHECKED);
   }
 
   /////////////////////// Play Button ///////////////////////

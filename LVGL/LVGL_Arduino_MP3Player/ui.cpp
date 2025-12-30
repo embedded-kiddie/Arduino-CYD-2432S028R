@@ -272,7 +272,9 @@ static bool load_setting(void) {
   }
 
   // Update UI
-  lv_obj_set_state(ui_Shuffle, LV_STATE_CHECKED, ui_setting.shuffle);
+  lv_obj_set_state(ui_Repeat,   LV_STATE_CHECKED, ui_setting.repeat  );
+  lv_obj_set_state(ui_Shuffle,  LV_STATE_CHECKED, ui_setting.shuffle );
+  lv_obj_set_state(ui_Favorite, LV_STATE_CHECKED, ui_setting.favorite);
 
   // Rewind
   ui_control.playNo = ui_control.focusNo = 0;
