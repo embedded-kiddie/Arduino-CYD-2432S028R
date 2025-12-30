@@ -73,13 +73,13 @@ static LGFX tft;
 //----------------------------------------------------------------------
 #define SCREENSHORT false
 #if SCREENSHORT
-#define USE_SDFAT
 #include "../src/sdcard.hpp"
 #endif
 
 #define SAVE_SEQUENCIAL_BMP false
 #if SAVE_SEQUENCIAL_BMP
 #include "../src/sdcard.hpp"
+static bool startTrigger = false;
 static uint32_t _skip = 0;
 static uint32_t _prev = 0;
 static uint32_t N = 0;
@@ -269,7 +269,7 @@ static uint32_t my_tick(void) {
 }
 
 void setup() {
-#if (DEBUG & 2) || defined(_ESP32_HPP_)
+#if (DEBUG & 2) || defined(_SDCARD_HPP_) || defined(_ESP32_HPP_)
   Serial.begin(115200);
   delay(1000);
 #endif
@@ -313,21 +313,26 @@ void loop() {
   }
 
 #if SAVE_SEQUENCIAL_BMP
-  uint32_t t = millis();
-  if (t - _skip < 45 * 1000 && t - _prev >= 66) {
-    sprintf(fname, "/%05d.bmp", N++);
-    SaveBMP24(SD, fname, tft);
-    _skip += (_prev = millis()) - t;
+  if (startTrigger) {
+    uint32_t t = millis();
+    if (t - _skip < 45 * 1000 && t - _prev >= 66) {
+      sprintf(fname, "/%05d.bmp", N++);
+      SaveBMP24(SD, fname, tft);
+      _skip += (_prev = millis()) - t;
+    }
   }
-#else
+#endif
+
   if (Serial.available()) {
-  #if SCREENSHORT
+#if SAVE_SEQUENCIAL_BMP
+    startTrigger = true;
+#elif SCREENSHORT
     Serial.readStringUntil('\n');
     static int No;
     char fname[16];
     sprintf(fname, "/demo%02d.bmp", ++No);
     SaveBMP24(SD, fname, tft);
-  #else
+#else
     String in = Serial.readStringUntil('\n');
     switch (in[0]) {
       case '0':
@@ -349,7 +354,6 @@ void loop() {
         break;
     #endif // _ESP32_HPP_
     }
-  #endif
-  }
 #endif
+  }
 }

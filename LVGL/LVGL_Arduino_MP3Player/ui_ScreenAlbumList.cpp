@@ -8,7 +8,7 @@
 #include <stdlib.h>   // strtoul()
 #include <functional> // std::hash
 
-/////////// Folder and file for saving album list ///////////
+/////////////// Album list configuration file ///////////////
 #define ALBUM_LIST_PATH ALBUM_CONF_PATH ALBUM_LIST_FILE
 
 //--------------------------------------------------------------------------------
@@ -601,8 +601,8 @@ static void toggle_cell_state(int type, int state) {
 
 //--------------------------------------------------------------------------------
 // Functions for manipulating JSON data / files
-//  @conf/
-//  ├── @album.txt
+//  @album/
+//  ├── @list.txt
 //  │   ├── Current dropdown selection
 //  │   ├── "All <tab> 0"
 //  │   ├── "Name <tab> Hash" for 1.json

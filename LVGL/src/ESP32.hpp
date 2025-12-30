@@ -226,6 +226,7 @@ public:
     uint32_t Y = esp_rom_get_reset_reason(0);   // core0
     uint32_t Z = esp_rom_get_reset_reason(1);   // core1
     uint32_t W = esp_sleep_get_wakeup_cause();  // overall
+
     if (X != 1 /* "board power-on" */) {
       printf("============ Reset Reason =============\n");
       printf("Reset reason (overall): %2d (%s)\n", X, reset_reason_all [X]);

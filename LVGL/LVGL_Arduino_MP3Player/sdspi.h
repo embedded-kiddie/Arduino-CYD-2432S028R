@@ -17,17 +17,10 @@
 #define DISABLE_FS_H_WARNING
 #include <SdFat.h>
 
-// extern SdFat SD;
+// extern SdFat SD;   // defined in CYD_Audio.cpp
 
 // SPI bus configuration
-// Note: It assumes that the LCD is assigned to HSPI.
-#if   0
-#define SD_SPI_BUS sd_spi
-#define SD_CONFIG SdSpiConfig((SdCsPin_t)SS, DEDICATED_SPI, SD_SPI_CLOCK, &SD_SPI_BUS)
-#define DECLARE_SD_SPI_BUS SPIClass SD_SPI_BUS = SPIClass(VSPI)
-#else
 #define SD_CONFIG SD_CS, SD_SPI_CLOCK
-#endif
 
 // Alternatives to FS.h definitions
 // File fd = SD.open((SDFS_VOID*)path, (SDFS_MODE)FILE_READ);
@@ -57,11 +50,7 @@ enum SeekMode {
 #include <SD.h>
 
 // SPI bus configuration
-#if   1
 #define SD_CONFIG SD_CS, SPI, SD_SPI_CLOCK
-#else
-#define SD_CONFIG
-#endif
 
 // File fd = SD.open((SDFS_VOID*)path, (SDFS_MODE)FILE_READ);
 // size_t size = fd.SDFS_SIZE();
