@@ -32,9 +32,9 @@
 // Meta data for MP3 audio file
 //--------------------------------------------------------------------------------
 typedef struct {
-  uint16_t saved    : 1;
-  uint16_t selected : 1;
-  uint16_t duration : 14;
+  uint16_t saved    : 1;  // Saved selected flag
+  uint16_t selected : 1;  // Selected or not
+  uint16_t duration : 14; // [sec]
 } MP3Meta_t;
 
 // Metadata paired with a hash of the file name
