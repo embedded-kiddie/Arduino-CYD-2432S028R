@@ -40,4 +40,11 @@
 
 ## Software Configuration
 
+### Platform board package
+| Platform board package     | Version      |
+| -------------------------- | ------------ |
+| esp32 by Espressif Systems | [2.0.17][^1] |
+
+[^1]: In version 3.x, the I2S driver for the internal DAC is deprecated and does not work properly.
+
 [1]: https://lvgl.io/ "LVGL — Light and Versatile Embedded Graphics Library"
