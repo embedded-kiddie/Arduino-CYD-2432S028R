@@ -18,8 +18,8 @@
 //    - ArduinoJson by Benoit Blanchon (version 7.4.2)
 //
 //  ### Important Notice
-//  If the folder/file name contains multi-byte characters, define the symbol
-//  "USE_UTF8_LONG_NAMES" to 1 in "libraries/SdFat/src/SdFatConfig.h" as below:
+//  To handle long filenames and multibyte characters, uncomment the definition
+//  of `USE_UTF8_LONG_NAMES` in "libraries/SdFat/src/SdFatConfig.h" as below:
 //
 //    // To try UTF-8 encoded filenames.
 //    #define USE_UTF8_LONG_NAMES 1
