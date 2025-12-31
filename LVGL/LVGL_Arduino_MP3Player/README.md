@@ -64,20 +64,18 @@ Select [ESP32 Dev Module][2] or [ESP32-2432S028R CYD][3] as a board type to fit 
 ### 4.4. Library configuration
 
 - LVGL  
-  After installing LVGL, configure `lv_conf.h` by referring to the official document "[Configure LVGL][8]".  
-  
-  Some samples of `lv_conf.h` for this application are provided in the [lv_conf directory](lv_conf). For details, see [README.md](lv_conf/README.md).
+  After installing LVGL, configure `lv_conf.h` by referring to the official document "[Configure LVGL][8]". Some samples of `lv_conf.h` for this application are provided in the [lv_conf directory](lv_conf). For details, see [README.md](lv_conf/README.md).
 
 - SdFat  
   To handle long filenames and multibyte characters, uncomment the definition of the symbol `USE_UTF8_LONG_NAMES` in [libraries/SdFat/src/SdFatConfig.h][9] under your sketchbook folder.
 
-## 5. Application Configuration & Compile/Upload
+## 5. Configuration and Compile / Upload
 
-### 5.1. Editting config.h
+### 5.1. Edit config.h
 
 Open [`config.h`](config.h) in the Arduino IDE and follow the comments to modify the default settings as desired.
 
-### 5.2. Compile/Upload
+### 5.2. Compile / Upload
 Set the following two items from the "Tools" menu in the Arduino IDE.
 
 | Item             | Selection                             | 
@@ -99,6 +97,10 @@ In this application, such subfolder is named as "Partition" and can be selected 
 ![Album List](assets/CYD-MP3Player-AlbumList.gif)
 
 ### 6.3. Album Cover Photo
+
+### 6.4. Shuffle Mode
+
+### 6.5. Backlight / Sleep Timer
 
 ## Have Fun!
 
