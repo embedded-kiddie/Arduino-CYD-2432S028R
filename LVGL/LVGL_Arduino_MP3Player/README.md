@@ -17,24 +17,23 @@
 
 ![CYD-MP3Player - Screens](assets/CYD-MP3Player-Screens.png)
 
+- **Screen: Main**  
+  Controls the playback of audio files included in the playlist.
 
-### Screen: Main
-Controls the playback of audio files included in the playlist.
+- **Screen: Playlist**  
+  A list of audio file titles, artists, and album names.
 
-### Screen: Playlist
-A list of audio file titles, artists, and album names.
+- **Screen: Album List**  
+  Manages "albums" that contain audio files recorded on a single CD. Albums with a check mark will be included in the playlist.  
+  
+  In addition to the default list "All", you can create new some lists.
 
-### Screen: Album List
-Manages "albums" that contain audio files recorded on a single CD. Albums with a check mark will be included in the playlist.
-
-In addition to the default list "All", you can create new some lists.
-
-### Screen: Setting
-The number of audio files that can be included in a playlist is limited to approximately 750. 
-
-By creating and switching between several subfolders (called "**Partition**" in this application) on the SD card, you can manage a total of over 3000 files.
-
-You can also set the time until the backlight turns off and the sleep timer.
+- **Screen: Setting**  
+  The number of audio files that can be included in a playlist is limited to approximately 750.   
+  
+  By creating and switching between several subfolders (called "**Partition**" in this application) on the SD card, you can manage a total of over 3000 files.  
+  
+  You can also set the time until the backlight turns off and the sleep timer.
 
 ## Hardware Configuration
 
