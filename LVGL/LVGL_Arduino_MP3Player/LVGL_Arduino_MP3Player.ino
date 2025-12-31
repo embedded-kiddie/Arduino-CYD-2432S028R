@@ -315,7 +315,7 @@ void loop() {
 #if SAVE_SEQUENCIAL_BMP
   if (startTrigger) {
     uint32_t t = millis();
-    if (t - _skip < 45 * 1000 && t - _prev >= 66) {
+    if (/*t - _skip < 45 * 1000 &&*/ t - _prev >= 66) {
       sprintf(fname, "/%05d.bmp", N++);
       SaveBMP24(SD, fname, tft);
       _skip += (_prev = millis()) - t;
@@ -326,6 +326,7 @@ void loop() {
   if (Serial.available()) {
 #if SAVE_SEQUENCIAL_BMP
     startTrigger = true;
+    Serial.readStringUntil('\n');
 #elif SCREENSHORT
     Serial.readStringUntil('\n');
     static int No;
