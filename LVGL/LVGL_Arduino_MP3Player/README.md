@@ -130,7 +130,7 @@ The "**Sleep Timer**" will put the MCU into deep sleep mode after the set time h
 ### 6.6. Auto Saving
 Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**" and so on) are automatically saved to the SD card between songs or when you pause playback, and are restored when you power cycle the device.
 
-## Known Issues
+## 7. Known Issues
 
 - When using the built-in DAC and amplifier, there will be a "click" sound when powering up and when pausing/resume playback.
 
@@ -138,17 +138,21 @@ Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**" 
 
 - It has been observed that `@photo.jpg` does not display depending on the tool that generates/compresses JPEG images. If the album cover photo is not displayed, please recreate it using [GIMP][11] or similar.
 
-## Credits
-Thanks to the beautiful photos.
+## 8, Credits
+Thanks to the high quality photos under the [license by Unsplash][14].
 
-- [jess_bailey.png](https://unsplash.com/photos/gift-wrapping-supplies-with-scissors-and-confetti-Lt0D5qhrfEM "Jess Bailey - Unsplash")
-- [jim_luo.png](https://unsplash.com/photos/city-street-with-cars-and-buildings-at-dusk-u60wXRQ2cXA "Jim Luo - Unsplash")
-- [majed_swan.png](https://unsplash.com/photos/a-bottle-of-daisy-perfume-with-floral-accents-SYB0KQmt2aY "majed swan - Unsplash")
-- [steve_busch.png](https://unsplash.com/photos/full-moon-with-visible-craters-against-black-sky-npMGtVIQNdc "Steve Busch - Unsplash")
-- [zoshua_colah.png](https://unsplash.com/photos/a-view-of-a-mountain-range-with-trees-in-the-foreground-xNSnX87QEs0 "Zoshua Colah - Unsplash")
+- [Annie Spratt](https://unsplash.com/photos/a-red-brick-house-with-a-green-door-and-wreath-Wk7iG4QhFd8 "A red brick house with a green door and wreath. photo – Free Christmas Image on Unsplash")
+- [BoliviaInteligente](https://unsplash.com/photos/abstract-flowing-blue-and-pink-liquid-waves-7TLXeqJgock "Abstract flowing blue and pink liquid waves photo – Free Abstract Image on Unsplash")
+- [David Becker](https://unsplash.com/photos/snowy-landscape-with-a-lone-tree-at-sunset-HiOWmnLFTd8 "Snowy landscape with a lone tree at sunset. photo – Free Forest Image on Unsplash")
+- [Doncoombez](https://unsplash.com/photos/a-duck-preening-itself-while-floating-on-water-b3Fse8sB4Ac "A duck preening itself while floating on water. photo – Free Animal Image on Unsplash")
+- [Dzo](https://unsplash.com/photos/pink-lotus-flowers-floating-on-serene-water-at-sunrise-IEJqCs6JkDI "Pink lotus flowers floating on serene water at sunrise photo – Free Sunset Image on Unsplash")
+- [Esra Afşar](https://unsplash.com/photos/a-latte-with-intricate-foam-art-on-a-saucer-qJMWQCq3ZJk "A latte with intricate foam art on a saucer photo – Free Coffee Image on Unsplash")
+- [Grigorii Shcheglov](https://unsplash.com/photos/desk-with-globe-books-and-vintage-typewriter-_f5MgSSpuKQ "Desk with globe, books, and vintage typewriter. photo – Free Books Image on Unsplash")
+- [Pranav Nav](https://unsplash.com/photos/clear-water-droplets-falling-onto-a-light-blue-podium-A3O1iXUQGR8 "Clear water droplets falling onto a light blue podium. photo – Free Abstract Image on Unsplash")
+- [Rohit Choudhari](https://unsplash.com/photos/giant-ribcage-structure-in-a-pink-field-with-cherry-blossoms-Ph527s59P_M "Giant ribcage structure in a pink field with cherry blossoms photo – Free Digital image Image on Unsplash")
+- [Vincent Tint](https://unsplash.com/photos/city-skyline-across-a-wide-body-of-water-hFQ39GIBPdI "City skyline across a wide body of water. photo – Free Sunset Image on Unsplash")
 
-
-## Have Fun!
+## 9. Have Fun!
 If you find any issues or have suggestions, please report in [Issues][12] or [Discussions][13] 🥰
 
 ----------
@@ -170,3 +174,4 @@ If you find any issues or have suggestions, please report in [Issues][12] or [Di
 [11]: https://www.gimp.org/ "GIMP - GNU Image Manipulation Program"
 [12]: https://google.com/
 [13]: https://google.com/
+[14]: https://unsplash.com/license "License｜Unsplash"
