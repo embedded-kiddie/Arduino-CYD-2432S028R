@@ -64,7 +64,7 @@ Select [ESP32 Dev Module][2] or [ESP32-2432S028R CYD][3] as a board type to fit 
 ### 4.4. Library configuration
 
 - **LVGL**  
-  After installing LVGL, configure `lv_conf.h` by referring to the official document "[Configure LVGL][8]". Some samples of `lv_conf.h` for this application are provided in the [lv_conf directory](lv_conf). For details, see [README.md](lv_conf/README.md).
+  After installing LVGL, configure `lv_conf.h` by referring to the official document "[Configure LVGL][8]". Some samples of `lv_conf.h` for this application are provided in the [./lv_conf/](lv_conf). For details, see [README.md](lv_conf/README.md).
 
 - **SdFat**  
   To handle long filenames and multibyte characters, uncomment the definition of the symbol `USE_UTF8_LONG_NAMES` in [libraries/SdFat/src/SdFatConfig.h][9] under your sketchbook folder.
@@ -86,7 +86,7 @@ Set the following two items from the "Tools" menu in the Arduino IDE.
 ### 5.3. Custom Fonts
 In addition to LVGL fonts, this application embeds several national alphabets and symbols, as well as Japanese Kanji Level 1 and Level 2.
 
-To create custom fonts, refer to [fonts/README.md][fonts/README.md] and use [LVGL Font Converter][10] to create/download the font data, save it to [src/](src), and modify [ui.h](ui.h#L16-L27).
+To create custom fonts, refer to [fonts/README.md][fonts/README.md] and use [LVGL Font Converter][10] to create/download the font data, save it to [./src/](src), and modify [ui.h](ui.h#L16-L27).
 
 ## 6. How To Use
 This application is designed to take albums ripped from CDs and save them directly to your SD card. In addition to `.mp3`, the `.m4a` and `.wav` audio file formats are supported.
@@ -128,7 +128,7 @@ The "**Backlight**" setting not only turns off the LCD illumination but also sto
 The "**Sleep Timer**" will put the MCU into deep sleep mode after the set time has elapsed. To recover from this state, press the reset button or cycle the power.
 
 ### 6.6. Auto Saving
-Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**" and so on) are automatically saved to the SD card between songs or when you pause playback, and are restored when you power cycle the device.
+Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**", etc.) are automatically saved to the SD card between songs or when you pause playback, and are restored when you power cycle the device.
 
 ## 7. Known Issues
 
@@ -168,8 +168,8 @@ If you find any issues or have suggestions, please report in [Issues][12] or [Di
 [5]: https://github.com/lovyan03/LovyanGFX "lovyan03/LovyanGFX: SPI LCD graphics library for ESP32 (ESP-IDF/ArduinoESP32) / ESP8266 (ArduinoESP8266) / SAMD51(Seeed ArduinoSAMD51)"
 [6]: https://github.com/greiman/SdFat "greiman/SdFat: Arduino FAT16/FAT32 exFAT Library"
 [7]: https://github.com/bblanchon/ArduinoJson "bblanchon/ArduinoJson: 📟 JSON library for Arduino and embedded C++. Simple and efficient."
-[8]: https://github.com/greiman/SdFat/blob/master/src/SdFatConfig.h#L34-L35 "SdFat/src/SdFatConfig.h at master · greiman/SdFat"
-[9]: https://docs.lvgl.io/master/integration/frameworks/arduino.html#configure-lvgl "Arduino - LVGL 9.5 documentation"
+[8]: https://docs.lvgl.io/master/integration/frameworks/arduino.html#configure-lvgl "Arduino - LVGL 9.5 documentation"
+[9]: https://github.com/greiman/SdFat/blob/master/src/SdFatConfig.h#L34-L35 "SdFat/src/SdFatConfig.h at master · greiman/SdFat"
 [10]: https://lvgl.io/tools/fontconverter "Font Converter — LVGL"
 [11]: https://www.gimp.org/ "GIMP - GNU Image Manipulation Program"
 [12]: https://google.com/
