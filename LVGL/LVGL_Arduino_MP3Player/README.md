@@ -63,10 +63,10 @@ Select [ESP32 Dev Module][2] or [ESP32-2432S028R CYD][3] as a board type to fit 
 
 ### 4.4. Library configuration
 
-- LVGL  
+- **LVGL**  
   After installing LVGL, configure `lv_conf.h` by referring to the official document "[Configure LVGL][8]". Some samples of `lv_conf.h` for this application are provided in the [lv_conf directory](lv_conf). For details, see [README.md](lv_conf/README.md).
 
-- SdFat  
+- **SdFat**  
   To handle long filenames and multibyte characters, uncomment the definition of the symbol `USE_UTF8_LONG_NAMES` in [libraries/SdFat/src/SdFatConfig.h][9] under your sketchbook folder.
 
 ## 5. Configuration and Compile / Upload
@@ -93,17 +93,46 @@ In this application, such subfolder is named as "Partition" and can be selected 
 
 **Note:** If you have more than 750+α (α is around 10), audio files, they will no longer fit in the playlist and management will become a hassle.
 
-### 6.2. Album List
+### 6.2. Shuffle Mode
+"**Shuffle**" works as bellow:
+
+- (a) continues to randomly select and add albums to the playlist until the total number of audio files exceeds 750
+- (b) and finally randomly sorts the playlist again.
+
+However, due to the "750" limit for audio files, when "**Shuffle**" is OFF, the behavior will differ depending on whether you select an individual partition or "All".
+
+When you select an individual partition, albums will be added to the playlist in ascending order, but when you select "All", only (a) will be performed.
+
+### 6.3. Album List
+Pressing the "Keyboard" button under the dropdown will create an empty list, so enter a list name, close the keyboard, select the album you want to add, and finally press the "Save" button.
+
 ![Album List](assets/CYD-MP3Player-AlbumList.gif)
 
-### 6.3. Album Cover Photo
+The "Keyboard" button is also used to edit an existing list.
 
-### 6.4. Shuffle Mode
+### 6.4. Album Cover Photo
+The "**Main Screen**" displays one of the 10 default images randomly selected. Besides the default image, you can add an album cover photo named `@photo.jpg` to your album folder.
+
+Due to memory capacity limitations of the MCU, this `@photo.jpg` must be 96x96 and its size must be 6KB or less.
+
+To generate the `@photo.jpg` image, use something like [GIMP][10] and it's good to set the compression rate to around 50-75%.
 
 ### 6.5. Backlight / Sleep Timer
+The "**Backlight**" setting not only turns off the LCD illumination but also stops the clock to the LCD, reducing power consumption by approximately 40%.
+
+The "**Sleep Timer**" will put the MCU into deep sleep mode after the set time has elapsed. To recover from this state, press the reset button or cycle the power.
+
+### 6.6. Auto Saving
+Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**" and so on) are automatically saved to the SD card between songs or when you pause playback, and are restored when you power cycle the device.
+
+## Known Issues
+
+- When using the built-in DAC and amplifier, there will be a "click" sound when powering up and when pausing/resume playback.
+
+- This application is designed to save memory, but it may occasionally crash 😅. If this occurs frequently, try reducing the value of `MP3_PERTITION_FILES` (default is 750) in [MP3Player.h](MP3Player.h).
 
 ## Have Fun!
-
+If you find any issues or have suggestions, please report in [Issues][11] or [Discussions][12] 🥰
 
 ----------
 
@@ -120,3 +149,6 @@ In this application, such subfolder is named as "Partition" and can be selected 
 [7]: https://github.com/bblanchon/ArduinoJson "bblanchon/ArduinoJson: 📟 JSON library for Arduino and embedded C++. Simple and efficient."
 [8]: https://github.com/greiman/SdFat/blob/master/src/SdFatConfig.h#L34-L35 "SdFat/src/SdFatConfig.h at master · greiman/SdFat"
 [9]: https://docs.lvgl.io/master/integration/frameworks/arduino.html#configure-lvgl "Arduino - LVGL 9.5 documentation"
+[10]: https://www.gimp.org/ "GIMP - GNU Image Manipulation Program"
+[11]: https://google.com/
+[12]: https://google.com/

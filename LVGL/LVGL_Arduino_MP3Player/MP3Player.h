@@ -21,8 +21,8 @@
 // Estimated number of albums/audio files and memory consumption
 // Note: Bluetooth requires at least an additional 56K bytes of RAM
 //--------------------------------------------------------------------------------
-#define MP3_PERTITION_ALBUMS   50           // Number of albums per partition
 #define MP3_PERTITION_FILES   750           // Number of audio files per partition
+#define MP3_PERTITION_ALBUMS   50           // Number of albums per partition
 #define MP3_HEAP_SIZE_ALBUM   150           // Averary memory consumption per album
 #define MP3_HEAP_SIZE_FILE    100           // Averary memory consumption per audio file
 #define MP3_HEAP_MAX_FREE     (150 * 1024U) // Estimated maximum free heap memory size
