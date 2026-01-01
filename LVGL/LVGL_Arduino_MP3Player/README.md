@@ -139,9 +139,14 @@ Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**" 
 - It has been observed that `@photo.jpg` does not display depending on the tool that generates/compresses JPEG images. If the album cover photo is not displayed, please recreate it using [GIMP][11] or similar.
 
 ## Credits
+Thanks to the beautiful photos.
 
-### Default images
-- 
+- [jess_bailey.png](https://unsplash.com/photos/gift-wrapping-supplies-with-scissors-and-confetti-Lt0D5qhrfEM "Jess Bailey - Unsplash")
+- [jim_luo.png](https://unsplash.com/photos/city-street-with-cars-and-buildings-at-dusk-u60wXRQ2cXA "Jim Luo - Unsplash")
+- [majed_swan.png](https://unsplash.com/photos/a-bottle-of-daisy-perfume-with-floral-accents-SYB0KQmt2aY "majed swan - Unsplash")
+- [steve_busch.png](https://unsplash.com/photos/full-moon-with-visible-craters-against-black-sky-npMGtVIQNdc "Steve Busch - Unsplash")
+- [zoshua_colah.png](https://unsplash.com/photos/a-view-of-a-mountain-range-with-trees-in-the-foreground-xNSnX87QEs0 "Zoshua Colah - Unsplash")
+
 
 ## Have Fun!
 If you find any issues or have suggestions, please report in [Issues][12] or [Discussions][13] 🥰
