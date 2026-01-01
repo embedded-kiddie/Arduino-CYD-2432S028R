@@ -1,5 +1,5 @@
-#ifndef _CYD_DSP_H_
-#define _CYD_DSP_H_
+#ifndef _CYD_DSP_CUSTOM_H_
+#define _CYD_DSP_CUSTOM_H_
 
 #include <Arduino.h>
 #include "esp_dsp.h"
@@ -166,4 +166,4 @@ private:
 	bool ready = false;
 };
 
-#endif // _CYD_DSP_H_
+#endif // _CYD_DSP_CUSTOM_H_

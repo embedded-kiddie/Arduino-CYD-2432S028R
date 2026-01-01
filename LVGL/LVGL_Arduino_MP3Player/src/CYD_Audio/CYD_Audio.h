@@ -12,8 +12,8 @@
 
 #define SDFATFS_USED  // activate for SdFat
 
-#ifndef _CYD_AUDIO_H_
-#define _CYD_AUDIO_H_
+#ifndef _CYD_AUDIO_CUSTOM_H_
+#define _CYD_AUDIO_CUSTOM_H_
 
 #pragma GCC optimize ("Ofast")
 #include <vector>
@@ -656,4 +656,4 @@ typedef enum
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#endif // _CYD_AUDIO_H_
+#endif // _CYD_AUDIO_CUSTOM_H_
