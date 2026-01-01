@@ -138,8 +138,10 @@ Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**",
 
 - It has been observed that `@photo.jpg` does not display depending on the tool that generates/compresses JPEG images. If the album cover photo is not displayed, please recreate it using [GIMP][11] or similar.
 
-## 8, Credits
-Thanks to the high quality photos under the [license by Unsplash][14].
+## 8. Credits
+Thanks to the [ESP32 I2S audio library][14] in [hexeguitar/ESP32_TFT_PIO][15] (MIT license). This application includes a customized version of the `CYD_Audio` library.
+
+Also thanks to the high quality photos under the [license by Unsplash][16].
 
 - [Annie Spratt](https://unsplash.com/photos/a-red-brick-house-with-a-green-door-and-wreath-Wk7iG4QhFd8 "A red brick house with a green door and wreath. photo – Free Christmas Image on Unsplash")
 - [BoliviaInteligente](https://unsplash.com/photos/abstract-flowing-blue-and-pink-liquid-waves-7TLXeqJgock "Abstract flowing blue and pink liquid waves photo – Free Abstract Image on Unsplash")
@@ -174,4 +176,6 @@ If you find any issues or have suggestions, please report in [Issues][12] or [Di
 [11]: https://www.gimp.org/ "GIMP - GNU Image Manipulation Program"
 [12]: https://google.com/
 [13]: https://google.com/
-[14]: https://unsplash.com/license "License｜Unsplash"
+[14]: https://github.com/hexeguitar/ESP32_TFT_PIO/tree/main/Examples/CYD28_BaseProject/lib/CYD_Audio "ESP32_TFT_PIO/Examples/CYD28_BaseProject/lib/CYD_Audio at main · hexeguitar/ESP32_TFT_PIO"
+[15]: https://github.com/hexeguitar/ESP32_TFT_PIO "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
+[16]: https://unsplash.com/license "License｜Unsplash"
