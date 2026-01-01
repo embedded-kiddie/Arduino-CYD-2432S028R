@@ -83,6 +83,11 @@ Set the following two items from the "Tools" menu in the Arduino IDE.
 | Partition Scheme | **"Huge App (3MB No OTA/1MB SPIFFS)"** |
 | Upload Speed     |**"460800"**                           |
 
+### 5.3. Custom Fonts
+In addition to LVGL fonts, this application embeds several national alphabets and symbols, as well as Japanese Kanji Level 1 and Level 2.
+
+To create custom fonts, refer to [fonts/README.md][fonts/README.md] and use [LVGL Font Converter][10] to create/download the font data, save it to [src/](src), and modify [ui.h](ui.h#L16-L27).
+
 ## 6. How To Use
 This application is designed to take albums ripped from CDs and save them directly to your SD card. In addition to `.mp3`, the `.m4a` and `.wav` audio file formats are supported.
 
@@ -115,7 +120,7 @@ The "**Main Screen**" displays one of the 10 default images randomly selected. B
 
 Due to memory capacity limitations of the MCU, this `@photo.jpg` must be 96x96 and its size must be 6KB or less.
 
-To generate the `@photo.jpg` image, use something like [GIMP][10] and it's good to set the compression rate to around 50-75%.
+To generate the `@photo.jpg` image, use something like [GIMP][11] and it's good to set the compression rate to around 50-75%.
 
 ### 6.5. Backlight / Sleep Timer
 The "**Backlight**" setting not only turns off the LCD illumination but also stops the clock to the LCD, reducing power consumption by approximately 40%.
@@ -129,10 +134,17 @@ Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**" 
 
 - When using the built-in DAC and amplifier, there will be a "click" sound when powering up and when pausing/resume playback.
 
-- This application is designed to save memory, but it may occasionally crash 😅. If this occurs frequently, try reducing the value of `MP3_PERTITION_FILES` (default is 750) in [MP3Player.h](MP3Player.h).
+- This application is designed to save memory, but it may occasionally crash 😅. If this occurs frequently, try reducing the value of `MP3_PERTITION_FILES` (default is 750) in [MP3Player.h](MP3Player.h#L24).
+
+- It has been observed that `@photo.jpg` does not display depending on the tool that generates/compresses JPEG images. If the album cover photo is not displayed, please recreate it using [GIMP][11] or similar.
+
+## Credits
+
+### Default images
+- 
 
 ## Have Fun!
-If you find any issues or have suggestions, please report in [Issues][11] or [Discussions][12] 🥰
+If you find any issues or have suggestions, please report in [Issues][12] or [Discussions][13] 🥰
 
 ----------
 
@@ -149,6 +161,7 @@ If you find any issues or have suggestions, please report in [Issues][11] or [Di
 [7]: https://github.com/bblanchon/ArduinoJson "bblanchon/ArduinoJson: 📟 JSON library for Arduino and embedded C++. Simple and efficient."
 [8]: https://github.com/greiman/SdFat/blob/master/src/SdFatConfig.h#L34-L35 "SdFat/src/SdFatConfig.h at master · greiman/SdFat"
 [9]: https://docs.lvgl.io/master/integration/frameworks/arduino.html#configure-lvgl "Arduino - LVGL 9.5 documentation"
-[10]: https://www.gimp.org/ "GIMP - GNU Image Manipulation Program"
-[11]: https://google.com/
+[10]: https://lvgl.io/tools/fontconverter "Font Converter — LVGL"
+[11]: https://www.gimp.org/ "GIMP - GNU Image Manipulation Program"
 [12]: https://google.com/
+[13]: https://google.com/
