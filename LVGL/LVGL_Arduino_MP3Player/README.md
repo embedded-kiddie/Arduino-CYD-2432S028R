@@ -119,6 +119,12 @@ To create custom fonts, refer to [fonts/README.md][fonts/README.md] and use [LVG
 ## 6. How To Use
 This application is designed to take albums ripped from CDs and save them directly to your SD card. In addition to `.mp3`, the `.m4a` and `.wav` audio file formats are supported.
 
+**Note for Mac users:** If a large number of dot files are created on the SD card, it will take a long time to scan for audio files, so please run the following command in the Terminal app to delete them.
+
+```bash
+find . -name ".???*" -print -exec /bin/rm -rf {} \;
+```
+
 ### 6.1. About "Partition"
 Due to the SRAM capacity of the MCU, if you plan to store a large number of albums, it is recommended that you create subfolders (up to 5) and limit the number of albums to arround 50 titles and the number of audio files to arround 750, in each subfolder.
 
