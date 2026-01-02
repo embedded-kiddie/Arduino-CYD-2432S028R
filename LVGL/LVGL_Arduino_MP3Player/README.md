@@ -119,10 +119,11 @@ To create custom fonts, refer to [fonts/README.md][fonts/README.md] and use [LVG
 ## 6. How To Use
 This application is designed to take albums ripped from CDs and save them directly to your SD card. In addition to `.mp3`, the `.m4a` and `.wav` audio file formats are supported.
 
-**Note for Mac users:** If a large number of dot files are created on the SD card, it will take a long time to scan for audio files, so please run the following command in the Terminal app to delete them.
+**Note for Mac users:** If a large number of dot files are created on the SD card, it will take a long time to search for audio files. In order to avoid this, use the Terminal app to navigate to the directory containing the audio files (e.g. `NO NAME`) and execute the following command to delete them.
 
 ```bash
-find . -name ".???*" -print -exec /bin/rm -rf {} \;
+% cd /Volumes/NO\ NAME
+% find . -name ".???*" -print -exec /bin/rm -rf {} \;
 ```
 
 ### 6.1. About "Partition"
