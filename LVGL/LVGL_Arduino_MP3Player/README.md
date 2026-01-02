@@ -35,9 +35,36 @@
   
   You can also set the time until the backlight turns off and the sleep timer.
 
-## 3. Hardware Requirements
+## 3. Hardware Requirements: ESP32-2432S028R (Cheap Yellow Display)
 
-### ESP32-2432S028R (Cheap Yellow Display)
+### 3.1. Use Internal DAC and Onboard Amplifier
+Connect a speaker to the terminal on the yellow board. However, the sound will be quite terrible, so you will need to adjust the SB8002B's amplifier gain by changing the surrounding resistors.
+
+For details on these, please see the following link:
+
+- [Audio amp gain mod - ESP32-2432S028 aka Cheap Yellow Display example project][20].
+
+### 3.2. Use External DAC and Amplifier
+The links below explain how to connect external DAC modules.
+
+- [PCM5102A DAC - ESP32-2432S028 aka Cheap Yellow Display example project][21]
+- [CYD’s Note 2025 - macsbug][22]
+
+In this case, please set the symbol `USE_I2S_DAC` and each pin appropriately in [audioTask() in CYD28_audio.cpp](CYD28_audio.cpp#L35-L43).
+
+```c++
+void audioTask(void *parameter)
+{
+	// if using the I2S mod, RGB led is removed, I2S pinout defined in platformio.ini file
+#ifdef USE_I2S_DAC
+	audio.begin();
+	audio.setPinout(I2S_BCK_PIN, I2S_LRCLK_PIN, I2S_DIN_PIN);
+#else
+	audio.begin(true, I2S_DAC_CHANNEL_LEFT_EN);
+#endif
+...
+}
+```
 
 ## 4. Software Requirements
 
@@ -164,7 +191,6 @@ If you find any issues or have suggestions, please report in [Issues][12] or [Di
 
 [^2]: In version 3.x, the I2S driver for the internal DAC is deprecated and does not work properly.
 
-[0]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#audio-amp-gain-mod "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
 [1]: https://lvgl.io/ "LVGL — Light and Versatile Embedded Graphics Library"
 [2]: https://github.com/espressif/arduino-esp32/tree/master/variants/esp32 "arduino-esp32/variants/esp32 at master · espressif/arduino-esp32"
 [3]: https://github.com/espressif/arduino-esp32/tree/master/variants/jczn_2432s028r "arduino-esp32/variants/jczn_2432s028r at master · espressif/arduino-esp32"
@@ -181,3 +207,7 @@ If you find any issues or have suggestions, please report in [Issues][12] or [Di
 [14]: https://github.com/hexeguitar/ESP32_TFT_PIO/tree/main/Examples/CYD28_BaseProject/lib/CYD_Audio "ESP32_TFT_PIO/Examples/CYD28_BaseProject/lib/CYD_Audio at main · hexeguitar/ESP32_TFT_PIO"
 [15]: https://github.com/hexeguitar/ESP32_TFT_PIO "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
 [16]: https://unsplash.com/license "License｜Unsplash"
+
+[20]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#audio-amp-gain-mod "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
+[21]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#pcm5102a-dac "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
+[22]: https://macsbug.wordpress.com/2025/04/18/cyds-note-2025/ "CYD&#8217;s Note 2025 | macsbug"
