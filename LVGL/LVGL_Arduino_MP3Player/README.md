@@ -37,6 +37,7 @@
 
 ## 3. Hardware Requirements
 
+### ESP32-2432S028R (Cheap Yellow Display)
 
 ## 4. Software Requirements
 
@@ -163,6 +164,7 @@ If you find any issues or have suggestions, please report in [Issues][12] or [Di
 
 [^2]: In version 3.x, the I2S driver for the internal DAC is deprecated and does not work properly.
 
+[0]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#audio-amp-gain-mod "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
 [1]: https://lvgl.io/ "LVGL — Light and Versatile Embedded Graphics Library"
 [2]: https://github.com/espressif/arduino-esp32/tree/master/variants/esp32 "arduino-esp32/variants/esp32 at master · espressif/arduino-esp32"
 [3]: https://github.com/espressif/arduino-esp32/tree/master/variants/jczn_2432s028r "arduino-esp32/variants/jczn_2432s028r at master · espressif/arduino-esp32"
