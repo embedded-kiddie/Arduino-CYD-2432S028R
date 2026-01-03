@@ -47,7 +47,7 @@ The link below is a good resource to help you solve this problem.
 
 - [Audio amp gain mod - ESP32-2432S028 aka Cheap Yellow Display example project][20].
 
-But even after changing the resistors ​​to the same as the ILI9341 type, the high frequencies were still crushed and the sound was rough, so I ended up doing the following:
+However, even after changing the resistor to the same type as ILI9341, the high frequencies were crushed and the sound became rough, making it unbearable to listen to music, so I finally did the following:
 
 | Resister | Before Fix | After Fix |
 | :------: | ---------: | --------: |
