@@ -14,8 +14,11 @@
 - Power saving mode to turn off the LCD after a set time, and a sleep timer to shut down the device
 
 ## 2. Screens
+<details>
+<summary>Screen transition</summary>
 
 ![CYD-MP3Player - Screens](assets/CYD-MP3Player-Screens.png)
+</details>
 
 - **Screen: Main**  
   Controls the playback of audio files included in the playlist.
@@ -38,11 +41,34 @@
 ## 3. Hardware Requirements: ESP32-2432S028R (Cheap Yellow Display)
 
 ### 3.1. Use Internal DAC and Onboard Amplifier
-Connect a speaker to the terminal on the yellow board. However, the sound will be quite terrible, so you will need to adjust the SB8002B's amplifier gain by changing the surrounding resistors.
+Connect a speaker to the terminal on the board. However, the sound will be quite terrible, so you will need to adjust the SB8002B's amplifier gain by changing the surrounding resistors.
 
-For details on these, please see the following link:
+The link below is a good resource to help you solve this problem.
 
 - [Audio amp gain mod - ESP32-2432S028 aka Cheap Yellow Display example project][20].
+
+But even after changing the resistors ​​to the same as the ILI9341 type, the high frequencies were still crushed and the sound was rough, so I ended up doing the following:
+
+| Resister | Before Fix | After Fix |
+| :------: | ---------: | --------: |
+| R7       | 0 Ω        | 0 Ω       |
+| R8       | 0 Ω        | 22 KΩ     |
+| R9       | 68 KΩ      | 10 KΩ     |
+
+
+
+
+<details>
+<summary>ILI9341/ST7789 and amplifier IC SC8002B schematics</summary>
+
+![ILI9341 vs ST7789](assets/CYD-ILI9341-ST7789.jpg)
+</details>
+
+<details>
+<summary>Observation results of 440 Hz/sine wave sound source</summary>
+
+![ILI9341 vs ST7789](assets/CYD-Before-After.jpg)
+</details>
 
 ### 3.2. Use External DAC and Amplifier
 The links below explain how to connect external DAC modules.
