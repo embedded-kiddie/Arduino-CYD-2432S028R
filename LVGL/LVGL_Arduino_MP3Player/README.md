@@ -43,27 +43,27 @@
 ### 3.1. Use Internal DAC and Onboard Amplifier
 Connect a speaker to the terminal on the board. However, the sound will be quite terrible, so you will need to adjust the SB8002B's amplifier gain by changing the surrounding resistors.
 
+<details style="margin-left: 1em">
+<summary>ILI9341/ST7789 and amplifier IC SC8002B schematics</summary>
+
+![ILI9341 vs ST7789](assets/CYD-ILI9341-ST7789.jpg)
+</details><br />
+
 The link below is a good resource to help you solve this problem.
 
 - [Audio amp gain mod - ESP32-2432S028 aka Cheap Yellow Display example project][20].
 
 Even after changing the resistors to the same as ILI9341, the high frequencies were crushed and the sound became rough, making it unbearable to listen to music, so I finally did the following:
 
-<details>
-<summary>ILI9341/ST7789 and amplifier IC SC8002B schematics</summary>
-
-![ILI9341 vs ST7789](assets/CYD-ILI9341-ST7789.jpg)
-</details>
-
 #### ILI9341
-<details>
+<details style="margin-left: 1em">
 <summary>Decrease the resistance value of R9</summary>
 
 ![Decrease the resistance value of R9](assets/CYD-ILI9341-SC8002B.jpg)
 </details>
 
 #### ST7789
-<details>
+<details style="margin-left: 1em">
 <summary>Replace resistors R8 and R9</summary>
 
 | Resister | Before Fix | After Fix |
@@ -74,7 +74,7 @@ Even after changing the resistors to the same as ILI9341, the high frequencies w
 </details>
 
 #### 440 Hz/sine wave sound test
-<details>
+<details style="margin-left: 1em">
 <summary>Oscilloscope observation results</summary>
 
 ![ILI9341 vs ST7789](assets/CYD-Before-After.jpg)
