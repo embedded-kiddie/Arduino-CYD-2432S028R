@@ -43,11 +43,11 @@
 ### 3.1. Use Internal DAC and Onboard Amplifier
 Connect a speaker to the terminal on the board. However, the sound will be quite terrible, so you will need to adjust the SB8002B's amplifier gain by changing the surrounding resistors.
 
-<details style="margin-left: 1em">
+<details style="margin-left: 12px">
 <summary>ILI9341/ST7789 and amplifier IC SC8002B schematics</summary>
 
 ![ILI9341 vs ST7789](assets/CYD-ILI9341-ST7789.jpg)
-</details><br />
+</details>
 
 The link below is a good resource to help you solve this problem.
 
@@ -56,14 +56,14 @@ The link below is a good resource to help you solve this problem.
 Even after changing the resistors to the same as ILI9341, the high frequencies were crushed and the sound became rough, making it unbearable to listen to music, so I finally did the following:
 
 #### ILI9341
-<details style="margin-left: 1em">
+<details style="margin-left: 12px">
 <summary>Decrease the resistance value of R9</summary>
 
 ![Decrease the resistance value of R9](assets/CYD-ILI9341-SC8002B.jpg)
 </details>
 
 #### ST7789
-<details style="margin-left: 1em">
+<details style="margin-left: 12px">
 <summary>Replace resistors R8 and R9</summary>
 
 | Resister | Before Fix | After Fix |
@@ -74,7 +74,7 @@ Even after changing the resistors to the same as ILI9341, the high frequencies w
 </details>
 
 #### 440 Hz/sine wave sound test
-<details style="margin-left: 1em">
+<details style="margin-left: 12px">
 <summary>Oscilloscope observation results</summary>
 
 ![ILI9341 vs ST7789](assets/CYD-Before-After.jpg)
