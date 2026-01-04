@@ -7,7 +7,7 @@
  - [Font Converter][2]
 
 ### 3. Set up Font Converter
-Create font data for 12-point and 14-point fonts. Below is an example of font converter settings when the base font is [Noto Sans Japanese][3].
+Create font data for 12px and 14px fonts. Below is an example of font converter settings when the base font is [Noto Sans Japanese][3].
 
 #### Name
   - noto_sans_jp_4bit_jis1_12
@@ -51,7 +51,7 @@ Optimize the font height and baseline to fit the layout of this application.
 
 Open the downloaded C source code. Change both `.line_height` and `.base_line` as shown below, and comment out the `.static_bitmap` line.
 
-#### - 12points font file
+#### ・ 12px font file
 ```
     .line_height = 15,          /*The maximum line height required by the font*/
     .base_line = 3,             /*Baseline measured from the bottom of the line*/
@@ -59,7 +59,7 @@ Open the downloaded C source code. Change both `.line_height` and `.base_line` a
 //  .static_bitmap = 0,
 ```
 
-#### - 14points font file
+#### ・ 14px font file
 ```
     .line_height = 18,          /*The maximum line height required by the font*/
     .base_line = 4,             /*Baseline measured from the bottom of the line*/
