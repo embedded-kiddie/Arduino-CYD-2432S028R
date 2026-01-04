@@ -137,7 +137,7 @@ Select [ESP32 Dev Module][2] or [ESP32-2432S028R CYD][3] as a board type to fit 
 ### 4.5. Custom Fonts
 In addition to LVGL fonts, this application embeds several national alphabets and symbols of **12px** and **14px**, as well as Japanese Kanji Level 1 and Level 2.
 
-To create custom fonts, refer to [fonts/README.md][fonts/README.md] and use [LVGL Font Converter][10] to create/download the font data, save them to [./src/](src), and modify [ui.h](ui.h#L16-L27).
+To create custom fonts, refer to [./fonts/README.md](fonts/README.md) and use [LVGL Font Converter][10] to create/download the font data, save them to [./src/](src), and modify [ui.h](ui.h#L16-L27).
 
 ## 5. Configuration and Compile / Upload
 
