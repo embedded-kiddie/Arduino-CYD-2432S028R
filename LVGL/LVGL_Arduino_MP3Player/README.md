@@ -52,8 +52,9 @@ Connect a speaker to the terminal on the board. However, the sound will be quite
 The link below is a good resource to help you solve this problem.
 
 - [Audio amp gain mod - ESP32-2432S028 aka Cheap Yellow Display example project][20].
+- [ESP32-2432S028 aka Cheap Yellow Display - fixing the audio issues][21]
 
-Even after changing the resistors to the same as ILI9341, the high frequencies were crushed and the sound became rough, making it unbearable to listen to music, so I finally did the following:
+Even when I changed the resistors of ST7789 to the same as ILI9341, the high frequencies were crushed and the sound became rough, making it unsuitable for listening to music, so I ended up doing the following:
 
 #### ILI9341
 <details>
@@ -66,18 +67,18 @@ Even after changing the resistors to the same as ILI9341, the high frequencies w
 <details>
 <summary>Replace resistors R8 and R9</summary>
 
-| Resister | Before Fix | After Fix |
-| :------: | ---------: | --------: |
-| R7       | 0 Ω        | 0 Ω       |
-| R8       | 0 Ω        | 22 KΩ     |
-| R9       | 68 KΩ      | 10 KΩ     |
+| Resister | Before modify | After modify |
+| :------: | ------------: | -----------: |
+| R7       | 0 Ω           | 0 Ω          |
+| R8       | 0 Ω           | 22 KΩ        |
+| R9       | 68 KΩ         | 10 KΩ        |
 </details>
 
 #### 440 Hz/sine wave sound test
 <details>
 <summary>Oscilloscope observation results</summary>
 
-![ILI9341 vs ST7789](assets/CYD-Before-After.jpg)
+![ILI9341 vs ST7789](assets/CYD-400Hz-SineWave.jpg)
 </details>
 
 ### 3.2. Use External DAC and Amplifier
@@ -252,3 +253,4 @@ If you find any issues or have suggestions, please report in [Issues][12] or [Di
 [20]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#audio-amp-gain-mod "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
 [21]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#pcm5102a-dac "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
 [22]: https://macsbug.wordpress.com/2025/04/18/cyds-note-2025/ "CYD&#8217;s Note 2025 | macsbug"
+[23]: https://www.youtube.com/watch?v=6JCLHIXXVus "ESP32-2432S028 aka Cheap Yellow Display - fixing the audio issues - YouTube"
