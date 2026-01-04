@@ -5,7 +5,7 @@
 ## 1. Feature
 
 - GUI by [LVGL][1]
-- Built-in DAC and amplifier can directly drive a speaker connected to CYD
+- Internal DAC and onboard amplifier can directly drive a speaker connected to CYD
 - Can manage approximately 3,000 music files [^1]
 - Can display the cover photo for each album
 - "**Playlist**" to display music titles, artist names, and album names
@@ -38,31 +38,38 @@
   
   You can also set the time until the backlight turns off and the sleep timer.
 
-## 3. Hardware Requirements: ESP32-2432S028R (Cheap Yellow Display)
+## 3. Hardware Requirements: ESP32-2432S028R (AKA CYD)
 
 ### 3.1. Use Internal DAC and Onboard Amplifier
 Connect a speaker to the terminal on the board. However, the sound will be quite terrible, so you will need to adjust the SB8002B's amplifier gain by changing the surrounding resistors.
-
-The link below is a good resource to help you solve this problem.
-
-- [Audio amp gain mod - ESP32-2432S028 aka Cheap Yellow Display example project][20].
-
-However, even after changing the resistor to the same type as ILI9341, the high frequencies were crushed and the sound became rough, making it unbearable to listen to music, so I finally did the following:
-
-| Resister | Before Fix | After Fix |
-| :------: | ---------: | --------: |
-| R7       | 0 Ω        | 0 Ω       |
-| R8       | 0 Ω        | 22 KΩ     |
-| R9       | 68 KΩ      | 10 KΩ     |
-
-
-
 
 <details>
 <summary>ILI9341/ST7789 and amplifier IC SC8002B schematics</summary>
 
 ![ILI9341 vs ST7789](assets/CYD-ILI9341-ST7789.jpg)
 </details>
+
+The link below is a good resource to help you solve this problem.
+
+- [Audio amp gain mod - ESP32-2432S028 aka Cheap Yellow Display example project][20].
+
+Even after changing the resistors to the same as ILI9341, the high frequencies were crushed and the sound became rough, making it unbearable to listen to music, so I finally did the following:
+
+<detail>
+<summary>ILI9341</summary>
+
+![Decrease the resistance value of R9](assets/CYD-ILI9341-SC8002B.jpg)
+</detail>
+
+<detail>ST7789
+<summary>Replace resistors R8 and R9</summary>
+
+| Resister | Before Fix | After Fix |
+| :------: | ---------: | --------: |
+| R7       | 0 Ω        | 0 Ω       |
+| R8       | 0 Ω        | 22 KΩ     |
+| R9       | 68 KΩ      | 10 KΩ     |
+</detail>
 
 <details>
 <summary>Observation results of 440 Hz/sine wave sound source</summary>
