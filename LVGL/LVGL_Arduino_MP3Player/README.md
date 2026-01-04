@@ -133,6 +133,11 @@ Select [ESP32 Dev Module][2] or [ESP32-2432S028R CYD][3] as a board type to fit 
 - **SdFat**  
   To handle long filenames and multibyte characters, uncomment the definition of the symbol `USE_UTF8_LONG_NAMES` in [libraries/SdFat/src/SdFatConfig.h][9] under your sketchbook folder.
 
+### 4.5. Custom Fonts
+In addition to LVGL fonts, this application embeds several national alphabets and symbols, as well as Japanese Kanji Level 1 and Level 2.
+
+To create custom fonts, refer to [fonts/README.md][fonts/README.md] and use [LVGL Font Converter][10] to create/download the font data, save it to [./src/](src), and modify [ui.h](ui.h#L16-L27).
+
 ## 5. Configuration and Compile / Upload
 
 ### 5.1. Edit config.h
@@ -146,11 +151,6 @@ Set the following two items from the "Tools" menu in the Arduino IDE.
 | ---------------- |-------------------------------------- |
 | Partition Scheme | **"Huge App (3MB No OTA/1MB SPIFFS)"** |
 | Upload Speed     |**"460800"**                           |
-
-### 5.3. Custom Fonts
-In addition to LVGL fonts, this application embeds several national alphabets and symbols, as well as Japanese Kanji Level 1 and Level 2.
-
-To create custom fonts, refer to [fonts/README.md][fonts/README.md] and use [LVGL Font Converter][10] to create/download the font data, save it to [./src/](src), and modify [ui.h](ui.h#L16-L27).
 
 ## 6. How To Use
 This application is designed to take albums ripped from CDs and save them directly to your SD card. In addition to `.mp3`, the `.m4a` and `.wav` audio file formats are supported.
