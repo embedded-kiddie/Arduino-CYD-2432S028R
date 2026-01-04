@@ -32,7 +32,7 @@
   In addition to the default list "All", you can create new some lists.
 
 - **Screen: Setting**  
-  The number of audio files that can be included in a playlist is limited to approximately 750.   
+  The number of audio files that can be included in a playlist is limited to approximately 600.
   
   By creating and switching between several subfolders (called "**Partition**" in this application) on the SD card, you can manage a total of over 3000 files.  
   
@@ -153,19 +153,19 @@ This application is designed to take albums ripped from CDs and save them direct
 ```
 
 ### 6.1. About "Partition"
-Due to the SRAM capacity of the MCU, if you plan to store a large number of albums, it is recommended that you create subfolders (up to 5) and limit the number of albums to arround 50 titles and the number of audio files to arround 750, in each subfolder.
+Due to the SRAM capacity of the MCU, if you plan to store a large number of albums, it is recommended that you create subfolders (up to 5) and limit the number of albums to arround 50 titles and the number of audio files to arround 600, in each subfolder.
 
 In this application, such subfolder is named as "Partition" and can be selected in the **"Setting"** screen.
 
-**Note:** If you have more than 750+α (α is around 10), audio files, they will no longer fit in the playlist and management will become a hassle.
+**Note:** If you have more than 600+α (α is around 10), audio files, they will no longer fit in the playlist and management will become a hassle.
 
 ### 6.2. Shuffle Mode
 "**Shuffle**" works as bellow:
 
-- (a) continues to randomly select and add albums to the playlist until the total number of audio files exceeds 750
+- (a) continues to randomly select and add albums to the playlist until the total number of audio files exceeds 600
 - (b) and finally randomly sorts the playlist again.
 
-However, due to the "750" limit for audio files, when "**Shuffle**" is OFF, the behavior will differ depending on whether you select an individual partition or "All".
+However, due to the "600" limit for audio files, when "**Shuffle**" is OFF, the behavior will differ depending on whether you select an individual partition or "All".
 
 When you select an individual partition, albums will be added to the playlist in ascending order, but when you select "All", only (a) will be performed.
 
@@ -194,8 +194,6 @@ Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**",
 ## 7. Known Issues
 
 - When using the built-in DAC and amplifier, there will be a "click" sound when powering up and when pausing/resume playback.
-
-- This application is designed to save memory, but it may occasionally crash 😅. If this occurs frequently, try reducing the value of `MP3_PERTITION_FILES` (default is 750) in [MP3Player.h](MP3Player.h#L24).
 
 - It has been observed that `@photo.jpg` does not display depending on the tool that generates/compresses JPEG images. If the album cover photo is not displayed, please recreate it using [GIMP][11] or similar.
 

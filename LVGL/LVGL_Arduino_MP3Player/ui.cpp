@@ -28,7 +28,7 @@ static UI_State_t nextState;
 static uint8_t autoSaving = 0;
 
 /////////////////////////// IMAGES //////////////////////////
-#include "src/_pictures.h"
+#include "src/photos.h"
 
 ////////////////////////// UI LOOP //////////////////////////
 #define ADDITIONAL_TASK_PERIOD 1000 // [msec]

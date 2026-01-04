@@ -56,7 +56,7 @@
 
 //--------------------------------------------------------------------------------
 // 7. Partitions under "MP3_ROOT_PATH"
-// Limit the # of audio files in your playlist to a maximum of around 750.
+// Limit the # of audio files in your playlist to a maximum of around 600.
 // You can make full use of your SD card capacity by creating subfolders
 // (called partitions) under "MP3_ROOT_PATH". (e.g. "/MP3/1/", "/MP3/2/", ...)
 //--------------------------------------------------------------------------------
