@@ -32,7 +32,7 @@
   In addition to the default list "All", you can create new some lists.
 
 - **Screen: Setting**  
-  The number of audio files that can be included in a playlist is limited to approximately 600.
+  The number of audio files that can be included in a playlist is limited to approximately 600+α (α ≦ 25).
   
   By creating and switching between several subfolders (called "**Partition**" in this application) on the SD card, you can manage a total of over 3000 files.  
   
@@ -168,15 +168,15 @@ Due to the SRAM capacity of the MCU, if you plan to store a large number of albu
 
 In this application, such subfolder is named as "Partition" and can be selected in the **"Setting"** screen.
 
-**Note:** If you have more than 600+α (α is around 10), audio files, they will no longer fit in the playlist and management will become a hassle.
+**Note:** If you have more than 600+α, audio files, they will no longer fit in the playlist and management will become a hassle.
 
 ### 6.2. Shuffle Mode
 "**Shuffle**" works as bellow:
 
-- (a) continues to randomly select and add albums to the playlist until the total number of audio files exceeds 600
+- (a) continues to randomly select and add albums to the playlist until the total number of audio files exceeds 600+α
 - (b) and finally randomly sorts the playlist again.
 
-However, due to the "600" limit for audio files, when "**Shuffle**" is OFF, the behavior will differ depending on whether you select an individual partition or "All".
+However, due to the "600+α" limitation for audio files, when "**Shuffle**" is OFF, the behavior will differ depending on whether you select an individual partition or "All".
 
 When you select an individual partition, albums will be added to the playlist in ascending order, but when you select "All", only (a) will be performed.
 
@@ -207,6 +207,8 @@ Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**",
 - When using the built-in DAC and amplifier, there will be a "click" sound when powering up and when pausing/resume playback.
 
 - It has been observed that `@photo.jpg` does not display depending on the tool that generates/compresses JPEG images. If the album cover photo is not displayed, please recreate it using [GIMP][11] or similar.
+
+- "**Bluetooth**" icon at the top left on "**Main**" screen is not supported yet 😅
 
 ## 8. Credits
 Thanks to the [ESP32 I2S audio library][14] in [hexeguitar/ESP32_TFT_PIO][15] (MIT license). This application includes a customized version of the `CYD_Audio` library.
