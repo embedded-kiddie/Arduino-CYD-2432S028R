@@ -71,13 +71,13 @@ Open the downloaded C source code. Change both `.line_height` and `.base_line` a
 Place the modified files under the `src` folder.
 
 ```
-CYD_MP3Player/src
-├── CYD_Audio
-├── _pictures
+CYD_MP3Player/src/
+├── CYD_Audio/
+├── _pictures/
 ├── _pictures.h
 ├── noto_sans_jp_4bit_jis1_12.c <== Here!
 ├── noto_sans_jp_4bit_jis1_14.c <== Here!
-├── tjpgd
+├── tjpgd/
 └── ui_img.c
 ```
 
