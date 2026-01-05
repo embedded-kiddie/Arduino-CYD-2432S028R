@@ -78,7 +78,9 @@ Even when I changed the resistors of ST7789 to the same as ILI9341, the high fre
 <details>
 <summary>Oscilloscope observation results</summary>
 
-![ILI9341 vs ST7789](assets/CYD-400Hz-SineWave.jpg)
+![ILI9341 vs ST7789](assets/CYD-SineWave-400Hz.jpg)
+
+![ILI9341 vs ST7789](assets/CYD-SineWave-All.jpg)
 </details>
 
 ### 3.2. Use External DAC and Amplifier
