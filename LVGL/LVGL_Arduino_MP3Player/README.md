@@ -27,12 +27,12 @@
   A list of audio file titles, artists, and album names.
 
 - **Screen: Album List**  
-  Manages "albums" that contain audio files recorded on a single CD. Albums with a check mark will be included in the playlist.  
+  Manages a list of albums that contain music files recorded on a single CD. Albums with a check mark will be included in the playlist.  
   
-  In addition to the default list "All", you can create new some lists.
+  In addition to the default list "All", you can create some new lists.
 
 - **Screen: Setting**  
-  The number of audio files that can be included in a playlist is limited to approximately 600+α (α ≦ 25).
+  The number of music files that can be included in a playlist is limited to approximately 600+α (α ≦ 25).
   
   By creating and switching between several subfolders (called "**Partition**" in this application) on the SD card, you can manage a total of over 3000 files.  
   
@@ -41,7 +41,7 @@
 ## 3. Hardware Requirements: ESP32-2432S028R (AKA CYD)
 
 ### 3.1. Use Internal DAC and Onboard Amplifier
-Connect a speaker to the terminal on the board. However, the sound will be quite terrible, so you will need to adjust the SB8002B's amplifier gain by changing the surrounding resistors.
+Connect a speaker to the terminal on board. However, its sound will be quite terrible, so you will need to adjust the SB8002B's amplifier gain by changing the surrounding resistors.
 
 <details>
 <summary>ILI9341/ST7789 and amplifier IC SC8002B schematics</summary>
@@ -49,21 +49,21 @@ Connect a speaker to the terminal on the board. However, the sound will be quite
 ![ILI9341 vs ST7789](assets/CYD-ILI9341-ST7789.jpg)
 </details>
 
-The link below is a good resource to help you solve this problem.
+The following links are good resources to help you solve this problem.
 
 - [Audio amp gain mod - ESP32-2432S028 aka Cheap Yellow Display example project][20].
 - [ESP32-2432S028 aka Cheap Yellow Display - fixing the audio issues][21]
 
-Even when I changed the resistors of ST7789 to the same as ILI9341, the high frequencies were crushed and the sound became rough, making it unsuitable for listening to music, so I ended up doing the following:
+Even when I changed the resistors of ST7789 to the same as ILI9341, the high frequencies were crushed and the sound became rough, making it unsuitable for listening to the music, so I ended up doing the following:
 
-#### ILI9341
+#### ILI9341 modification
 <details>
 <summary>Decrease the resistance value of R9</summary>
 
 ![Decrease the resistance value of R9](assets/CYD-ILI9341-SC8002B.jpg)
 </details>
 
-#### ST7789
+#### ST7789 modification
 <details>
 <summary>Replace resistors R8 and R9</summary>
 
@@ -89,7 +89,7 @@ The links below explain how to connect external DAC modules.
 - [PCM5102A DAC - ESP32-2432S028 aka Cheap Yellow Display example project][21]
 - [CYD’s Note 2025 - macsbug][22]
 
-In this case, please set the symbol `USE_I2S_DAC` and each pin appropriately in [audioTask() in CYD28_audio.cpp](CYD28_audio.cpp#L35-L43).
+In this case, please define the symbol `USE_I2S_DAC` and each pin appropriately in [audioTask() in CYD28_audio.cpp](CYD28_audio.cpp#L35-L43).
 
 ```c++
 void audioTask(void *parameter)
@@ -118,7 +118,7 @@ void audioTask(void *parameter)
 | -------------------------- | ----------- |
 | esp32 by Espressif Systems | 2.0.17 [^2] |
 
-Select [ESP32 Dev Module][2] or [ESP32-2432S028R CYD][3] as a board type to fit your board.
+Select [ESP32 Dev Module][2] as a board.
 
 ### 4.3. Libraries
 | Name                                | Version      | 
@@ -137,18 +137,18 @@ Select [ESP32 Dev Module][2] or [ESP32-2432S028R CYD][3] as a board type to fit 
   To handle long filenames and multibyte characters, uncomment the definition of the symbol `USE_UTF8_LONG_NAMES` in [libraries/SdFat/src/SdFatConfig.h][9] under your sketchbook folder.
 
 ### 4.5. Custom Fonts
-In addition to LVGL fonts, this application embeds several national alphabets and symbols of **12px** and **14px**, as well as Japanese Kanji Level 1 and Level 2.
+In addition to LVGL's fonts, this application embeds several national alphabets and symbols of **12px** and **14px**, as well as Japanese Kanji Level 1 and Level 2.
 
 To create custom fonts, refer to [./fonts/README.md](fonts/README.md) and use [LVGL Font Converter][10] to create/download the font data, save them to [./src/](src), and modify [ui.h](ui.h#L16-L27).
 
-## 5. Configuration and Compile / Upload
+## 5. Edit and Compile / Upload
 
 ### 5.1. Edit config.h
 
 Open [`config.h`](config.h) in the Arduino IDE and follow the comments to modify the default settings as desired.
 
 ### 5.2. Compile / Upload
-Set the following two items from the "Tools" menu in the Arduino IDE.
+Set the following two items from the "**Tools**" menu in the Arduino IDE.
 
 | Item             | Selection                             | 
 | ---------------- |-------------------------------------- |
@@ -166,31 +166,29 @@ This application is designed to take albums ripped from CDs and save them direct
 ```
 
 ### 6.1. About "Partition"
-Due to the SRAM capacity of the MCU, if you plan to store a large number of albums, it is recommended that you create subfolders (up to 5) and limit the number of albums to arround 50 titles and the number of audio files to arround 600, in each subfolder.
+Due to the SRAM capacity of MCU, if you plan to store a large number of albums, it is recommended that you create subfolders (up to 5) and limit the number of albums to arround 50 titles and the number of music files to arround 600+α, in each subfolder.
 
 In this application, such subfolder is named as "Partition" and can be selected in the **"Setting"** screen.
-
-**Note:** If you have more than 600+α, audio files, they will no longer fit in the playlist and management will become a hassle.
 
 ### 6.2. Shuffle Mode
 "**Shuffle**" works as bellow:
 
-- (a) continues to randomly select and add albums to the playlist until the total number of audio files exceeds 600+α
-- (b) and finally randomly sorts the playlist again.
+- (1) continues to randomly select and add albums to the playlist until the total number of music files exceeds 600+α
+- (2) and finally randomly sorts the playlist again.
 
-However, due to the "600+α" limitation for audio files, when "**Shuffle**" is OFF, the behavior will differ depending on whether you select an individual partition or "All".
+However, due to the "600+α" limitation for music files, when "**Shuffle**" is OFF, the behavior will differ depending on whether you select an individual partition or "**All**".
 
-When you select an individual partition, albums will be added to the playlist in ascending order, but when you select "All", only (a) will be performed.
+When you select an individual partition, albums will be added to the playlist in ascending order, but when you select "**All**", only (1) will be performed.
 
 ### 6.3. Album List
-Pressing the "Keyboard" button under the dropdown will create an empty list, so enter a list name, close the keyboard, select the album you want to add, and finally press the "Save" button.
+Pressing the "**Keyboard**" button under the dropdown will create an empty list, so enter a list name, close the keyboard, select the album you want to add, and finally press the "**Save**" button.
 
 ![Album List](assets/CYD-MP3Player-AlbumList.gif)
 
-The "Keyboard" button is also used to edit an existing list.
+The "**Keyboard**" button is also used to edit an existing list.
 
 ### 6.4. Album Cover Photo
-The "**Main Screen**" displays one of the 10 default images randomly selected. Besides the default image, you can add an album cover photo named `@photo.jpg` to your album folder.
+The "**Main Screen**" displays one of the 10 default images randomly. Besides the default image, you can put an album cover photo named `@photo.jpg` to your album folder.
 
 Due to memory capacity limitations of the MCU, this `@photo.jpg` must be 96x96 and its size must be 6KB or less.
 
