@@ -67,11 +67,11 @@ Even when I changed the resistors of ST7789 to the same as ILI9341, the high fre
 <details>
 <summary>Replace resistors R8 and R9</summary>
 
-| Resister | Before modify | After modify |
-| :------: | ------------: | -----------: |
-| R7       | 0 Ω           | 0 Ω          |
-| R8       | 0 Ω           | 22 KΩ        |
-| R9       | 68 KΩ         | 10 KΩ        |
+| Resister | Before modification | After modification |
+| :------: | ------------------: | -----------------: |
+| R7       | 0 Ω                 | 0 Ω                |
+| R8       | 0 Ω                 | 22 KΩ              |
+| R9       | 68 KΩ               | 10 KΩ              |
 </details>
 
 #### 440 Hz/sine wave sound test
