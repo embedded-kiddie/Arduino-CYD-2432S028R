@@ -60,6 +60,7 @@ uint32_t MP3Player::ScanAlbumDirs(void) {
     }
 
     m_tree = new Node(m_root.c_str());
+    DBG_ASSERT(m_tree);
     m_tree->scan_dir(dir);
     dir.close();
   }
