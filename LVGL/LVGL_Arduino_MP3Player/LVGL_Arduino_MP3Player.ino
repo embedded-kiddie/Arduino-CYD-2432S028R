@@ -269,7 +269,7 @@ static uint32_t my_tick(void) {
 }
 
 void setup() {
-#if (DEBUG & 2) || defined(_SDCARD_HPP_) || defined(_ESP32_HPP_)
+#if !USE_CALIBRATED || (DEBUG & 2) || defined(_SDCARD_HPP_) || defined(_ESP32_HPP_)
   Serial.begin(115200);
   delay(1000);
 #endif
