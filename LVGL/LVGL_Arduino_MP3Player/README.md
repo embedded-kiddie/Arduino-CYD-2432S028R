@@ -86,7 +86,7 @@ Even when I changed the resistors of ST7789 to the same as ILI9341, the high fre
 ### 3.2. Use External DAC and Amplifier
 The links below explain how to connect external DAC modules.
 
-- [PCM5102A DAC - ESP32-2432S028 aka Cheap Yellow Display example project][22]
+- [Audio I2S mod - ESP32-2432S028 aka Cheap Yellow Display example project][22]
 - [CYD’s Note 2025 - macsbug][23]
 
 In this case, please define the symbol `USE_I2S_DAC` and each pin appropriately in [audioTask() in CYD28_audio.cpp](CYD28_audio.cpp#L35-L43).
@@ -139,7 +139,7 @@ Select [ESP32 Dev Module][2] as a board.
 ### 4.5. Custom Fonts
 In addition to LVGL's fonts, this application embeds several national alphabets and symbols of **12px** and **14px**, as well as Japanese Kanji Level 1 and Level 2.
 
-To create custom fonts, refer to [assets/fonts/README.md](fonts/README.md) and use [LVGL Font Converter][10] to create/download the font data, save them to [src/](src), and modify [ui.h](ui.h#L16-L27).
+To create custom fonts, refer to [assets/fonts/README.md](assets/fonts/README.md) and use [LVGL Font Converter][10] to create/download the font data, save them to [src/](src), and modify [ui.h](ui.h#L16-L27).
 
 ## 5. Edit and Compile / Upload
 
@@ -246,13 +246,13 @@ If you find any issues or have suggestions, please report in [Issues][12] or [Di
 [9]: https://github.com/greiman/SdFat/blob/master/src/SdFatConfig.h#L34-L35 "SdFat/src/SdFatConfig.h at master · greiman/SdFat"
 [10]: https://lvgl.io/tools/fontconverter "Font Converter — LVGL"
 [11]: https://www.gimp.org/ "GIMP - GNU Image Manipulation Program"
-[12]: https://google.com/
-[13]: https://google.com/
+[12]: https://github.com/embedded-kiddie/CYD_MP3Player/issues "embedded-kiddie/CYD_MP3Player · Issues · GitHub"
+[13]: https://github.com/embedded-kiddie/CYD_MP3Player/discussions "embedded-kiddie/CYD_MP3Player · Discussions · GitHub"
 [14]: https://github.com/hexeguitar/ESP32_TFT_PIO/tree/main/Examples/CYD28_BaseProject/lib/CYD_Audio "ESP32_TFT_PIO/Examples/CYD28_BaseProject/lib/CYD_Audio at main · hexeguitar/ESP32_TFT_PIO"
 [15]: https://github.com/hexeguitar/ESP32_TFT_PIO "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
 [16]: https://unsplash.com/license "License｜Unsplash"
 
 [20]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#audio-amp-gain-mod "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
 [21]: https://www.youtube.com/watch?v=6JCLHIXXVus "ESP32-2432S028 aka Cheap Yellow Display - fixing the audio issues - YouTube"
-[22]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#pcm5102a-dac "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
+[22]: https://github.com/hexeguitar/ESP32_TFT_PIO?tab=readme-ov-file#audio-i2s-mod "hexeguitar/ESP32_TFT_PIO: Example project for the ESP32-2432S028 &quot;Cheap Yellow Display&quot; board."
 [23]: https://macsbug.wordpress.com/2025/04/18/cyds-note-2025/ "CYD&#8217;s Note 2025 | macsbug"
