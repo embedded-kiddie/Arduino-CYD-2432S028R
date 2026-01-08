@@ -295,7 +295,8 @@ static void update_open_cb(lv_anim_t* a) {
 //--------------------------------------------------------------------------------
 static void update_open(lv_obj_t *list, Node *node, uint32_t index, lv_anim_t *a) {
   Node *prev = node;
-  std::vector <Node*> stack = {node};
+  std::vector <Node*> stack;
+  stack.push_back(node);
 
   uint32_t depth = node->meta.depth;
   uint32_t d = depth + 1;
