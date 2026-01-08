@@ -131,7 +131,7 @@ Select [ESP32 Dev Module][2] as a board.
 ### 4.4. Library configuration
 
 - **LVGL**  
-  After installing LVGL, configure `lv_conf.h` by referring to the official document "[Configure LVGL][8]". Some samples of `lv_conf.h` for this application are provided in the [./lv_conf/](lv_conf). For details, see [README.md](lv_conf/README.md).
+  After installing LVGL, configure `lv_conf.h` by referring to the official document "[Configure LVGL][8]". Some samples of `lv_conf.h` for this application are provided in the [assets/lv_conf/](assets/lv_conf). For details, see [assets/lv_conf/README.md](assets/lv_conf/README.md).
 
 - **SdFat**  
   To handle long filenames and multibyte characters, uncomment the definition of the symbol `USE_UTF8_LONG_NAMES` in [libraries/SdFat/src/SdFatConfig.h][9] under your sketchbook folder.
@@ -139,7 +139,7 @@ Select [ESP32 Dev Module][2] as a board.
 ### 4.5. Custom Fonts
 In addition to LVGL's fonts, this application embeds several national alphabets and symbols of **12px** and **14px**, as well as Japanese Kanji Level 1 and Level 2.
 
-To create custom fonts, refer to [./fonts/README.md](fonts/README.md) and use [LVGL Font Converter][10] to create/download the font data, save them to [./src/](src), and modify [ui.h](ui.h#L16-L27).
+To create custom fonts, refer to [assets/fonts/README.md](fonts/README.md) and use [LVGL Font Converter][10] to create/download the font data, save them to [src/](src), and modify [ui.h](ui.h#L16-L27).
 
 ## 5. Edit and Compile / Upload
 
@@ -150,18 +150,18 @@ Open [`config.h`](config.h) in the Arduino IDE and follow the comments to modify
 ### 5.2. Compile / Upload
 Set the following two items from the "**Tools**" menu in the Arduino IDE.
 
-| Item             | Selection                             | 
-| ---------------- |-------------------------------------- |
+| Item             | Selection                              | 
+| ---------------- |--------------------------------------- |
 | Partition Scheme | **"Huge App (3MB No OTA/1MB SPIFFS)"** |
-| Upload Speed     |**"460800"**                           |
+| Upload Speed     |**"460800"**                            |
 
 ## 6. How To Use
 This application is designed to take albums ripped from CDs and save them directly to your SD card. In addition to `.mp3`, the `.m4a` and `.wav` audio file formats are supported.
 
-**Note for Mac users:** If a large number of dot files are created on the SD card, it will take a long time to search for audio files. In order to avoid this, use the Terminal app to navigate to the directory containing the audio files (e.g. `NO NAME`) and execute the following command to delete them.
+**Note for Mac users:** If a large number of dot files are created on the SD card, it will take a long time to search for audio files. In order to avoid this, use the Terminal app to navigate to the directory containing the audio files (e.g. `NO NAME/MP3/`) and execute the following command to delete them.
 
 ```bash
-% cd /Volumes/NO\ NAME
+% cd /Volumes/NO\ NAME/MP3/
 % find . -name ".???*" -print -exec /bin/rm -rf {} \;
 ```
 
