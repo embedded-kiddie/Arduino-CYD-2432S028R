@@ -150,10 +150,10 @@ Open [`config.h`](config.h) in the Arduino IDE and follow the comments to modify
 ### 5.2. Compile / Upload
 Set the following two items from the "**Tools**" menu in the Arduino IDE.
 
-| Item             | Selection                              | 
+| Item             | Selection                              |
 | ---------------- |--------------------------------------- |
 | Partition Scheme | **"Huge App (3MB No OTA/1MB SPIFFS)"** |
-| Upload Speed     |**"460800"**                            |
+| Upload Speed     | **"460800"** (Mac), **"921600"** (Win) |
 
 ## 6. How To Use
 This application is designed to take albums ripped from CDs and save them directly to your SD card. In addition to `.mp3`, the `.m4a` and `.wav` audio file formats are supported.
@@ -203,6 +203,17 @@ The "**Sleep Timer**" will put the MCU into deep sleep mode after the set time h
 Some UI-related parameters (e.g. "**Shuffle**", "**Favorite**", "**Partition**", etc.) are automatically saved to the SD card between songs or when you pause playback, and are restored when you power cycle the device.
 
 ## 7. Known Issues
+
+- Due to the exception handling for the `new` operator differs between the C++ Standard Template Library (STL) and SdFat, the following warning will be out during compilation, but this is not a problem for practical use.
+
+```
+/Users/xxxx/Documents/Arduino/libraries/SdFat/src/FsLib/FsNew.h:44:48: warning: optimization attribute on 'void* operator new(size_t, newalign_t*)' follows definition but the attribute doesn't match [-Wattributes]
+ void* operator new(size_t size, newalign_t* ptr);
+                                                ^
+/Users/xxxx/Library/Arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/include/c++/8.4.0/new:168:14: note: previous definition of 'void* operator new(std::size_t, void*)' was here
+ inline void* operator new(std::size_t, void* __p) _GLIBCXX_USE_NOEXCEPT
+              ^~~~~~~~
+```
 
 - When using the built-in DAC and amplifier, there will be a "click" sound when powering up and when pausing/resume playback.
 
