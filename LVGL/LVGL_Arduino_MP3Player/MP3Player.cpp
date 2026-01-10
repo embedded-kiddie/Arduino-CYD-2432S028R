@@ -32,7 +32,7 @@ bool MP3Player::begin(const char *root, uint8_t volume) {
   }
 
 #if MY_USE_FS_ARDUINO_SD
-  // LVGL SD File System for displaying cover pictures
+  // LVGL SD File System for displaying cover photos
   lv_fs_arduino_sd_init();
 #endif
 
@@ -45,12 +45,12 @@ bool MP3Player::begin(const char *root, uint8_t volume) {
 //--------------------------------------------------------------------------------
 uint32_t MP3Player::ScanAlbumDirs(void) {
   uint32_t time;
-//DBG_EXEC({
+  DBG_EXEC({
     printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
       heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
       heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
     time = lv_tick_get();
-//});
+  });
 
   if (m_tree == NULL) {
     File dir = SD.open(m_root.c_str());
@@ -65,10 +65,10 @@ uint32_t MP3Player::ScanAlbumDirs(void) {
     dir.close();
   }
 
-//DBG_EXEC({
+  DBG_EXEC({
     //m_tree->dump_tree();
     printf("%s: %lu [msec]\n", __func__, lv_tick_elaps(time));
-//});
+  });
 
   return m_tree->get_n_leafs();
 }
@@ -79,12 +79,12 @@ uint32_t MP3Player::ScanAlbumDirs(void) {
 uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
   DBG_ASSERT(m_tree && m_list.size() == 0);
   uint32_t time;
-//DBG_EXEC({
+  DBG_EXEC({
     printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
       heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
       heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
     time = lv_tick_get();
-//});
+  });
 
   std::mt19937 engine(esp_random());
 
@@ -121,14 +121,14 @@ uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
     std::shuffle(m_list.begin(), m_list.end(), engine);
   }
 
-//DBG_EXEC({
+  DBG_EXEC({
     //dump_files();
     printf("%s: %lu [msec]\n", __func__, lv_tick_elaps(time));
     printf("%s: Free heap %7lu bytesm / Minimum heap %7lu bytes\n", __func__,
       heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
       heap_caps_get_minimum_free_size(MALLOC_CAP_DEFAULT));
     printf("%s: %d files\n", __func__, m_list.size());
-//});
+  });
 
   return m_list.size();
 }
@@ -257,12 +257,12 @@ void MP3Player::ClearAudioFiles(void) {
 }
 
 //--------------------------------------------------------------------------------
-// Load the picture number stored in the metadata on the SD card
+// Load the photo number stored in the metadata on the SD card
 //--------------------------------------------------------------------------------
-uint32_t MP3Player::GetPictureNo(uint32_t playNo) {
+uint32_t MP3Player::GetPhotoNo(uint32_t playNo) {
   uint32_t pictNo = 0;
 
-  // Gets the picture number recorded in PICTURE_FILE.
+  // Gets the photo number recorded in ALBUM_PHOTO_FILE.txt
   std::string path = GetDirPath(playNo);
   path.append(ALBUM_PHOTO_FILE "txt");
 
