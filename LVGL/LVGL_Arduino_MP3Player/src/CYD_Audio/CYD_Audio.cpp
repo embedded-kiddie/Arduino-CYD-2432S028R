@@ -168,7 +168,7 @@ void CYD_Audio::begin(bool internalDAC /* = false */, uint8_t channelEnabled /* 
 #endif
 
     #define __malloc_heap_psram(size) \
-        heap_caps_malloc_prefer(size, 2, MALLOC_CAP_DEFAULT|MALLOC_CAP_SPIRAM, MALLOC_CAP_DEFAULT|MALLOC_CAP_INTERNAL)
+        heap_caps_malloc_prefer(size, 2, MALLOC_CAP_DEFAULT|MALLOC_CAP_INTERNAL/*MALLOC_CAP_SPIRAM*/, MALLOC_CAP_DEFAULT|MALLOC_CAP_INTERNAL)
 
     if(psramInit()) m_chbufSize = 4096; else m_chbufSize = 512 + 64;
     m_ibuff    = (char*)    __malloc_heap_psram(512 + 64);

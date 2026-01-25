@@ -267,7 +267,7 @@ static bool auto_saving(void) {
 
     // Update all favorites that have been modified during playback
     if (autoSaving & SAVE_FAVORITE) {
-      // Prevent assert() from being fired by nodes reordering
+      // Prevent assert() from being fired by node reordering
       lv_obj_t *screen = lv_screen_active();
       if (screen == ui_ScreenAlbumList) {
         player.m_tree->traverse_node();
@@ -805,7 +805,7 @@ UI_State_t ui_loop(void) {
       if (!check_favorite()) {
         ui_state = UI_STATE_NEXT;
       } else if (!player.AutoPlay()) {
-        ui_state = UI_STATE_ERROR;
+        ui_state = UI_STATE_NEXT; // UI_STATE_ERROR;
       }
       break;
     case UI_STATE_STOP:
