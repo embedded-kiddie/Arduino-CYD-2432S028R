@@ -110,7 +110,7 @@ public:
 private:
   // check the file extension
   bool check_ext(const char *path) {
-    const char* ext[] = MP3_FILE_EXT;
+    const char* const ext[] = MP3_FILE_EXT;
     for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
       if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {
         return true;
