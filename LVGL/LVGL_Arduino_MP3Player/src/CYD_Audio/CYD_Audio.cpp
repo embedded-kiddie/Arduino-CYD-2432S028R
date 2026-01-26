@@ -178,7 +178,7 @@ void CYD_Audio::begin(bool internalDAC /* = false */, uint8_t channelEnabled /* 
 
     if(!m_chbuf || !m_lastHost || !m_outBuff || !m_ibuff) log_e("oom");
 
-    #define AUDIO_INFO(...) {sprintf(m_ibuff, __VA_ARGS__); if(audio_info) audio_info(m_ibuff);}
+    #define AUDIO_INFO(...) { if (audio_info) { sprintf(m_ibuff, __VA_ARGS__); audio_info(m_ibuff); } }
 #if __has_include(<WiFi.h>)
     clientsecure.setInsecure();  // if that can't be resolved update to ESP32 Arduino version 1.0.5-rc05 or higher
 #endif

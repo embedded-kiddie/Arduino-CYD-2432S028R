@@ -458,11 +458,13 @@ bool MP3Player::AutoPlay(void) {
 //--------------------------------------------------------------------------------
 // Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
 //--------------------------------------------------------------------------------
+#if   DEBUG_AUDIO
 void audio_info(const char *info) {
   Serial.print("info        ");
   Serial.println(info);
 }
-#if   false
+#endif
+/*
 void audio_id3data(const char *info) {  // id3 metadata
   Serial.print("id3tags     ");
   Serial.println(info);
@@ -495,4 +497,4 @@ void audio_lasthost(const char *info) {  // stream URL played
   Serial.print("lasthost    ");
   Serial.println(info);
 }
-#endif
+*/
