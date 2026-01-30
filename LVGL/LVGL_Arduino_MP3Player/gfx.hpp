@@ -138,7 +138,7 @@ static void my_disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px
 static void tft_init(void) {
   // Start the tft display
   tft.init();
-  tft.initDMA(false);
+//tft.initDMA(true);  // garbage lines are displayed
   tft.setRotation(TFT_ROTATION);
 
   // Touch calibration parameters for TFT_eSPI
