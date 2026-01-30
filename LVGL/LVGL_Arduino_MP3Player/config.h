@@ -15,14 +15,19 @@
 
 //--------------------------------------------------------------------------------
 // 2. Graphic library configuration
-// Below are for the LovyanGFX library for the "ESP32-2432S028R" (aka CYD).
-// If the LCD panel auto-detection feature does not work, define the panel type.
+// Set GFX_LIBRARY to GFX_LOVYANGFX or GFX_TFT_ESPI depending on your board type.
 //--------------------------------------------------------------------------------
+#define GFX_LOVYANGFX 0 // LovyanGFX for "ESP32-2432S028R" (aka CYD)
+#define GFX_TFT_ESPI  1 // TFT_eSPI  for "CrowPanel ESP32 HMI 2.8-inch
+
+#define GFX_LIBRARY   GFX_TFT_ESPI // or GFX_TFT_ESPI
+
+#if (GFX_LIBRARY == GFX_LOVYANGFX)
 // true  : Use the LGFX auto-detect feature
 // false : Define the appropriate LCD panel driver type to "DISPLAY_CYD_2USB"
 #define USE_AUTODETECT  true
 
-#if (USE_AUTODETECT == false)
+// If auto-detection feature does not work, define the panel type.
 // false: Panel driver: ILI9341 (micro-USB x 1 type)
 // true : Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
 #define DISPLAY_CYD_2USB  true

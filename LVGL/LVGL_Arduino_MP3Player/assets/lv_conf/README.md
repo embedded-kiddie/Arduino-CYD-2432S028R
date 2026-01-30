@@ -14,8 +14,8 @@ Define the following "Symbol" as "Setting Value":
 | LV_FONT_MONTSERRAT_12 | 1             | 0             |
 | LV_USE_FS_ARDUINO_SD  | 0             | 0             |
 | LV_USE_TJPGD          | 0             | 0             |
-| LV_USE_ST7789         | 1             | 0             |
-| LV_USE_ILI9341        | 1             | 0             |
+| LV_USE_ST7789         | 0             | 0             |
+| LV_USE_ILI9341        | 0             | 0             |
 
 In particular, `LV_USE_FS_ARDUINO_SD` and `LV_USE_TJPGD` must be defined to 0 to prevent conflicts with this application.
 
