@@ -26,6 +26,7 @@
 //--------------------------------------------------------------------------------
 // 2.2 Graphic library configuration
 // Set the desired library type to "GFX_LIBRARY_TYPE".
+// Note: TFT_eSPI is applied only for CrowPanel HMI 2.4/2.8 inch
 //--------------------------------------------------------------------------------
 #define USE_LOVYANGFX     0 // LovyanGFX (Highly recommended)
 #define USE_TFT_ESPI      1 // TFT_eSPI (Slower than LovyanGFX)
@@ -60,7 +61,7 @@
 //--------------------------------------------------------------------------------
 #define MP3_ROOT_PATH     "/MP3/"                       // Root folder for storing music files
 #define MP3_FILE_EXT      {".m4a", ".mp3", ".wav"}      // Define the preferred extension first
-#define IS_VALID_FILE(f)  (*(f) != '@' && *(f) != '.')  // Folder/file name prefix (1 char) to exclude
+#define MP3_IS_VALID(f)   (*(f) != '@' && *(f) != '.')  // Folder/file name prefix (1 char) to exclude
 
 //--------------------------------------------------------------------------------
 // 6. File that stores settings related to the operation of this player
@@ -78,7 +79,7 @@
 
 //--------------------------------------------------------------------------------
 // 8. Album list configuration under "PARTITION_PATH"
-// The list to classify albums is saved under "PARTITION_PATH" as a text file.
+// An album list is saved under "PARTITION_PATH" as a text file.
 // Also the configuration for each classification is saved as a JSON file.
 //--------------------------------------------------------------------------------
 #define ALBUM_LIST_PATH   "@album/"       // Album list configuration folder

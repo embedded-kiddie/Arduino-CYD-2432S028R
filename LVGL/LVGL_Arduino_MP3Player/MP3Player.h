@@ -141,7 +141,7 @@ private:
   // Verify file extension. (mp3, m4a, aac, wav, flac, opus, ogg, oga)
   //--------------------------------------------------------------------------------
   bool check_ext(const char *path) {
-    if (IS_VALID_FILE(path)) {
+    if (MP3_IS_VALID(path)) {
       const char* const ext[] = MP3_FILE_EXT;
       for (int i = 0; i < sizeof(ext) / sizeof(ext[0]); i++) {
         if (strcmp(&path[strlen(path) - strlen(ext[i])], ext[i]) == 0) {

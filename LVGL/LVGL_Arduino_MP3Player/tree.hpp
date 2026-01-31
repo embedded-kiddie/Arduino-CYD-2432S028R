@@ -145,7 +145,7 @@ private:
 #else
       const char *name = fd.name();
 #endif
-      if (IS_VALID_FILE(name)) {
+      if (MP3_IS_VALID(name)) {
         if (fd.isDirectory()) {
           scan_node(fd, node->append(name), scan_file);
         }
