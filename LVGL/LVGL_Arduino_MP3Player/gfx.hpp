@@ -1,19 +1,22 @@
 //================================================================================
-// Grapics library configuration
+// Display panel and grapics library configuration
 //  Auther: embedded-kiddie (https://github.com/embedded-kiddie)
-//  Released under the GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 //================================================================================
 #include "config.h"
 
-#if (GFX_LIBRARY == GFX_LOVYANGFX)
+#if (GFX_LIBRARY_TYPE == USE_LOVYANGFX)
 //----------------------------------------------------------------------
 // LovyanGFX configuration
 //----------------------------------------------------------------------
-#if USE_AUTODETECT
-  #define LGFX_AUTODETECT
-  #include <LovyanGFX.h>
+#if (GFX_DISPLAY_TYPE <= CYD_2432S028R_2USB)
+  #if USE_AUTODETECT
+    #define LGFX_AUTODETECT
+    #include <LovyanGFX.h>
+  #else
+    #include "LGFX_ESP32_2432S028R_CYD.hpp"
+  #endif
 #else
-  #include "LGFX_ESP32_2432S028R_CYD.hpp"
+  #include "LGFX_ESP32_ELECROW_2432R.hpp"
 #endif
 
 static LGFX tft;
@@ -92,7 +95,7 @@ static void tft_init(void) {
   }
 }
 
-#elif (GFX_LIBRARY == GFX_TFT_ESPI)
+#elif (GFX_LIBRARY_TYPE == USE_TFT_ESPI)
 //----------------------------------------------------------------------
 // TFT_eSPI configuration
 //----------------------------------------------------------------------

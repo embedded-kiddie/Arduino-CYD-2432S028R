@@ -14,23 +14,29 @@
 #define TFT_ROTATION    0     // 0: Portrait, 3: Portrait (Upside down)
 
 //--------------------------------------------------------------------------------
-// 2. Graphic library configuration
-// Set GFX_LIBRARY to GFX_LOVYANGFX or GFX_TFT_ESPI depending on your board type.
+// 2.1 Display type configuration
+// Set the appropriate display type to "GFX_DISPLAY_TYPE".
 //--------------------------------------------------------------------------------
-#define GFX_LOVYANGFX 0 // LovyanGFX for "ESP32-2432S028R" (aka CYD)
-#define GFX_TFT_ESPI  1 // TFT_eSPI  for "CrowPanel ESP32 HMI 2.8-inch
+#define CYD_2432S028R_1USB  0 // Panel driver: ILI9341 (micro-USB x 1 type)
+#define CYD_2432S028R_2USB  1 // Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
+#define CROWPANEL_HMI_2432  2 // CrowPanel HMI 2.4/2.8 inch
 
-#define GFX_LIBRARY   GFX_TFT_ESPI // or GFX_TFT_ESPI
+#define GFX_DISPLAY_TYPE    CROWPANEL_HMI_2432
 
-#if (GFX_LIBRARY == GFX_LOVYANGFX)
+//--------------------------------------------------------------------------------
+// 2.2 Graphic library configuration
+// Set the desired library type to "GFX_LIBRARY_TYPE".
+//--------------------------------------------------------------------------------
+#define USE_LOVYANGFX     0 // LovyanGFX (Highly recommended)
+#define USE_TFT_ESPI      1 // TFT_eSPI (Slower than LovyanGFX)
+
+#define GFX_LIBRARY_TYPE  USE_LOVYANGFX
+
+// Configure LovyanGFX's auto-detection of display panel type only for CYD
 // true  : Use the LGFX auto-detect feature
-// false : Define the appropriate LCD panel driver type to "DISPLAY_CYD_2USB"
-#define USE_AUTODETECT  true
-
-// If auto-detection feature does not work, define the panel type.
-// false: Panel driver: ILI9341 (micro-USB x 1 type)
-// true : Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
-#define DISPLAY_CYD_2USB  true
+// false : Define the appropriate LCD panel driver type to "GFX_DISPLAY_TYPE"
+#if (GFX_LIBRARY_TYPE == USE_LOVYANGFX)
+#define USE_AUTODETECT    true
 #endif
 
 //--------------------------------------------------------------------------------
