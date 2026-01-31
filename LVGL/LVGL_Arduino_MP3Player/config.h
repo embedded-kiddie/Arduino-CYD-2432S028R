@@ -1,7 +1,6 @@
 //================================================================================
 // MP3Player Configration
 //  Auther: embedded-kiddie (https://github.com/embedded-kiddie)
-//  Released under the GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 //================================================================================
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
@@ -19,7 +18,7 @@
 //--------------------------------------------------------------------------------
 #define CYD_2432S028R_1USB  0 // Panel driver: ILI9341 (micro-USB x 1 type)
 #define CYD_2432S028R_2USB  1 // Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
-#define CROWPANEL_HMI_2432  2 // CrowPanel HMI 2.4/2.8 inch
+#define CROWPANEL_HMI_2432  2 // CrowPanel HMI 2.4"/2.8" (LCD & touch share the SPI bus)
 
 #define GFX_DISPLAY_TYPE    CROWPANEL_HMI_2432
 
