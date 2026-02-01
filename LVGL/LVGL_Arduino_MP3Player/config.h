@@ -10,7 +10,7 @@
 //--------------------------------------------------------------------------------
 #define TFT_WIDTH       240   // Portrait orientation default width
 #define TFT_HEIGHT      320   // Portrait orientation default height
-#define TFT_ROTATION    0     // 0: Portrait, 3: Portrait (Upside down)
+#define TFT_ROTATION    0     // 0: Portrait, 2: Portrait (Upside down)
 
 //--------------------------------------------------------------------------------
 // 2.1 Display type configuration
@@ -20,7 +20,7 @@
 #define CYD_2432S028R_2USB  1 // Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
 #define CROWPANEL_HMI_2432  2 // CrowPanel HMI 2.4"/2.8" (LCD & touch share the SPI bus)
 
-#define GFX_DISPLAY_TYPE    CROWPANEL_HMI_2432
+#define GFX_DISPLAY_TYPE    CYD_2432S028R_2USB
 
 //--------------------------------------------------------------------------------
 // 2.2 Graphic library configuration
@@ -35,7 +35,7 @@
 // Configure LovyanGFX's auto-detection of display panel type only for CYD
 // true  : Use the LGFX auto-detect feature
 // false : Define the appropriate LCD panel driver type to "GFX_DISPLAY_TYPE"
-#if (GFX_LIBRARY_TYPE == USE_LOVYANGFX)
+#if (GFX_DISPLAY_TYPE <= CYD_2432S028R_2USB) && (GFX_LIBRARY_TYPE == USE_LOVYANGFX)
 #define USE_AUTODETECT    true
 #endif
 

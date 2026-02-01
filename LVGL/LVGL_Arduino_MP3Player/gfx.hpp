@@ -3,6 +3,7 @@
 //  Auther: embedded-kiddie (https://github.com/embedded-kiddie)
 //================================================================================
 #include "config.h"
+#include "peripherals.h"
 
 #if (GFX_LIBRARY_TYPE == USE_LOVYANGFX)
 //----------------------------------------------------------------------
@@ -13,10 +14,10 @@
     #define LGFX_AUTODETECT
     #include <LovyanGFX.h>
   #else
-    #include "LGFX_ESP32_2432S028R_CYD.hpp"
+    #include "LGFX_CYD_2432S028R.hpp"
   #endif
 #else
-  #include "LGFX_ESP32_ELECROW_2432R.hpp"
+  #include "LGFX_ELECROW_2432R.hpp"
 #endif
 
 static LGFX tft;
@@ -72,7 +73,7 @@ static void tft_init(void) {
 
   if (tft.touch()) {
     if (USE_CALIBRATED) {
-      // The following is equivalent to the `_touch_instance` setting in `LGFX_ESP32_2432S028R_CYD.hpp`.
+      // The following is equivalent to the `_touch_instance` setting in `LGFX_CYD_2432S028R.hpp`.
       // The `cal[8]` can be replaced with the result displayed on the serial monitor after calibration.
       const uint16_t cal[8] = {
         240,   // x_min
@@ -117,11 +118,11 @@ static void calibrate_touch(uint16_t cal[5]) {
   tft.println("Touch corners in order");
   tft.calibrateTouch(cal, TFT_MAGENTA, TFT_BLACK, 15);
 
-  printf("\n// Touch calibration parameters for TFT_eSPI\n");
-  printf("uint16_t cal[5] = { ");
+  Serial.print("\n// Touch calibration parameters for TFT_eSPI\n");
+  Serial.print("uint16_t cal[5] = { ");
   for (int i = 0; i < 5; ++i) {
-    printf("%d", cal[i]);
-    printf(i < 4 ? ", " : " }\n");
+    Serial.print(cal[i]);
+    Serial.print(i < 4 ? ", " : " }\n");
   }
 }
 
@@ -158,10 +159,11 @@ static void tft_init(void) {
 #endif // LovyanGFX or TFT_eSPI
 
 //----------------------------------------------------------------------
-// Sleep/Awake peripherals control
+// Common functions independent of LCD type
 //----------------------------------------------------------------------
-#include "peripherals.h"
+static bool is_awake = true;
 
+// Sleep/Awake peripherals control
 static void update_device_state(UI_State_t state) {
   switch (state) {
     case UI_STATE_SLEEP:

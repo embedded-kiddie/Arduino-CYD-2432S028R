@@ -15,7 +15,7 @@
 //
 //  2. Required 3rd party libraries
 //    - LVGL by kisvegabor (version: 9.2.2 and up)
-//    - LovyanGFX by lovyan03 (version 1.2.7)
+//    - LovyanGFX by lovyan03 (version 1.2.7 and up)
 //    - SdFat by Bill Greiman (version 2.3.0)
 //    - ArduinoJson by Benoit Blanchon (version 7.4.2)
 //
@@ -56,11 +56,6 @@ static uint8_t* draw_buf;
 #else
 static uint8_t draw_buf[DRAW_BUF_SIZE];
 #endif
-
-//----------------------------------------------------------------------
-// Display sleep/wakeup
-//----------------------------------------------------------------------
-static bool is_awake = true;
 
 //----------------------------------------------------------------------
 // Graphics library
@@ -128,7 +123,7 @@ void setup() {
 #endif
 
   lv_display_t *disp = lv_display_create(TFT_HOR_RES, TFT_VER_RES);
-//lv_display_add_event_cb(disp, resolution_changed_event_cb, LV_EVENT_RESOLUTION_CHANGED, NULL);
+  lv_display_add_event_cb(disp, resolution_changed_event_cb, LV_EVENT_RESOLUTION_CHANGED, NULL);
   lv_display_set_rotation(disp, (lv_display_rotation_t)TFT_ROTATION);
   lv_display_set_flush_cb(disp, my_disp_flush);
 
@@ -149,7 +144,7 @@ void loop() {
   lv_timer_handler(); // Let the GUI do its work
 
   UI_State_t state = ui_loop();
-  if (state == UI_STATE_SLEEP || (state == UI_STATE_BLOFF && is_awake == true)) {
+  if (state == UI_STATE_SLEEP || state == UI_STATE_BLOFF) {
     update_device_state(state);
   }
 
