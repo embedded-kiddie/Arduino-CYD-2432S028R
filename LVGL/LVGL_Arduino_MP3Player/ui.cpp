@@ -8,6 +8,11 @@
 #include "json.hpp"
 #include <string.h> // for strncpy(), strrchr()
 
+#define DEMO  true
+#if DEMO
+static uint32_t demo_time = 0;
+#endif
+
 ////////////////////// GLOBAL VARIABLES /////////////////////
 UI_State_t   ui_state;
 UI_Control_t ui_control;
@@ -50,7 +55,7 @@ static void display_photo(uint32_t playNo) {
     LV_STYLE_CONST_PROPS_END
   };
   static LV_STYLE_CONST_INIT(style_photo, (void*)style_prop_photo);
-
+#if !DEMO
   // Display an image file on SD card
   char buf[BUF_SIZE], *ptr;
   buf[0] = MY_FS_ARDUINO_SD_LETTER;
@@ -80,7 +85,7 @@ static void display_photo(uint32_t playNo) {
       return;
     }
   }
-
+#endif
 #ifdef _PHOTOS_H_
   #if true
     // Display an image file on flash ROM at random
@@ -133,20 +138,49 @@ static bool play_next(bool next) {
     ui_list_update_play(ui_control.playNo, true);
   }
 
+#if DEMO
+  demo_time = 0;
+#endif
+
   return ret;
 }
 
 static void play_stop(void) {
   lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
+#if DEMO
+  demo_time = 0;
+#else
   player.StopPlay();
+#endif
+}
+
+static bool play_auto(void) {
+#if DEMO
+  if (demo_time == 0) {
+    void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags);
+    ui_get_id3tags(ui_control.playNo, id3tags);
+    demo_time = millis();
+    ui_state = UI_STATE_ID3;
+  } else if ((millis() - demo_time) / 1000 > id3tags.meta.duration) {
+    play_next(true);
+  }
+  return true;
+#else
+  return player.AutoPlay();
+#endif
 }
 
 //--------------------------------------------------------------------------------
 // Update bar and label according to elapsed time
 //--------------------------------------------------------------------------------
 static void update_elapsed_time(void) {
+#if DEMO
+  uint32_t duration = id3tags.meta.duration;
+  uint32_t elapsed  = (millis() - demo_time) / 1000;
+#else
   uint32_t duration = audioGetDuration();
   uint32_t elapsed  = audioGetElapsedTime();
+#endif
 
   if (duration < elapsed) {
     duration = elapsed;
@@ -499,10 +533,13 @@ void ui_event_Volume(lv_event_t *e) {
 
 void ui_event_ElapsedBar(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-
+#if DEMO
+  demo_time = millis() - lv_slider_get_value(ui_ElapsedBar) * 1000;
+#else
   if (player.IsPlaying()) {
     audioSetElapsedTime(lv_slider_get_value(ui_ElapsedBar));
   }
+#endif
 }
 
 //********************************************************************************
@@ -707,6 +744,9 @@ void ui_set_playNo(uint32_t track_id) {
     lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
     ui_state = UI_STATE_PLAY;
   }
+#if DEMO
+  demo_time = 0;
+#endif
 }
 
 //--------------------------------------------------------------------------------
@@ -803,7 +843,7 @@ UI_State_t ui_loop(void) {
     case UI_STATE_PLAY:
       if (!check_favorite()) {
         ui_state = UI_STATE_NEXT;
-      } else if (!player.AutoPlay()) {
+      } else if (!play_auto()) {
         log_e(player.GetError());
         ui_state = UI_STATE_NEXT;
       }
@@ -862,10 +902,16 @@ UI_State_t ui_loop(void) {
 
   // Additional periodic task
   DO_EVERY(ADDITIONAL_TASK_PERIOD, task1Time) {
+#if DEMO
+    if (demo_time > 0) {
+      update_elapsed_time();
+    }
+#else
     // update elapsed time
     if (player.IsPlaying()) {
       update_elapsed_time();
     }
+#endif
 
     // deep sleep
     if (ui_setting.selectSleepTimer) {

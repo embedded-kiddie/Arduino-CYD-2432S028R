@@ -33,9 +33,9 @@ typedef struct {
 // https://github.com/espressif/esp-idf/blob/master/components/heap/heap_caps.c#L408-L427
 
 //--------------------------------------------------------------------------------
-// MALLOC_CAP_DEFAULT
+// MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL
 //--------------------------------------------------------------------------------
-#define HEAP_MEM_CAPS (MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
+#define HEAP_MEM_CAPS (MALLOC_CAP_DEFAULT)
 
 //--------------------------------------------------------------------------------
 //
