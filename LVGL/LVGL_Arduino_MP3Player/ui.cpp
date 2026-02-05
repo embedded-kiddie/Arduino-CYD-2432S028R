@@ -8,7 +8,7 @@
 #include "json.hpp"
 #include <string.h> // for strncpy(), strrchr()
 
-#define DEMO  true
+#define DEMO  false
 #if DEMO
 static uint32_t demo_time = 0;
 #endif
@@ -147,15 +147,17 @@ static bool play_next(bool next) {
 
 static void play_stop(void) {
   lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, false);
-#if DEMO
-  demo_time = 0;
-#else
+#if !DEMO
   player.StopPlay();
+#else
+  demo_time = 0;
 #endif
 }
 
 static bool play_auto(void) {
-#if DEMO
+#if !DEMO
+  return player.AutoPlay();
+#else
   if (demo_time == 0) {
     void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags);
     ui_get_id3tags(ui_control.playNo, id3tags);
@@ -165,8 +167,6 @@ static bool play_auto(void) {
     play_next(true);
   }
   return true;
-#else
-  return player.AutoPlay();
 #endif
 }
 
@@ -174,12 +174,12 @@ static bool play_auto(void) {
 // Update bar and label according to elapsed time
 //--------------------------------------------------------------------------------
 static void update_elapsed_time(void) {
-#if DEMO
-  uint32_t duration = id3tags.meta.duration;
-  uint32_t elapsed  = (millis() - demo_time) / 1000;
-#else
+#if !DEMO
   uint32_t duration = audioGetDuration();
   uint32_t elapsed  = audioGetElapsedTime();
+#else
+  uint32_t duration = id3tags.meta.duration;
+  uint32_t elapsed  = (millis() - demo_time) / 1000;
 #endif
 
   if (duration < elapsed) {
@@ -533,12 +533,12 @@ void ui_event_Volume(lv_event_t *e) {
 
 void ui_event_ElapsedBar(lv_event_t *e) {
   DBG_ASSERT(lv_event_get_code(e) == LV_EVENT_VALUE_CHANGED);
-#if DEMO
-  demo_time = millis() - lv_slider_get_value(ui_ElapsedBar) * 1000;
-#else
+#if !DEMO
   if (player.IsPlaying()) {
     audioSetElapsedTime(lv_slider_get_value(ui_ElapsedBar));
   }
+#else
+  demo_time = millis() - lv_slider_get_value(ui_ElapsedBar) * 1000;
 #endif
 }
 
@@ -902,13 +902,13 @@ UI_State_t ui_loop(void) {
 
   // Additional periodic task
   DO_EVERY(ADDITIONAL_TASK_PERIOD, task1Time) {
-#if DEMO
-    if (demo_time > 0) {
+#if !DEMO
+    // update elapsed time
+    if (player.IsPlaying()) {
       update_elapsed_time();
     }
 #else
-    // update elapsed time
-    if (player.IsPlaying()) {
+    if (demo_time > 0) {
       update_elapsed_time();
     }
 #endif
