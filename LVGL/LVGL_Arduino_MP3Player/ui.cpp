@@ -327,6 +327,11 @@ static bool auto_saving(void) {
     if (autoSaving & SAVE_DURATION) {
       uint32_t playNo = player.GetPlayNo();
       ui_list_update_duration(playNo, id3tags.meta.duration);
+
+      MP3Meta_t meta;
+      player.GetMetaData(playNo, &meta);
+      id3tags.meta.selected = meta.selected;
+
       if (player.PutMetaData(playNo, &id3tags.meta)) {
         autoSaving ^= SAVE_DURATION;
       }
@@ -597,11 +602,6 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
 
   lv_obj_t *obj = (lv_obj_t*)lv_event_get_current_target(e);
   meta.selected = ui_list_get_heart_state(track_id);
-
-  // Avoid overwritten by SAVE_DURATION in auto_save()
-  if (track_id == player.GetPlayNo()) {
-    id3tags.meta.selected = true;
-  }
 
   // If unable to save, save at idle state
   if (!player.PutMetaData(track_id, &meta)) {
