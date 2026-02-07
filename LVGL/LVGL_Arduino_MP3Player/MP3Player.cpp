@@ -167,6 +167,18 @@ std::string MP3Player::GetFilePath(uint32_t playNo) {
   }
 }
 
+//--------------------------------------------------------------------------------
+// Get metadata from play list and save it to a dedicated file
+//--------------------------------------------------------------------------------
+void MP3Player::GetMetaData(uint32_t playNo, MP3Meta_t *meta) {
+  MP3List_t *list = GetPlayList(playNo);
+  if (list) {
+    *meta = list->meta;
+  } else {
+    *meta = {}; // Never get here
+  }
+}
+
 bool MP3Player::SaveMetaData(uint32_t playNo, MP3Meta_t *meta) {
   if (audioIsPlaying()) {
     return false;
@@ -216,18 +228,6 @@ bool MP3Player::SaveMetaData(uint32_t playNo, MP3Meta_t *meta) {
   }
 
   return false;
-}
-
-//--------------------------------------------------------------------------------
-// Get metadata from play list and save it to a dedicated file
-//--------------------------------------------------------------------------------
-void MP3Player::GetMetaData(uint32_t playNo, MP3Meta_t *meta) {
-  MP3List_t *list = GetPlayList(playNo);
-  if (list) {
-    *meta = list->meta;
-  } else {
-    *meta = {}; // Never get here
-  }
 }
 
 bool MP3Player::PutMetaData(uint32_t playNo, MP3Meta_t *meta) {

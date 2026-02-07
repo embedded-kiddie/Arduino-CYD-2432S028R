@@ -308,16 +308,7 @@ static bool auto_saving(void) {
       player.PauseResume();
     }
 
-    // Update the playback duration at the end of file
-    if (autoSaving & SAVE_DURATION) {
-      uint32_t playNo = player.GetPlayNo();
-      ui_list_update_duration(playNo, id3tags.meta.duration);
-      if (player.PutMetaData(playNo, &id3tags.meta)) {
-        autoSaving ^= SAVE_DURATION;
-      }
-    }
-
-    // Update all favorites that have been modified during playback
+    // 1. Update all favorites that have been modified during playback
     if (autoSaving & SAVE_FAVORITE) {
       // Prevent assert() from being fired by node reordering
       lv_obj_t *screen = lv_screen_active();
@@ -332,7 +323,16 @@ static bool auto_saving(void) {
       }
     }
 
-    // Update favorite and repeat when they are changed during playback
+    // 2. Update the playback duration at the end of file
+    if (autoSaving & SAVE_DURATION) {
+      uint32_t playNo = player.GetPlayNo();
+      ui_list_update_duration(playNo, id3tags.meta.duration);
+      if (player.PutMetaData(playNo, &id3tags.meta)) {
+        autoSaving ^= SAVE_DURATION;
+      }
+    }
+
+    // 3. Update favorite and repeat when they are changed during playback
     if (autoSaving & SAVE_SETTING) {
       if (save_setting()) {
         autoSaving ^= SAVE_SETTING;
@@ -598,6 +598,11 @@ void ui_event_PlayList_Heart(lv_event_t *e) {
   lv_obj_t *obj = (lv_obj_t*)lv_event_get_current_target(e);
   meta.selected = ui_list_get_heart_state(track_id);
 
+  // Avoid overwritten by SAVE_DURATION in auto_save()
+  if (track_id == player.GetPlayNo()) {
+    id3tags.meta.selected = true;
+  }
+
   // If unable to save, save at idle state
   if (!player.PutMetaData(track_id, &meta)) {
     autoSaving |= SAVE_FAVORITE;
@@ -676,6 +681,7 @@ void ui_event_ScreenSetting(lv_event_t *e) {
   else if (event_code == LV_EVENT_GESTURE) {
     lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_active());
     lv_screen_load_anim_t anim = (dir == LV_DIR_TOP ? LV_SCR_LOAD_ANIM_MOVE_TOP : LV_SCR_LOAD_ANIM_MOVE_BOTTOM);
+
     if (screenFrom == UI_SCREEN_MAIN) {
       change_screen(UI_SCREEN_SETTING, &ui_ScreenMain, anim, &ui_ScreenMain_screen_init);
     } else if (screenFrom == UI_SCREEN_ALBUM_LIST) {
@@ -701,13 +707,9 @@ void ui_event_ScreenSetting(lv_event_t *e) {
         // Change the procedure depending on the screen
         lv_obj_t *screen = lv_screen_active();
         if (screen == ui_ScreenMain) {
-          // Reset and create a new playlist
-          ui_state = UI_STATE_RESET;
-        }
-
-        else if (screen == ui_ScreenAlbumList) {
-          // Reset and create a new album list
-          ui_state = UI_STATE_ALBUM;
+          ui_state = UI_STATE_RESET;  // Reset and create a new playlist
+        } else if (screen == ui_ScreenAlbumList) {
+          ui_state = UI_STATE_ALBUM;  // Reset and create a new album list
         }
       }
     }
