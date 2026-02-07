@@ -78,7 +78,7 @@ uint32_t MP3Player::ScanAlbumDirs(void) {
 //--------------------------------------------------------------------------------
 // Randomly scan a specified number of audio files
 //--------------------------------------------------------------------------------
-uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
+uint32_t MP3Player::ScanAudioFiles(bool shuffle) {
   DBG_ASSERT(m_tree && m_list.size() == 0);
   //uint32_t time;
   DBG_EXEC({
@@ -95,7 +95,7 @@ uint32_t MP3Player::ScanAudioFiles(uint8_t partition, bool shuffle) {
   #define MIN(a, b) ((a) < (b) ? (a) : (b))
   uint32_t max_files = MIN(MP3_PERTITION_FILES, n_audio);
 
-  if (partition) {
+  if (n_audio <= MP3_PERTITION_FILES) {
     for (int i = 0, key = 0; max_files > i && key < n_leafs; key++) {
       i = scan_files(key);
     }

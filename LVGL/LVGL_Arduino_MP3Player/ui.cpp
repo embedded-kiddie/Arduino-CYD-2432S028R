@@ -62,8 +62,8 @@ static void display_photo(uint32_t playNo) {
   buf[1] = ':';
 
   // Skip drive letter "S:"
-  std::string dir = player.GetFilePath(playNo);
-  strncpy(&buf[2], dir.c_str(), sizeof(buf) - 2);
+  std::string path = player.GetFilePath(playNo);
+  strncpy(&buf[2], path.c_str(), sizeof(buf) - 2);
   buf[sizeof(buf) - 1] = '\0';
 
   // @photo.jpg
@@ -77,6 +77,7 @@ static void display_photo(uint32_t playNo) {
   }
 
   // title.jpg
+  strncpy(&buf[2], path.c_str(), sizeof(buf) - 2);
   if (ptr = strrchr(buf, '.')) {
     strncpy(ptr, ALBUM_PHOTO_EXT, sizeof(ALBUM_PHOTO_EXT));
     if (SD.exists(buf + 2)) {
@@ -107,32 +108,50 @@ static void display_photo(uint32_t playNo) {
 }
 
 //--------------------------------------------------------------------------------
-// Control next/previous play or stop/continuous play
+// Control player: auto, next/previous or stop/continuous
 //--------------------------------------------------------------------------------
+static bool play_auto(void) {
+#if !DEMO
+  return player.AutoPlay();
+#else
+  if (demo_time == 0) {
+    void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags);
+    ui_get_id3tags(ui_control.playNo, id3tags);
+    demo_time = millis();
+    ui_state = UI_STATE_ID3;
+  } else if ((millis() - demo_time) / 1000 > id3tags.meta.duration) {
+    play_next(true);
+  }
+  return true;
+#endif
+}
+
 static bool play_next(bool next) {
+  bool ret = true;
+
   if (ui_ScreenPlayList) {
     ui_list_update_cell(ui_control.focusNo, false);
     ui_list_update_icon(ui_control.playNo,  false);
   }
 
-  bool ret = true;
-  if (ui_setting.favorite) {
-    ret = player.NextSelected(next, (ui_setting.repeat ? true : false));
-  } else {
-    if (next) {
+  // When a button in the playlist is pressed
+  if (bitRead(ui_setting.favorite, 7)) {
+    bitClear(ui_setting.favorite, 7);
+    ret = play_auto();
+  }
+
+  else {
+    if (ui_setting.favorite) {
+      ret = player.NextSelected(next, (ui_setting.repeat ? true : false));
+    } else if (next) {
       player.PlayNext();
     } else {
       player.PlayPrev();
     }
+
+    bitClear(ui_setting.repeat, 7);     // clear the bit that has been temporarily forced set
+    ui_set_playNo(player.GetPlayNo());  // Reset ID3 tags, set ui_control, display photo and update play button
   }
-
-  bitClear(ui_setting.repeat, 7); // clear the bit that has been temporarily forced set
-
-  ui_control.playNo = ui_control.focusNo = player.GetPlayNo();
-  display_photo(ui_control.playNo);
-
-  // Update ui_control and look of the play button
-  lv_obj_set_state(ui_ButtonPlay, LV_STATE_CHECKED, true);
 
   if (ui_ScreenPlayList) {
     ui_list_update_play(ui_control.playNo, true);
@@ -151,22 +170,6 @@ static void play_stop(void) {
   player.StopPlay();
 #else
   demo_time = 0;
-#endif
-}
-
-static bool play_auto(void) {
-#if !DEMO
-  return player.AutoPlay();
-#else
-  if (demo_time == 0) {
-    void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags);
-    ui_get_id3tags(ui_control.playNo, id3tags);
-    demo_time = millis();
-    ui_state = UI_STATE_ID3;
-  } else if ((millis() - demo_time) / 1000 > id3tags.meta.duration) {
-    play_next(true);
-  }
-  return true;
 #endif
 }
 
@@ -195,6 +198,12 @@ static void update_elapsed_time(void) {
 
   lv_label_set_text_fmt(ui_ElapsedStart, "%" LV_PRIu32 ":%02" LV_PRIu32, elapsed  / 60, elapsed  % 60);
   lv_label_set_text_fmt(ui_ElapsedEnd,   "%" LV_PRIu32 ":%02" LV_PRIu32, duration / 60, duration % 60);
+
+  // In case ID3 tags are empty
+  if (id3tags.title.empty() || id3tags.artist.empty() || id3tags.album.empty()) {
+    player.GetID3Tags(player.GetPlayNo(), id3tags);
+    ui_state = UI_STATE_ID3;
+  }
 }
 
 //--------------------------------------------------------------------------------
@@ -214,20 +223,31 @@ static bool save_setting(void) {
 }
 
 static bool load_setting(void) {
-  File fd = SD.open(MP3_ROOT_PATH MP3_SETTING_FILE, FILE_READ);
-  if (!fd) {
-    player.SetError("can't load " MP3_ROOT_PATH MP3_SETTING_FILE);
-    return false;
+  bool save = false;
+
+  if (SD.exists(MP3_ROOT_PATH MP3_SETTING_FILE)) {
+    File fd = SD.open(MP3_ROOT_PATH MP3_SETTING_FILE, FILE_READ);
+    if (!fd) {
+      player.SetError("can't load " MP3_ROOT_PATH MP3_SETTING_FILE);
+      return false;
+    }
+
+    // Save the sleep timer setting
+    uint8_t sleepTimer = ui_setting.selectSleepTimer;
+
+    fd.read((uint8_t *)&ui_setting, sizeof(ui_setting));
+    fd.close();
+
+    // Restore the setting
+    ui_setting.selectSleepTimer = sleepTimer;
+    bitClear(ui_setting.repeat,   7);
+    bitClear(ui_setting.favorite, 7);
   }
 
-  // Save the sleep timer setting
-  uint8_t sleepTimer = ui_setting.selectSleepTimer;
-
-  fd.read((uint8_t *)&ui_setting, sizeof(ui_setting));
-  fd.close();
-
-  // Restore the setting of sleep timer
-  ui_setting.selectSleepTimer = sleepTimer;
+  // For the first time
+  else {
+    save = true;
+  }
 
   // Check if the partition exists
   char buf[BUF_SIZE];
@@ -241,8 +261,6 @@ static bool load_setting(void) {
       break;
     }
   }
-
-  bool save = false;
 
   if (ui_setting.partition_max != partition_max) {
     ui_setting.partition_max = partition_max;
@@ -349,7 +367,7 @@ static bool create_playlist(void) {
     ui_album_load((void*)player.m_tree);
 
     // Scan audio files base on album list
-    if (player.ScanAudioFiles(ui_setting.partition_id, ui_setting.shuffle)) {
+    if (player.ScanAudioFiles(ui_setting.shuffle)) {
       ui_set_playNo(ui_control.playNo);
       return true;
     }
@@ -731,7 +749,17 @@ void ui_redisplay(void) {
 //--------------------------------------------------------------------------------
 // Start to play with the specified track
 //--------------------------------------------------------------------------------
-void ui_set_playNo(uint32_t track_id) {
+void ui_set_playNo(uint32_t track_id, bool event_in_playlist) {
+  // Clear ID3 tag
+  id3tags.title.clear();
+  id3tags.album.clear();
+  id3tags.artist.clear();
+
+  // When a button in the playlist is pressed
+  if (event_in_playlist) {
+    bitSet(ui_setting.favorite, 7);
+  }
+
   // Start the specified track to play
   player.SetPlayNo(track_id);
 
@@ -769,7 +797,7 @@ void ui_get_id3tags(uint32_t track_id, MP3Tags_t &tags) {
 
 //--------------------------------------------------------------------------------
 // Optional functions for audio-I2S (defined in CYD_Audio.h as a weak function)
-// Note: These functions will be executed in the context of CORE 1.
+// Note: This function is called for each tag in the context of CORE 1.
 //--------------------------------------------------------------------------------
 void audio_id3data(const char *info) {
   // Avoid a race condition with ui_state set by audio_eof_mp3()
