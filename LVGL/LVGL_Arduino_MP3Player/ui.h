@@ -123,7 +123,7 @@ void ui_event_Volume        (lv_event_t *e);
 void ui_event_ElapsedBar    (lv_event_t *e);
 void ui_event_GoToAlbumList (lv_event_t *e);
 void ui_event_GoToPlayList  (lv_event_t *e);
-void ui_event_GoToSettings  (lv_event_t *e);
+void ui_event_GoToSetting   (lv_event_t *e);
 void ui_event_Favorite      (lv_event_t *e);
 void ui_event_Repeat        (lv_event_t *e);
 void ui_event_Shuffle       (lv_event_t *e);
