@@ -758,10 +758,10 @@ void ui_set_playNo(uint32_t track_id, bool event_in_playlist) {
   id3tags.artist.clear();
 
   // When an audio file that is not favorite is selected in the playlist
-  if (event_in_playlist) {
+  if (event_in_playlist && ui_setting.favorite) {
     MP3Tags_t tags;
     player.GetID3Tags(track_id, tags);
-    if (!tags.meta.selected && ui_setting.favorite) {
+    if (!tags.meta.selected) {
       bitSet(ui_setting.favorite, 7);
     }
   }
