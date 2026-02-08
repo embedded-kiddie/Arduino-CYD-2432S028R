@@ -149,7 +149,8 @@ static bool play_next(bool next) {
       player.PlayPrev();
     }
 
-    ui_set_playNo(player.GetPlayNo());
+    bitClear(ui_setting.repeat, 7);     // Clear bit set by ui_event_Button{Next|Prev}()
+    ui_set_playNo(player.GetPlayNo());  // Clear ID3 tag, set ui_control and display photo
   }
 
   if (ui_ScreenPlayList) {
