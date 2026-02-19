@@ -15,8 +15,8 @@
 
 #include "SPI.h"
 
-#if   0
-// DON'T FORGET TO UPDATE "DISPLAY_CYD_2USB" IN User_Setup.h
+#if   1
+// DON'T FORGET TO UPDATE "CYD_DISPLAY_TYPE" IN User_Setup.h
 #include "TFT_eSPI.h"
 TFT_eSPI tft = TFT_eSPI();
 
@@ -25,11 +25,17 @@ TFT_eSPI tft = TFT_eSPI();
 #include <LovyanGFX.h>
 LGFX tft;
 
-#else
+#elif 0
 // false: Panel driver: ILI9341 (micro-USB x 1 type)
 // true : Panel driver: ST7789  (micro-USB x 1 + USB-C x 1 type)
-#define DISPLAY_CYD_2USB  true
-#include "LGFX_ESP32_2432S028R_CYD.hpp"
+#define CYD_2432S028R_2USB  false
+#include "LGFX_CYD_2432S028R.hpp"
+LGFX tft;
+
+#else
+// Crow Panel 2432R
+#define CROWPANEL_HMI_2432
+#include "LGFX_ELECROW_2432R.hpp"
 LGFX tft;
 #endif
 
@@ -50,6 +56,10 @@ LGFX tft;
 #endif
 
 #if defined (_TFT_eSPIH_)
+
+#if (CYD_DISPLAY_TYPE == CROWPANEL_HMI_2432)
+#define tp  tft
+#else
 /*--------------------------------------------------------------------------------
  * Select one of the following to test XPT2046 Touchscreen library
  *--------------------------------------------------------------------------------*/
@@ -58,32 +68,32 @@ LGFX tft;
 
 #if defined (_XPT2046_Touchscreen_h_)
 #include "XPT2046_ScreenPoint.h"
-// HSPI: sp.touched() works properly, but TFT_eSPI on HSPI cannot read pixels properly.
-// CYD_TP_SPI_BUS (= VSPI): can save bitmap files, but sp.touched() does not work properly.
-static SPIClass sp_spi = SPIClass(HSPI /*CYD_TP_SPI_BUS*/); // tft.getSPIinstance();
-static XPT2046_ScreenPoint sp(CYD_TP_CS, CYD_TP_IRQ);
-#endif
+// HSPI: tp.touched() works properly, but TFT_eSPI on HSPI cannot read pixels properly.
+// CYD_TP_SPI_BUS (= VSPI): can save bitmap files, but tp.touched() does not work properly.
+static SPIClass tp_spi = SPIClass(HSPI /*CYD_TP_SPI_BUS*/); // tft.getSPIinstance();
+static XPT2046_ScreenPoint tp(CYD_TP_CS, CYD_TP_IRQ);
 
-#if defined (XPT2046_Bitbang_h)
+#elif defined (XPT2046_Bitbang_h)
 #include "XPT2046_ScreenPoint.h"
-static XPT2046_ScreenPoint sp(CYD_TP_MOSI, CYD_TP_MISO, CYD_TP_CLK, CYD_TP_CS);
+static XPT2046_ScreenPoint tp(CYD_TP_MOSI, CYD_TP_MISO, CYD_TP_CLK, CYD_TP_CS);
+#endif
 #endif
 
 #else
 /*--------------------------------------------------------------------------------
  * Use lovyanGFX native touch functions
  *--------------------------------------------------------------------------------*/
-#define sp  tft
+#define tp  tft
 #endif
 
 void touch_setup(void) {
-#if defined (_XPT2046_Touchscreen_h_)
-  sp_spi.begin(CYD_TP_CLK, CYD_TP_MISO, CYD_TP_MOSI, CYD_TP_CS);
-  sp.begin(sp_spi, tft.width(), tft.height(), TFT_ROTATION);
+#if defined (_XPT2046_Touchscreen_h_) && (CYD_DISPLAY_TYPE != CROWPANEL_HMI_2432)
+  tp_spi.begin(CYD_TP_CLK, CYD_TP_MISO, CYD_TP_MOSI, CYD_TP_CS);
+  tp.begin(tp_spi, tft.width(), tft.height(), TFT_ROTATION);
 #endif
 
 #if defined (XPT2046_Bitbang_h)
-  sp.begin(tft.width(), tft.height(), TFT_ROTATION);
+  tp.begin(tft.width(), tft.height(), TFT_ROTATION);
 #endif
 }
 
@@ -95,7 +105,7 @@ void touch_setup(void) {
 void setup() {
   Serial.begin(115200);
   while (!Serial || millis() < 1000);
-  Serial.println(""); Serial.println("");
+  Serial.println("\n");
 
 #if defined (_TFT_eSPIH_)
   Serial.println("Bodmer's TFT_eSPI library Test!"); 
@@ -123,9 +133,9 @@ void loop(void) {
   uint32_t start = millis();
   while (millis() - start < WAIT(60 * 1000L)) {
 
-#if defined (_XPT2046_SCREENPOINT_H_) || defined (LOVYANGFX_HPP_)
+#if 1
     uint16_t x, y;
-    bool ret = sp.getTouch(&x, &y); // alternative: sp.touched()
+    bool ret = tp.getTouch(&x, &y); // alternative: tp.touched()
     if (ret) {
       Serial.printf("ret: %d, x: %d, y: %d\n", ret, x, y);
 #else
@@ -136,9 +146,9 @@ void loop(void) {
 #if   0
       sdcard_test();
 #elif defined (_TFT_eSPIH_)
-      SaveBMP24(SD, "/img1.bmp", tft);
-#else
-      SaveBMP24(SD, "/img2.bmp", tft);
+      SaveBMP24(SD, "/TFT_eSPI.bmp", tft);
+#else // LovyanGFX
+      SaveBMP24(SD, "/Lovyan.bmp", tft);
 #endif
       break;
     }

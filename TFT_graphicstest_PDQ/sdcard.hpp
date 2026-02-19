@@ -235,7 +235,8 @@ void sdcard_setup() {
   static SPIClass spi = SPIClass(CYD_SD_SPI_BUS); // VSPI
   spi.begin(CYD_SD_SCK, CYD_SD_MISO, CYD_SD_MOSI, CYD_SD_SS);
 
-  if (!SD.begin(CYD_SD_SS, spi, 50000000)) {
+//if (!SD.begin(CYD_SD_SS, spi, 50000000)) {
+  if (!SD.begin(CYD_SD_SS, spi, 24000000)) {
     Serial.println("Card Mount Failed");
     return;
   }
