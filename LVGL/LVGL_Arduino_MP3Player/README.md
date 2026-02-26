@@ -6,6 +6,7 @@
 
 - GUI by [LVGL][1]
 - Internal DAC and onboard amplifier can directly drive a speaker connected to CYD
+- Can play `.mp3`, `.m4a` and `.wav` files
 - Can manage approximately 3,000 music files [^1]
 - Can display the cover photo for each album
 - "**Playlist**" to display music titles, artist names, and album names
