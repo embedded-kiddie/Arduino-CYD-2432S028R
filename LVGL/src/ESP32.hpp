@@ -59,16 +59,16 @@ private:
 //  printf("Sketch space           :%7lu\n", mem->sketch_space);
 //  printf("Sketch size            :%7lu\n", mem->sketch_size);
     printf("Heap total size        :%7lu\n", mem->total);
-    printf("Heap total free        :%7lu\n", mem->free);
-    printf("Heap total allocated   :%7lu\n", mem->allocated);
+    printf("Heap free  size        :%7lu\n", mem->free);
+    printf("Heap allocated size    :%7lu\n", mem->allocated);
     printf("Heap free minimum      :%7lu\n", mem->minimum);
     printf("Heap free largest block:%7lu\n", mem->largest);
   }
 
   static void print_diff(ESP32MemInfo_t *start, ESP32MemInfo_t *end) {
     printf("Heap total size        :%7lu (%7lu ==> %7lu)\n", end->total     - start->total,     start->total,     end->total    );
-    printf("Heap total free        :%7lu (%7lu ==> %7lu)\n", end->free      - start->free,      start->free,      end->free     );
-    printf("Heap total allocated   :%7lu (%7lu ==> %7lu)\n", end->allocated - start->allocated, start->allocated, end->allocated);
+    printf("Heap free  size        :%7lu (%7lu ==> %7lu)\n", end->free      - start->free,      start->free,      end->free     );
+    printf("Heap allocated size    :%7lu (%7lu ==> %7lu)\n", end->allocated - start->allocated, start->allocated, end->allocated);
     printf("Heap free minimum      :%7lu (%7lu ==> %7lu)\n", end->minimum   - start->minimum,   start->minimum,   end->minimum  );
     printf("Heap free largest block:%7lu (%7lu ==> %7lu)\n", end->largest   - start->largest,   start->largest,   end->largest  );
   }
@@ -91,9 +91,16 @@ public:
     // LVGL memory usage
     lv_mem_monitor_t mon;
     lv_mem_monitor(&mon);
+  #if false
     uint32_t used = mon.total_size - mon.max_used;
     printf("LVGL free size         :%7lu (Used: %lu %%)\n", mon.free_size, mon.used_pct);
     printf("LVGL maximum used size :%7lu (Rest: %lu %%)\n", used, (100 * used) / mon.total_size);
+  #else
+    size_t used = mon.total_size - mon.free_size;
+    printf("LVGL heap total size   :%7lu (fragmentation: %d%%)\n", mon.total_size, mon.frag_pct);
+    printf("LVGL heap free  size   :%7lu (largest block: %lu)\n", mon.free_size, mon.free_biggest_size);
+    printf("LVGL heap allocated    :%7lu (%d%%, maximum: %lu)\n", used, mon.used_pct, mon.max_used);
+  #endif
 #endif
   }
 

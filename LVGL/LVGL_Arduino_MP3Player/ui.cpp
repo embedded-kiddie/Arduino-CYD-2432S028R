@@ -11,6 +11,7 @@
 #define DEMO  false
 #if DEMO
 static uint32_t demo_time = 0;
+static bool play_next(bool next);
 #endif
 
 ////////////////////// GLOBAL VARIABLES /////////////////////

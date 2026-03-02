@@ -1,7 +1,7 @@
 ## Configuring LVGL
 
 ### 1. Installing LVGL
-This application has been tested on LVGL versions 9.2.2, 9.3.0, and 9.4.0.
+This application has been tested on LVGL versions 9.2.2, 9.3.0, 9.4.0 and 9.5.0.
 
 After installing LVGL, please refer to [Configure LVGL][1] and place lv_conf.h in the library folder.
 
@@ -23,10 +23,10 @@ In particular, `LV_USE_FS_ARDUINO_SD` and `LV_USE_TJPGD` must be defined to 0 to
 
 To improve compilation times, it is recommended that the following symbols are defined to 0:
 
-| Symbol            | Setting value                |
-| ----------------- | ---------------------------- |
-| LV_BUILD_EXAMPLES | 0                            |
-| LV_BUILD_DEMOS    | 0 (for version 9.3.0, 9.4.0) |
-| LV_USE_DEMO_XXXX  | 0 (only for version 9.2.2)   |
+| Symbol            | Setting value                   |
+| ----------------- | ------------------------------- |
+| LV_BUILD_EXAMPLES | 0                               |
+| LV_BUILD_DEMOS    | 0 (for version 9.3.0 and later) |
+| LV_USE_DEMO_XXXX  | 0 (only for version 9.2.2)      |
 
 [1]: https://docs.lvgl.io/master/integration/frameworks/arduino.html#configure-lvgl "Arduino - LVGL  documentation"

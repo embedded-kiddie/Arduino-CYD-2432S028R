@@ -63,22 +63,24 @@ static uint8_t draw_buf[DRAW_BUF_SIZE];
 #include "gfx.hpp"
 
 //----------------------------------------------------------------------
-// Signle or Sequentcial screenshot
+// Screenshot (0: disable, 1: single, 2: sequential)
+// Required: ESP32 core 3.x
+//  - Comment out `SDFATFS_USED` in CYD_Audio.h
+//  - Set `DEMO` as `true` in ui.cpp
 //----------------------------------------------------------------------
-#define SCREENSHORT false
-#if SCREENSHORT
+#define SAVE_SCREENSHORT  0
+#if SAVE_SCREENSHORT
 #include "../src/sdcard.hpp"
 #endif
 
-#define SAVE_SEQUENCIAL_BMP false
-#if SAVE_SEQUENCIAL_BMP
-#include "../src/sdcard.hpp"
+#if SAVE_SCREENSHORT == 2
 static bool startTrigger = false;
 static uint32_t _skip = 0;
 static uint32_t _prev = 0;
 static uint32_t N = 0;
 static char fname[16];
 #endif
+
 
 #ifndef _SDCARD_HPP_
 #include "ESP32.hpp"
@@ -148,7 +150,7 @@ void loop() {
     update_device_state(state);
   }
 
-#if SAVE_SEQUENCIAL_BMP
+#if SAVE_SCREENSHORT == 2
   if (startTrigger) {
     uint32_t t = millis();
     if (/*t - _skip < 45 * 1000 &&*/ t - _prev >= 66) {
@@ -160,10 +162,10 @@ void loop() {
 #endif
 
   if (Serial.available()) {
-#if SAVE_SEQUENCIAL_BMP
+#if SAVE_SCREENSHORT == 2
     startTrigger = true;
     Serial.readStringUntil('\n');
-#elif SCREENSHORT
+#elif SAVE_SCREENSHORT == 1
     Serial.readStringUntil('\n');
     static int No;
     char fname[16];
