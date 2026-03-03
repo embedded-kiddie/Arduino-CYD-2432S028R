@@ -21,6 +21,13 @@ Define the following "Symbol" as "Setting Value":
 
 In particular, `LV_USE_FS_ARDUINO_SD` and `LV_USE_TJPGD` must be defined to 0 to prevent conflicts with this application.
 
+Setting the following two theme-related settings to 0 will reduce the size of the global variable area (bss segment) and allow more room for system's heap memory.
+
+| Symbol                | Default value | Setting value |
+| --------------------- | ------------- | ------------- |
+| LV_USE_THEME_SIMPLE   | 1             | 0             |
+| LV_USE_THEME_MONO     | 1             | 0             |
+
 To improve compilation times, it is recommended that the following symbols are defined to 0:
 
 | Symbol            | Setting value                   |

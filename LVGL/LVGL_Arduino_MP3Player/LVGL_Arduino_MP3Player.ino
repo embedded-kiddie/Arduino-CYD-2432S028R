@@ -64,9 +64,10 @@ static uint8_t draw_buf[DRAW_BUF_SIZE];
 
 //----------------------------------------------------------------------
 // Screenshot (0: disable, 1: single, 2: sequential)
-// Required: ESP32 core 3.x
+// Required:
+//  - ESP32 core 3.x
+//  - Set `DEMO` to `true` in ui.cpp
 //  - Comment out `SDFATFS_USED` in CYD_Audio.h
-//  - Set `DEMO` as `true` in ui.cpp
 //----------------------------------------------------------------------
 #define SAVE_SCREENSHORT  0
 #if SAVE_SCREENSHORT
@@ -80,7 +81,6 @@ static uint32_t _prev = 0;
 static uint32_t N = 0;
 static char fname[16];
 #endif
-
 
 #ifndef _SDCARD_HPP_
 #include "ESP32.hpp"
@@ -99,7 +99,7 @@ static void my_print(lv_log_level_t level, const char *buf) {
 
 // Use Arduino millis() as tick source
 static uint32_t my_tick(void) {
-#if SAVE_SEQUENCIAL_BMP
+#if SAVE_SCREENSHORT == 2
   return millis() - _skip;
 #else
   return millis();
