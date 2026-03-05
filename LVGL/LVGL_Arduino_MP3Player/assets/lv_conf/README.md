@@ -42,7 +42,7 @@ To improve compilation times, it is recommended that the following symbols are d
 #### Used/Unused Widgets
 The following symbols indicate the widgets used in this application.
 
-Setting unused widgets to 0 will save LVGL heap memory defined by `LV_MEM_SIZE`, but it is not necessary to do so.
+Setting unused widget symbols to `0` will reduce LVGL heap memory consumption as defined by `LV_MEM_SIZE`, but is not required.
 
 | WIDGETS                      | Default value | Setting value |
 | ---------------------------- | ------------- | ------------- |
