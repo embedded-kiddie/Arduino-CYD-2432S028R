@@ -57,10 +57,10 @@ Select [ESP32 Dev Module][2] as a board.
 ### 3.3. Libraries
 | Name                                | Version      |
 | ----------------------------------- | ------------ |
-| [LVGL][4] by kisvegabor             | 9.2.2 and up |
+| [LVGL][4] by kisvegabor             | 9.2.2 - 9.5.0|
 | [LovyanGFX][5] by lovyan03          | 1.2.7        |
 | [SdFat][6] by Bill Greiman          | 2.3.0        |
-| [ArduinoJson][7] by Benoit Blanchon | 7.4.2        |
+| [ArduinoJson][7] by Benoit Blanchon | 7.4.2, 7.4.3 |
 
 ### 3.4. Library configuration
 
