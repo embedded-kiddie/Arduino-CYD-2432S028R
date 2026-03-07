@@ -766,9 +766,9 @@
  *  - lv_label_t       :  Text set to "Text", else empty string.
  *  - lv_arclabel_t   :  Text set to "Arced Text", else empty string.
  * */
-#define LV_WIDGETS_HAS_DEFAULT_VALUE  1
+#define LV_WIDGETS_HAS_DEFAULT_VALUE  0
 
-#define LV_USE_ANIMIMG    1
+#define LV_USE_ANIMIMG    0
 
 #define LV_USE_ARC        0
 
@@ -880,10 +880,10 @@
 #endif /*LV_USE_THEME_DEFAULT*/
 
 /** A very simple theme that is a good starting point for a custom theme */
-#define LV_USE_THEME_SIMPLE 0
+#define LV_USE_THEME_SIMPLE 1
 
 /** A theme designed for monochrome displays */
-#define LV_USE_THEME_MONO 0
+#define LV_USE_THEME_MONO 1
 
 /*==================
  * LAYOUTS
