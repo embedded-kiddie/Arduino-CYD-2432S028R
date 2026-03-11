@@ -1,7 +1,6 @@
 #pragma once
 
 #define LGFX_USE_V1
-
 #include <LovyanGFX.hpp>
 
 //===================================================================================
@@ -30,6 +29,9 @@
 #define CYD_SD_SPI_BUS  VSPI
 #endif
 
+#define SPI_FREQUENCY       40000000
+#define SPI_READ_FREQUENCY  16000000
+
 class LGFX : public lgfx::LGFX_Device
 {
   lgfx::Panel_ILI9341 _panel_instance;
@@ -42,22 +44,22 @@ public:
   LGFX(void)
   {
     { // バス制御の設定を行います。
-      auto cfg = _bus_instance.config();    // バス設定用の構造体を取得します。
+      auto cfg = _bus_instance.config();      // バス設定用の構造体を取得します。
 
       // SPIバスの設定
-      cfg.spi_host = HSPI_HOST;     // 使用するSPIを選択  ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
+      cfg.spi_host = HSPI_HOST;               // 使用するSPIを選択  ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
       // ※ ESP-IDFバージョンアップに伴い、VSPI_HOST , HSPI_HOSTの記述は非推奨になるため、エラーが出る場合は代わりにSPI2_HOST , SPI3_HOSTを使用してください。
-      cfg.spi_mode = 0;             // SPI通信モードを設定 (0 ~ 3)
-      cfg.freq_write = 40000000;    // 送信時のSPIクロック (最大80MHz, 80MHzを整数で割った値に丸められます)
-      cfg.freq_read  = 16000000;    // 受信時のSPIクロック
-      cfg.spi_3wire  = false;       // 受信をMOSIピンで行う場合はtrueを設定
-      cfg.use_lock   = true;        // トランザクションロックを使用する場合はtrueを設定
-      cfg.dma_channel = SPI_DMA_CH_AUTO; // 使用するDMAチャンネルを設定 (0=DMA不使用 / 1=1ch / 2=ch / SPI_DMA_CH_AUTO=自動設定)
+      cfg.spi_mode = 0;                       // SPI通信モードを設定 (0 ~ 3)
+      cfg.freq_write = SPI_FREQUENCY;         // 送信時のSPIクロック (最大80MHz, 80MHzを整数で割った値に丸められます)
+      cfg.freq_read  = SPI_READ_FREQUENCY;    // 受信時のSPIクロック
+      cfg.spi_3wire  = false;                 // 受信をMOSIピンで行う場合はtrueを設定
+      cfg.use_lock   = true;                  // トランザクションロックを使用する場合はtrueを設定
+      cfg.dma_channel = SPI_DMA_CH_AUTO;      // 使用するDMAチャンネルを設定 (0=DMA不使用 / 1=1ch / 2=ch / SPI_DMA_CH_AUTO=自動設定)
       // ※ ESP-IDFバージョンアップに伴い、DMAチャンネルはSPI_DMA_CH_AUTO(自動設定)が推奨になりました。1ch,2chの指定は非推奨になります。
-      cfg.pin_sclk = CYD_TFT_SCK;      // SPIのSCLKピン番号を設定
-      cfg.pin_mosi = CYD_TFT_MOSI;      // SPIのMOSIピン番号を設定
-      cfg.pin_miso = CYD_TFT_MISO;      // SPIのMISOピン番号を設定 (-1 = disable)
-      cfg.pin_dc   = CYD_TFT_DC;        // SPIのD/Cピン番号を設定  (-1 = disable)
+      cfg.pin_sclk = CYD_TFT_SCK;             // SPIのSCLKピン番号を設定
+      cfg.pin_mosi = CYD_TFT_MOSI;            // SPIのMOSIピン番号を設定
+      cfg.pin_miso = CYD_TFT_MISO;            // SPIのMISOピン番号を設定 (-1 = disable)
+      cfg.pin_dc   = CYD_TFT_DC;              // SPIのD/Cピン番号を設定  (-1 = disable)
       // SDカードと共通のSPIバスを使う場合、MISOは省略せず必ず設定してください。
 
       _bus_instance.config(cfg);              // 設定値をバスに反映します。
@@ -67,9 +69,9 @@ public:
     { // 表示パネル制御の設定を行います。
       auto cfg = _panel_instance.config();    // 表示パネル設定用の構造体を取得します。
 
-      cfg.pin_cs           = CYD_TFT_CS; // CSが接続されているピン番号   (-1 = disable)
-      cfg.pin_rst          = CYD_TFT_RST;// RSTが接続されているピン番号  (-1 = disable)
-      cfg.pin_busy         =    -1;  // BUSYが接続されているピン番号 (-1 = disable)
+      cfg.pin_cs           = CYD_TFT_CS;      // CSが接続されているピン番号   (-1 = disable)
+      cfg.pin_rst          = CYD_TFT_RST;     // RSTが接続されているピン番号  (-1 = disable)
+      cfg.pin_busy         =    -1;           // BUSYが接続されているピン番号 (-1 = disable)
 
       // ※ 以下の設定値はパネル毎に一般的な初期値が設定されていますので、不明な項目はコメントアウトして試してみてください。
       cfg.panel_width      =   240;  // 実際に表示可能な幅
@@ -89,12 +91,12 @@ public:
     }
 
     { // バックライト制御の設定を行います。（必要なければ削除）
-      auto cfg = _light_instance.config();    // バックライト設定用の構造体を取得します。
+      auto cfg = _light_instance.config();  // バックライト設定用の構造体を取得します。
 
-      cfg.pin_bl = CYD_TFT_BL;          // バックライトが接続されているピン番号
-      cfg.invert = false;           // バックライトの輝度を反転させる場合 true
-      cfg.freq   = 44100;           // バックライトのPWM周波数
-      cfg.pwm_channel = 7;          // 使用するPWMのチャンネル番号
+      cfg.pin_bl = CYD_TFT_BL;              // バックライトが接続されているピン番号
+      cfg.invert = false;                   // バックライトの輝度を反転させる場合 true
+      cfg.freq   = 44100;                   // バックライトのPWM周波数
+      cfg.pwm_channel = 7;                  // 使用するPWMのチャンネル番号
 
       _light_instance.config(cfg);
       _panel_instance.setLight(&_light_instance);  // バックライトをパネルにセットします。
@@ -103,18 +105,18 @@ public:
     { // タッチスクリーン制御の設定を行います。（必要なければ削除）
       auto cfg = _touch_instance.config();
 
-      cfg.x_min      = 240;     // タッチスクリーンから得られる最小のX値(生の値)
-      cfg.x_max      = 3800;    // タッチスクリーンから得られる最大のX値(生の値)
-      cfg.y_min      = 3700;    // タッチスクリーンから得られる最小のY値(生の値)
-      cfg.y_max      = 200;     // タッチスクリーンから得られる最大のY値(生の値)
+      cfg.x_min      = 240;         // タッチスクリーンから得られる最小のX値(生の値)
+      cfg.x_max      = 3800;        // タッチスクリーンから得られる最大のX値(生の値)
+      cfg.y_min      = 3700;        // タッチスクリーンから得られる最小のY値(生の値)
+      cfg.y_max      = 200;         // タッチスクリーンから得られる最大のY値(生の値)
       cfg.pin_int    = CYD_TP_IRQ;  // INTが接続されているピン番号
-      cfg.bus_shared = true;    // 画面と共通のバスを使用している場合 trueを設定
-      cfg.offset_rotation = 0;  // 表示とタッチの向きのが一致しない場合の調整 0~7の値で設定
+      cfg.bus_shared = true;        // 画面と共通のバスを使用している場合 trueを設定
+      cfg.offset_rotation = 0;      // 表示とタッチの向きのが一致しない場合の調整 0~7の値で設定
 
       // SPI接続の場合
-      cfg.spi_host = HSPI_HOST; // 使用するSPIを選択 (HSPI_HOST or VSPI_HOST)
-      cfg.freq = 1000000;       // SPIクロックを設定
-      cfg.pin_sclk = CYD_TP_CLK;   // SCLKが接続されているピン番号
+      cfg.spi_host = HSPI_HOST;     // 使用するSPIを選択 (HSPI_HOST or VSPI_HOST)
+      cfg.freq = 1000000;           // SPIクロックを設定
+      cfg.pin_sclk = CYD_TP_CLK;    // SCLKが接続されているピン番号
       cfg.pin_mosi = CYD_TP_MOSI;   // MOSIが接続されているピン番号
       cfg.pin_miso = CYD_TP_MISO;   // MISOが接続されているピン番号
       cfg.pin_cs   = CYD_TP_CS;     //   CSが接続されているピン番号

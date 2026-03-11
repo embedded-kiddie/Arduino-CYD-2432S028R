@@ -32,12 +32,12 @@
 // ##################################################################################
 
 // Only define one driver, the other ones must be commented out
-#if     (CYD_DISPLAY_TYPE == CYD_2432S028R_2USB)
+#if   (CYD_DISPLAY_TYPE == CYD_2432S028R_2USB)
 #define ST7789_DRIVER
-#elif   (CYD_DISPLAY_TYPE == CYD_2432S028R_1USB)
+#elif (CYD_DISPLAY_TYPE == CYD_2432S028R_1USB)
 #define ILI9341_2_DRIVER
 #else // CROWPANEL_HMI_2432
-#define ILI9341_2_DRIVER
+#define ILI9341_DRIVER
 #endif
 
 #define TFT_WIDTH  240
@@ -155,17 +155,23 @@
 // With an ILI9341 display 40MHz works OK, 80MHz sometimes fails
 // With a ST7735 display more than 27MHz may not work (spurious pixels and lines)
 // With an ILI9163 display 27 MHz works OK.
-#if (CYD_DISPLAY_TYPE == CYD_2432S028R_2USB)
-#define SPI_FREQUENCY  80000000
-#else
-#define SPI_FREQUENCY  40000000
-#endif
+#if   (CYD_DISPLAY_TYPE == CYD_2432S028R_2USB)
+#define SPI_FREQUENCY       80000000
+#define SPI_READ_FREQUENCY  20000000
+#elif (CYD_DISPLAY_TYPE == CYD_2432S028R_1USB)
+#define SPI_FREQUENCY       40000000
+#define SPI_READ_FREQUENCY  20000000
+#else // CROWPANEL_HMI_2432
+#define SPI_FREQUENCY       40000000
+//#define SPI_FREQUENCY       15999999  // Original
 
 // Optional reduced SPI frequency for reading TFT
-#define SPI_READ_FREQUENCY  20000000
+#define SPI_READ_FREQUENCY  20000000  // 20MHz, 10MHz, 8MHz, 4MHz, 2MHz, 1MHz, 400KHz ... readRectRGB() does not work
+#endif
 
 // The XPT2046 requires a lower SPI clock rate of 2.5MHz so we define that here:
-#define SPI_TOUCH_FREQUENCY  600000
+#define SPI_TOUCH_FREQUENCY  600000   // Original
+//#define SPI_TOUCH_FREQUENCY  2500000  // Testing Required
 
 // The ESP32 has 2 free SPI ports i.e. VSPI and HSPI, the VSPI is the default.
 // If the VSPI port is in use and pins are not accessible (e.g. TTGO T-Beam)

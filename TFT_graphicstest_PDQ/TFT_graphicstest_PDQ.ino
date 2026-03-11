@@ -15,7 +15,7 @@
 
 #include "SPI.h"
 
-#if   1
+#if   0
 // DON'T FORGET TO UPDATE "CYD_DISPLAY_TYPE" IN User_Setup.h
 #include "TFT_eSPI.h"
 TFT_eSPI tft = TFT_eSPI();
@@ -87,6 +87,7 @@ static XPT2046_ScreenPoint tp(CYD_TP_MOSI, CYD_TP_MISO, CYD_TP_CLK, CYD_TP_CS);
 #endif
 
 void touch_setup(void) {
+#if defined (_TFT_eSPIH_)
 #if defined (_XPT2046_Touchscreen_h_) && (CYD_DISPLAY_TYPE != CROWPANEL_HMI_2432)
   tp_spi.begin(CYD_TP_CLK, CYD_TP_MISO, CYD_TP_MOSI, CYD_TP_CS);
   tp.begin(tp_spi, tft.width(), tft.height(), TFT_ROTATION);
@@ -94,6 +95,7 @@ void touch_setup(void) {
 
 #if defined (XPT2046_Bitbang_h)
   tp.begin(tft.width(), tft.height(), TFT_ROTATION);
+#endif
 #endif
 }
 
@@ -132,26 +134,24 @@ void loop(void) {
    *----------------------------------------*/
   uint32_t start = millis();
   while (millis() - start < WAIT(60 * 1000L)) {
-
-#if 1
     uint16_t x, y;
     bool ret = tp.getTouch(&x, &y); // alternative: tp.touched()
     if (ret) {
       Serial.printf("ret: %d, x: %d, y: %d\n", ret, x, y);
-#else
-    if (Serial.available()) {
+    } else if (Serial.available()) {
       Serial.readStringUntil('\n');
-#endif
+    } else {
+      continue;
+    }
 
 #if   0
-      sdcard_test();
+    sdcard_test();
 #elif defined (_TFT_eSPIH_)
-      SaveBMP24(SD, "/TFT_eSPI.bmp", tft);
+    SaveBMP24(SD, "/TFT_eSPI.bmp", tft);
 #else // LovyanGFX
-      SaveBMP24(SD, "/Lovyan.bmp", tft);
+    SaveBMP24(SD, "/Lovyan.bmp", tft);
 #endif
-      break;
-    }
+    break;
   }
 }
 
@@ -261,11 +261,13 @@ void exec_test(void) {
 	tft.setTextColor(TFT_MAGENTA);
 	tft.setTextSize(2);
 
+  char title[256];
 #if defined (_TFT_eSPIH_)
- 	tft.println(F("   TFT_eSPI test"));
+  sprintf(title, "  TFT_eSPI (%dMHz)", (SPI_FREQUENCY + 1) / 1000000);
 #else
- 	tft.println(F("   LovyanGFX test"));
+  sprintf(title, "  LovyanGFX (%dMHz)", (SPI_FREQUENCY + 1) / 1000000);
 #endif
+ 	tft.println(title);
 
 	tft.setTextSize(1);
 	tft.setTextColor(TFT_WHITE);
